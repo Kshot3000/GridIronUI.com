@@ -163,7 +163,10 @@ $("clearPool").addEventListener("click", function(){
 /* ---------- pool table ---------- */
 function renderPool(){
   var c = cfg();
-  $("poolCount").textContent = pool.length+" players · "+c.site+" "+c.sport+" · $"+c.cap.toLocaleString()+" cap";
+  var nl = pool.filter(function(p){ return p.locked; }).length;
+  var nb = pool.filter(function(p){ return p.banned; }).length;
+  $("poolCount").textContent = pool.length+" players · "+c.site+" "+c.sport+" · $"+c.cap.toLocaleString()+" cap"+
+    (nl ? " · "+nl+" 🔒 locked" : "")+(nb ? " · "+nb+" 🚫 excluded" : "");
   $("rulesLine").textContent = "Roster: "+c.slots.join(" · ")+" — always confirm current rules on the official "+c.site+" site before entering.";
   if(!pool.length){
     $("poolWrap").innerHTML = '<div class="empty">Pool is empty. Import a CSV, add players manually, or load the DEMO slate to try the optimizer.</div>';
@@ -171,15 +174,20 @@ function renderPool(){
   }
   var demo = pool.some(function(p){return p.demo;});
   var html = (demo?'<div class="notice" style="margin:0 0 12px"><strong>DEMO SLATE.</strong> These are synthetic players with made-up projections, for testing the optimizer only. Not real players, not real numbers.</div>':"")+
-  '<div class="table-scroll"><table class="data"><thead><tr><th>Player</th><th>Pos</th><th>Team</th><th>Opp</th><th>Sal</th><th>Proj</th><th>Floor</th><th>Ceil</th><th>Own%</th><th></th></tr></thead><tbody>'+
+  '<div class="table-scroll"><table class="data"><thead><tr><th>Player</th><th>Pos</th><th>Team</th><th>Opp</th><th>Sal</th><th>Proj</th><th>Floor</th><th>Ceil</th><th>Own%</th><th>Lineup</th></tr></thead><tbody>'+
   pool.map(function(p){
-    return '<tr data-id="'+p.id+'"><td><b>'+OPT_esc(p.name)+'</b></td><td>'+p.pos.join("/")+'</td><td>'+OPT_esc(p.team)+'</td><td>'+OPT_esc(p.opp||"—")+'</td>'+
+    var rowCls = p.locked ? ' class="row-locked"' : (p.banned ? ' class="row-banned"' : "");
+    return '<tr data-id="'+p.id+'"'+rowCls+'><td><b>'+OPT_esc(p.name)+'</b></td><td>'+p.pos.join("/")+'</td><td>'+OPT_esc(p.team)+'</td><td>'+OPT_esc(p.opp||"—")+'</td>'+
     '<td class="num">$'+p.salary.toLocaleString()+'</td>'+
     '<td><input type="number" step="any" data-k="proj" value="'+p.proj+'" style="width:70px;padding:6px"></td>'+
     '<td><input type="number" step="any" data-k="floor" value="'+p.floor+'" style="width:70px;padding:6px"></td>'+
     '<td><input type="number" step="any" data-k="ceil" value="'+p.ceil+'" style="width:70px;padding:6px"></td>'+
     '<td><input type="number" step="any" data-k="own" value="'+p.own+'" style="width:64px;padding:6px"></td>'+
-    '<td><button class="copy-btn" data-del="'+p.id+'">✕</button></td></tr>';
+    '<td style="white-space:nowrap">'+
+      '<button class="mini-btn'+(p.locked?" on":"")+'" data-lock="'+p.id+'" title="'+(p.locked?"Unlock ":"Lock into ")+'every lineup">🔒</button> '+
+      '<button class="mini-btn'+(p.banned?" on":"")+'" data-ban="'+p.id+'" title="'+(p.banned?"Un-exclude ":"Exclude from ")+'all lineups">🚫</button> '+
+      '<button class="copy-btn" data-del="'+p.id+'" title="Remove player">✕</button>'+
+    '</td></tr>';
   }).join("")+'</tbody></table></div>';
   $("poolWrap").innerHTML = html;
   Array.prototype.forEach.call($("poolWrap").querySelectorAll("input[data-k]"), function(inp){
@@ -194,6 +202,21 @@ function renderPool(){
       var id = Number(b.getAttribute("data-del"));
       pool = pool.filter(function(x){return x.id!==id;});
       save(); renderPool();
+    });
+  });
+  /* lock / exclude toggles — mutually exclusive per player */
+  Array.prototype.forEach.call($("poolWrap").querySelectorAll("[data-lock]"), function(b){
+    b.addEventListener("click", function(){
+      var id = Number(b.getAttribute("data-lock"));
+      var pl = pool.filter(function(x){return x.id===id;})[0];
+      if(pl){ pl.locked = !pl.locked; if(pl.locked) pl.banned = false; save(); renderPool(); }
+    });
+  });
+  Array.prototype.forEach.call($("poolWrap").querySelectorAll("[data-ban]"), function(b){
+    b.addEventListener("click", function(){
+      var id = Number(b.getAttribute("data-ban"));
+      var pl = pool.filter(function(x){return x.id===id;})[0];
+      if(pl){ pl.banned = !pl.banned; if(pl.banned) pl.locked = false; save(); renderPool(); }
     });
   });
 }
@@ -231,13 +254,19 @@ $("runOpt").addEventListener("click", function(){
     numLineups: n,
     maxExposure: (Number($("maxExp").value)||60)/100,
     minUnique: Number($("minUni").value)||3,
-    volPenalty: Number($("volPen").value)||0.5
+    volPenalty: Number($("volPen").value)||0.5,
+    locked: pool.filter(function(p){ return p.locked; }).map(function(p){ return p.id; }),
+    excluded: pool.filter(function(p){ return p.banned; }).map(function(p){ return p.id; })
   });
   var ms = Math.round(performance.now()-t0);
   renderResults(res, ms, n);
 });
 function renderResults(res, ms, wanted){
   var c = cfg(), box = $("results");
+  if(res.error){
+    box.innerHTML = '<div class="notice red"><strong>Can\'t build with these locks.</strong> '+OPT_esc(res.error)+' Adjust locks or the pool and try again.</div>';
+    return;
+  }
   if(!res.lineups.length){
     box.innerHTML = '<div class="notice red"><strong>No valid lineups.</strong> The pool may be too small or too expensive for the cap. Add cheaper players or lower the lineup count.</div>';
     return;

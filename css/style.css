@@ -329,6 +329,15 @@ select option{background:#141a26}
 .copy-btn{background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 12px;font-size:.75rem;cursor:pointer;font-weight:600}
 .copy-btn:hover{border-color:var(--gold);color:var(--gold)}
 
+/* DFS lock / exclude pool controls */
+.mini-btn{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.85rem;cursor:pointer;line-height:1;filter:grayscale(1);opacity:.55;transition:filter .15s,opacity .15s,border-color .15s,box-shadow .15s}
+.mini-btn:hover{border-color:var(--gold);opacity:1}
+.mini-btn.on{filter:none;opacity:1;border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset,0 0 10px rgba(230,168,76,.25)}
+tr.row-locked td{background:rgba(230,168,76,.07)}
+tr.row-locked td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+tr.row-banned td{opacity:.42}
+tr.row-banned td:nth-child(2){text-decoration:line-through}
+
 /* ---------- misc ---------- */
 .divider{height:1px;background:var(--line-soft);margin:34px 0;border:none}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}

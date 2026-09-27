@@ -86,13 +86,15 @@
       </div>
       <button class="btn btn-gold" id="runOpt">⚙️ Generate lineups</button>
       <div class="notice" style="margin:16px 0 0;font-size:.85rem">
-        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. Then hill-climbing swaps improve every lineup until no single swap helps. <b>No AI, no magic</b> — just math you can audit.
+        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. <b>No AI, no magic</b> — just math you can audit.
       </div>
     </div>
   </div>
 
   <div class="section-head" style="margin-top:30px">
-    <div><span class="kicker">Your pool</span><h2 id="poolCount">0 players</h2></div>
+    <div><span class="kicker">Your pool</span><h2 id="poolCount">0 players</h2>
+      <p style="font-size:.8rem;color:var(--faint);margin:6px 0 0">🔒 = locked into <b style="color:var(--gold-soft)">every</b> lineup · 🚫 = excluded from <b style="color:var(--gold-soft)">all</b> lineups · ✕ = remove player</p>
+    </div>
   </div>
   <div id="poolWrap"></div>
 

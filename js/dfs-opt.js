@@ -136,7 +136,10 @@ function hasStack(lineup){
   }).length;
   return n>=2;
 }
-function buildStackCore(cfg, pool, mode, opts, qbId){
+/* exposures: current per-player lineup counts, used to prefer the least-exposed
+   mates so forced stacks spread exposure instead of pinning the same two players */
+function buildStackCore(cfg, pool, mode, opts, qbId, exposures){
+  exposures = exposures||{};
   var qbs = pool.filter(function(p){ return p.pos.indexOf("QB")!==-1; })
     .sort(function(a,b){ return b.ceil-a.ceil || b.proj-a.proj; });
   var qb = qbId ? qbs.filter(function(q){return q.id===qbId;})[0] : qbs[0];
@@ -144,8 +147,12 @@ function buildStackCore(cfg, pool, mode, opts, qbId){
   var mates = pool.filter(function(p){
     return p.id!==qb.id && p.team===qb.team &&
            p.pos.some(function(x){ return ["RB","WR","TE"].indexOf(x)!==-1; });
-  }).sort(function(a,b){ return b.ceil-a.ceil; }).slice(0,2);
+  }).sort(function(a,b){
+    var ea = exposures[a.id]||0, eb = exposures[b.id]||0;
+    return (ea-eb) || (b.ceil-a.ceil);
+  });
   if(mates.length<2) return null;
+  var picks = mates.slice(0,2);
   var locked = [{slot:"QB", player:qb}];
   /* seat mates into eligible non-QB slots, tracking used slot occurrences by index */
   var seatable = [];
@@ -156,7 +163,7 @@ function buildStackCore(cfg, pool, mode, opts, qbId){
   var usedIdx = {};
   cfg.slots.forEach(function(s, idx){ if(s==="QB") usedIdx[idx]=1; });
   var okSeat = true;
-  mates.forEach(function(m){
+  picks.forEach(function(m){
     var placed = false;
     for(var i=0;i<seatable.length && !placed;i++){
       var idx = seatable[i];
@@ -177,10 +184,53 @@ function diffCount(a,b){
   return d;
 }
 
+/* lock seating: place each locked player into a concrete slot occurrence.
+   Most-constrained players seat first so single-slot players win ties.
+   Returns null when the locks can't all fit the roster slots. */
+function seatLocked(cfg, pool, lockedIds){
+  var players = pool.filter(function(p){ return lockedIds[p.id]; });
+  var tmp = cfg.slots.slice();
+  var locked = [];
+  players.sort(function(a,b){
+    return tmp.filter(function(s){ return eligible(a,s,cfg); }).length -
+           tmp.filter(function(s){ return eligible(b,s,cfg); }).length;
+  });
+  for(var i=0;i<players.length;i++){
+    var placed = -1;
+    for(var s=0;s<tmp.length;s++){
+      if(eligible(players[i], tmp[s], cfg)){ placed = s; break; }
+    }
+    if(placed===-1) return null;
+    locked.push({slot:tmp[placed], player:players[i]});
+    tmp.splice(placed,1);
+  }
+  return locked;
+}
+
 function generate(cfgKey, pool, mode, opts){
   opts = opts||{};
   var cfg = CONFIGS[cfgKey];
   if(!cfg) throw new Error("Unknown config "+cfgKey);
+  var userLids = {}, exclIds = {};
+  (opts.locked||[]).forEach(function(id){ userLids[id]=1; });
+  (opts.excluded||[]).forEach(function(id){ if(!userLids[id]) exclIds[id]=1; });
+  var userLocked = pool.filter(function(p){ return userLids[p.id]; });
+  var lockedQB = userLocked.filter(function(p){ return p.pos.indexOf("QB")!==-1; })[0]||null;
+  /* feasibility up front — never silently drop a lock */
+  function fail(msg){ return { lineups:[], exposures:{}, config:cfg, relaxed:false, error:msg }; }
+  if(userLocked.length > cfg.slots.length)
+    return fail(userLocked.length+" locked players but only "+cfg.slots.length+" roster slots.");
+  var lockedSal = userLocked.reduce(function(s,p){ return s+p.salary; },0);
+  if(lockedSal > cfg.cap)
+    return fail("Locked players cost $"+lockedSal.toLocaleString()+" — over the $"+cfg.cap.toLocaleString()+" cap.");
+  var unseat = userLocked.filter(function(p){
+    return !cfg.slots.some(function(s){ return eligible(p,s,cfg); });
+  });
+  if(unseat.length)
+    return fail("Locked "+unseat.map(function(p){ return p.name; }).join(", ")+
+      (unseat.length>1?" have":" has")+" no eligible roster slot.");
+  var userSeated = seatLocked(cfg, pool, userLids);
+  if(!userSeated) return fail("Locked players can't all fit the roster slots at once.");
   var numWanted = Math.min(opts.numLineups|| (mode==="cash"?3:20), mode==="cash"?3:20);
   var maxExp = opts.maxExposure!=null?opts.maxExposure:(mode==="cash"?1:0.6);
   var minUnique = opts.minUnique!=null?opts.minUnique:(mode==="cash"?2:3);
@@ -199,40 +249,63 @@ function generate(cfgKey, pool, mode, opts){
   while(lineups.length < numWanted && attempts < numWanted*16){
     attempts++;
     /* diversity: each attempt bans a rotating window of 3 players from the last
-       accepted lineup, forcing greedy down a genuinely different path */
+       accepted lineup, forcing greedy down a genuinely different path.
+       Locked players are never banned. */
     var banned = {};
     if(prevIds.length){
-      for(var w=0; w<3; w++) banned[prevIds[(banIdx*3+w) % prevIds.length]] = 1;
+      for(var w=0; w<3; w++){
+        var bid = prevIds[(banIdx*3+w) % prevIds.length];
+        if(!userLids[bid]) banned[bid] = 1;
+      }
     }
     banIdx++;
-    /* exposure-aware pool: players already at the cap sit this attempt out */
+    /* exposure-aware pool: players already at the cap sit this attempt out.
+       Locks and excluded players are handled specially. */
     var maxed = {};
     Object.keys(exposures).forEach(function(id){
+      if(userLids[id]) return; /* locks ignore the exposure cap — standard DFS behavior */
       if(exposures[id]/numWanted >= maxExp - 1e-9) maxed[id]=1;
     });
-    var effPool = pool.filter(function(p){ return !banned[p.id] && !maxed[p.id]; });
-    var locked=null, lockedIds={};
+    var effPool = pool.filter(function(p){
+      if(exclIds[p.id]) return false;
+      if(userLids[p.id]) return true;
+      return !banned[p.id] && !maxed[p.id];
+    });
+    var locked = userSeated.slice(), lids = {};
+    userSeated.forEach(function(e){ lids[e.player.id]=1; });
     if(needStack){
       var qbsEff = effPool.filter(function(p){ return p.pos.indexOf("QB")!==-1; })
         .sort(function(a,b){ return b.ceil-a.ceil; }).slice(0, Math.max(8, numWanted));
-      if(!qbsEff.length) continue;
-      var core = buildStackCore(cfg, effPool, mode, opts, qbsEff[qbIdx % qbsEff.length].id);
-      qbIdx++;
+      var qbId;
+      if(lockedQB){
+        /* a user-locked QB becomes the stack QB — no rotation against their choice */
+        if(!qbsEff.some(function(q){ return q.id===lockedQB.id; })) continue;
+        qbId = lockedQB.id;
+      } else {
+        if(!qbsEff.length) continue;
+        qbId = qbsEff[qbIdx % qbsEff.length].id;
+        qbIdx++;
+      }
+      var core = buildStackCore(cfg, effPool, mode, opts, qbId, exposures);
       if(!core) continue;
-      locked = core.locked; lockedIds = core.lockedIds;
+      core.locked.forEach(function(e){
+        if(!lids[e.player.id]){ locked.push(e); lids[e.player.id]=1; }
+      });
     }
     var lu = greedy(cfg, effPool, mode, opts, locked);
     if(!lu) continue;
-    lu = hillClimb(cfg, lu, effPool, mode, opts, lockedIds);
+    lu = hillClimb(cfg, lu, effPool, mode, opts, lids);
     var v = validate(lu, cfg);
     if(!v.ok) continue;
     if(needStack && !hasStack(lu)) continue;
     /* uniqueness */
     var dup = lineups.some(function(o){ return diffCount(o,lu) < level; });
     if(dup) continue;
-    /* exposure */
+    /* exposure — locked players exempt */
     var maxAfter = 0;
-    lu.forEach(function(e){ maxAfter = Math.max(maxAfter, ((exposures[e.player.id]||0)+1)/numWanted); });
+    lu.forEach(function(e){
+      if(!userLids[e.player.id]) maxAfter = Math.max(maxAfter, ((exposures[e.player.id]||0)+1)/numWanted);
+    });
     if(maxAfter > maxExp + 1e-9) continue;
     lu.forEach(function(e){ exposures[e.player.id]=(exposures[e.player.id]||0)+1; });
     lineups.push(lu);
@@ -279,9 +352,9 @@ function insights(lineup, pool, mode, cfgKey){
 
 if(typeof module !== "undefined" && module.exports){
   module.exports = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
-    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, generate:generate, insights:insights,
-    salary:salary, proj:proj, ceil:ceil, floor:floor };
+    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
+    insights:insights, salary:salary, proj:proj, ceil:ceil, floor:floor };
 } else { window.DFSOpt = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
-    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, generate:generate, insights:insights,
-    salary:salary, proj:proj, ceil:ceil, floor:floor }; }
+    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
+    insights:insights, salary:salary, proj:proj, ceil:ceil, floor:floor }; }
 })();
