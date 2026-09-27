@@ -593,7 +593,11 @@ function coachGenerate(mode, opts){
   });
   var globalMax = opts.maxExposure!=null ? opts.maxExposure/100 : (mode==="cash"?1:0.6);
   var numWanted = Math.min(opts.numLineups||1, mode==="cash"?3:20);
-  var lineups=[], exposures={}, prevIds=[], banIdx=0, attempts=0;
+  /* a cap below 1/numWanted can never accept even one lineup (the first pick
+     already violates it) — relax it openly rather than failing every attempt */
+  var askedCap = globalMax, capRelaxed = false;
+  if(globalMax < 1/numWanted - 1e-9){ globalMax = 1/numWanted; capRelaxed = true; }
+  var lineups=[], exposures={}, prevIds=[], banIdx=0, qbIdx=0, attempts=0;
   var minUnique = mode==="cash"?2:3;
 
   while(lineups.length<numWanted && attempts<numWanted*24){
@@ -604,23 +608,48 @@ function coachGenerate(mode, opts){
     var lockedGone = (opts.locked||[]).some(function(l){ return banned[l.player.id]; });
     if(lockedGone) continue;
     var maxed={};
-    var skip=false;
     Object.keys(exposures).forEach(function(id){
+      if(opts.lockedIds[id]) return; /* locks ignore the exposure cap — standard DFS behavior */
       var cap = idCaps[id]!=null?idCaps[id]:globalMax;
-      if(exposures[id]/numWanted >= cap-1e-9){
-        if(opts.lockedIds[id]) skip=true; else maxed[id]=1;
-      }
+      /* mirror the acceptance rule below: exclude anyone who could not be picked
+         again, so greedy aims at fresh players instead of burning attempts on
+         lineups the exposure check would reject */
+      if(((exposures[id]||0)+1)/numWanted > cap+1e-9) maxed[id]=1;
     });
-    if(skip) continue;
     var ep = eff.filter(function(p){ return !banned[p.id] && !maxed[p.id]; });
-    var lu = OPT.greedy(c, ep, mode, {volPenalty:0.5}, opts.locked||[]);
+    /* GPP NFL requires a QB stack — force one the way the DFS Lab does (rotating
+       the QB for diversity) instead of hoping greedy stumbles into a stack */
+    var lockedG = (opts.locked||[]).slice(), lidsG = {};
+    (opts.locked||[]).forEach(function(e){ lidsG[e.player.id]=1; });
+    if(mode==="gpp" && c.sport==="NFL" && !OPT.hasStack(lockedG)){
+      var lockedQB = (opts.locked||[]).filter(function(e){ return e.player.pos.indexOf("QB")!==-1; })[0]||null;
+      var qbsEff = ep.filter(function(p){ return p.pos.indexOf("QB")!==-1; })
+        .sort(function(a,b){ return b.ceil-a.ceil; }).slice(0, Math.max(8, numWanted));
+      var qbId;
+      if(lockedQB){
+        /* a user-locked QB becomes the stack QB — no rotation against their choice */
+        if(!qbsEff.some(function(q){ return q.id===lockedQB.player.id; })) continue;
+        qbId = lockedQB.player.id;
+      } else {
+        if(!qbsEff.length) continue;
+        qbId = qbsEff[qbIdx % qbsEff.length].id;
+        qbIdx++;
+      }
+      var core = OPT.buildStackCore(c, ep, mode, {volPenalty:0.5}, qbId, exposures);
+      if(!core) continue;
+      core.locked.forEach(function(e){
+        if(!lidsG[e.player.id]){ lockedG.push(e); lidsG[e.player.id]=1; }
+      });
+    }
+    var lu = OPT.greedy(c, ep, mode, {volPenalty:0.5}, lockedG);
     if(!lu) continue;
-    lu = OPT.hillClimb(c, lu, ep, mode, {volPenalty:0.5}, opts.lockedIds||{});
+    lu = OPT.hillClimb(c, lu, ep, mode, {volPenalty:0.5}, lidsG);
     if(!OPT.validate(lu,c).ok) continue;
     if(mode==="gpp" && c.sport==="NFL" && !OPT.hasStack(lu)) continue;
     if(lineups.some(function(o){ return diffCount(o,lu)<minUnique; })) continue;
     var over=false;
     lu.forEach(function(e){
+      if(opts.lockedIds[e.player.id]) return; /* locks exempt from exposure caps */
       var cap = idCaps[e.player.id]!=null?idCaps[e.player.id]:globalMax;
       if(((exposures[e.player.id]||0)+1)/numWanted > cap+1e-9) over=true;
     });
@@ -629,7 +658,8 @@ function coachGenerate(mode, opts){
     lineups.push(lu);
     prevIds = lu.map(function(e){ return e.player.id; });
   }
-  return { lineups:lineups, exposures:exposures, relaxed: lineups.length<numWanted };
+  return { lineups:lineups, exposures:exposures, relaxed: lineups.length<numWanted,
+           capRelaxed:capRelaxed, askedCap:askedCap, effCap:globalMax };
 }
 
 function lineupCard(lu, i, mode){
@@ -750,6 +780,12 @@ function executeDirectives(text, hostEl, userText){
         wrap.innerHTML = lineupCard(lu, i, mode);
         hostEl.appendChild(wrap);
       });
+      if(res.capRelaxed){
+        var crn = document.createElement("div");
+        crn.className = "action-note";
+        crn.textContent = "Heads up: max exposure "+Math.round(res.askedCap*100)+"% can't fill "+res.lineups.length+" lineup(s) — each player needs at least "+Math.round(res.effCap*100)+"% to appear once. I relaxed the cap to fit your request.";
+        hostEl.appendChild(crn);
+      }
       var disc = document.createElement("div");
       disc.className = "action-note";
       disc.textContent = res.relaxed

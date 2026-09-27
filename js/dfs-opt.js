@@ -231,10 +231,17 @@ function generate(cfgKey, pool, mode, opts){
       (unseat.length>1?" have":" has")+" no eligible roster slot.");
   var userSeated = seatLocked(cfg, pool, userLids);
   if(!userSeated) return fail("Locked players can't all fit the roster slots at once.");
+  /* user locks that already form a QB stack satisfy the GPP stack rule on their
+     own — piling on more forced mates would squeeze the remaining cap */
+  var needStack = (mode==="gpp" && cfg.sport==="NFL");
+  var userHasStack = needStack && hasStack(userSeated);
   var numWanted = Math.min(opts.numLineups|| (mode==="cash"?3:20), mode==="cash"?3:20);
   var maxExp = opts.maxExposure!=null?opts.maxExposure:(mode==="cash"?1:0.6);
+  /* a cap below 1/numWanted can never accept even one lineup — relax it openly
+     rather than failing every attempt */
+  var askedExp = maxExp, capRelaxed = false;
+  if(maxExp < 1/numWanted - 1e-9){ maxExp = 1/numWanted; capRelaxed = true; }
   var minUnique = opts.minUnique!=null?opts.minUnique:(mode==="cash"?2:3);
-  var needStack = (mode==="gpp" && cfg.sport==="NFL");
   /* candidate QB rotation for diversity */
   var lineups = [], exposures = {};
   /* uniqueness relaxation: if the pool is too small for strict uniqueness,
@@ -264,7 +271,10 @@ function generate(cfgKey, pool, mode, opts){
     var maxed = {};
     Object.keys(exposures).forEach(function(id){
       if(userLids[id]) return; /* locks ignore the exposure cap — standard DFS behavior */
-      if(exposures[id]/numWanted >= maxExp - 1e-9) maxed[id]=1;
+      /* mirror the acceptance rule below: exclude anyone who could not be picked
+         again, so greedy aims at fresh players instead of burning attempts on
+         lineups the exposure check would reject */
+      if((exposures[id]+1)/numWanted > maxExp + 1e-9) maxed[id]=1;
     });
     var effPool = pool.filter(function(p){
       if(exclIds[p.id]) return false;
@@ -273,7 +283,7 @@ function generate(cfgKey, pool, mode, opts){
     });
     var locked = userSeated.slice(), lids = {};
     userSeated.forEach(function(e){ lids[e.player.id]=1; });
-    if(needStack){
+    if(needStack && !userHasStack){
       var qbsEff = effPool.filter(function(p){ return p.pos.indexOf("QB")!==-1; })
         .sort(function(a,b){ return b.ceil-a.ceil; }).slice(0, Math.max(8, numWanted));
       var qbId;
@@ -312,7 +322,8 @@ function generate(cfgKey, pool, mode, opts){
     prevIds = lu.map(function(e){ return e.player.id; });
   }
   });
-  return { lineups: lineups, exposures: exposures, config: cfg, relaxed: finalLevel < minUnique };
+  return { lineups: lineups, exposures: exposures, config: cfg, relaxed: finalLevel < minUnique,
+           capRelaxed: capRelaxed, askedExp: askedExp, effExp: maxExp };
 }
 
 /* optimizer insights — computed from data, never invented */
@@ -410,11 +421,11 @@ function buildDemoSlate(cfg){
 
 if(typeof module !== "undefined" && module.exports){
   module.exports = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
-    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
+    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, generate:generate,
     insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor,
     buildDemoSlate:buildDemoSlate };
 } else { window.DFSOpt = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
-    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
+    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, generate:generate,
     insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor,
     buildDemoSlate:buildDemoSlate }; }
 })();

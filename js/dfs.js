@@ -264,6 +264,11 @@ function renderResults(res, ms, wanted, extra){
   }
   var got = res.lineups.length;
   var note = res.relaxed ? '<div class="notice" style="margin:0 0 14px"><strong>Small pool:</strong> uniqueness was relaxed to fill '+got+' lineups. Add more players for better diversity.</div>' : "";
+  if(res.capRelaxed){
+    note += '<div class="notice" style="margin:0 0 14px"><strong>Exposure cap relaxed:</strong> '+
+      Math.round(res.askedExp*100)+'% can\'t fill '+wanted+' lineup(s) — each player needs at least '+
+      Math.round(res.effExp*100)+'% to appear once. Raised to '+Math.round(res.effExp*100)+'% to build your lineups.</div>';
+  }
   /* shortfall hint: GPP exposure caps legitimately cut the lineup count, but
      "1 of 3 requested lineups" alone leaves users guessing why. */
   var note2 = "";

@@ -111,5 +111,36 @@ var demoNBA = D.buildDemoSlate(D.CONFIGS.DK_NBA);
 ok("demo: 40 NBA players", demoNBA.length===40);
 ok("demo: ids unique", (function(){ var s={}; return demoDK.every(function(p){ if(s[p.id]) return false; s[p.id]=1; return true; }); })());
 
+/* ---- regression: 3 GPP lineups with a KC stack on the demo slate ----
+   (2026-09-27: the coach returned zero lineups here — locked stack players were
+   not exempt from the exposure cap, and the maxed-player filter disagreed with
+   the acceptance check, so greedy burned all its attempts) */
+function demoStackLocks(pool, team){
+  var qb = pool.filter(function(p){ return p.team===team && p.pos[0]==="QB"; })
+    .sort(function(a,b){ return b.ceil-a.ceil; })[0];
+  var mates = pool.filter(function(p){
+    return p.id!==qb.id && p.team===team && ["RB","WR","TE"].indexOf(p.pos[0])!==-1;
+  }).sort(function(a,b){ return b.ceil-a.ceil; }).slice(0,2);
+  return [qb].concat(mates).map(function(p){ return p.id; });
+}
+var demoLocks = demoStackLocks(demoDK, "KC");
+var rStack = D.generate("DK_NFL", demoDK, "gpp", { numLineups:3, maxExposure:0.6, locked:demoLocks });
+ok("stack: 3 GPP lineups built on demo slate", rStack.lineups.length===3, "got "+rStack.lineups.length);
+ok("stack: all lineups valid", rStack.lineups.every(function(lu){ return D.validate(lu, D.CONFIGS.DK_NFL).ok; }));
+ok("stack: every lineup has the KC stack", rStack.lineups.every(function(lu){ return D.hasStack(lu); }));
+ok("stack: locked QB in every lineup", rStack.lineups.every(function(lu){
+  return lu.some(function(e){ return e.player.id===demoLocks[0]; });
+}));
+/* locks ignore the exposure cap — a lock in 3/3 lineups must not be rejected */
+var rLock = D.generate("DK_NFL", demoDK, "gpp", { numLineups:3, maxExposure:0.6, locked:[demoLocks[0]] });
+ok("locks exempt from exposure cap", rLock.lineups.length===3, "got "+rLock.lineups.length);
+/* small lineup counts: the maxed filter must agree with the acceptance rule */
+var rSmall = D.generate("DK_NFL", demoDK, "gpp", { numLineups:3, maxExposure:0.6 });
+ok("small count: 3 lineups without locks", rSmall.lineups.length===3, "got "+rSmall.lineups.length);
+/* impossible cap: relaxed openly instead of returning nothing */
+var rCap = D.generate("DK_NFL", demoDK, "gpp", { numLineups:3, maxExposure:0.2 });
+ok("impossible cap: flagged as relaxed", rCap.capRelaxed===true);
+ok("impossible cap: lineups still produced", rCap.lineups.length===3, "got "+rCap.lineups.length);
+
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL DFS TESTS PASSED");
 process.exit(fails ? 1 : 0);
