@@ -25,9 +25,11 @@ function load(){
       var img = (a.images&&a.images[0]&&a.images[0].url)
         ? '<img class="card-img" loading="lazy" src="'+a.images[0].url+'" alt="">' : "";
       var link = (a.links&&a.links.web&&a.links.web.href) || "#";
+      var desc = a.description||"";
+      desc = desc.length>160 ? desc.slice(0,160)+"…" : desc;
       return '<a class="card" href="'+link+'" target="_blank" rel="noopener">'+img+
         '<div class="game-meta" style="margin:8px 0 6px"><span class="tag">'+LEAGUES[cur][1]+'</span><span>'+ago(a.published)+'</span></div>'+
-        '<h3>'+GIU.esc(a.headline)+'</h3><p>'+GIU.esc((a.description||"").slice(0,160))+'…</p></a>';
+        '<h3>'+GIU.esc(a.headline)+'</h3><p>'+GIU.esc(desc)+'</p></a>';
     }).join("");
   }).catch(function(){
     box.innerHTML = GIU.failBox("The ESPN news feed didn't respond for "+LEAGUES[cur][1]+".");

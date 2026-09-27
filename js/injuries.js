@@ -8,6 +8,33 @@ var LEAGUES = [
   ["basketball/mens-college-basketball","NCAAB"],["soccer/eng.1","EPL"]
 ];
 var cur = 0, data = [];
+/* Severity ranking for betting relevance: Out > Doubtful > Questionable > everything else.
+   Statuses are ESPN free text, verified live 2026-09-27: NFL uses Out / Injured Reserve /
+   Doubtful / Questionable; NBA "Day-To-Day"; MLB/NHL use IL forms ("15-Day-IL", "60-Day-IL");
+   plus non-injury statuses (Active, Suspension, Bereavement, Paternity) which sort last. */
+function sevRank(s){
+  s = String(s||"");
+  if(/out|injured reserve|\bil\b|injured list/i.test(s)) return 3;
+  if(/doubtful/i.test(s)) return 2;
+  if(/questionable|day[- ]to[- ]day/i.test(s)) return 1;
+  return 0;
+}
+var SEVS = [["all","All"],["out","Out"],["doubtful","Doubtful"],["questionable","Questionable"]];
+var sevF = -1; /* filter rank: -1 = all */
+var SEV_RANK = {all:-1, out:3, doubtful:2, questionable:1};
+function teamWeight(t){
+  var w = 0;
+  (t.injuries||[]).forEach(function(i){
+    var r = sevRank(i.status);
+    w += r===3?10 : r===2?5 : r===1?2 : 0;
+  });
+  return w;
+}
+function sevCounts(t){
+  var c = [0,0,0,0];
+  (t.injuries||[]).forEach(function(i){ c[sevRank(i.status)]++; });
+  return c;
+}
 function detailText(i){
   /* ESPN injury entries carry longComment/shortComment strings, but `details`
      and `type` are OBJECTS ({type, location, detail, side, returnDate} etc).
@@ -32,11 +59,26 @@ function statusTag(s){
   if(/questionable|day-to-day/.test(s)) return '<span class="tag">'+GIU.esc(s)+'</span>';
   return '<span class="tag blue">'+GIU.esc(s||"—")+'</span>';
 }
+function teamTag(t){
+  var c = sevCounts(t), parts = [];
+  if(c[3]) parts.push('<span class="tag red">'+c[3]+' out</span>');
+  if(c[2]) parts.push('<span class="tag red">'+c[2]+' doubtful</span>');
+  if(c[1]) parts.push('<span class="tag">'+c[1]+' questionable</span>');
+  parts.push('<span class="tag blue">'+(t.injuries||[]).length+' reported</span>');
+  return parts.join(" ");
+}
+function passSev(i){ return sevF===-1 || sevRank(i.status)===sevF; }
 function load(){
   var box = $("injGrid");
   box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
   GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+LEAGUES[cur][0]+"/injuries").then(function(d){
     data = (d.injuries||[]).filter(function(t){ return (t.injuries||[]).length; });
+    /* Bettors care about the worst news first: teams with the most severe
+       injuries top the grid, and each card lists its worst cases first. */
+    data.sort(function(a,b){ return teamWeight(b)-teamWeight(a); });
+    data.forEach(function(t){
+      (t.injuries||[]).sort(function(a,b){ return sevRank(b.status)-sevRank(a.status); });
+    });
     render("");
   }).catch(function(){
     box.innerHTML = GIU.failBox("The ESPN injuries feed didn't respond for "+LEAGUES[cur][1]+".");
@@ -46,31 +88,49 @@ function render(q){
   q = q.toLowerCase();
   var box = $("injGrid");
   var teams = data.filter(function(t){
+    var injs = (t.injuries||[]).filter(passSev);
+    if(!injs.length) return false;
+    t._shown = injs;
     if(!q) return true;
     if((t.displayName||"").toLowerCase().indexOf(q)!==-1) return true;
-    return (t.injuries||[]).some(function(i){
+    return injs.some(function(i){
       return (((i.athlete||{}).displayName||"")+" "+detailText(i)+" "+(i.status||"")).toLowerCase().indexOf(q)!==-1;
     });
   });
-  if(!teams.length){ box.innerHTML = '<div class="empty">No injuries match "'+GIU.esc(q)+'".</div>'; return; }
+  var what = sevF===-1 ? "" : ' with status "'+SEVS.filter(function(s){return SEV_RANK[s[0]]===sevF;})[0][1]+'"';
+  if(!teams.length){ box.innerHTML = '<div class="empty">No injuries'+GIU.esc(what)+' match "'+GIU.esc(q)+'" for '+LEAGUES[cur][1]+' right now.</div>'; return; }
   box.innerHTML = teams.map(function(t){
-    var rows = (t.injuries||[]).map(function(i){
+    var rows = (t._shown||t.injuries).map(function(i){
       var nm = ((i.athlete||{}).displayName)||"Unknown";
       var detail = detailText(i);
       return '<div class="gloss-term" style="padding:10px 0"><h3 style="font-size:.95rem">'+GIU.esc(nm)+' '+statusTag(i.status)+'</h3>'+
         '<p>'+GIU.esc(detail)+'</p>'+
         (i.date?'<p style="font-size:.78rem;color:var(--faint)">Updated '+GIU.esc(i.date.slice(0,10))+'</p>':"")+'</div>';
     }).join("");
-    return '<div class="card"><h3>'+GIU.esc(t.displayName||t.name||"Team")+'</h3><span class="tag">'+(t.injuries||[]).length+' reported</span>'+rows+'</div>';
+    return '<div class="card"><h3>'+GIU.esc(t.displayName||t.name||"Team")+'</h3><p style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px">'+teamTag(t)+'</p>'+rows+'</div>';
   }).join("");
 }
+$("injSev").innerHTML = SEVS.map(function(s,i){
+  return '<button class="tab'+(i===0?" active":"")+'" data-sev="'+s[0]+'">'+s[1]+'</button>';
+}).join("");
+Array.prototype.forEach.call($("injSev").querySelectorAll(".tab"), function(t){
+  t.addEventListener("click", function(){
+    Array.prototype.forEach.call($("injSev").querySelectorAll(".tab"), function(x){x.classList.remove("active");});
+    t.classList.add("active"); sevF = SEV_RANK[t.getAttribute("data-sev")]; render($("injSearch").value||"");
+  });
+});
 $("injTabs").innerHTML = LEAGUES.map(function(l,i){
   return '<button class="tab'+(i===0?" active":"")+'" data-i="'+i+'">'+l[1]+'</button>';
 }).join("");
 Array.prototype.forEach.call($("injTabs").querySelectorAll(".tab"), function(t){
   t.addEventListener("click", function(){
     Array.prototype.forEach.call($("injTabs").querySelectorAll(".tab"), function(x){x.classList.remove("active");});
-    t.classList.add("active"); cur = Number(t.getAttribute("data-i")); $("injSearch").value=""; load();
+    t.classList.add("active"); cur = Number(t.getAttribute("data-i")); $("injSearch").value="";
+    sevF = -1;
+    Array.prototype.forEach.call($("injSev").querySelectorAll(".tab"), function(x){
+      x.classList.toggle("active", x.getAttribute("data-sev")==="all");
+    });
+    load();
   });
 });
 var deb=null;
