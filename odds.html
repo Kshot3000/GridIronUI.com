@@ -49,13 +49,17 @@
   <div id="oddsBoard"></div>
 
   <div class="notice" style="margin:30px 0">
-    <strong>How to read this board.</strong> Green cells are the best available price for that outcome across every book shown. The "best place to bet" badge goes to the book holding the most best prices for that game. ▲▼ marks movement since your last refresh. Odds update when books move them — always confirm the final price in the sportsbook app before betting.
+    <strong>How to read this board.</strong> Green cells are the best available price for that outcome across every book shown. The "best place to bet" badge goes to the book holding the most best prices for that game. ▲▼ marks movement since your last refresh. <strong>Tap any price</strong> to add it to your slip — the Slip button (bottom-right) combines your legs into parlay odds with a potential payout. Odds update when books move them — always confirm the final price in the sportsbook app before betting.
   </div>
 </div>
+
+<button id="slipToggle" class="slip-toggle" aria-expanded="false" aria-controls="slipPanel">🎟 Slip <span id="slipCount">0</span></button>
+<aside id="slipPanel" class="slip" aria-label="Bet slip" hidden></aside>
 
 <div id="site-footer"></div>
 <script src="js/site.js"></script>
 <script src="js/odds-logic.js"></script>
+<script src="js/odds-slip.js"></script>
 <script src="js/odds.js"></script>
 </body>
 </html>

@@ -21,6 +21,15 @@ var sport = SPORTS[0][0], key = "";
 try{ key = localStorage.getItem("giu_odds_key") || ""; }catch(e){}
 var autoTimer = null;
 
+/* ---- bet slip state (local only, never leaves the browser) ---- */
+var Slip = window.OddsSlip;
+var slip = [];
+try{ slip = JSON.parse(localStorage.getItem("giu_slip") || "[]"); }catch(e){ slip = []; }
+var stakeVal = 100;
+try{ stakeVal = Number(localStorage.getItem("giu_slip_stake")) || 100; }catch(e){}
+function saveSlip(){ try{ localStorage.setItem("giu_slip", JSON.stringify(slip)); }catch(e){} }
+function saveStake(){ try{ localStorage.setItem("giu_slip_stake", String(stakeVal)); }catch(e){} }
+
 function fmtT(iso){
   try{ var d=new Date(iso);
     return d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+
@@ -53,6 +62,10 @@ function render(){
       : '<div class="empty">No upcoming games with odds for this league right now.</div>';
     board.innerHTML = html;
     setSnap(now);
+    /* keep slip prices honest against the fresh board */
+    if(slip.length){ Slip.reprice(slip, now); saveSlip(); }
+    refreshPickMarks();
+    renderSlip();
   }).catch(function(e){
     if(e.message==="invalid-key"){
       board.innerHTML = '<div class="notice red"><strong>That API key didn\'t work.</strong> The Odds API said the key is invalid. Double-check it, or <a href="https://the-odds-api.com" target="_blank" rel="noopener">grab a free one here</a> (500 requests/month, no card).</div>';
@@ -70,7 +83,7 @@ function renderGame(ev, prev, now){
       mlBest     = OL.bestML(books, ev);
   var top = OL.topBook(books, [spreadBest, totalBest, mlBest]);
 
-  function cell(mkey, bkKey, name, label, idKey, price){
+  function cell(mkey, bkKey, bkTitle, name, label, idKey, price){
     var id = ev.id+"|"+bkKey+"|"+mkey+"|"+name;  /* book key included: movement is per-book */
     var old = prev[id];
     now[id] = price;
@@ -80,7 +93,17 @@ function renderGame(ev, prev, now){
       flash = " flash";
     }
     var cls = ((idKey ? "best" : "") + flash).trim();
-    return '<td class="'+cls+'"><span class="num">'+label+'</span>'+mv+'</td>';
+    var picked = Slip.has(slip, id);
+    var am = OL.dec2am(price);
+    var aria = (picked ? "Remove " : "Add ") + name + " " + label + " (" + am + ") at " + bkTitle +
+               (picked ? " from" : " to") + " your slip";
+    return '<td class="'+cls+'"><button class="pick-btn'+(picked?" picked":"")+'"'+
+      ' data-slip="'+GIU.esc(id)+'" data-game="'+GIU.esc(a+" @ "+h)+'"'+
+      ' data-market="'+GIU.esc(mkey)+'" data-side="'+GIU.esc(name)+'"'+
+      ' data-book="'+GIU.esc(bkKey)+'" data-booktitle="'+GIU.esc(bkTitle)+'"'+
+      ' data-label="'+GIU.esc(label)+'" data-price="'+price+'"'+
+      ' aria-pressed="'+picked+'" aria-label="'+GIU.esc(aria)+'">'+
+      '<span class="num">'+label+'</span>'+mv+'</button></td>';
   }
   function isBest(mapVal, bk, extra){
     return mapVal === bk.key + (extra||"");
@@ -90,12 +113,12 @@ function renderGame(ev, prev, now){
     var hSP = OL.oneOutcome(bk,"spreads",h), aSP = OL.oneOutcome(bk,"spreads",a);
     var oT = OL.oneOutcome(bk,"totals","Over"), uT = OL.oneOutcome(bk,"totals","Under");
     return "<tr><td><b>"+GIU.esc(bk.title)+"</b></td>"+
-      (aSP ? cell("spreads", bk.key, a, OL.fmtPt(aSP.point)+" · "+OL.dec2am(aSP.price), isBest(spreadBest.a,bk,"|"+aSP.point+"|"+aSP.price), aSP.price) : "<td>—</td>")+
-      (hSP ? cell("spreads", bk.key, h, OL.fmtPt(hSP.point)+" · "+OL.dec2am(hSP.price), isBest(spreadBest.h,bk,"|"+hSP.point+"|"+hSP.price), hSP.price) : "<td>—</td>")+
-      (oT  ? cell("totals", bk.key, "Over","O "+OL.fmtPt(oT.point)+" · "+OL.dec2am(oT.price), isBest(totalBest.o,bk,"|"+oT.point+"|"+oT.price), oT.price) : "<td>—</td>")+
-      (uT  ? cell("totals", bk.key, "Under","U "+OL.fmtPt(uT.point)+" · "+OL.dec2am(uT.price), isBest(totalBest.u,bk,"|"+uT.point+"|"+uT.price), uT.price) : "<td>—</td>")+
-      (aML ? cell("h2h", bk.key, a, OL.dec2am(aML.price), isBest(mlBest.a,bk,"|"+aML.price), aML.price) : "<td>—</td>")+
-      (hML ? cell("h2h", bk.key, h, OL.dec2am(hML.price), isBest(mlBest.h,bk,"|"+hML.price), hML.price) : "<td>—</td>")+
+      (aSP ? cell("spreads", bk.key, bk.title, a, OL.fmtPt(aSP.point)+" · "+OL.dec2am(aSP.price), isBest(spreadBest.a,bk,"|"+aSP.point+"|"+aSP.price), aSP.price) : "<td>—</td>")+
+      (hSP ? cell("spreads", bk.key, bk.title, h, OL.fmtPt(hSP.point)+" · "+OL.dec2am(hSP.price), isBest(spreadBest.h,bk,"|"+hSP.point+"|"+hSP.price), hSP.price) : "<td>—</td>")+
+      (oT  ? cell("totals", bk.key, bk.title, "Over","O "+OL.fmtPt(oT.point)+" · "+OL.dec2am(oT.price), isBest(totalBest.o,bk,"|"+oT.point+"|"+oT.price), oT.price) : "<td>—</td>")+
+      (uT  ? cell("totals", bk.key, bk.title, "Under","U "+OL.fmtPt(uT.point)+" · "+OL.dec2am(uT.price), isBest(totalBest.u,bk,"|"+uT.point+"|"+uT.price), uT.price) : "<td>—</td>")+
+      (aML ? cell("h2h", bk.key, bk.title, a, OL.dec2am(aML.price), isBest(mlBest.a,bk,"|"+aML.price), aML.price) : "<td>—</td>")+
+      (hML ? cell("h2h", bk.key, bk.title, h, OL.dec2am(hML.price), isBest(mlBest.h,bk,"|"+hML.price), hML.price) : "<td>—</td>")+
       "</tr>";
   }).join("");
 
@@ -116,6 +139,49 @@ function renderGame(ev, prev, now){
     '<th>Over</th><th>Under</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' ML</th><th>'+GIU.esc(OL.shortName(h))+' ML</th>'+
     '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+/* ---- bet slip UI ---- */
+function totalsHtml(p){
+  return '<div><span>Combined odds</span><b class="num">'+GIU.esc(String(p.combinedAm))+
+    ' <span style="color:var(--faint);font-weight:400">'+p.combined.toFixed(3)+' dec</span></b></div>'+
+    '<div><span>To win</span><b class="num" style="color:var(--green)">$'+p.profit.toFixed(2)+'</b></div>'+
+    '<div><span>Total payout</span><b class="num">$'+p.total.toFixed(2)+'</b></div>';
+}
+function renderSlip(){
+  var panel = $("slipPanel"), n = slip.length;
+  $("slipCount").textContent = n;
+  if(!n){
+    panel.innerHTML = '<div class="empty" style="padding:26px 14px">Tap any price on the board to start building a slip.<br>Your slip lives in this browser only.</div>';
+    return;
+  }
+  var rows = slip.map(function(l){
+    var mv = "";
+    if(l.prevPrice !== undefined){
+      var up = l.price > l.prevPrice;
+      mv = ' <span class="'+(up?"mv-up":"mv-dn")+'">'+(up?"▲":"▼")+'</span>';
+    }
+    return '<div class="slip-leg"><div><b>'+GIU.esc(l.side)+'</b> '+
+      '<span class="num">'+GIU.esc(l.label)+' ('+OL.dec2am(l.price)+')</span>'+mv+
+      '<div class="slip-sub">'+GIU.esc(l.game)+' · '+GIU.esc(l.bookTitle)+'</div></div>'+
+      '<button class="slip-x" data-unslip="'+GIU.esc(l.id)+'" aria-label="Remove '+GIU.esc(l.side)+' from slip">✕</button></div>';
+  }).join("");
+  panel.innerHTML =
+    '<div class="slip-head"><b>Your slip</b><span class="tag">'+n+' leg'+(n>1?"s":"")+'</span></div>'+
+    '<div class="slip-legs">'+rows+'</div>'+
+    '<div class="field" style="margin:14px 0 8px"><label for="slipStake">Stake ($)</label>'+
+    '<input type="number" id="slipStake" min="0" step="1" value="'+stakeVal+'" inputmode="numeric"></div>'+
+    '<div class="slip-totals" id="slipTotals">'+totalsHtml(Slip.payout(slip, stakeVal))+'</div>'+
+    '<button class="btn btn-ghost btn-sm" id="slipClear" style="width:100%;justify-content:center;margin-top:12px">Clear slip</button>'+
+    '<p class="slip-note">Practice slip — research only, not a wager with any book. Prices refresh from the live board above; ▲▼ marks a leg whose line moved.</p>';
+}
+function refreshPickMarks(){
+  var btns = document.querySelectorAll("#oddsBoard .pick-btn");
+  for(var i=0;i<btns.length;i++){
+    var on = Slip.has(slip, btns[i].getAttribute("data-slip"));
+    btns[i].classList.toggle("picked", on);
+    btns[i].setAttribute("aria-pressed", on ? "true" : "false");
+  }
 }
 
 /* ---- wiring ---- */
@@ -147,5 +213,49 @@ $("autoRef").addEventListener("change", function(){
     alert("Auto-refresh on: the board reloads every 5 minutes. Each reload uses API quota — the free tier is 500 requests/month.");
   }
 });
+/* slip: toggle legs from the board (delegated, survives re-renders) */
+$("oddsBoard").addEventListener("click", function(e){
+  var b = e.target && e.target.closest ? e.target.closest(".pick-btn") : null;
+  if(!b) return;
+  var leg = {
+    id:b.getAttribute("data-slip"), game:b.getAttribute("data-game"),
+    market:b.getAttribute("data-market"), side:b.getAttribute("data-side"),
+    book:b.getAttribute("data-book"), bookTitle:b.getAttribute("data-booktitle"),
+    label:b.getAttribute("data-label"), price:Number(b.getAttribute("data-price"))
+  };
+  var added = Slip.toggle(slip, leg);
+  saveSlip();
+  b.classList.toggle("picked", added);
+  b.setAttribute("aria-pressed", added ? "true" : "false");
+  b.setAttribute("aria-label", (added ? "Remove " : "Add ") + leg.side + " " + leg.label +
+    " (" + OL.dec2am(leg.price) + ") at " + leg.bookTitle + (added ? " from" : " to") + " your slip");
+  renderSlip();
+});
+/* slip panel: remove legs, clear, stake math (delegated + bubbled input) */
+$("slipPanel").addEventListener("click", function(e){
+  var x = e.target && e.target.closest ? e.target.closest("[data-unslip]") : null;
+  if(x){
+    Slip.remove(slip, x.getAttribute("data-unslip"));
+    saveSlip(); refreshPickMarks(); renderSlip();
+    return;
+  }
+  if(e.target && e.target.id === "slipClear"){
+    Slip.clear(slip); saveSlip(); refreshPickMarks(); renderSlip();
+  }
+});
+$("slipPanel").addEventListener("input", function(e){
+  if(e.target && e.target.id === "slipStake"){
+    stakeVal = Number(e.target.value) || 0;
+    saveStake();
+    var t = $("slipTotals");
+    if(t) t.innerHTML = totalsHtml(Slip.payout(slip, stakeVal));
+  }
+});
+$("slipToggle").addEventListener("click", function(){
+  var p = $("slipPanel"), open = p.hasAttribute("hidden");
+  if(open){ p.removeAttribute("hidden"); this.setAttribute("aria-expanded", "true"); }
+  else { p.setAttribute("hidden", ""); this.setAttribute("aria-expanded", "false"); }
+});
+renderSlip();
 render();
 })();
