@@ -61,16 +61,23 @@ function render(){
             "&regions=us&markets=h2h,spreads,totals&oddsFormat=decimal";
   board.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--faint)">Pulling live lines…</p>';
   var remaining = "?";
+  /* Identity directory (ESPN logos/colors) loads in parallel; resolves to {}
+     on failure so the board always renders, with or without identity. */
+  var dirP = GIU.teamDir();
+  var league = OL.sportLeague(sport);
   fetch(url, {cache:"no-store"}).then(function(r){
     remaining = r.headers.get("x-requests-remaining") || "?";
     if(r.status===401) throw new Error("invalid-key");
     if(!r.ok) throw new Error("HTTP "+r.status);
     return r.json();
   }).then(function(events){
+    return dirP.then(function(dir){ return {events:events, dir:dir}; });
+  }).then(function(payload){
+    var events = payload.events, dir = payload.dir;
     $("quota").textContent = "API quota remaining: "+remaining+" requests this month";
     var prev = getSnap(), now = {}, opens = getOpens();
     var html = events.length
-      ? events.map(function(ev){ return renderGame(ev, prev, now, opens); }).join("")
+      ? events.map(function(ev){ return renderGame(ev, prev, now, opens, dir, league); }).join("")
       : '<div class="empty">No upcoming games with odds for this league right now.</div>';
     board.innerHTML = html;
     setSnap(now);
@@ -88,9 +95,15 @@ function render(){
   });
 }
 
-function renderGame(ev, prev, now, opens){
+function renderGame(ev, prev, now, opens, dir, league){
   var books = ev.bookmakers||[];
   var h = ev.home_team, a = ev.away_team;
+  /* GameDay identity: real ESPN logo + team-color chips when the matchup
+     resolves against the identity directory; otherwise the plain title. */
+  var idHead = GIU.vsHeader(dir, league, a, h);
+  var titleHtml = idHead
+    ? idHead
+    : '<h3 style="margin:0">'+GIU.esc(a)+' @ '+GIU.esc(h)+'</h3>';
   var spreadBest = OL.bestSpread(books, ev),
       totalBest  = OL.bestTotal(books),
       mlBest     = OL.bestML(books, ev);
@@ -181,7 +194,7 @@ function renderGame(ev, prev, now, opens){
   }
 
   return '<div class="card" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
-    '<h3 style="margin:0">'+GIU.esc(a)+' @ '+GIU.esc(h)+'</h3>'+
+    titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
     consLineHtml()+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+

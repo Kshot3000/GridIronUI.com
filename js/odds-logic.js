@@ -9,6 +9,16 @@ var L = {
   },
   fmtPt: function(p){ return (p>0?"+":"")+p; },
   shortName: function(name){ return String(name).split(" ").pop(); },
+  /* Odds API sport keys -> teams.json identity-league keys. College leagues
+     have no identity directory, so they return null (callers fall back to
+     the plain-text title). */
+  sportLeague: function(sportKey){
+    var m = {
+      americanfootball_nfl:"nfl", basketball_nba:"nba", baseball_mlb:"mlb",
+      icehockey_nhl:"nhl", soccer_epl:"epl"
+    };
+    return m[String(sportKey)] || null;
+  },
   outcomesOf: function(bk, mkey){
     var m = (bk.markets||[]).filter(function(m){return m.key===mkey;})[0];
     return m ? m.outcomes : [];
