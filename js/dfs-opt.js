@@ -350,11 +350,42 @@ function insights(lineup, pool, mode, cfgKey){
   return out;
 }
 
+/* per-player exposure across the generated lineups — pure and testable.
+   exposures: {playerId: lineupCount} from generate(); got: generated count;
+   numWanted: requested count (the exposure cap is enforced against this);
+   maxExp: max exposure fraction; lockedIds: user locks (exempt from cap).
+   Returns rows sorted by share desc: {id,name,team,count,pct,capped,locked}. */
+function exposureSummary(exposures, got, pool, lockedIds, maxExp, numWanted){
+  var byId = {}, locked = {};
+  (pool||[]).forEach(function(p){ byId[p.id]=p; });
+  (lockedIds||[]).forEach(function(id){ locked[id]=1; });
+  var rows = [];
+  Object.keys(exposures||{}).forEach(function(k){
+    var p = byId[k]; if(!p) return;              /* stale id — ignore, don't invent */
+    var n = exposures[k]||0; if(!(n>0)) return;
+    var id = Number(k);
+    var isL = !!locked[id];
+    rows.push({
+      id:id, name:p.name, team:p.team, count:n,
+      pct: got>0 ? n/got : 0,
+      locked: isL,
+      /* mirrors generate()'s acceptance rule: unlocked players are rejected once
+         count/numWanted would exceed the cap */
+      capped: !isL && numWanted>0 && n/numWanted >= maxExp-1e-9
+    });
+  });
+  rows.sort(function(a,b){
+    if(b.count!==a.count) return b.count-a.count;
+    return a.name<b.name?-1:(a.name>b.name?1:0);
+  });
+  return rows;
+}
+
 if(typeof module !== "undefined" && module.exports){
   module.exports = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
     greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
-    insights:insights, salary:salary, proj:proj, ceil:ceil, floor:floor };
+    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor };
 } else { window.DFSOpt = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
     greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
-    insights:insights, salary:salary, proj:proj, ceil:ceil, floor:floor }; }
+    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor }; }
 })();

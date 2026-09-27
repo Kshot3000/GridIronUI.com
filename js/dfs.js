@@ -249,20 +249,23 @@ $("runOpt").addEventListener("click", function(){
   });
   if(missing.length){ alert("Can't build a lineup: no eligible players for "+missing.join(", ")+"."); return; }
   var n = Math.min(Number($("numLineups").value)||1, mode==="cash"?3:20);
+  var maxExp = (Number($("maxExp").value)||60)/100,
+      minUni = Number($("minUni").value)||3,
+      lockIds = pool.filter(function(p){ return p.locked; }).map(function(p){ return p.id; });
   var t0 = performance.now();
   var res = OPT.generate(cfgKey, pool, mode, {
     numLineups: n,
-    maxExposure: (Number($("maxExp").value)||60)/100,
-    minUnique: Number($("minUni").value)||3,
+    maxExposure: maxExp,
+    minUnique: minUni,
     volPenalty: Number($("volPen").value)||0.5,
-    locked: pool.filter(function(p){ return p.locked; }).map(function(p){ return p.id; }),
+    locked: lockIds,
     excluded: pool.filter(function(p){ return p.banned; }).map(function(p){ return p.id; })
   });
   var ms = Math.round(performance.now()-t0);
-  renderResults(res, ms, n);
+  renderResults(res, ms, n, {locked:lockIds, maxExp:maxExp, minUnique:minUni});
 });
-function renderResults(res, ms, wanted){
-  var c = cfg(), box = $("results");
+function renderResults(res, ms, wanted, extra){
+  var c = cfg(), box = $("results"), x = extra||{};
   if(res.error){
     box.innerHTML = '<div class="notice red"><strong>Can\'t build with these locks.</strong> '+OPT_esc(res.error)+' Adjust locks or the pool and try again.</div>';
     return;
@@ -271,8 +274,36 @@ function renderResults(res, ms, wanted){
     box.innerHTML = '<div class="notice red"><strong>No valid lineups.</strong> The pool may be too small or too expensive for the cap. Add cheaper players or lower the lineup count.</div>';
     return;
   }
-  var note = res.relaxed ? '<div class="notice" style="margin:0 0 14px"><strong>Small pool:</strong> uniqueness was relaxed to fill '+res.lineups.length+' lineups. Add more players for better diversity.</div>' : "";
-  box.innerHTML = note + '<p style="color:var(--faint);font-size:.85rem">'+res.lineups.length+' of '+wanted+' requested lineups · optimized in '+ms+'ms · all lineups hard-validated (cap, positions, no duplicates'+(mode==="gpp"&&c.sport==="NFL"?", QB stacks":"")+').</p>' +
+  var got = res.lineups.length;
+  var note = res.relaxed ? '<div class="notice" style="margin:0 0 14px"><strong>Small pool:</strong> uniqueness was relaxed to fill '+got+' lineups. Add more players for better diversity.</div>' : "";
+  /* shortfall hint: GPP exposure caps legitimately cut the lineup count, but
+     "1 of 3 requested lineups" alone leaves users guessing why. */
+  var note2 = "";
+  if(got < wanted){
+    note2 = '<div class="notice" style="margin:0 0 14px"><strong>Only '+got+' of '+wanted+' requested lineups.</strong> '+
+      'The '+Math.round((x.maxExp||0.6)*100)+'% max-exposure cap stops any unlocked player appearing in more than that share of lineups, '+
+      'and every lineup must differ by at least '+(x.minUnique||3)+' players. '+
+      'To get all '+wanted+': raise <b>Max exposure</b>, add more players to the pool, or lower <b>Min unique</b>.</div>';
+  }
+  /* exposure summary — a standard optimizer readout: who you're overweight on.
+     Computed from the real exposures generate() tracked; no invented numbers. */
+  var expHtml = "";
+  var expRows = OPT.exposureSummary(res.exposures||{}, got, pool, x.locked||[], x.maxExp||0.6, wanted);
+  if(expRows.length){
+    var body = expRows.map(function(r){
+      var tag = r.locked
+        ? ' <span class="tag" title="Locked by you — appears in every lineup, exempt from the exposure cap">🔒 lock</span>'
+        : (r.capped ? ' <span class="tag blue" title="Hit the max-exposure cap — the optimizer wouldn\'t add more of this player">cap</span>' : '');
+      return '<tr><td>'+OPT_esc(r.name)+tag+'</td><td>'+OPT_esc(r.team)+'</td><td class="num">'+r.count+'</td><td class="num">'+Math.round(r.pct*100)+'%</td></tr>';
+    }).join("");
+    expHtml = '<details class="faq" style="margin:0 0 18px"><summary>Exposure summary — who you\'re overweight on ('+expRows.length+' players)</summary>'+
+      '<p style="color:var(--faint);font-size:.82rem;margin:8px 0">Each player\'s share of the '+got+' generated lineup'+(got>1?'s':'')+'. '+
+      'If a top play is at the cap and you want more of them, raise Max exposure or add lineup count.</p>'+
+      '<div class="table-scroll"><table class="data"><caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">Player exposure across generated lineups</caption>'+
+      '<thead><tr><th>Player</th><th>Team</th><th>Lineups</th><th>Share</th></tr></thead><tbody>'+body+'</tbody></table></div></details>';
+  }
+  box.innerHTML = note + note2 + '<p style="color:var(--faint);font-size:.85rem">'+got+' of '+wanted+' requested lineups · optimized in '+ms+'ms · all lineups hard-validated (cap, positions, no duplicates'+(mode==="gpp"&&c.sport==="NFL"?", QB stacks":"")+').</p>' +
+  expHtml +
   res.lineups.map(function(lu, i){
     var totS = OPT.salary(lu), totP = OPT.proj(lu), totC = OPT.ceil(lu);
     var rows = lu.map(function(e){

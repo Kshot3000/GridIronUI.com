@@ -33,6 +33,7 @@ node tests/test-odds.js       # odds logic tests
 node tests/test-odds-slip.js  # bet-slip math tests
 node tests/test-odds-slip-dom.js  # bet-slip DOM wiring tests
 node tests/test-dfs.js        # DFS optimizer tests
+node tests/test-dfs-exposure.js  # DFS exposure summary tests
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 ```
 
