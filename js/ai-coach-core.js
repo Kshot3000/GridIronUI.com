@@ -155,32 +155,130 @@ function nanoSystemPrompt(ctx){
 function tryJson(s){
   try{ return JSON.parse(s); }catch(e){ return null; }
 }
-function parseDirectiveJson(raw){
-  var d = tryJson(raw);
-  if(d && typeof d === "object" && typeof d.action === "string") return d;
-  var repaired = String(raw).replace(/,\s*([}\]])/g, "$1");
-  d = tryJson(repaired);
-  if(d && typeof d === "object" && typeof d.action === "string") return d;
+function asDirective(d){
+  if(d && typeof d === "object" && typeof d.action === "string" &&
+     ACTIONS.indexOf(d.action) !== -1) return d;
   return null;
 }
+/* Strip // and block comments that models sometimes leave inside the fence.
+   String-aware so http:// and apostrophes inside quotes survive. */
+function stripJsonComments(s){
+  var out="", i=0, n=s.length, inStr=false, q="";
+  while(i<n){
+    var c=s[i];
+    if(inStr){
+      out+=c;
+      if(c==="\\" && i+1<n){ out+=s[i+1]; i+=2; continue; }
+      if(c===q) inStr=false;
+      i++; continue;
+    }
+    if(c==='"'||c==="'"){ inStr=true; q=c; out+=c; i++; continue; }
+    if(c==="/" && i+1<n && s[i+1]==="/"){ while(i<n && s[i]!=="\n") i++; continue; }
+    if(c==="/" && i+1<n && s[i+1]==="*"){ i+=2; while(i+1<n && !(s[i]==="*" && s[i+1]==="/")) i++; i+=2; continue; }
+    out+=c; i++;
+  }
+  return out;
+}
+/* Quote unquoted object keys: {action:"build_lineup"} -> {"action":"build_lineup"} */
+function quoteKeys(s){
+  return s.replace(/([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)/g, '$1"$2"$3');
+}
+/* Convert single-quoted strings to double-quoted */
+function singleToDouble(s){
+  return s.replace(/'([^'\\\n]*(?:\\.[^'\\\n]*)*)'/g, function(m, inner){
+    return '"'+inner.replace(/\\'/g,"'")+'"';
+  });
+}
+function parseDirectiveJson(raw){
+  var s = String(raw==null?"":raw).trim();
+  if(!s) return null;
+  var d = asDirective(tryJson(s));
+  if(d) return d;
+  /* largest {...} span — handles prose accidentally left inside the fence */
+  var a=s.indexOf("{"), b=s.lastIndexOf("}");
+  var core = (a!==-1 && b>a) ? s.slice(a, b+1) : s;
+  var noComment = stripJsonComments(core);
+  var candidates = [
+    core.replace(/,\s*([}\]])/g, "$1"),
+    quoteKeys(noComment).replace(/,\s*([}\]])/g, "$1"),
+    singleToDouble(quoteKeys(noComment)).replace(/,\s*([}\]])/g, "$1")
+  ];
+  for(var i=0;i<candidates.length;i++){
+    d = asDirective(tryJson(candidates[i]));
+    if(d) return d;
+  }
+  return null;
+}
+/* Fences: ```gridiron (closed or unclosed — small models run out of tokens),
+   plus ```json / bare ``` fences that contain a recognizable action. */
+var FENCE_RES = [
+  /```gridiron[ \t]*\r?\n([\s\S]*?)(?:```|$)/g,
+  /```(?:json)?[ \t]*\r?\n([\s\S]*?)(?:```|$)/g
+];
 function extractDirectivesLenient(text){
-  var out = [], re = /```gridiron\s*\n([\s\S]*?)```/g, m;
-  while((m = re.exec(text)) !== null){
-    var raw = m[1].trim();
-    if(!raw) continue;
-    var d = parseDirectiveJson(raw);
-    if(d) out.push(d);
+  var out = [], seen = {}, t = String(text==null?"":text), ri, m, raw, d, key;
+  for(ri=0; ri<FENCE_RES.length; ri++){
+    var re = new RegExp(FENCE_RES[ri].source, "g");
+    while((m = re.exec(t)) !== null){
+      if(m[0].length===0) break;
+      raw = m[1].trim();
+      if(!raw) continue;
+      d = (ri===0) ? parseDirectiveJson(raw) : (asDirective(tryJson(raw)) || parseDirectiveJson(raw));
+      if(d){
+        key = d.action+JSON.stringify(d);
+        if(!seen[key]){ seen[key]=1; out.push(d); }
+      }
+    }
   }
   return out;
 }
 function findMalformedDirectives(text){
-  var bad = [], re = /```gridiron\s*\n([\s\S]*?)```/g, m;
-  while((m = re.exec(text)) !== null){
-    var raw = m[1].trim();
+  var bad = [], t = String(text==null?"":text), m, raw;
+  var re = /```gridiron[ \t]*\r?\n([\s\S]*?)(?:```|$)/g;
+  while((m = re.exec(t)) !== null){
+    if(m[0].length===0) break;
+    raw = m[1].trim();
     if(!raw) continue;
     if(!parseDirectiveJson(raw)) bad.push(raw.slice(0,120));
   }
   return bad;
+}
+/* Last-resort intent recovery: the model clearly meant to act but the fence
+   was unsalvageable. Rebuild the directive from the user + reply text so the
+   optimizer still runs instead of asking the user to rephrase. Conservative:
+   only fires on explicit build/compare intent, and validateAction is the
+   final gate (names are matched against the real pool). */
+function salvageIntent(replyText, userText, pool){
+  pool = pool||[];
+  var t = String(userText==null?"":userText)+"\n"+String(replyText==null?"":replyText);
+  var low = t.toLowerCase();
+  if(/\b(build|generat|creat|make|give me|run)\b/.test(low) &&
+     /\b(lineups?|rosters?|teams?|entries?)\b/.test(low)){
+    var mode = /\b(cash|double[\s-]?up|fifty\/fifty|50\/50)\b/.test(low) ? "cash" : "gpp";
+    var m = low.match(/(\d{1,2})\s*(lineups?|rosters?|teams?|entries?)/) ||
+            low.match(/\b(\d{1,2})\s*(cash|gpp)\b/);
+    var n = m ? Math.min(20, Math.max(1, parseInt(m[1],10))) : 1;
+    var d = { action:"build_lineup", mode:mode, num_lineups:n,
+              locks:[], excludes:[], stacks:[] };
+    var sm = t.match(/\b([A-Za-z]{2,3})\s+stack\b/i);
+    if(sm) d.stacks = [{ team: sm[1].toUpperCase() }];
+    if(validateAction(d, pool).ok) return d;
+    d.stacks = [];
+    if(validateAction(d, pool).ok) return d;
+    return null;
+  }
+  if(/\bcompar/.test(low) && pool.length){
+    var names = [];
+    pool.forEach(function(p){
+      if(low.indexOf(String(p.name).toLowerCase())!==-1 && names.indexOf(p.name)===-1)
+        names.push(p.name);
+    });
+    if(names.length>=2){
+      var d2 = { action:"compare", players:names.slice(0,4) };
+      if(validateAction(d2, pool).ok) return d2;
+    }
+  }
+  return null;
 }
 
 /* ---------- credits / rate-limit detection ----------
@@ -318,7 +416,8 @@ function systemPrompt(ctx){
 "5. When the user wants lineups built, comparisons, or a pick explained, end your reply with one or more fenced directive blocks like:\n"+
 "```gridiron\n{\"action\":\"build_lineup\",\"mode\":\"gpp\",\"num_lineups\":3,\"locks\":[],\"excludes\":[],\"stacks\":[{\"team\":\"KC\"}],\"max_exposure\":60}\n```\n"+
 "Actions: build_lineup {mode: cash|gpp, num_lineups 1-20, locks [{name, slot?}], excludes [names], stacks [{team}], max_exposure 0-100}; set_exposure {player, pct 0-100}; compare {players: [2+ names]}; explain_pick {player}. "+
-"Put prose OUTSIDE the blocks — the app parses and executes them. Only use exact player names from the pool.\n"+
+"Put prose OUTSIDE the blocks — the app parses and executes them. Only use exact player names from the pool. "+
+"Inside the fence: STRICT JSON only — double quotes, no comments, no trailing commas, no prose.\n"+
 "6. You may suggest strategy (stacks, leverage, chalk) but label optimizer outputs as optimizer outputs.");
 }
 
@@ -328,6 +427,8 @@ var api = {
   extractDirectives: extractDirectives,
   extractDirectivesLenient: extractDirectivesLenient,
   findMalformedDirectives: findMalformedDirectives,
+  parseDirectiveJson: parseDirectiveJson,
+  salvageIntent: salvageIntent,
   buildPromptContext: buildPromptContext,
   buildNanoContext: buildNanoContext,
   nanoSystemPrompt: nanoSystemPrompt,

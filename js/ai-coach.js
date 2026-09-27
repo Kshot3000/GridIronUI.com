@@ -668,16 +668,24 @@ function explainPick(p){
   return out;
 }
 
-function executeDirectives(text, hostEl){
-  /* lenient parse: Nano is a small model and may emit slightly-off JSON */
+function executeDirectives(text, hostEl, userText){
+  /* lenient parse: small models may emit slightly-off JSON */
   var blocks = CORE.extractDirectivesLenient(text);
   if(!blocks.length){
-    /* no parseable directives — but did it *try* and garble one? ask, don't fail */
-    var malformed = CORE.findMalformedDirectives(text);
-    if(malformed.length){
-      addMsg("grid", "I tried to run that as an optimizer action, but the instruction came out garbled on my end — could you say it again in different words?");
+    /* the model meant to act but the fence was unsalvageable — rebuild the
+       intent from the conversation so the optimizer still runs */
+    var salvaged = (typeof CORE.salvageIntent==="function")
+      ? CORE.salvageIntent(text, userText, pool) : null;
+    if(salvaged){
+      blocks = [salvaged];
+    } else {
+      /* no parseable directives — but did it *try* and garble one? ask, don't fail */
+      var malformed = CORE.findMalformedDirectives(text);
+      if(malformed.length){
+        addMsg("grid", "I tried to run that as an optimizer action, but the instruction came out garbled on my end — could you say it again in different words?");
+      }
+      return;
     }
-    return;
   }
   var c = cfg();
   blocks.forEach(function(d){
@@ -812,15 +820,15 @@ function send(prefill, skipEcho){
     body.innerHTML = fmtText(vis) || '<span class="typing"><span></span><span></span><span></span></span>';
     scrollChat();
   }
-  function onDone(text){
+  function onDone(aiText){
     busy = false; $("sendBtn").disabled = false;
     setFace("idle");
     bubble.classList.remove("streaming");
-    history.push({role:"assistant", content:text});
+    history.push({role:"assistant", content:aiText});
     if(history.length>22) history = history.slice(-22);
-    var vis = stripDirectives(text).trim();
+    var vis = stripDirectives(aiText).trim();
     body.innerHTML = vis ? fmtText(vis) : '<i style="color:var(--faint)">Grid ran the optimizer below.</i>';
-    executeDirectives(text, body);
+    executeDirectives(aiText, body, text);
     scrollChat();
   }
   function onFail(err){

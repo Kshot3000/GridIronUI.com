@@ -144,5 +144,41 @@ ok("systemPrompt: names Grid and rules",
   sp.indexOf("Grid")!==-1 && sp.indexOf("NEVER invent")!==-1 && sp.indexOf("```gridiron")!==-1);
 ok("systemPrompt: no-guarantee rule", sp.toLowerCase().indexOf("never guarantee")!==-1);
 
+
+/* ---- hardened directive parsing (free API models) ---- */
+var h1 = C.parseDirectiveJson('{action:"build_lineup",mode:"cash",num_lineups:1,}');
+ok("hardened: unquoted keys + trailing comma", !!h1 && h1.action==="build_lineup" && h1.mode==="cash");
+var h2 = C.parseDirectiveJson("{'action':'compare','players':['A','B']}");
+ok("hardened: single quotes", !!h2 && h2.action==="compare" && h2.players.length===2);
+var h3 = C.parseDirectiveJson('{"action":"build_lineup", // build it\n"mode":"gpp"}');
+ok("hardened: // comment stripped", !!h3 && h3.action==="build_lineup" && h3.mode==="gpp");
+var h4 = C.parseDirectiveJson('Here is your block:\n{"action":"explain_pick","player":"A"}\nHope that helps!');
+ok("hardened: prose around JSON salvaged", !!h4 && h4.action==="explain_pick");
+var h5 = C.extractDirectivesLenient('ok\n```gridiron\n{"action":"build_lineup","num_lineups":2}');
+ok("hardened: unclosed fence still parsed", h5.length===1 && h5[0].action==="build_lineup");
+var h6 = C.extractDirectivesLenient('ok\n```json\n{"action":"compare","players":["A","B"]}\n```');
+ok("hardened: ```json fence with action accepted", h6.length===1 && h6[0].action==="compare");
+var h7 = C.extractDirectivesLenient('Here is {"a":1} some json but no action\n```gridiron\n{"action":"build_lineup"}\n```');
+ok("hardened: no duplicate blocks across fence types", h7.length===1);
+ok("hardened: unknown action rejected", C.parseDirectiveJson('{"action":"fly_to_moon"}')===null);
+ok("hardened: garbage still null", C.parseDirectiveJson('not json at all')===null);
+
+/* ---- intent salvage ---- */
+var pool2 = mkPool(8);
+var s1 = C.salvageIntent("On it — building now!", "Build me 3 cash lineups", pool2);
+ok("salvage: build 3 cash", !!s1 && s1.action==="build_lineup" && s1.num_lineups===3 && s1.mode==="cash");
+var poolKC = [{ id:1, name:"QbOne", team:"KC", pos:["QB"], salary:8000, proj:20, floor:10, ceil:30, own:5 }];
+var s2 = C.salvageIntent("Sure, generating your GPP teams with a KC stack.", "make me 2 gpp lineups", poolKC);
+ok("salvage: 2 gpp + KC stack", !!s2 && s2.num_lineups===2 && s2.mode==="gpp" &&
+   s2.stacks.length===1 && s2.stacks[0].team==="KC");
+var s2b = C.salvageIntent("with a T1 stack", "make me 2 gpp lineups", pool2);
+ok("salvage: invalid stack dropped, build still runs", !!s2b && s2b.num_lineups===2 && s2b.stacks.length===0);
+var s3 = C.salvageIntent("Both are solid.", "Compare Player1 vs Player2", pool2);
+ok("salvage: compare two pool names", !!s3 && s3.action==="compare" && s3.players.length===2);
+var s4 = C.salvageIntent("Josh Allen looks great this week.", "Who is the best QB?", pool2);
+ok("salvage: no build intent → null", s4===null);
+var s5 = C.salvageIntent("Building!", "Build me 99 lineups", pool2);
+ok("salvage: lineup count capped at 20", !!s5 && s5.num_lineups===20);
+
 console.log(fails ? ("\n"+fails+" FAILURES") : "\nALL PASS");
 process.exit(fails ? 1 : 0);
