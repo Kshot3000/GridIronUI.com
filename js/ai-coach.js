@@ -242,70 +242,154 @@ function exampleChips(){
 }
 
 /* ---------- LLM provider chain ----------
-   Order: Pollinations free tier (keyless, verified working + CORS-open) →
-   your optional Gemini key (only if you pasted one) → on-device browser AI
-   (only if the browser reports one available) → honest failure message.
+   1. Chrome/Edge built-in on-device AI (Gemini Nano) — primary, keyless.
+   2. The visitor's optional free Gemini key (only if they pasted one).
+   3. An honest failure state naming both options — never a fake reply,
+      never an endless spinner.
    The status pill always shows which provider actually answered. */
 var GEMINI_KEY_LS = "giu_gemini_key";
 function getGeminiKey(){ try{ return (localStorage.getItem(GEMINI_KEY_LS)||"").trim(); }catch(e){ return ""; } }
 function providerStatus(html){ var el=$("providerStatus"); if(el) el.innerHTML = html; }
 
-function pollinationsGET(messages){
-  var prompt = messages.map(function(m){ return m.role.toUpperCase()+": "+m.content; }).join("\n\n");
-  return fetch("https://text.pollinations.ai/"+encodeURIComponent(prompt.slice(0,6000)))
-    .then(function(res){
-      if(!res.ok) throw { code:"http", message:"The free API returned HTTP "+res.status+"." };
-      return res.text();
-    });
+/* ----- Nano (on-device) session management ----- */
+var nanoSession = null, nanoSessionKey = null, nanoAvailability = "unknown";
+var nanoBannerDismissed = false, pendingAfterDownload = null;
+function nanoApi(){
+  return window.LanguageModel || (window.ai && window.ai.languageModel) || null;
 }
-function pollinationsStream(messages, model, onToken){
+function checkNanoAvailability(){
+  var LM = nanoApi();
+  if(!LM || typeof LM.availability !== "function")
+    return Promise.resolve("unsupported");
+  var p;
+  try{
+    p = LM.availability({ expectedOutputs:[{ type:"text", languages:["en"] }] });
+  }catch(e){
+    nanoAvailability = "unavailable";
+    return Promise.resolve("unavailable");
+  }
+  return Promise.resolve(p).then(function(av){
+    nanoAvailability = av || "unavailable";
+    return nanoAvailability;
+  }, function(){
+    nanoAvailability = "unavailable";
+    return "unavailable";
+  });
+}
+function dropNanoSession(){
+  if(nanoSession && typeof nanoSession.destroy === "function"){
+    try{ nanoSession.destroy(); }catch(e){}
+  }
+  nanoSession = null; nanoSessionKey = null;
+}
+function getNanoSession(){
+  /* one persistent session per pool/config; the session itself holds the
+     conversation, so each turn only sends the latest user message */
+  var key = cfgKey()+"|"+settings.mode+"|"+pool.length;
+  if(nanoSession && nanoSessionKey===key) return Promise.resolve(nanoSession);
+  dropNanoSession();
+  var LM = nanoApi();
+  var ctx = CORE.buildNanoContext(cfg(), pool, {mode: settings.mode});
+  return LM.create({ systemPrompt: CORE.nanoSystemPrompt(ctx) }).then(function(s){
+    nanoSession = s; nanoSessionKey = key;
+    return s;
+  });
+}
+function streamNano(session, userText, onToken){
   return new Promise(function(resolve, reject){
-    var ctrl;
-    try{ ctrl = new AbortController(); }catch(e){ ctrl = null; }
-    var to = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 120000);
-    var full = "", gotToken = false, settled = false;
-    function done(t){ if(settled) return; settled = true; clearTimeout(to); resolve(t); }
-    function fail(e){ if(settled) return; settled = true; clearTimeout(to); reject(e); }
-    function getFallback(){
-      pollinationsGET(messages).then(function(t){ onToken(t); done(t); }, fail);
+    var full = "";
+    var stream;
+    try{
+      if(typeof session.promptStreaming !== "function") throw new Error("no-stream");
+      stream = session.promptStreaming(userText);
+    }catch(e){
+      session.prompt(userText).then(function(out){
+        var t = String(out==null?"":out); onToken(t); resolve(t);
+      }, reject);
+      return;
     }
-    var fetchOpts = {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ messages: messages, model: CORE.modelId(model), stream:true })
-    };
-    if(ctrl) fetchOpts.signal = ctrl.signal;
-    fetch("https://text.pollinations.ai/", fetchOpts).then(function(res){
-      if(res.status===404 || res.status===400){
-        return res.text().then(function(){
-          fail({ code:"model_unavailable", message:"Model '"+model+"' isn't served by the free API right now ("+res.status+")." });
+    var reader = stream.getReader();
+    (function pump(){
+      reader.read().then(function(r){
+        if(r.done){ resolve(full); return; }
+        var chunk = String(r.value==null?"":r.value);
+        full += chunk; onToken(chunk);
+        pump();
+      }, reject);
+    })();
+  });
+}
+function nanoRun(userText, onToken){
+  return checkNanoAvailability().then(function(av){
+    if(av === "available"){
+      return getNanoSession().then(function(session){
+        return streamNano(session, userText, onToken).then(function(t){
+          if(!t || !t.trim()) throw { code:"nano_empty", message:"the on-device model returned nothing" };
+          return t;
         });
-      }
-      if(!res.ok){
-        return res.text().then(function(t){
-          fail({ code:"http", message:"The free API returned HTTP "+res.status+". "+String(t||"").slice(0,140) });
-        });
-      }
-      if(!res.body || !res.body.getReader()){
-        return res.text().then(function(t){ done(t); });
-      }
-      var reader = res.body.getReader(), dec = new TextDecoder(), buf = "";
-      (function pump(){
-        reader.read().then(function(r){
-          if(r.done){ done(full); return; }
-          buf += dec.decode(r.value, {stream:true});
-          var lines = buf.split("\n"); buf = lines.pop();
-          lines.forEach(function(line){
-            line = line.trim();
-            if(line.indexOf("data:")!==0) return;
-            var piece = CORE.extractStreamContent(line.slice(5).trim());
-            if(piece){ full += piece; gotToken = true; onToken(piece); }
-          });
-          pump();
-        }).catch(function(){ if(gotToken) done(full); else getFallback(); });
-      })();
-      return null;
-    }).catch(function(){ getFallback(); });
+      });
+    }
+    if(av === "downloadable" || av === "downloading")
+      throw { code:"nano_download", availability: av,
+              message:"on-device model is '"+av+"' — needs a one-time download first" };
+    throw { code:"nano_unavailable",
+            message: av==="unsupported"
+              ? "this browser has no built-in AI (needs Chrome/Edge 138+ on desktop)"
+              : "on-device AI is '"+av+"'" };
+  });
+}
+
+/* ----- one-time model download banner ----- */
+function showNanoBanner(){
+  var b = $("nanoBanner");
+  if(!b || nanoBannerDismissed) return;
+  b.style.display = "block";
+}
+function hideNanoBanner(){ var b = $("nanoBanner"); if(b) b.style.display = "none"; }
+function maybeOfferNanoDownload(){
+  if(nanoBannerDismissed) return;
+  checkNanoAvailability().then(function(av){
+    if(av==="downloadable" || av==="downloading") showNanoBanner();
+  });
+}
+function wireNanoBanner(){
+  var btn = $("nanoDownloadBtn");
+  if(btn) btn.addEventListener("click", downloadNanoModel);
+  var x = $("nanoBannerClose");
+  if(x) x.addEventListener("click", function(){ nanoBannerDismissed = true; hideNanoBanner(); });
+}
+function downloadNanoModel(){
+  var LM = nanoApi();
+  if(!LM) return;
+  var btn = $("nanoDownloadBtn"), bar = $("nanoBar"),
+      pct = $("nanoPct"), prog = $("nanoProgress");
+  if(btn) btn.disabled = true;
+  if(prog) prog.style.display = "flex";
+  if(pct) pct.textContent = "starting…";
+  var ctx = CORE.buildNanoContext(cfg(), pool, {mode: settings.mode});
+  function onProgress(e){
+    var p = (e && e.total) ? (e.loaded/e.total) : 0;
+    if(bar) bar.style.width = Math.round(p*100)+"%";
+    if(pct) pct.textContent = Math.round(p*100)+"%";
+  }
+  LM.create({
+    systemPrompt: CORE.nanoSystemPrompt(ctx),
+    monitor: function(m){ m.addEventListener("downloadprogress", onProgress); }
+  }).then(function(session){
+    nanoSession = session;
+    nanoSessionKey = cfgKey()+"|"+settings.mode+"|"+pool.length;
+    nanoAvailability = "available";
+    hideNanoBanner();
+    providerStatus("✅ Running 100% on your device");
+    if(pendingAfterDownload){
+      var t = pendingAfterDownload; pendingAfterDownload = null;
+      send(t, true); /* user message already shown — don't echo it twice */
+    } else {
+      addMsg("grid", fmtText("The on-device model is ready — everything now runs 100% on your device. Ask me anything."));
+    }
+  }, function(){
+    if(btn) btn.disabled = false;
+    if(pct) pct.textContent = "download failed — check your connection and try again";
   });
 }
 
@@ -315,41 +399,6 @@ function geminiRun(messages, onToken){
   return CORE.geminiGenerateText(messages, getGeminiKey(), fetch).then(function(t){
     onToken(t);
     return t;
-  });
-}
-
-/* Chrome/Edge on-device AI (Prompt API). Only used when the browser itself
-   reports a model is available — never claimed otherwise. */
-function onDeviceRun(messages){
-  return new Promise(function(resolve, reject){
-    var LM = window.LanguageModel || (window.ai && window.ai.languageModel);
-    if(!LM){ reject({ code:"unavailable", message:"this browser has no on-device AI" }); return; }
-    var availP = (typeof LM.availability === "function")
-      ? LM.availability()
-      : Promise.resolve("available");
-    availP.then(function(av){
-      if(av !== "available"){
-        reject({ code:"unavailable", message:"on-device AI is '"+av+"' (needs a model download first)" });
-        return;
-      }
-      var sys = "";
-      var lastUser = "";
-      messages.forEach(function(m){
-        if(m.role==="system") sys += m.content+"\n";
-        else if(m.role==="user") lastUser = m.content;
-      });
-      LM.create(sys ? { systemPrompt: sys } : {}).then(function(session){
-        session.prompt(lastUser).then(function(out){
-          resolve(String(out==null?"":out));
-        }, function(e){
-          reject({ code:"ondevice", message:"on-device AI failed: "+String((e&&e.message)||e).slice(0,140) });
-        });
-      }, function(e){
-        reject({ code:"ondevice", message:"on-device AI failed to start: "+String((e&&e.message)||e).slice(0,140) });
-      });
-    }, function(){
-      reject({ code:"unavailable", message:"could not check on-device AI availability" });
-    });
   });
 }
 
@@ -489,8 +538,16 @@ function explainPick(p){
 }
 
 function executeDirectives(text, hostEl){
-  var blocks = CORE.extractDirectives(text);
-  if(!blocks.length) return;
+  /* lenient parse: Nano is a small model and may emit slightly-off JSON */
+  var blocks = CORE.extractDirectivesLenient(text);
+  if(!blocks.length){
+    /* no parseable directives — but did it *try* and garble one? ask, don't fail */
+    var malformed = CORE.findMalformedDirectives(text);
+    if(malformed.length){
+      addMsg("grid", "I tried to run that as an optimizer action, but the instruction came out garbled on my end — could you say it again in different words?");
+    }
+    return;
+  }
   var c = cfg();
   blocks.forEach(function(d){
     var v = CORE.validateAction(d, pool);
@@ -582,14 +639,17 @@ function executeDirectives(text, hostEl){
 }
 
 /* ---------- send ---------- */
-function send(){
+/* prefill: message text to send; skipEcho: the user message is already on screen
+   (used when resuming after the on-device model download) */
+function send(prefill, skipEcho){
   if(busy) return;
   var input = $("chatInput");
-  var text = input.value.trim();
+  var text = (prefill!=null) ? String(prefill).trim() : input.value.trim();
   if(!text) return;
-  input.value = "";
-  addMsg("user", fmtText(text));
-  var model = $("modelSel").value;
+  if(!skipEcho){
+    input.value = "";
+    addMsg("user", fmtText(text));
+  }
 
   if(!pool.length){
     /* still allow chat — the system prompt tells Grid to redirect to the DFS Lab */
@@ -598,12 +658,13 @@ function send(){
   busy = true;
   $("sendBtn").disabled = true;
   setFace("thinking");
+  /* full-context messages for the Gemini fallback (Nano uses its own session) */
   var ctx = CORE.buildPromptContext(cfg(), pool, {mode: settings.mode});
   var sys = CORE.systemPrompt(ctx);
   var msgs = [{role:"system", content:sys}];
   history.slice(-10).forEach(function(h){ msgs.push(h); });
   msgs.push({role:"user", content:text});
-  history.push({role:"user", content:text});
+  if(!skipEcho) history.push({role:"user", content:text});
 
   var bubble = addMsg("grid", '<span class="typing"><span></span><span></span><span></span></span>');
   bubble.classList.add("streaming");
@@ -635,39 +696,54 @@ function send(){
     busy = false; $("sendBtn").disabled = false;
     setFace("idle");
     bubble.classList.remove("streaming");
-    providerStatus("⚠️ all providers failed");
     var attempts = (err && err.attempts) || [];
+    var nanoDl = attempts.some(function(a){ return a.code==="nano_download"; });
+    var hasKey = !!getGeminiKey();
+    if(nanoDl && !hasKey){
+      /* the only ways forward: download the model, or paste a Gemini key */
+      pendingAfterDownload = text;
+      showNanoBanner();
+      providerStatus("💻 needs the on-device model or a Gemini key");
+      var mdDl = "**Grid needs an AI to talk to — pick either option, both are free:**\n\n" +
+        "**1. On-device AI (recommended):** hit **Download free model** above (~1.7 GB, one time). It then runs 100% on your device — private, no key, no bill.\n\n" +
+        "**2. Free Gemini key:** paste one from [AI Studio](https://aistudio.google.com/apikey) above (free tier, no credit card — it stays in your browser, only ever sent to Google).\n\n" +
+        "On-device AI needs Chrome or Edge 138+ on a desktop computer — it isn't on mobile browsers.";
+      body.innerHTML = CORE.renderRich(mdDl);
+      scrollChat();
+      return;
+    }
+    providerStatus("⚠️ all providers failed");
     var lines = attempts.map(function(a){ return "• "+a.label+" — "+a.error; });
-    var creditsHit = attempts.some(function(a){ return CORE.isCreditsError(a.error); });
+    var quotaHit = attempts.some(function(a){ return CORE.isCreditsError(a.error); });
     var md = "**Grid couldn't reach any AI provider right now.**\n\n" +
       (lines.length ? "Tried:\n"+lines.join("\n")+"\n\n" : "") +
-      (creditsHit
-        ? "The free tier looks out of credits at the moment — it usually recovers on its own, so try again in a bit.\n\n"
+      (quotaHit
+        ? "A provider hit a rate or quota limit — that usually clears on its own, so try again in a bit.\n\n"
         : "") +
-      (getGeminiKey()
-        ? "Your saved Gemini key didn't work either — double-check it at [AI Studio](https://aistudio.google.com/apikey)."
-        : "Tip: paste a free Gemini key from [AI Studio](https://aistudio.google.com/apikey) above and Grid will use it automatically whenever the free tier is busy. It stays in your browser — never sent anywhere but Google.");
+      (hasKey
+        ? "Your saved Gemini key didn't work — double-check it at [AI Studio](https://aistudio.google.com/apikey)."
+        : "Not on Chrome/Edge desktop? Paste a free Gemini key from [AI Studio](https://aistudio.google.com/apikey) above and Grid will use it automatically. It stays in your browser — never sent anywhere but Google.");
     body.innerHTML = CORE.renderRich(md);
     scrollChat();
   }
-  /* build the provider chain: keyless free tier first, then optional user key,
-     then on-device AI — whichever answers first wins, and the pill says who */
-  var models = (model==="gpt-oss") ? ["gpt-oss","openai"] : ["openai","gpt-oss"];
-  var providers = models.map(function(m){
-    return { id:"pollinations-"+m, label:"Pollinations free tier ("+m+")",
-             run:function(){ return pollinationsStream(msgs, m, onToken); } };
-  });
+  /* provider chain: on-device Nano first (keyless), then the optional
+     user-supplied Gemini key — whichever answers first wins, and the
+     pill says who. Also proactively offer the model download. */
+  maybeOfferNanoDownload();
+  var providers = [
+    { id:"nano", label:"on-device AI",
+      run:function(){ return nanoRun(text, onToken); } }
+  ];
   if(getGeminiKey()){
     providers.push({ id:"gemini-key", label:"your Gemini key",
                      run:function(){ return geminiRun(msgs, onToken); } });
   }
-  providers.push({ id:"ondevice", label:"on-device AI",
-                   run:function(){ return onDeviceRun(msgs).then(function(t){ onToken(t); return t; }); } });
 
   CORE.runProviderChain(providers, function(p){
     providerStatus("⏳ trying "+esc(p.label)+"…");
   }).then(function(res){
-    providerStatus("✅ answered by "+esc(res.provider.label));
+    if(res.provider.id==="nano") providerStatus("✅ Running 100% on your device");
+    else providerStatus("✅ Answered by Gemini (your free key)");
     onDone(res.text);
   }, function(chainErr){
     onFail(chainErr);
@@ -688,6 +764,7 @@ function wireTabs(id, key, cb){
 }
 function onCfgChange(){
   pool = loadPool();
+  dropNanoSession(); /* on-device session holds the old pool context */
   refreshPoolBar();
   var c = cfg();
   addMsg("sys", "Switched to "+c.site+" "+c.sport+" · "+(settings.mode==="cash"?"50/50 Cash":"Tournament")+". Pool: "+pool.length+" players. Cap $"+c.cap.toLocaleString()+".");
@@ -697,6 +774,7 @@ function onCfgChange(){
 $("chatForm").addEventListener("submit", function(e){ e.preventDefault(); send(); });
 $("clearBtn").addEventListener("click", function(){
   history = [];
+  dropNanoSession();
   $("chatLog").innerHTML = "";
   greeting();
 });
@@ -717,7 +795,7 @@ if(gemSave) gemSave.addEventListener("click", function(){
   if(!v){ return; }
   try{ localStorage.setItem(GEMINI_KEY_LS, v); }catch(e){}
   refreshGemUI();
-  addMsg("sys", "Gemini key saved in this browser. Grid will use it automatically whenever the free tier is busy or down.");
+  addMsg("sys", "Gemini key saved in this browser. Grid will use it automatically whenever on-device AI isn't available.");
 });
 if(gemClear) gemClear.addEventListener("click", function(){
   try{ localStorage.removeItem(GEMINI_KEY_LS); }catch(e){}
@@ -725,7 +803,9 @@ if(gemClear) gemClear.addEventListener("click", function(){
   addMsg("sys", "Gemini key removed from this browser.");
 });
 refreshGemUI();
-providerStatus("ready — free tier first");
+providerStatus("ready — on-device AI first");
+wireNanoBanner();
+maybeOfferNanoDownload();
 wireTabs("cSite","site", onCfgChange);
 wireTabs("cSport","sport", onCfgChange);
 wireTabs("cMode","mode", onCfgChange);

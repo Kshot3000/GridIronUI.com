@@ -59,6 +59,17 @@ ul.ins li{margin-bottom:4px}
 .key-row input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow)}
 .key-note{font-size:.72rem;color:var(--faint);margin-top:6px;line-height:1.5}
 .key-note a{color:var(--muted);text-decoration:underline}
+.nano-banner{position:relative;display:flex;background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(34,197,94,.03));border:1px solid var(--green);border-radius:var(--radius);padding:14px 40px 14px 16px;margin-bottom:12px}
+.nano-close{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--faint);cursor:pointer;font-size:.85rem;padding:4px}
+.nano-close:hover{color:var(--text)}
+.nano-title{font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:4px}
+.nano-text{font-size:.82rem;color:var(--muted);margin-bottom:10px;line-height:1.5}
+.nano-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.nano-progress{flex:1;min-width:140px;max-width:280px;height:22px;background:var(--bg-3);border:1px solid var(--line);border-radius:999px;position:relative;overflow:hidden;display:flex;align-items:center}
+.nano-bar{height:100%;width:0;background:linear-gradient(90deg,var(--green),#4ade80);transition:width .3s}
+.nano-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--text)}
+.nano-req{font-size:.7rem;color:var(--faint);margin-top:8px}
+@media(prefers-reduced-motion:reduce){.nano-bar{transition:none}}
 .msg.sys a{color:var(--gold);font-weight:600}
 .msg.grid a{color:var(--gold);font-weight:600}
 .typing{display:inline-block}
@@ -78,7 +89,7 @@ ul.ins li{margin-bottom:4px}
     <a class="back-link" href="dfs.html" style="position:relative;z-index:2">← DFS Lab</a>
     <span class="kicker">Conversational optimizer</span>
     <h1>AI Lineup Coach</h1>
-    <p class="lede">Meet <b>Grid</b> — talk through your slate, compare players, and have real optimizer-built lineups dealt right into the chat. Free to use, no account, powered by a community LLM.</p>
+    <p class="lede">Meet <b>Grid</b> — talk through your slate, compare players, and have real optimizer-built lineups dealt right into the chat. Free to use, no account — on Chrome/Edge desktop the AI runs 100% on your device.</p>
   </div>
 </section>
 
@@ -95,22 +106,29 @@ ul.ins li{margin-bottom:4px}
       <div class="field"><label>Site</label><div class="tabs" id="cSite" style="margin:0"><button class="tab" data-v="DK">DraftKings</button><button class="tab" data-v="FD">FanDuel</button></div></div>
       <div class="field"><label>Sport</label><div class="tabs" id="cSport" style="margin:0"><button class="tab" data-v="NFL">NFL</button><button class="tab" data-v="NBA">NBA</button></div></div>
       <div class="field"><label>Contest</label><div class="tabs" id="cMode" style="margin:0"><button class="tab" data-v="cash">50/50 Cash</button><button class="tab" data-v="gpp">Tournament</button></div></div>
-      <div class="field"><label>AI model (free)</label>
-        <select id="modelSel">
-          <option value="openai" selected>openai — gpt-oss-20b, default</option>
-          <option value="gpt-oss">gpt-oss — alternate free model</option>
-        </select>
-      </div>
-      <div class="field"><label>Provider status</label>
+      <div class="field"><label>AI provider</label>
         <div class="provider-status" id="providerStatus">—</div>
       </div>
-      <div class="field key-field"><label>Gemini key <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+      <div class="field key-field"><label>Paste your free Gemini key <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
         <div class="key-row">
           <input id="gemKey" type="password" placeholder="Paste AI Studio key" autocomplete="off" aria-label="Gemini API key">
           <button class="btn btn-sm" type="button" id="gemSave">Save</button>
           <button class="btn btn-sm" type="button" id="gemClear" title="Remove saved key">✕</button>
         </div>
-        <div class="key-note"><span id="gemState">not set</span> · free key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> — stays in your browser, only ever sent to Google. Used automatically when the free tier is busy.</div>
+        <div class="key-note"><span id="gemState">not set</span> · free key (no credit card) from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> — stays in this browser, only ever sent to Google. Google may use free-tier data to improve its products. Used automatically when on-device AI isn't available.</div>
+      </div>
+    </div>
+
+    <div class="nano-banner" id="nanoBanner" style="display:none">
+      <button class="nano-close" id="nanoBannerClose" type="button" aria-label="Dismiss">✕</button>
+      <div class="nano-body">
+        <div class="nano-title">💻 Run Grid 100% on your device</div>
+        <div class="nano-text" id="nanoBannerText">Your browser can download the free on-device AI model (~1.7 GB, one time) — then Grid answers privately, with no key and no bill.</div>
+        <div class="nano-actions">
+          <button class="btn btn-green btn-sm" type="button" id="nanoDownloadBtn">Download free model (~1.7 GB, once)</button>
+          <div class="nano-progress" id="nanoProgress" style="display:none"><div class="nano-bar" id="nanoBar"></div><span class="nano-pct" id="nanoPct"></span></div>
+        </div>
+        <div class="nano-req">Chrome/Edge 138+ on desktop (Windows/macOS/Linux) · decent hardware · ~22 GB free disk · not on mobile</div>
       </div>
     </div>
 
@@ -124,7 +142,7 @@ ul.ins li{margin-bottom:4px}
         <button class="btn btn-sm" type="button" id="clearBtn" title="Clear chat">Clear</button>
       </div>
     </form>
-    <p class="caption">Grid tries providers in order: the free <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations</a> tier (no key needed), your optional Gemini key, then on-device browser AI if available. The status pill above always shows which provider actually answered. Lineups are optimizer outputs built from your own editable projections in the <a href="dfs.html">DFS Lab</a>, not predictions — nothing here guarantees wins. Never wager more than you can afford to lose.</p>
+    <p class="caption">Grid answers with on-device AI first (Chrome/Edge desktop — free, private, no key), then your optional free Gemini key if you saved one. The status pill above always shows which provider actually answered. If neither is available, Grid says so plainly and offers both options — never a fake reply. Lineups are optimizer outputs built from your own editable projections in the <a href="dfs.html">DFS Lab</a>, not predictions — nothing here guarantees wins. Never wager more than you can afford to lose.</p>
   </div>
 </div>
 

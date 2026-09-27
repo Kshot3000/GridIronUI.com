@@ -161,13 +161,25 @@ ok("directives: still parsed", d.length===1 && d[0].action==="build_lineup" && d
 ok("directives: json fence not executed",
   C.extractDirectives('```json\n{"action":"build_lineup"}\n```').length===0);
 
-/* ---- model mapping: only verified models ---- */
-ok("models: openai maps", C.modelId("openai")==="openai");
-ok("models: gpt-oss maps", C.modelId("gpt-oss")==="gpt-oss");
-ok("models: dead models fall back to openai",
-  C.modelId("mistral")==="openai" && C.modelId("llama")==="openai" && C.modelId("deepseek")==="openai");
-ok("models: pollinations list has no dead models",
-  C.POLLINATIONS_MODELS.indexOf("mistral")===-1 && C.POLLINATIONS_MODELS.length>=2);
+/* ---- provider chain: Nano primary, Gemini key fallback, no Pollinations ---- */
+ok("chain: no pollinations models or mapping exported",
+  C.modelId===undefined && C.POLLINATIONS_MODELS===undefined);
+ok("chain: nano context builder exported",
+  typeof C.buildNanoContext==="function" && typeof C.nanoSystemPrompt==="function");
+ok("chain: lenient directive tools exported",
+  typeof C.extractDirectivesLenient==="function" && typeof C.findMalformedDirectives==="function");
+
+asyncTest("chain: error codes recorded (nano_download case)", function(){
+  return C.runProviderChain([
+    { id:"nano", label:"on-device AI",
+      run: function(){ return Promise.reject({ code:"nano_download", message:"needs download" }); } },
+    { id:"gemini-key", label:"your Gemini key", run: mkRun("gemini says hi") }
+  ]).then(function(res){
+    if(res.provider.id!=="gemini-key") throw new Error("gemini should win after nano_download");
+    if(res.attempts.length!==1) throw new Error("attempts missing");
+    if(res.attempts[0].code!=="nano_download") throw new Error("code not recorded: "+JSON.stringify(res.attempts[0]));
+  });
+});
 
 /* ---- nav + links (read the shipped files) ---- */
 var root = path.join(__dirname, "..");
@@ -181,7 +193,12 @@ var coachHtml = fs.readFileSync(path.join(root, "ai-coach.html"), "utf8");
 ok("html: back link points to dfs.html", coachHtml.indexOf('href="dfs.html"')!==-1);
 ok("html: no dead model options",
   coachHtml.indexOf('value="mistral"')===-1 && coachHtml.indexOf('value="llama"')===-1 &&
-  coachHtml.indexOf('value="deepseek"')===-1);
+  coachHtml.indexOf('value="deepseek"')===-1 && coachHtml.indexOf('id="modelSel"')===-1);
+ok("html: nano download banner present",
+  coachHtml.indexOf('id="nanoBanner"')!==-1 && coachHtml.indexOf('id="nanoDownloadBtn"')!==-1 &&
+  coachHtml.indexOf("1.7 GB")!==-1);
+ok("html: honest Gemini caption (free tier, data use)",
+  coachHtml.indexOf("may use free-tier data")!==-1);
 ok("html: provider status pill present", coachHtml.indexOf('id="providerStatus"')!==-1);
 ok("html: gemini key UI present",
   coachHtml.indexOf('id="gemKey"')!==-1 && coachHtml.indexOf('id="gemSave"')!==-1 &&
@@ -206,7 +223,13 @@ ok("links: no page references dfs-lab.html ("+allHtml.length+" html files scanne
 
 var coachJs = fs.readFileSync(path.join(root, "js", "ai-coach.js"), "utf8");
 ok("js: no hardcoded API keys", !/sk-[A-Za-z0-9]{8,}/.test(coachJs));
-ok("js: pollinations host present", coachJs.indexOf("text.pollinations.ai")!==-1);
+ok("js: pollinations fully removed", coachJs.toLowerCase().indexOf("pollinations")===-1);
+ok("js: nano provider first in chain",
+  coachJs.indexOf('id:"nano"')!==-1 && coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"gemini-key"'));
+ok("js: downloadprogress monitor wired",
+  coachJs.indexOf("downloadprogress")!==-1 && coachJs.indexOf("LM.create(")!==-1);
+ok("js: on-device badge text", coachJs.indexOf("Running 100% on your device")!==-1);
+ok("js: gemini badge text", coachJs.indexOf("Answered by Gemini (your free key)")!==-1);
 ok("js: chain uses CORE.runProviderChain", coachJs.indexOf("runProviderChain")!==-1);
 ok("js: failures render via CORE.renderRich", coachJs.indexOf("CORE.renderRich")!==-1);
 ok("js: provider status always updated", coachJs.indexOf("providerStatus(")!==-1);

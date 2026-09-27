@@ -100,9 +100,33 @@ ok("validate: good explain_pick", v3.ok===true && v3.player.name==="Saquon Barkl
 ok("validate: explain_pick unknown rejected",
   C.validateAction({action:"explain_pick", player:"Nobody"}, pool).ok===false);
 
-/* ---- model mapping ---- */
-ok("model: openai maps", C.modelId("openai")==="openai");
-ok("model: unknown falls back to openai", C.modelId("gpt-99")==="openai");
+/* ---- Nano (on-device) context: small model, tight prompt ---- */
+ok("nano: NANO_MAX_POOL is 25", C.NANO_MAX_POOL===25);
+var nanoPool = mkPool(40);
+var nctx = C.buildNanoContext(CFG, nanoPool, {mode:"gpp"});
+ok("nano: truncates to 25", nctx.shown===25 && nctx.total===40 && nctx.truncated===true);
+ok("nano: sorted by projection", nctx.text.indexOf("Player1|")!==-1 && nctx.text.indexOf("Player40|")===-1);
+ok("nano: terse pipe format", /Player1\|T0\|QB\|\$7000\|20\.0\/10\.0\/30\.0\|5\.0%/.test(nctx.text));
+ok("nano: gpp mode in header", nctx.text.indexOf("GPP")!==-1);
+var nsp = C.nanoSystemPrompt(nctx);
+ok("nanoSystemPrompt: short, names Grid, has directive example",
+  nsp.length < 2500 && nsp.indexOf("Grid")!==-1 && nsp.indexOf("```gridiron")!==-1);
+ok("nanoSystemPrompt: never-invent rule", nsp.toLowerCase().indexOf("never invent")!==-1);
+ok("nanoSystemPrompt: not-a-prediction rule", nsp.toLowerCase().indexOf("not predictions")!==-1);
+
+/* ---- lenient directive parsing (for small on-device models) ---- */
+var lz = C.extractDirectivesLenient('ok\n```gridiron\n{"action":"build_lineup","mode":"gpp","num_lineups":2,}\n```');
+ok("lenient: trailing comma repaired", lz.length===1 && lz[0].action==="build_lineup");
+var lz2 = C.extractDirectivesLenient('ok\n```gridiron\n{"action":"compare","players":["A","B"]}\n```');
+ok("lenient: valid block still parses", lz2.length===1 && lz2[0].action==="compare");
+ok("lenient: garbage block skipped",
+  C.extractDirectivesLenient('```gridiron\nnot json at all\n```').length===0);
+ok("malformed: garbled block detected",
+  C.findMalformedDirectives('```gridiron\nnot json at all\n```').length===1);
+ok("malformed: valid block not flagged",
+  C.findMalformedDirectives('```gridiron\n{"action":"build_lineup"}\n```').length===0);
+ok("malformed: repairable block not flagged",
+  C.findMalformedDirectives('```gridiron\n{"action":"build_lineup",}\n```').length===0);
 
 /* ---- SSE extraction ---- */
 ok("extractStreamContent: content delta",

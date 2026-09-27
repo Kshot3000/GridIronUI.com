@@ -109,10 +109,79 @@ function validateAction(d, pool){
   return { ok:false, error:"Unhandled action." };
 }
 
-/* ---------- model mapping (only models verified working anonymously) ---------- */
-var MODEL_IDS = { openai:"openai", "gpt-oss":"gpt-oss" };
-function modelId(name){ return MODEL_IDS[name] || "openai"; }
-var POLLINATIONS_MODELS = ["openai", "gpt-oss"];
+/* ---------- Nano (on-device) context ----------
+   Gemini Nano is a small model: keep the pool tight (top 25) and fields terse. */
+var NANO_MAX_POOL = 25;
+function nanoNum(v){ return (v==null||!isFinite(v)) ? "?" : (+v).toFixed(1); }
+function buildNanoContext(cfg, pool, opts){
+  opts = opts||{};
+  var mode = opts.mode || "gpp";
+  var sorted = (pool||[]).slice().sort(function(a,b){ return (b.proj||0)-(a.proj||0); });
+  var truncated = sorted.length > NANO_MAX_POOL;
+  var top = sorted.slice(0, NANO_MAX_POOL);
+  var lines = top.map(function(p){
+    return [p.name, p.team, (p.pos||[]).join("/"), "$"+p.salary,
+            nanoNum(p.proj)+"/"+nanoNum(p.floor)+"/"+nanoNum(p.ceil),
+            nanoNum(p.own)+"%"].join("|");
+  });
+  return {
+    text:
+      (cfg.site==="DraftKings"?"DK":"FD")+" "+cfg.sport+" "+
+      (mode==="cash"?"cash":"GPP")+" cap $"+cfg.cap.toLocaleString()+
+      " slots "+cfg.slots.join(",")+"\n"+
+      "POOL top "+top.length+" of "+sorted.length+" by proj (name|team|pos|$sal|proj/floor/ceil|own%):\n"+
+      lines.join("\n")+
+      (truncated ? "\n[truncated]" : ""),
+    shown: top.length, total: sorted.length, truncated: truncated
+  };
+}
+function nanoSystemPrompt(ctx){
+  return (
+"You are Grid, a DraftKings/FanDuel DFS lineup coach. Be short and conversational.\n"+
+"POOL:\n"+ctx.text+"\n"+
+"RULES: Only name players from the POOL. Never invent names, teams or salaries. "+
+"Lineups come from a rules-based optimizer using the user's own projections; they are NOT predictions and NEVER guarantee wins. "+
+"If the pool is empty, say to load the demo slate or upload a CSV in the DFS Lab (dfs.html). "+
+"To act, end your reply with a fenced block:\n"+
+"```gridiron\n{\"action\":\"build_lineup\",\"mode\":\"gpp\",\"num_lineups\":3,\"locks\":[],\"excludes\":[],\"stacks\":[{\"team\":\"KC\"}],\"max_exposure\":60}\n```\n"+
+"Actions: build_lineup, set_exposure {player,pct}, compare {players:[2+]}, explain_pick {player}. "+
+"Use exact pool names. Prose outside blocks.");
+}
+
+/* ---------- lenient directive parsing (for small on-device models) ----------
+   Nano is weaker at strict JSON. Try strict first, then safe repairs
+   (trailing commas). findMalformedDirectives reports fences that still fail,
+   so the chat can ask a clarifying question instead of failing silently. */
+function tryJson(s){
+  try{ return JSON.parse(s); }catch(e){ return null; }
+}
+function parseDirectiveJson(raw){
+  var d = tryJson(raw);
+  if(d && typeof d === "object" && typeof d.action === "string") return d;
+  var repaired = String(raw).replace(/,\s*([}\]])/g, "$1");
+  d = tryJson(repaired);
+  if(d && typeof d === "object" && typeof d.action === "string") return d;
+  return null;
+}
+function extractDirectivesLenient(text){
+  var out = [], re = /```gridiron\s*\n([\s\S]*?)```/g, m;
+  while((m = re.exec(text)) !== null){
+    var raw = m[1].trim();
+    if(!raw) continue;
+    var d = parseDirectiveJson(raw);
+    if(d) out.push(d);
+  }
+  return out;
+}
+function findMalformedDirectives(text){
+  var bad = [], re = /```gridiron\s*\n([\s\S]*?)```/g, m;
+  while((m = re.exec(text)) !== null){
+    var raw = m[1].trim();
+    if(!raw) continue;
+    if(!parseDirectiveJson(raw)) bad.push(raw.slice(0,120));
+  }
+  return bad;
+}
 
 /* ---------- credits / rate-limit detection ----------
    Pollinations' free tier sometimes answers with a "not enough credits / top
@@ -215,7 +284,7 @@ function runProviderChain(providers, onAttempt){
         return { provider:p, text:text, attempts:attempts };
       })
       .catch(function(err){
-        attempts.push({ id:p.id, label:p.label, error:errMessage(err) });
+        attempts.push({ id:p.id, label:p.label, code:(err&&err.code)||null, error:errMessage(err) });
         return next();
       });
   }
@@ -255,12 +324,15 @@ function systemPrompt(ctx){
 
 var api = {
   ACTIONS: ACTIONS, MAX_POOL_IN_PROMPT: MAX_POOL_IN_PROMPT,
-  POLLINATIONS_MODELS: POLLINATIONS_MODELS, GEMINI_HOST: GEMINI_HOST,
+  NANO_MAX_POOL: NANO_MAX_POOL, GEMINI_HOST: GEMINI_HOST,
   extractDirectives: extractDirectives,
+  extractDirectivesLenient: extractDirectivesLenient,
+  findMalformedDirectives: findMalformedDirectives,
   buildPromptContext: buildPromptContext,
+  buildNanoContext: buildNanoContext,
+  nanoSystemPrompt: nanoSystemPrompt,
   validateAction: validateAction,
   findPlayer: findPlayer,
-  modelId: modelId,
   extractStreamContent: extractStreamContent,
   systemPrompt: systemPrompt,
   isCreditsError: isCreditsError,
