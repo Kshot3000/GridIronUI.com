@@ -242,9 +242,10 @@ function exampleChips(){
 }
 
 /* ---------- LLM provider chain ----------
-   1. Chrome/Edge built-in on-device AI (Gemini Nano) — primary, keyless.
-   2. The visitor's optional free Gemini key (only if they pasted one).
-   3. An honest failure state naming both options — never a fake reply,
+   1. Puter.js instant free cloud — primary, keyless, zero setup.
+   2. Chrome/Edge built-in on-device AI (Gemini Nano) — one-tap download.
+   3. The visitor's optional free Gemini key (only if they pasted one).
+   4. An honest failure state naming the options — never a fake reply,
       never an endless spinner.
    The status pill always shows which provider actually answered. */
 var GEMINI_KEY_LS = "giu_gemini_key";
@@ -398,6 +399,85 @@ function downloadNanoModel(){
 function geminiRun(messages, onToken){
   return CORE.geminiGenerateText(messages, getGeminiKey(), fetch).then(function(t){
     onToken(t);
+    return t;
+  });
+}
+
+/* ----- Puter.js (instant free cloud) — primary provider -----
+   Keyless chat via the Puter.js SDK (https://js.puter.com/v2/, loaded with
+   async+onerror in ai-coach.html). Puter funds anonymous usage: no API keys,
+   no sign-in, no downloads. Docs: https://docs.puter.com/AI/chat/
+   The SDK loads asynchronously, so readiness is polled; a script-tag error
+   (window.__puterFailed) fails fast so the chain falls through to Nano. */
+var PUTER_MODEL = "gpt-5-nano";
+var puterState = "unknown"; /* unknown | ready | failed */
+function puterSdk(){
+  return (typeof window.puter !== "undefined" && window.puter &&
+          window.puter.ai && typeof window.puter.ai.chat === "function")
+         ? window.puter : null;
+}
+/* Resolves true once the SDK is usable. Fast-fails on script error or timeout. */
+function waitForPuter(timeoutMs){
+  return new Promise(function(resolve){
+    if(window.__puterFailed){ puterState = "failed"; resolve(false); return; }
+    if(puterSdk()){ puterState = "ready"; resolve(true); return; }
+    var waited = 0, step = 250;
+    var iv = setInterval(function(){
+      waited += step;
+      if(window.__puterFailed || puterSdk() || waited >= timeoutMs){
+        clearInterval(iv);
+        if(window.__puterFailed || !puterSdk()){ puterState = "failed"; resolve(false); }
+        else { puterState = "ready"; resolve(true); }
+      }
+    }, step);
+  });
+}
+/* Pump one async-iterator of Puter streaming chunks into onToken. */
+function pumpPuterChunks(iterator, onToken){
+  return new Promise(function(resolve, reject){
+    var full = "";
+    (function next(){
+      var p;
+      try{ p = iterator.next(); }catch(e){ reject(e); return; }
+      Promise.resolve(p).then(function(r){
+        if(r.done){ resolve(full); return; }
+        var chunk = r.value;
+        if(chunk && chunk.type === "error"){
+          reject({ code:"puter_error",
+                   message:"Puter stream error: "+String(chunk.message||"unknown").slice(0,200) });
+          return;
+        }
+        var t = CORE.puterChunkText(chunk);
+        if(t){ full += t; onToken(t); }
+        next();
+      }, reject);
+    })();
+  });
+}
+function puterRun(messages, onToken){
+  return waitForPuter(8000).then(function(ok){
+    if(!ok) throw { code:"puter_unavailable",
+                    message:"the instant cloud AI didn't load (network blocked?)" };
+    var chatMsgs = (messages||[]).map(function(m){
+      return { role: m.role, content: String(m.content) };
+    });
+    return window.puter.ai.chat(chatMsgs, {
+      model: PUTER_MODEL,
+      stream: true,
+      normalize: true,   /* force OpenAI-format responses regardless of vendor */
+      temperature: 0.7,
+      max_tokens: 1500
+    });
+  }).then(function(resp){
+    if(resp && typeof resp[Symbol.asyncIterator] === "function")
+      return pumpPuterChunks(resp[Symbol.asyncIterator](), onToken);
+    /* non-streaming shape (older SDK): normalized ChatResponse */
+    var t = (resp && resp.message) ? String(resp.message.content||"") : String(resp==null?"":resp);
+    if(!t.trim()) throw { code:"puter_empty", message:"the instant cloud AI returned nothing" };
+    onToken(t);
+    return t;
+  }).then(function(t){
+    if(!t || !t.trim()) throw { code:"puter_empty", message:"the instant cloud AI returned nothing" };
     return t;
   });
 }
@@ -704,7 +784,11 @@ function send(prefill, skipEcho){
       pendingAfterDownload = text;
       showNanoBanner();
       providerStatus("💻 needs the on-device model or a Gemini key");
-      var mdDl = "**Grid needs an AI to talk to — pick either option, both are free:**\n\n" +
+      var puterTried = attempts.some(function(a){ return a.id==="puter"; });
+      var mdDl = puterTried
+        ? "**Grid's instant cloud AI didn't respond just now — here are the other free options:**\n\n"
+        : "**Grid needs an AI to talk to — pick either option, both are free:**\n\n";
+      mdDl +=
         "**1. On-device AI (recommended):** hit **Download free model** above (~1.7 GB, one time). It then runs 100% on your device — private, no key, no bill.\n\n" +
         "**2. Free Gemini key:** paste one from [AI Studio](https://aistudio.google.com/apikey) above (free tier, no credit card — it stays in your browser, only ever sent to Google).\n\n" +
         "On-device AI needs Chrome or Edge 138+ on a desktop computer — it isn't on mobile browsers.";
@@ -726,14 +810,17 @@ function send(prefill, skipEcho){
     body.innerHTML = CORE.renderRich(md);
     scrollChat();
   }
-  /* provider chain: on-device Nano first (keyless), then the optional
-     user-supplied Gemini key — whichever answers first wins, and the
-     pill says who. Also proactively offer the model download. */
-  maybeOfferNanoDownload();
-  var providers = [
-    { id:"nano", label:"on-device AI",
-      run:function(){ return nanoRun(text, onToken); } }
-  ];
+  /* provider chain: Puter instant cloud first (zero setup), then on-device
+     Nano, then the optional user-supplied Gemini key — whichever answers
+     first wins, and the pill says who. */
+  if(puterState === "failed") maybeOfferNanoDownload(); /* no instant cloud: offer the download */
+  var providers = [];
+  if(puterState !== "failed"){
+    providers.push({ id:"puter", label:"instant cloud AI",
+                     run:function(){ return puterRun(msgs, onToken); } });
+  }
+  providers.push({ id:"nano", label:"on-device AI",
+                   run:function(){ return nanoRun(text, onToken); } });
   if(getGeminiKey()){
     providers.push({ id:"gemini-key", label:"your Gemini key",
                      run:function(){ return geminiRun(msgs, onToken); } });
@@ -742,7 +829,8 @@ function send(prefill, skipEcho){
   CORE.runProviderChain(providers, function(p){
     providerStatus("⏳ trying "+esc(p.label)+"…");
   }).then(function(res){
-    if(res.provider.id==="nano") providerStatus("✅ Running 100% on your device");
+    if(res.provider.id==="puter") providerStatus("⚡ Answered instantly (free cloud)");
+    else if(res.provider.id==="nano") providerStatus("✅ Running 100% on your device");
     else providerStatus("✅ Answered by Gemini (your free key)");
     onDone(res.text);
   }, function(chainErr){
@@ -803,9 +891,19 @@ if(gemClear) gemClear.addEventListener("click", function(){
   addMsg("sys", "Gemini key removed from this browser.");
 });
 refreshGemUI();
-providerStatus("ready — on-device AI first");
+providerStatus("⚡ warming up instant AI…");
 wireNanoBanner();
-maybeOfferNanoDownload();
+/* Warm up Puter in the background: no UI, no user action. The first message
+   then answers with zero friction. Only if Puter can't load do we fall back
+   to offering the on-device model download. */
+waitForPuter(12000).then(function(ok){
+  if(ok){
+    providerStatus("⚡ Ready — answers instantly (free cloud)");
+  } else {
+    providerStatus("ready — on-device AI or Gemini key");
+    maybeOfferNanoDownload();
+  }
+});
 wireTabs("cSite","site", onCfgChange);
 wireTabs("cSport","sport", onCfgChange);
 wireTabs("cMode","mode", onCfgChange);

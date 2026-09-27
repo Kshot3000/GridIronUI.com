@@ -224,8 +224,10 @@ ok("links: no page references dfs-lab.html ("+allHtml.length+" html files scanne
 var coachJs = fs.readFileSync(path.join(root, "js", "ai-coach.js"), "utf8");
 ok("js: no hardcoded API keys", !/sk-[A-Za-z0-9]{8,}/.test(coachJs));
 ok("js: pollinations fully removed", coachJs.toLowerCase().indexOf("pollinations")===-1);
-ok("js: nano provider first in chain",
-  coachJs.indexOf('id:"nano"')!==-1 && coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"gemini-key"'));
+ok("js: puter first in provider chain, then nano, then gemini key",
+  coachJs.indexOf('id:"puter"')!==-1 &&
+  coachJs.indexOf('id:"puter"') < coachJs.indexOf('id:"nano"') &&
+  coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"gemini-key"'));
 ok("js: downloadprogress monitor wired",
   coachJs.indexOf("downloadprogress")!==-1 && coachJs.indexOf("LM.create(")!==-1);
 ok("js: on-device badge text", coachJs.indexOf("Running 100% on your device")!==-1);
@@ -239,5 +241,44 @@ ok("footer: @kshot9000", siteJs.indexOf("x.com/kshot9000")!==-1);
 ok("footer: Pearl address", siteJs.indexOf("prl1p62v09vuzyd8kdz9l23jaf3kph4wwx6jqcmhkkhg8lhr2qlxky8psu3zw9d")!==-1);
 ok("footer: 21+", siteJs.indexOf("21+")!==-1);
 ok("footer: 1-800-GAMBLER", siteJs.indexOf("1-800-GAMBLER")!==-1);
+
+/* ---- Puter.js primary provider ---- */
+ok("puter: core exposes puterChunkText", typeof C.puterChunkText === "function");
+ok("puter: text chunk extracted",
+  C.puterChunkText({type:"text", text:"hello"}) === "hello");
+ok("puter: non-text chunks ignored",
+  C.puterChunkText({type:"reasoning", reasoning:"hmm"}) === "" &&
+  C.puterChunkText({type:"usage", usage:{}}) === "" &&
+  C.puterChunkText({type:"error", message:"boom"}) === "" &&
+  C.puterChunkText(null) === "" &&
+  C.puterChunkText("str") === "");
+ok("html: puter SDK script with async/defer + onerror guard",
+  /<script[^>]*src="https:\/\/js\.puter\.com\/v2\/"[^>]*>/.test(coachHtml) &&
+  coachHtml.indexOf("__puterFailed") !== -1);
+ok("js: puter badge text", coachJs.indexOf("Answered instantly (free cloud)") !== -1);
+ok("js: puter chat call with streaming + normalize",
+  coachJs.indexOf("puter.ai.chat") !== -1 &&
+  coachJs.indexOf("stream: true") !== -1 &&
+  coachJs.indexOf("normalize: true") !== -1);
+ok("js: puter warms up on page load", coachJs.indexOf("waitForPuter(12000)") !== -1);
+ok("js: puter SDK failure fast-fails to next provider",
+  coachJs.indexOf("puter_unavailable") !== -1 &&
+  coachJs.indexOf('puterState !== "failed"') !== -1);
+ok("js: full-context system prompt feeds puter (not the nano-terse one)",
+  coachJs.indexOf("CORE.systemPrompt(ctx)") !== -1);
+
+/* directives survive a Puter-style reply end to end (parse + validate) */
+(function(){
+  var pool = [
+    {id:"p1", name:"Josh Allen", team:"BUF", pos:["QB"], salary:8000, proj:22.5, floor:14, ceil:32, own:18},
+    {id:"p2", name:"Jalen Hurts", team:"PHI", pos:["QB"], salary:7800, proj:21.0, floor:13, ceil:30, own:15}
+  ];
+  var reply = "Hurts is the better value this week.\n```gridiron\n{\"action\":\"compare\",\"players\":[\"Josh Allen\",\"Jalen Hurts\"]}\n```";
+  var blocks = C.extractDirectivesLenient(reply);
+  ok("puter: directive block parsed from reply",
+    blocks.length === 1 && blocks[0].action === "compare");
+  ok("puter: directive validates against pool",
+    C.validateAction(blocks[0], pool).ok === true);
+})();
 
 finish();
