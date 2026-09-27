@@ -1,0 +1,13 @@
+name = "gridironui-grid-chat"
+main = "worker.js"
+compatibility_date = "2026-09-27"
+
+# Workers AI binding — gives the Worker its `env.AI` model runner.
+# Free tier: 10,000 neurons/day, no credit card required.
+[ai]
+binding = "AI"
+
+# Optional: comma-separated extra origins allowed to call POST /chat,
+# e.g. Kyle's future custom domain. The GitHub Pages origin is always allowed.
+# [vars]
+# ALLOWED_ORIGINS = "https://www.example.com"

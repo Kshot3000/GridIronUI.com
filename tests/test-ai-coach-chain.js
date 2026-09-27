@@ -224,9 +224,11 @@ ok("links: no page references dfs-lab.html ("+allHtml.length+" html files scanne
 var coachJs = fs.readFileSync(path.join(root, "js", "ai-coach.js"), "utf8");
 ok("js: no hardcoded API keys", !/sk-[A-Za-z0-9]{8,}/.test(coachJs));
 ok("js: pollinations fully removed", coachJs.toLowerCase().indexOf("pollinations")===-1);
-ok("js: puter first in provider chain, then nano, then gemini key",
-  coachJs.indexOf('id:"puter"')!==-1 &&
-  coachJs.indexOf('id:"puter"') < coachJs.indexOf('id:"nano"') &&
+ok("js: puter fully removed", !/\bputer\b/i.test(coachJs) &&
+  coachJs.indexOf("js.puter.com")===-1);
+ok("js: grid-cloud first in provider chain, then nano, then gemini key",
+  coachJs.indexOf('id:"grid-cloud"')!==-1 &&
+  coachJs.indexOf('id:"grid-cloud"') < coachJs.indexOf('id:"nano"') &&
   coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"gemini-key"'));
 ok("js: downloadprogress monitor wired",
   coachJs.indexOf("downloadprogress")!==-1 && coachJs.indexOf("LM.create(")!==-1);
@@ -242,32 +244,57 @@ ok("footer: Pearl address", siteJs.indexOf("prl1p62v09vuzyd8kdz9l23jaf3kph4wwx6j
 ok("footer: 21+", siteJs.indexOf("21+")!==-1);
 ok("footer: 1-800-GAMBLER", siteJs.indexOf("1-800-GAMBLER")!==-1);
 
-/* ---- Puter.js primary provider ---- */
-ok("puter: core exposes puterChunkText", typeof C.puterChunkText === "function");
-ok("puter: text chunk extracted",
-  C.puterChunkText({type:"text", text:"hello"}) === "hello");
-ok("puter: non-text chunks ignored",
-  C.puterChunkText({type:"reasoning", reasoning:"hmm"}) === "" &&
-  C.puterChunkText({type:"usage", usage:{}}) === "" &&
-  C.puterChunkText({type:"error", message:"boom"}) === "" &&
-  C.puterChunkText(null) === "" &&
-  C.puterChunkText("str") === "");
-ok("html: puter SDK script with async/defer + onerror guard",
-  /<script[^>]*src="https:\/\/js\.puter\.com\/v2\/"[^>]*>/.test(coachHtml) &&
-  coachHtml.indexOf("__puterFailed") !== -1);
-ok("js: puter badge text", coachJs.indexOf("Answered instantly (free cloud)") !== -1);
-ok("js: puter chat call with streaming + normalize",
-  coachJs.indexOf("puter.ai.chat") !== -1 &&
-  coachJs.indexOf("stream: true") !== -1 &&
-  coachJs.indexOf("normalize: true") !== -1);
-ok("js: puter warms up on page load", coachJs.indexOf("waitForPuter(12000)") !== -1);
-ok("js: puter SDK failure fast-fails to next provider",
-  coachJs.indexOf("puter_unavailable") !== -1 &&
-  coachJs.indexOf('puterState !== "failed"') !== -1);
-ok("js: full-context system prompt feeds puter (not the nano-terse one)",
-  coachJs.indexOf("CORE.systemPrompt(ctx)") !== -1);
+/* ---- Grid cloud (Cloudflare Worker) provider ---- */
+ok("js: GRID_WORKER_URL placeholder is empty (silent skip until Kyle deploys)",
+  /var GRID_WORKER_URL = ""/.test(coachJs));
+ok("js: grid-cloud self-skips when unconfigured (not added to chain)",
+  coachJs.indexOf("gridCloudConfigured()")!==-1 &&
+  coachJs.indexOf('if(gridCloudConfigured()){')!==-1);
+ok("js: grid-cloud POSTs {system, messages} to worker /chat",
+  coachJs.indexOf('gridCloudBase()+"/chat"')!==-1 &&
+  coachJs.indexOf('"Content-Type":"application/json"')!==-1);
+ok("js: grid-cloud sends system prompt + last 10 turns",
+  coachJs.indexOf('role:"system"')!==-1 && coachJs.indexOf("slice(-10)")!==-1);
+ok("js: grid-cloud 25s timeout treated as failure",
+  coachJs.indexOf("25000")!==-1 && coachJs.indexOf("gridcloud_fail")!==-1);
+ok("js: grid-cloud reachability probe is silent (no AI spend, no UI)",
+  coachJs.indexOf("probeGridCloud")!==-1 &&
+  coachJs.indexOf('gridCloudBase()+"/"')!==-1);
+ok("js: grid-cloud badge text", coachJs.indexOf("⚡ Answered instantly")!==-1);
+ok("js: no 'instantly' wording promised before probe succeeds",
+  coachJs.indexOf("Ready — answers instantly")!==-1 &&
+  coachJs.indexOf("probeGridCloud().then")!==-1);
+ok("js: honest pill states (cloud / on-device / neutral)",
+  coachJs.indexOf("Ready — answers instantly")!==-1 &&
+  coachJs.indexOf("Ready — on-device AI")!==-1 &&
+  coachJs.indexOf("Choose a free AI option below")!==-1);
+ok("js: full-context system prompt feeds grid-cloud (not the nano-terse one)",
+  coachJs.indexOf("CORE.systemPrompt(ctx)")!==-1);
+ok("html: no puter SDK script tag", coachHtml.indexOf("js.puter.com")===-1);
+ok("html: no 'no key, no download, no setup' claim",
+  coachHtml.indexOf("no key, no download, no setup")===-1);
+ok("worker: worker.js exists", fs.existsSync(path.join(root, "worker", "worker.js")));
+ok("worker: wrangler.toml exists", fs.existsSync(path.join(root, "worker", "wrangler.toml")));
+ok("worker: README exists", fs.existsSync(path.join(root, "worker", "README.md")));
+(function(){
+  var w = fs.readFileSync(path.join(root, "worker", "worker.js"), "utf8");
+  ok("worker: POST /chat endpoint", w.indexOf('"/chat"')!==-1);
+  ok("worker: uses Workers AI instruct model", w.indexOf("env.AI.run")!==-1 && w.indexOf("@cf/meta/")!==-1);
+  ok("worker: CORS locked to github.io pages origin",
+    w.indexOf("https://kshot3000.github.io")!==-1);
+  ok("worker: ALLOWED_ORIGINS env var for custom domain",
+    w.indexOf("ALLOWED_ORIGINS")!==-1);
+  ok("worker: per-IP rate limit", w.indexOf("RATE_LIMIT")!==-1 && w.indexOf("429")!==-1);
+  ok("worker: max body size guard", w.indexOf("MAX_BODY_BYTES")!==-1);
+  ok("worker: rejects empty messages", w.indexOf("messages must not be empty")!==-1);
+  ok("worker: returns {reply}", w.indexOf("reply: reply")!==-1);
+  ok("worker: GET / health probe (no AI spend)", w.indexOf("gridironui-grid-chat")!==-1);
+  var t = fs.readFileSync(path.join(root, "worker", "wrangler.toml"), "utf8");
+  ok("worker: wrangler name + AI binding",
+    t.indexOf('name = "gridironui-grid-chat"')!==-1 && t.indexOf('binding = "AI"')!==-1);
+})();
 
-/* directives survive a Puter-style reply end to end (parse + validate) */
+/* directives survive a cloud-style reply end to end (parse + validate) */
 (function(){
   var pool = [
     {id:"p1", name:"Josh Allen", team:"BUF", pos:["QB"], salary:8000, proj:22.5, floor:14, ceil:32, own:18},
@@ -275,9 +302,9 @@ ok("js: full-context system prompt feeds puter (not the nano-terse one)",
   ];
   var reply = "Hurts is the better value this week.\n```gridiron\n{\"action\":\"compare\",\"players\":[\"Josh Allen\",\"Jalen Hurts\"]}\n```";
   var blocks = C.extractDirectivesLenient(reply);
-  ok("puter: directive block parsed from reply",
+  ok("grid-cloud: directive block parsed from reply",
     blocks.length === 1 && blocks[0].action === "compare");
-  ok("puter: directive validates against pool",
+  ok("grid-cloud: directive validates against pool",
     C.validateAction(blocks[0], pool).ok === true);
 })();
 

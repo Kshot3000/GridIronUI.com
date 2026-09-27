@@ -322,22 +322,9 @@ function systemPrompt(ctx){
 "6. You may suggest strategy (stacks, leverage, chalk) but label optimizer outputs as optimizer outputs.");
 }
 
-/* ---------- Puter.js chunk helper ----------
-   Extracts displayable text from one puter.ai.chat() streaming chunk.
-   Chunk types: "text" (has .text), "reasoning", "image", "tool_use",
-   "compaction", "extra_content", "usage", "error" (has .message).
-   Only "text" chunks contribute to the reply; everything else is "".
-   Pure function so node tests can cover it. */
-function puterChunkText(chunk){
-  if(!chunk || typeof chunk !== "object") return "";
-  if(chunk.type === "text" && typeof chunk.text === "string") return chunk.text;
-  return "";
-}
-
 var api = {
   ACTIONS: ACTIONS, MAX_POOL_IN_PROMPT: MAX_POOL_IN_PROMPT,
   NANO_MAX_POOL: NANO_MAX_POOL, GEMINI_HOST: GEMINI_HOST,
-  puterChunkText: puterChunkText,
   extractDirectives: extractDirectives,
   extractDirectivesLenient: extractDirectivesLenient,
   findMalformedDirectives: findMalformedDirectives,
