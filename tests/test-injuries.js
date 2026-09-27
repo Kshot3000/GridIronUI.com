@@ -77,6 +77,7 @@ for(var i=0;i<7;i++){
   getEl("injTabs")._children.push(b2);
 }
 
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/team-brand.js"), "utf8"), sandbox, {filename: "js/team-brand.js"});
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/injuries.js"), "utf8"), sandbox, {filename: "js/injuries.js"});
 
 function clickSev(k){

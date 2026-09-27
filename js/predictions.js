@@ -47,8 +47,12 @@ function probRow(label, pct, chg){
 function load(key){
   skel();
   seriesFor(key).then(function(sid){
-    return GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20");
-  }).then(function(d){
+    return Promise.all([
+      GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20"),
+      GIU.teamDir()
+    ]);
+  }).then(function(x){
+    var d = x[0], dir = x[1];
     var evs = Array.isArray(d) ? d : (d.events||[]);
     var rows = [];
     evs.forEach(function(ev){
@@ -72,6 +76,9 @@ function load(key){
     $("predGrid").innerHTML = rows.map(function(r){
       var t = fmtT(r.ev.startTime || r.ev.eventDate);
       var slug = r.ev.slug||"";
+      var tp = String(r.ev.title||"").split(/\s+vs\.?\s+/);
+      var head = (tp.length===2 && GIU.vsHeader(dir, key, tp[0], tp[1])) ||
+        '<h3 style="margin:10px 0 4px;font-size:1.02rem">'+GIU.esc(r.ev.title)+'</h3>';
       var body;
       if(r.mls.length===1){
         /* classic 2-way: team vs team */
@@ -90,7 +97,7 @@ function load(key){
         }).join("");
       }
       return '<div class="card"><span class="tag green">Market-implied</span>'+
-        '<h3 style="margin:10px 0 4px;font-size:1.02rem">'+GIU.esc(r.ev.title)+'</h3>'+
+        head+
         (t ? '<div class="game-meta" style="margin-bottom:12px"><span>'+t+'</span></div>' : '<div style="height:8px"></div>')+
         body+
         '<div class="game-meta"><span>Source: Polymarket live price</span>'+(slug?'<a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">View market →</a>':"")+'</div></div>';

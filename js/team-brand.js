@@ -57,4 +57,65 @@ window.GIU.teamRow = function(t, winner){
     '<span class="nm">'+nm+'</span></div>'+
     '<span class="sc num"'+(winner?' style="color:var(--gold)"':"")+'>'+sc+'</span></div>';
 };
+
+/* Team directory — a static ESPN snapshot (scripts/fetch-teams.py ->
+   data/teams.json) for feeds that don't carry logos/colors themselves
+   (Kalshi snapshot, Polymarket events, injury-team lists). Loaded once and
+   cached; resolves to {} on failure so pages render without identity. */
+window.GIU._teamDirP = null;
+window.GIU.teamDir = function(){
+  if(window.GIU._teamDirP) return window.GIU._teamDirP;
+  var base = (window.GIU_BASE || ".");
+  window.GIU._teamDirP = window.GIU.fetchJSON(base+"/data/teams.json", 15000).then(function(d){
+    return (d && d.leagues) || {};
+  }).catch(function(){ return {}; });
+  return window.GIU._teamDirP;
+};
+function normName(s){
+  return String(s==null?"":s).toLowerCase().replace(/[^a-z0-9]/g,"")
+    .replace(/(afc|fc|utd)$/,""); /* "Arsenal FC"->"arsenal", "Leeds United"->"leeds" */
+}
+/* Find a team by abbreviation, full name or short name. `dir` is the resolved
+   leagues map from teamDir() (passed in so this stays pure and testable). */
+window.GIU.teamFind = function(dir, league, q){
+  var list = (dir||{})[league] || [];
+  q = String(q==null?"":q).trim();
+  if(!q || !list.length) return null;
+  var ql = q.toLowerCase(), qu = q.toUpperCase(), i, t;
+  for(i=0;i<list.length;i++){ t=list[i];
+    if(t.abbr===qu) return t; }
+  for(i=0;i<list.length;i++){ t=list[i];
+    if(String(t.displayName||"").toLowerCase()===ql ||
+       String(t.shortDisplayName||"").toLowerCase()===ql) return t; }
+  var qn = normName(q);
+  if(!qn) return null;
+  for(i=0;i<list.length;i++){ t=list[i];
+    if(normName(t.displayName)===qn || normName(t.shortDisplayName)===qn) return t; }
+  return null;
+};
+/* Versus header: logo + color chip + short name for both sides, "vs" between.
+   Returns "" when neither side matches — the caller keeps its plain title. */
+window.GIU.vsHeader = function(dir, league, a, b){
+  var ta = window.GIU.teamFind(dir, league, a),
+      tb = window.GIU.teamFind(dir, league, b);
+  if(!ta && !tb) return "";
+  function side(t, raw){
+    var inner = t
+      ? window.GIU.teamLogo(t, 30) + window.GIU.teamChip(t, t.abbr)
+      : "";
+    var nm = t ? (t.shortDisplayName || t.displayName || raw) : raw;
+    return '<span class="vs-side">'+inner+
+      '<span class="nm">'+window.GIU.esc(nm)+'</span></span>';
+  }
+  return '<div class="vs-head" style="margin:10px 0 4px">'+side(ta, a)+
+    '<span class="vs-x">vs</span>'+side(tb, b)+'</div>';
+};
+/* Single-team identity header (injury cards). Falls back to a plain heading. */
+window.GIU.teamHead = function(dir, league, q, rawName){
+  var t = window.GIU.teamFind(dir, league, q || rawName);
+  if(!t) return '<h3>'+window.GIU.esc(rawName)+'</h3>';
+  return '<div class="vs-head" style="margin:0 0 2px"><span class="vs-side">'+
+    window.GIU.teamLogo(t, 30)+window.GIU.teamChip(t, t.abbr)+
+    '<span class="nm">'+window.GIU.esc(t.displayName)+'</span></span></div>';
+};
 })();

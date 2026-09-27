@@ -37,7 +37,18 @@ node tests/test-dfs-exposure.js  # DFS exposure summary tests
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 node tests/test-kalshi.js     # Kalshi snapshot logic tests
 node tests/test-team-brand.js  # ESPN team logo/color identity tests
+node tests/test-teams.js     # team-directory lookup (abbr/name/normalized) + vs-header tests
 node tests/test-weather.js    # weather matchup header + impact tests
+```
+
+### Team identity directory
+
+Feeds that don't carry logos/colors themselves (Kalshi snapshot, Polymarket
+events, ESPN injury teams) get GameDay identity from a static ESPN snapshot.
+Team colors/logos are stable, so this is refreshed rarely:
+
+```bash
+python3 scripts/fetch-teams.py    # writes data/teams.json (NFL/NBA/MLB/NHL/EPL)
 ```
 
 ### Kalshi NFL snapshot

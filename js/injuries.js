@@ -8,6 +8,12 @@ var LEAGUES = [
   ["basketball/mens-college-basketball","NCAAB"],["soccer/eng.1","EPL"]
 ];
 var cur = 0, data = [];
+/* Team-identity directory key per ESPN league path (NCAA leagues have no
+   directory — teamHead falls back to the plain heading). */
+var DIRKEY = {"football/nfl":"nfl","basketball/nba":"nba","baseball/mlb":"mlb",
+              "hockey/nhl":"nhl","soccer/eng.1":"epl"};
+var tdir = {};
+GIU.teamDir().then(function(d){ tdir = d||{}; if(data.length) render($("injSearch").value||""); });
 /* Severity ranking for betting relevance: Out > Doubtful > Questionable > everything else.
    Statuses are ESPN free text, verified live 2026-09-27: NFL uses Out / Injured Reserve /
    Doubtful / Questionable; NBA "Day-To-Day"; MLB/NHL use IL forms ("15-Day-IL", "60-Day-IL");
@@ -107,7 +113,7 @@ function render(q){
         '<p>'+GIU.esc(detail)+'</p>'+
         (i.date?'<p style="font-size:.78rem;color:var(--faint)">Updated '+GIU.esc(i.date.slice(0,10))+'</p>':"")+'</div>';
     }).join("");
-    return '<div class="card"><h3>'+GIU.esc(t.displayName||t.name||"Team")+'</h3><p style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px">'+teamTag(t)+'</p>'+rows+'</div>';
+    return '<div class="card">'+GIU.teamHead(tdir, DIRKEY[LEAGUES[cur][0]], t.displayName, t.displayName||t.name||"Team")+'<p style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px">'+teamTag(t)+'</p>'+rows+'</div>';
   }).join("");
 }
 $("injSev").innerHTML = SEVS.map(function(s,i){

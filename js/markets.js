@@ -87,16 +87,27 @@ function marketRow(m){
     '<div style="font-size:.76rem;color:var(--faint)">'+volLine(m)+bookLine(m)+chgChip(m)+'</div></div>';
 }
 
+function vsFor(title, leagueKey, dir){
+  /* "Ravens vs. Cowboys" -> identity header; "" keeps the caller's plain title */
+  var p = String(title||"").split(/\s+vs\.?\s+/);
+  if(p.length !== 2) return "";
+  return window.GIU.vsHeader(dir, leagueKey, p[0], p[1]);
+}
+
 function load(my){
   my = (my===undefined) ? tabSeq : my;
   var box = $("marketGrid");
   box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
   $("marketNote").textContent = "Loading live markets — this is a large data feed, one moment…";
-  var lname = LEAGUES[cur][0];
-  seriesFor(LEAGUES[cur][1]).then(function(sid){
-    return GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20");
-  }).then(function(d){
+  var lname = LEAGUES[cur][0], lkey = LEAGUES[cur][1];
+  seriesFor(lkey).then(function(sid){
+    return Promise.all([
+      GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20"),
+      GIU.teamDir()
+    ]);
+  }).then(function(x){
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
+    var d = x[0], dir = x[1];
     var evs = Array.isArray(d) ? d : (d.events||[]);
     var games = [];
     evs.forEach(function(ev){
@@ -129,8 +140,10 @@ function load(my){
       var body = g.mls.map(marketRow).join("") +
                  (g.spread ? marketRow(g.spread) : "") +
                  (g.total ? marketRow(g.total) : "");
+      var head = vsFor(g.ev.title, lkey, dir) ||
+        '<h3 style="margin:10px 0 4px">'+GIU.esc(g.ev.title)+'</h3>';
       return '<div class="card"><span class="tag green">Live market</span>'+
-        '<h3 style="margin:10px 0 4px">'+GIU.esc(g.ev.title)+'</h3>'+
+        head+
         (t ? '<div class="game-meta" style="margin-bottom:12px"><span>'+t+'</span></div>' : '<div style="height:8px"></div>')+
         body+
         '<div class="game-meta"><a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">Trade on Polymarket →</a></div></div>';
@@ -156,7 +169,15 @@ function agoShort(iso){
   var h = Math.floor(m / 60); if(h < 24) return h + "h ago";
   return Math.floor(h / 24) + "d ago";
 }
-function kalshiCard(g){
+function kalshiAbbrs(g){
+  /* sub looks like "CAR vs CLE (Sep 27)" — abbreviations are the reliable key */
+  var m = String((g&&g.sub)||"").match(/^([A-Z]{2,3})\s+vs\s+([A-Z]{2,3})\b/);
+  return m ? [m[1], m[2]] : null;
+}
+function kalshiCard(g, dir){
+  var ab = kalshiAbbrs(g);
+  var head = (ab && window.GIU.vsHeader(dir, "nfl", ab[0], ab[1])) ||
+    '<h3 style="margin:10px 0 4px">'+GIU.esc(g.title)+'</h3>';
   var rows = g.teams.map(function(t){
     var book = t.book
       ? ' · book <b class="num" style="color:var(--text)">'+t.book.bid+'¢/'+t.book.ask+'¢</b> '+
@@ -169,7 +190,7 @@ function kalshiCard(g){
   }).join("");
   return '<div class="card"><span class="tag green">Kalshi</span> <span class="tag blue">NFL</span> '+
     '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+
-    '<h3 style="margin:10px 0 4px">'+GIU.esc(g.title)+'</h3>'+
+    head+
     (g.sub ? '<div class="game-meta" style="margin-bottom:12px"><span>'+GIU.esc(g.sub)+'</span></div>' : '<div style="height:8px"></div>')+
     rows+
     '<div class="game-meta"><a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi →</a></div></div>';
@@ -179,7 +200,11 @@ function loadKalshi(my){
   var box = $("marketGrid");
   box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
   $("marketNote").textContent = "Loading the Kalshi snapshot…";
-  GIU.fetchJSON("data/kalshi-nfl.json").then(function(snap){
+  Promise.all([
+    GIU.fetchJSON("data/kalshi-nfl.json"),
+    GIU.teamDir()
+  ]).then(function(x){
+    var snap = x[0], dir = x[1];
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     var games = window.Kalshi.games(snap);
     if(!games.length){
@@ -192,7 +217,7 @@ function loadKalshi(my){
     var stale = window.Kalshi.stale(snap.updated_at)
       ? '<div class="notice" style="margin-bottom:16px"><strong>This snapshot is stale</strong> (over 6 hours old). Treat these prices as a rough guide until the next refresh — we\'d rather say so than let you bet on cold numbers.</div>'
       : "";
-    box.innerHTML = stale + games.slice(0, 12).map(kalshiCard).join("");
+    box.innerHTML = stale + games.slice(0, 12).map(function(g){ return kalshiCard(g, dir); }).join("");
   }).catch(function(){
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     box.innerHTML = GIU.failBox("The Kalshi snapshot couldn't be loaded. Kalshi's API blocks browser requests, so this page depends on the server-side snapshot — nothing is shown rather than stale prices.");

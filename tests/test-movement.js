@@ -54,7 +54,7 @@ var sandbox = {
 sandbox.window.GIU = sandbox.GIU;
 vm.createContext(sandbox);
 
-["js/markets.js", "js/predictions.js"].forEach(function(f){
+["js/team-brand.js", "js/markets.js", "js/predictions.js"].forEach(function(f){
   vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, {filename: f});
 });
 
