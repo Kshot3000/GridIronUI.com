@@ -17,6 +17,54 @@ var cur = 0;
    another league's tab. */
 var tabSeq = 0;
 
+/* ---- live auto-refresh machinery (same contract as scores.js v1.20.0) ----
+   Polymarket prices move with the games, and the Kalshi snapshot gets rebuilt
+   server-side roughly every 15 minutes, so both tabs keep themselves fresh in
+   place — no reload, no skeleton shimmer. Ticks skip while the tab is hidden
+   and resume on their own when it returns. Timers never stack: every load
+   clears the old timer before scheduling a new one. */
+var PM_MS = 90000, KAL_MS = 300000, LIVE_WINDOW_MS = 4*3600*1000;
+var liveTimer = null, autoOn = true, liveN = 0, snapN = 0, lastUpdated = null, kalshiTab = false;
+
+function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+function clearLive(){ if(liveTimer){ clearInterval(liveTimer); liveTimer = null; } }
+/* Polymarket events expose startTime but no explicit in-progress flag; a game
+   that started within the last 4 hours is very likely live (NFL/NBA/MLB games
+   rarely run longer), so prices on those games are the ones worth refreshing. */
+function likelyLive(games){
+  var now = Date.now(), n = 0;
+  (games||[]).forEach(function(g){
+    var t = startOf(g.ev || {});
+    if(t < now && now - t < LIVE_WINDOW_MS) n++;
+  });
+  return n;
+}
+function fmtClock(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function renderLiveStatus(){
+  var s = $("liveStatus"), b = $("pauseBtn");
+  if(!s) return;
+  if(liveN > 0 && autoOn){
+    s.className = "live-status live";
+    var what = kalshiTab ? snapN + (snapN > 1 ? " games" : " game") + " on this snapshot"
+                         : liveN + (liveN > 1 ? " live games" : " live game");
+    var cadence = kalshiTab ? "auto-refresh every 5 min" : "auto-refresh every 90s";
+    s.innerHTML = '<span class="live-dot" aria-hidden="true"></span>'+
+      GIU.esc(what + " — " + cadence)+
+      (lastUpdated ? " · updated "+GIU.esc(fmtClock(lastUpdated)) : "");
+    if(b){ b.style.display = ""; b.innerHTML = "⏸ Pause live"; b.setAttribute("aria-pressed","false"); }
+  } else if(liveN > 0){
+    s.className = "live-status paused";
+    s.textContent = liveN + (liveN > 1 ? " games" : " game") + " · auto-refresh paused";
+    if(b){ b.style.display = ""; b.innerHTML = "▶ Resume live"; b.setAttribute("aria-pressed","true"); }
+  } else {
+    s.className = "live-status"; s.textContent = "";
+    if(b){ b.style.display = "none"; }
+  }
+}
+
 function parseArr(s){
   try{ var v = typeof s==="string" ? JSON.parse(s) : s; return Array.isArray(v)?v:[]; }
   catch(e){ return []; }
@@ -94,11 +142,14 @@ function vsFor(title, leagueKey, dir){
   return window.GIU.vsHeader(dir, leagueKey, p[0], p[1]);
 }
 
-function load(my){
+function load(my, silent){
   my = (my===undefined) ? tabSeq : my;
+  clearLive(); /* league switches and silent refreshes always reschedule */
   var box = $("marketGrid");
-  box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
-  $("marketNote").textContent = "Loading live markets — this is a large data feed, one moment…";
+  if(!silent){
+    box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
+    $("marketNote").textContent = "Loading live markets — this is a large data feed, one moment…";
+  }
   var lname = LEAGUES[cur][0], lkey = LEAGUES[cur][1];
   seriesFor(lkey).then(function(sid){
     return Promise.all([
@@ -131,6 +182,7 @@ function load(my){
     if(!games.length){
       box.innerHTML = '<div class="empty">No upcoming '+GIU.esc(lname)+' game markets on Polymarket right now. Markets cluster around game days — check back mid-week.</div>';
       $("marketNote").textContent = "";
+      liveN = 0; renderLiveStatus();
       return;
     }
     $("marketNote").textContent = games.length+" games · prices live from Polymarket · volume in $";
@@ -148,10 +200,21 @@ function load(my){
         body+
         '<div class="game-meta"><a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">Trade on Polymarket →</a></div></div>';
     }).join("");
+    /* ---- live auto-refresh ----
+       Refresh in-place every 90s, but only while a shown game is likely
+       in-progress — otherwise the timer would burn requests on dead pages. */
+    kalshiTab = false;
+    liveN = likelyLive(games);
+    lastUpdated = Date.now();
+    renderLiveStatus();
+    if(liveN > 0 && autoOn){
+      liveTimer = setInterval(function(){ if(!isHidden()) load(tabSeq, true); }, PM_MS);
+    }
   }).catch(function(){
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     box.innerHTML = GIU.failBox("Polymarket's API didn't respond. No prices are shown rather than stale ones.");
     $("marketNote").textContent = "";
+    liveN = 0; renderLiveStatus();
   });
 }
 
@@ -195,11 +258,14 @@ function kalshiCard(g, dir){
     rows+
     '<div class="game-meta"><a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi →</a></div></div>';
 }
-function loadKalshi(my){
+function loadKalshi(my, silent){
   my = (my===undefined) ? tabSeq : my;
+  clearLive(); /* league switches and silent refreshes always reschedule */
   var box = $("marketGrid");
-  box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
-  $("marketNote").textContent = "Loading the Kalshi snapshot…";
+  if(!silent){
+    box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
+    $("marketNote").textContent = "Loading the Kalshi snapshot…";
+  }
   Promise.all([
     GIU.fetchJSON("data/kalshi-nfl.json"),
     GIU.teamDir()
@@ -210,18 +276,31 @@ function loadKalshi(my){
     if(!games.length){
       box.innerHTML = '<div class="empty">No priced Kalshi NFL game markets in the current snapshot. Markets cluster around game days — check back mid-week.</div>';
       $("marketNote").textContent = "";
+      liveN = 0; renderLiveStatus();
       return;
     }
     var when = agoShort(snap.updated_at);
-    $("marketNote").textContent = games.length+" games · snapshot refreshed "+when+" · Kalshi's API blocks browsers, so prices update with each site refresh (~15 min)";
+    $("marketNote").textContent = games.length+" games · snapshot refreshed "+when+" · Kalshi's API blocks browsers, so prices update when the snapshot rebuilds (~15 min)";
     var stale = window.Kalshi.stale(snap.updated_at)
       ? '<div class="notice" style="margin-bottom:16px"><strong>This snapshot is stale</strong> (over 6 hours old). Treat these prices as a rough guide until the next refresh — we\'d rather say so than let you bet on cold numbers.</div>'
       : "";
     box.innerHTML = stale + games.slice(0, 12).map(function(g){ return kalshiCard(g, dir); }).join("");
+    /* ---- live auto-refresh ----
+       The snapshot file is rebuilt server-side roughly every 15 minutes, so a
+       silent 5-minute re-fetch picks up fresh prices between site pushes —
+       no page reload, no shimmer. */
+    kalshiTab = true;
+    snapN = games.length; liveN = games.length;
+    lastUpdated = Date.now();
+    renderLiveStatus();
+    if(games.length > 0 && autoOn){
+      liveTimer = setInterval(function(){ if(!isHidden()) loadKalshi(tabSeq, true); }, KAL_MS);
+    }
   }).catch(function(){
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     box.innerHTML = GIU.failBox("The Kalshi snapshot couldn't be loaded. Kalshi's API blocks browser requests, so this page depends on the server-side snapshot — nothing is shown rather than stale prices.");
     $("marketNote").textContent = "";
+    liveN = 0; renderLiveStatus();
   });
 }
 
@@ -236,6 +315,13 @@ Array.prototype.forEach.call($("marketTabs").querySelectorAll(".tab"), function(
     if(t.getAttribute("data-kalshi")){ loadKalshi(my); return; }
     cur = Number(t.getAttribute("data-i")); load(my);
   });
+});
+$("pauseBtn").addEventListener("click", function(){
+  autoOn = !autoOn;
+  if(autoOn && liveN > 0){
+    /* resume: refresh now; the loader reschedules the timer */
+    if(kalshiTab) loadKalshi(tabSeq, true); else load(tabSeq, true);
+  } else { clearLive(); renderLiveStatus(); }
 });
 load(++tabSeq);
 })();

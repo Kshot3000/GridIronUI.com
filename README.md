@@ -43,6 +43,7 @@ node tests/test-teams.js     # team-directory lookup (abbr/name/normalized) + vs
 node tests/test-weather.js    # weather matchup header + impact tests
 node tests/test-scores.js     # ESPN scoreboard stat-leader line tests
 node tests/test-scores-live.js  # scores page live auto-refresh (60s tick, hidden-tab skip, pause/resume, no stacking)
+node tests/test-markets-live.js  # markets page live auto-refresh (90s Polymarket tick on likely-live games, 5-min Kalshi snapshot tick, hidden-tab skip, pause/resume, no stacking)
 ```
 
 ### Team identity directory
