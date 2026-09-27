@@ -230,6 +230,17 @@ td.flash{animation:flash 1.2s ease-out}
 .mover-d{font-size:.84rem;color:var(--gold-soft)}
 @media(prefers-reduced-motion:reduce){.mover{transition:none}}
 
+/* line-movement sparklines on odds game cards: the consensus path since this
+   browser first tracked the game. Static SVG (no motion to reduce). */
+.spark-row{display:flex;gap:16px 22px;flex-wrap:wrap;align-items:flex-end;margin:10px 0 2px}
+.spark-cell{display:flex;flex-direction:column;gap:3px}
+.spark-lab{font-size:.74rem;color:var(--muted);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+.spark-vals{display:flex;justify-content:space-between;width:132px;font-size:.72rem;color:var(--faint)}
+.spark-line{fill:none;stroke:var(--gold);stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.spark-area{fill:rgba(240,180,41,.13);stroke:none}
+.spark-dot{fill:var(--gold)}
+.spark-cap{flex-basis:100%;font-size:.74rem;color:var(--faint)}
+
 /* cross-book edge: where Polymarket and Kalshi disagree (markets page, NFL tab) */
 .disagree-card{margin-bottom:20px;border-color:rgba(23,201,100,.35)}
 .disagree-note{font-size:.82rem;color:var(--faint);margin:2px 0 14px;max-width:70ch}
@@ -567,4 +578,81 @@ td.best .pick-btn.picked{box-shadow:inset 0 0 0 2px var(--gold)}
 @media (prefers-reduced-motion:reduce){
   .ref-card,.ref-card::before{transition:none}
   .ref-card:hover,.ref-card:focus-within{transform:none}
+}
+
+/* ============================================================
+   v1.30.0 — sports imagery backgrounds.
+   Tasteful, atmospheric depth for the dark-sportsbook identity:
+   - homepage hero: floodlight glows + drifting crowd bokeh (static
+     under prefers-reduced-motion; canvas stays the star)
+   - interior page heroes: ultra-subtle hand-authored SVG line art
+     per sport (yard lines / court / diamond / rink / pitch) under
+     a dark readability overlay — zero extra HTTP requests
+   - photo heroes now self-hosted in img/heroes/ (no hotlinking)
+   - empty states: warm glow + film grain instead of flat color
+   - cards: 1px gold hairline top accent
+   Readability rule: if a background ever fights text, the
+   background loses — every treatment sits under a dark overlay.
+   ============================================================ */
+
+/* ---------- homepage hero atmosphere ---------- */
+.hero::before{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(360px 210px at 10% -4%, rgba(255,240,200,.13), transparent 65%),
+    radial-gradient(360px 210px at 90% -4%, rgba(255,240,200,.13), transparent 65%),
+    radial-gradient(120% 100% at 50% 50%, transparent 58%, rgba(3,5,9,.62) 100%);
+}
+.hero-bokeh{
+  position:absolute;inset:-6%;z-index:1;pointer-events:none;opacity:.5;
+  background-image:
+    radial-gradient(2.5px 2.5px at 20px 30px, rgba(255,214,130,.55), transparent 70%),
+    radial-gradient(2px 2px at 120px 90px, rgba(160,200,255,.4), transparent 70%),
+    radial-gradient(3px 3px at 260px 40px, rgba(255,214,130,.4), transparent 70%),
+    radial-gradient(2px 2px at 380px 120px, rgba(140,255,180,.35), transparent 70%),
+    radial-gradient(2.5px 2.5px at 60px 180px, rgba(160,200,255,.35), transparent 70%),
+    radial-gradient(4px 4px at 300px 200px, rgba(255,214,130,.3), transparent 70%),
+    radial-gradient(3px 3px at 200px 260px, rgba(255,255,255,.3), transparent 70%),
+    radial-gradient(2px 2px at 440px 60px, rgba(255,214,130,.4), transparent 70%);
+  background-size:480px 300px;
+}
+@media (prefers-reduced-motion:no-preference){
+  .hero-bokeh{animation:hero-bokeh-drift 75s ease-in-out infinite alternate}
+}
+@keyframes hero-bokeh-drift{
+  from{transform:translate3d(-1.5%,1%,0)}
+  to{transform:translate3d(1.5%,-1%,0)}
+}
+
+/* ---------- per-sport line-art page heroes ---------- */
+.page-hero[class*="sport-"]{isolation:isolate}
+.page-hero[class*="sport-"]::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-repeat:no-repeat;background-position:center;background-size:cover;
+}
+.page-hero.sport-nfl::before{background-image:linear-gradient(180deg, rgba(8,11,17,.78) 0%, rgba(8,11,17,.88) 58%, var(--bg) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='360' viewBox='0 0 800 360'%3E%3Cg stroke='%23ffffff' stroke-width='5'%3E%3Cline x1='60' y1='0' x2='60' y2='360' stroke-opacity='.45'/%3E%3Cline x1='140' y1='0' x2='140' y2='360' stroke-opacity='.45'/%3E%3Cline x1='220' y1='0' x2='220' y2='360' stroke-opacity='.45'/%3E%3Cline x1='300' y1='0' x2='300' y2='360' stroke-opacity='.45'/%3E%3Cline x1='380' y1='0' x2='380' y2='360' stroke-opacity='.45'/%3E%3Cline x1='460' y1='0' x2='460' y2='360' stroke-opacity='.45'/%3E%3Cline x1='540' y1='0' x2='540' y2='360' stroke-opacity='.45'/%3E%3Cline x1='620' y1='0' x2='620' y2='360' stroke-opacity='.45'/%3E%3Cline x1='700' y1='0' x2='700' y2='360' stroke-opacity='.45'/%3E%3C/g%3E%3Cg stroke='%23ffffff' stroke-width='3' stroke-opacity='.28'%3E%3Cline x1='40' y1='150' x2='760' y2='150' stroke-dasharray='12 16'/%3E%3Cline x1='40' y1='210' x2='760' y2='210' stroke-dasharray='12 16'/%3E%3C/g%3E%3C/svg%3E")}
+.page-hero.sport-nba::before{background-image:linear-gradient(180deg, rgba(8,11,17,.78) 0%, rgba(8,11,17,.88) 58%, var(--bg) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='500' viewBox='0 0 600 500'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='4'%3E%3Crect x='24' y='24' width='552' height='452' stroke-opacity='.45'/%3E%3Cline x1='300' y1='24' x2='300' y2='476' stroke-opacity='.45'/%3E%3Ccircle cx='300' cy='250' r='62' stroke-opacity='.45'/%3E%3Crect x='24' y='170' width='130' height='160' stroke-opacity='.4'/%3E%3Crect x='446' y='170' width='130' height='160' stroke-opacity='.4'/%3E%3Cpath d='M154 128 Q300 250 154 372' stroke-opacity='.4'/%3E%3Cpath d='M446 128 Q300 250 446 372' stroke-opacity='.4'/%3E%3Ccircle cx='154' cy='250' r='62' stroke-opacity='.35'/%3E%3Ccircle cx='446' cy='250' r='62' stroke-opacity='.35'/%3E%3C/g%3E%3C/svg%3E")}
+.page-hero.sport-mlb::before{background-image:linear-gradient(180deg, rgba(8,11,17,.78) 0%, rgba(8,11,17,.88) 58%, var(--bg) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='4'%3E%3Cpath d='M260 430 L110 280 L260 130 L410 280 Z' stroke-opacity='.45'/%3E%3Cpath d='M52 300 A 232 232 0 0 1 468 300' stroke-opacity='.4'/%3E%3Ccircle cx='260' cy='280' r='10' stroke-opacity='.4'/%3E%3Cline x1='110' y1='280' x2='40' y2='210' stroke-opacity='.35'/%3E%3Cline x1='410' y1='280' x2='480' y2='210' stroke-opacity='.35'/%3E%3C/g%3E%3C/svg%3E")}
+.page-hero.sport-nhl::before{background-image:linear-gradient(180deg, rgba(8,11,17,.78) 0%, rgba(8,11,17,.88) 58%, var(--bg) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='400' viewBox='0 0 700 400'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='4'%3E%3Crect x='24' y='24' width='652' height='352' rx='88' stroke-opacity='.45'/%3E%3Cline x1='350' y1='24' x2='350' y2='376' stroke-opacity='.45'/%3E%3Ccircle cx='350' cy='200' r='52' stroke-opacity='.4'/%3E%3Ccircle cx='160' cy='112' r='40' stroke-opacity='.35'/%3E%3Ccircle cx='160' cy='288' r='40' stroke-opacity='.35'/%3E%3Ccircle cx='540' cy='112' r='40' stroke-opacity='.35'/%3E%3Ccircle cx='540' cy='288' r='40' stroke-opacity='.35'/%3E%3C/g%3E%3C/svg%3E")}
+.page-hero.sport-soccer::before{background-image:linear-gradient(180deg, rgba(8,11,17,.78) 0%, rgba(8,11,17,.88) 58%, var(--bg) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='460' viewBox='0 0 700 460'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='4'%3E%3Crect x='24' y='24' width='652' height='412' stroke-opacity='.45'/%3E%3Cline x1='350' y1='24' x2='350' y2='436' stroke-opacity='.45'/%3E%3Ccircle cx='350' cy='230' r='62' stroke-opacity='.4'/%3E%3Crect x='24' y='130' width='112' height='200' stroke-opacity='.4'/%3E%3Crect x='564' y='130' width='112' height='200' stroke-opacity='.4'/%3E%3Crect x='24' y='180' width='42' height='100' stroke-opacity='.35'/%3E%3Crect x='634' y='180' width='42' height='100' stroke-opacity='.35'/%3E%3C/g%3E%3C/svg%3E")}
+
+/* ---------- empty states: glow + grain, never flat ---------- */
+.empty{
+  padding:44px 20px;text-align:center;color:var(--faint);
+  background:
+    radial-gradient(560px 170px at 50% 0%, rgba(240,180,41,.07), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  border:1px dashed var(--line-soft);
+  border-radius:var(--radius);
+}
+
+/* ---------- cards: hairline gold top accent ---------- */
+.card{position:relative}
+.card::before{
+  content:"";position:absolute;top:-1px;left:26px;right:26px;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(240,180,41,.38),transparent);
+  border-radius:1px;
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-bokeh{animation:none}
 }
