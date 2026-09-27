@@ -537,6 +537,26 @@ function probeFreeCloud(){
 }
 
 /* ---------- action execution (through the real optimizer) ---------- */
+/* why did a build produce nothing? Returns a short, specific reason string —
+   a generic "couldn't fit" leaves visitors (and us) guessing. */
+function diagnoseBuildFailure(c, excludeIds, lockedIds){
+  var bits = [];
+  var lockSal = pool.filter(function(p){ return lockedIds[p.id]; })
+    .reduce(function(s,p){ return s+p.salary; }, 0);
+  if(lockSal > c.cap)
+    bits.push("locks cost $"+lockSal.toLocaleString()+" — over the $"+c.cap.toLocaleString()+" cap");
+  var caps = exposureCaps();
+  var zeroed = pool.filter(function(p){
+    return !lockedIds[p.id] && !excludeIds[p.id] && Number(caps[p.name.toLowerCase()])<=0 && caps[p.name.toLowerCase()]!=null;
+  }).length;
+  if(zeroed) bits.push(zeroed+" player(s) set to 0% exposure");
+  var excl = Object.keys(excludeIds||{}).length;
+  if(excl) bits.push(excl+" player(s) excluded");
+  if(!bits.length && pool.length < 20)
+    bits.push("only "+pool.length+" players in the pool");
+  return bits.length ? " ("+bits.join("; ")+")" : "";
+}
+
 function seatLocks(cfg, pool, locks){
   /* locks: [{slot, player}] → returns {locked, lockedIds, errors} */
   var locked=[], lockedIds={}, errors=[];
@@ -771,7 +791,9 @@ function executeDirectives(text, hostEl, userText){
       if(!res.lineups.length){
         var ne = document.createElement("div");
         ne.className = "action-note err";
-        ne.textContent = "⚙️ The optimizer couldn't fit a valid lineup — the pool may be too small or too expensive for the cap. Add cheaper players in the DFS Lab.";
+        ne.textContent = "⚙️ The optimizer couldn't fit a valid lineup"+
+          diagnoseBuildFailure(c, excludeIds, seat.lockedIds)+
+          " — try fewer locks/excludes, raise a 0% exposure cap, or add cheaper players in the DFS Lab.";
         hostEl.appendChild(ne);
         return;
       }
