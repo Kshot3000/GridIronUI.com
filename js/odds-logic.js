@@ -74,6 +74,52 @@ var L = {
     });
     return res;
   },
+  /* Median of a numeric list; null when empty. Median beats mean here —
+     one book hanging a wild number shouldn't drag the reference point. */
+  median: function(nums){
+    var s = nums.filter(function(n){ return isFinite(n); }).sort(function(x,y){ return x-y; });
+    if(!s.length) return null;
+    var m = s.length >> 1;
+    return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+  },
+  /* Market consensus: the median line across every listed book for this game.
+     Slots are null where no book posts that market — never invents a line.
+     Returns {n, spread:{a:{pt},h:{pt}}, total:{o:{pt},u:{pt}}, ml:{a:{pr},h:{pr}}}. */
+  consensus: function(books, ev){
+    function collect(mkey, name, field){
+      var vals = [];
+      books.forEach(function(bk){
+        var o = L.oneOutcome(bk, mkey, name);
+        if(o && isFinite(o[field])) vals.push(Number(o[field]));
+      });
+      return L.median(vals);
+    }
+    function slot(v, k){ return v===null ? null : (function(o){ o[k]=v; return o; })({}); }
+    return {
+      n: books.length,
+      spread: { a: slot(collect("spreads", ev.away_team, "point"), "pt"),
+                h: slot(collect("spreads", ev.home_team, "point"), "pt") },
+      total:  { o: slot(collect("totals", "Over", "point"), "pt"),
+                u: slot(collect("totals", "Under", "point"), "pt") },
+      ml:     { a: slot(collect("h2h", ev.away_team, "price"), "pr"),
+                h: slot(collect("h2h", ev.home_team, "price"), "pr") }
+    };
+  },
+  /* Off-market flag: a book's line differs from the consensus by a meaningful
+     amount — a full point on spreads/totals, or 3% of implied probability on
+     moneylines. That's either a stale line or a deliberate lean; either way
+     it's where the value (or the trap) lives. Single-book boards never flag. */
+  offMarket: function(cons, mkey, side, point, price){
+    if(!cons) return false;
+    var c = null;
+    if(mkey==="spreads")      c = side==="a" ? cons.spread.a : cons.spread.h;
+    else if(mkey==="totals")  c = side==="o" ? cons.total.o  : cons.total.u;
+    else if(mkey==="h2h")     c = side==="a" ? cons.ml.a     : cons.ml.h;
+    else return false;
+    if(!c) return false;
+    if(mkey==="h2h") return Math.abs(1/price - 1/c.pr) >= 0.03 - 1e-9;
+    return Math.abs(point - c.pt) >= 1.0 - 1e-9;
+  },
   /* count best-prices per book; returns top book key (or null) */
   topBook: function(books, bestMaps){
     var count = {};

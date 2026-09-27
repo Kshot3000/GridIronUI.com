@@ -44,6 +44,30 @@ ok("topBook empty -> null", L.topBook(thin,[{a:null,h:null}])===null);
 /* dec2am */
 ok("dec2am 1.91 = -110", L.dec2am(1.91)===-110, L.dec2am(1.91));
 ok("dec2am 2.5 = +150", L.dec2am(2.5)==="+150", L.dec2am(2.5));
+/* ---- market consensus ---- */
+var c = L.consensus(books, ev);
+ok("consensus n = 3", c.n===3, c.n);
+ok("consensus spread a = -6.5 (median of -6.5,-7,-6.5)", c.spread.a && c.spread.a.pt===-6.5, JSON.stringify(c.spread.a));
+ok("consensus spread h = 6.5", c.spread.h && c.spread.h.pt===6.5, JSON.stringify(c.spread.h));
+ok("consensus total over = 47.5 (median of 47.5,47,47.5)", c.total.o && c.total.o.pt===47.5, JSON.stringify(c.total.o));
+ok("consensus ML away = 1.38 (median of 1.40,1.36,1.38)", c.ml.a && c.ml.a.pr===1.38, JSON.stringify(c.ml.a));
+ok("consensus ML home = 2.95", c.ml.h && c.ml.h.pr===2.95, JSON.stringify(c.ml.h));
+var c2 = L.consensus(books.slice(0,2), ev);
+ok("even count: spread a median = -6.75", c2.spread.a && c2.spread.a.pt===-6.75, JSON.stringify(c2.spread.a));
+var ct = L.consensus(thin, ev);
+ok("thin board: spread slots null, ML away kept", ct.spread.a===null && ct.spread.h===null && ct.ml.a && ct.ml.a.pr===1.5 && ct.ml.h===null, JSON.stringify(ct));
+ok("empty books: all slots null", (function(){ var e=L.consensus([],ev); return e.spread.a===null && e.total.o===null && e.ml.a===null && e.n===0; })());
+/* ---- off-market flags ---- */
+ok("FD -7 vs consensus -6.5 (0.5 pt): not flagged", L.offMarket(c,"spreads","a",-7,1.87)===false);
+ok("full point off spread: flagged", L.offMarket(c,"spreads","a",-5.5,1.91)===true);
+ok("DK -6.5 on consensus: not off-market", L.offMarket(c,"spreads","a",-6.5,1.91)===false);
+ok("0.5 pt off (FD total 47 vs 47.5): not flagged", L.offMarket(c,"totals","o",47,1.87)===false);
+ok("full point off totals: flagged", L.offMarket(c,"totals","o",46.5,1.87)===true);
+ok("ML home 3.30 vs consensus 2.95: flagged (~3.6% implied)", L.offMarket(c,"h2h","h",null,3.30)===true);
+ok("ML home 3.05 vs consensus 2.95: not flagged (~1.1% implied)", L.offMarket(c,"h2h","h",null,3.05)===false);
+ok("single-book board never flags", (function(){ var s=L.consensus(books.slice(0,1),ev); return L.offMarket(s,"spreads","a",-6.5,1.91)===false && L.offMarket(s,"h2h","a",null,1.40)===false; })());
+ok("missing consensus slot: no flag", L.offMarket(ct,"spreads","a",-6.5,1.9)===false);
+ok("unknown market: no flag", L.offMarket(c,"props","a",-6.5,1.9)===false);
 
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL ODDS-LOGIC TESTS PASSED");
 process.exit(fails ? 1 : 0);

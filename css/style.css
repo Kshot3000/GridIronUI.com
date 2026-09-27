@@ -201,6 +201,10 @@ td.best,span.best{
 td.flash{animation:flash 1.2s ease-out}
 .mv-up{color:var(--green);font-weight:700}
 .mv-dn{color:var(--red);font-weight:700}
+/* market consensus line + off-market flag on the odds board */
+.cons-line{margin:-8px 0 14px;font-size:.84rem}
+.cons-line span{color:var(--gold-soft)}
+.offmkt{color:var(--gold);font-weight:700;cursor:help}
 
 /* ---------- forms ---------- */
 .field{margin-bottom:16px}
