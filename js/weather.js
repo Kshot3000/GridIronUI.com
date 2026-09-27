@@ -111,6 +111,20 @@ function impact(w){
   else if(w.temp >= 90) notes.push('<span class="tag">Heat '+w.temp+'°F</span>');
   return notes.length ? notes.join(" ") : '<span class="tag green">No major concerns</span>';
 }
+/* Pure builders, exported on GIU for node tests (tests/test-weather.js).
+   GameDay matchup header: both team identities (logo + real color chip + name)
+   with an "at" between — same identity system as scores + homepage. */
+function matchupHTML(away, home){
+  function side(t){
+    var tm = (t&&t.team)||{};
+    var abbr = tm.abbreviation || tm.shortDisplayName || "";
+    return '<span class="team">'+GIU.teamLogo(tm, 38)+GIU.teamChip(tm, abbr)+
+      '<span class="nm">'+GIU.esc(tm.displayName||"")+'</span></span>';
+  }
+  return '<div class="wx-matchup">'+side(away)+'<span class="at">at</span>'+side(home)+'</div>';
+}
+GIU.wxMatchupHTML = matchupHTML;
+GIU.wxImpact = impact;
 
 GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard").then(function(d){
   var evs = (d.events||[]).filter(function(ev){
@@ -132,7 +146,7 @@ GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreb
     return '<div class="card" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
       (st ? ' data-sname="'+GIU.esc(st[1])+'" data-scity="'+GIU.esc(st[2])+'" data-slat="'+st[3]+'" data-slon="'+st[4]+'" data-sroof="'+st[5]+'"' : "")+'>'+
       '<div class="game-meta"><span>'+when+'</span>'+(v.neutral?'<span class="tag" style="margin-left:8px">neutral site</span>':"")+'</div>'+
-      '<h3 style="margin:8px 0">'+GIU.esc(away.team.displayName)+' @ '+GIU.esc(home.team.displayName)+'</h3>'+
+      matchupHTML(away, home)+
       (st ? '<p style="font-size:.86rem;color:var(--muted);margin:0 0 10px">🏟️ '+GIU.esc(st[1])+' · '+GIU.esc(st[2])+(st[5]==="open"?"":' · <span class="tag blue">'+st[5]+' roof</span>')+'</p>'
           : '<p style="color:var(--faint)">Stadium data unavailable</p>')+
       '<div class="wx-body"><div class="skel" style="height:60px"></div></div></div>';

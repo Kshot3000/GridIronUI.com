@@ -8,7 +8,7 @@ The sharpest free sports betting knowledge hub — guides, calculators, live odd
 
 - **Learn** — original guides (betting 101, bet types, bankroll, advanced strategy) + glossary
 - **Tools** — odds converter, implied probability, parlay math, Kelly staking, no-vig calculator
-- **Live data** — odds board (The Odds API, user-supplied key), Polymarket markets, ESPN scores/news/injuries, Open-Meteo stadium weather
+- **Live data** — odds board (The Odds API, user-supplied key), Polymarket + Kalshi NFL moneyline prices (Kalshi via server-side snapshot), ESPN scores/news/injuries, Open-Meteo stadium weather
 - **DFS Lab** — real lineup optimizer for DraftKings/FanDuel, NFL/NBA, cash/GPP, with CSV import and export
 - **Watch** — betting shows and analysis from major outlets
 
@@ -36,6 +36,8 @@ node tests/test-dfs.js        # DFS optimizer tests
 node tests/test-dfs-exposure.js  # DFS exposure summary tests
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 node tests/test-kalshi.js     # Kalshi snapshot logic tests
+node tests/test-team-brand.js  # ESPN team logo/color identity tests
+node tests/test-weather.js    # weather matchup header + impact tests
 ```
 
 ### Kalshi NFL snapshot

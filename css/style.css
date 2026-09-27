@@ -315,6 +315,11 @@ select option{background:#141a26}
 .team .sc{font-family:var(--font-display);font-weight:800;font-size:1.3rem;margin-left:auto}
 .team-logo{width:40px;height:40px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45))}
 @media(max-width:640px){.team-logo{width:34px;height:34px}}
+/* Weather page matchup header — two GameDay team identities with an "at" between */
+.wx-matchup{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:10px 0 4px}
+.wx-matchup .nm{font-size:1.02rem;max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wx-matchup .at{color:var(--faint);font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em}
+@media(max-width:640px){.wx-matchup .nm{max-width:148px;font-size:.95rem}}
 .game-meta{font-size:.78rem;color:var(--faint);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .leaders{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft);display:flex;gap:8px 16px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
 .leaders b{color:var(--gold-soft);font-weight:700;margin-right:4px;text-transform:uppercase;font-size:.68rem;letter-spacing:.07em}
