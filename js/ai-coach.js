@@ -1,4 +1,4 @@
-/* GridIronUI AI Coach — "Grid". Chat UI + Matrix obelisk face + Pollinations LLM.
+/* GridIronUI AI Coach — "Grid". Chat UI + Matrix baseball face + multi-provider free LLM chain.
    Pure logic in js/ai-coach-core.js (window.AICoachCore); optimizer in js/dfs-opt.js (window.DFSOpt). */
 (function(){
 "use strict";
@@ -28,20 +28,42 @@ function exposureCaps(){
 }
 function saveExposureCaps(c){ try{ localStorage.setItem(CHAT_KEY+cfgKey(), JSON.stringify(c)); }catch(e){} }
 
-/* ================= THE FACE — Matrix obelisk =================
-   Rotating tapered monolith (obelisk). Each visible face is sampled as a
-   grid of 3D points; every point is drawn as a Matrix glyph whose brightness
-   encodes depth. A football silhouette (oval + laces) in brighter glyphs is
-   wrapped on the faces. Pure canvas 2D, no libraries. */
+/* ================= THE FACE — Matrix baseball =================
+   A 3D-projected sphere skinned in falling green Matrix-style glyphs.
+   The two classic baseball seam curves (with stitching ticks) are drawn in
+   brighter, bolder glyphs so it reads unmistakably as a baseball.
+   Pure canvas 2D, no libraries. */
 var face = (function(){
   var canvas = $("faceCanvas"), ctx = canvas.getContext("2d");
   var W=0, H=0, DPR=1;
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var GLYPHS = "アイカキクケコサシスセソタチツ0123456789$#*+-<>/\\|=:.";
-  /* obelisk: tapered square column. bottom half-width wb, top wt, height h */
-  var WB=0.62, WT=0.34, HH=2.3;
-  var state = { mode:"idle", spin:0, glow:0, energy:0, t:0 };
+  var GLYPHS = "\u30a2\u30a4\u30ab\u30ad\u30af\u30b1\u30b3\u30b5\u30b7\u30b9\u30bb\u30bd\u30bf\u30c1\u30c4\u30c6\u30c8\u30ca0123456789$#*+-<>/\\|=:.";
+  var TILT = 0.45;            /* fixed X tilt so the seams read in 3D */
+  var state = { mode:"idle", spin:0.6, glow:0, energy:0, t:0 };
   var rain = [];
+
+  /* fibonacci sphere skin */
+  var SKIN_N = 620, skin = [];
+  (function(){
+    var ga = Math.PI * (3 - Math.sqrt(5));
+    for(var i=0;i<SKIN_N;i++){
+      var y = 1 - (i/(SKIN_N-1))*2, r = Math.sqrt(Math.max(0,1-y*y)), th = ga*i;
+      skin.push([Math.cos(th)*r, y, Math.sin(th)*r]);
+    }
+  })();
+
+  /* baseball seam: one wavy great-circle-ish curve -> the two classic lobes.
+     phi(t) = A*sin(2t) weaves the circle up/down, giving the familiar
+     two-curved-seam look from any angle. */
+  var SEAM_N = 150, seam = [];
+  (function(){
+    var A = 0.55;
+    for(var i=0;i<SEAM_N;i++){
+      var t = (i/SEAM_N)*Math.PI*2, ph = A*Math.sin(2*t), c = Math.cos(ph);
+      seam.push([Math.cos(t)*c, Math.sin(ph), Math.sin(t)*c, t]);
+    }
+  })();
+  var STITCH_EVERY = 7;       /* stitch tick every Nth seam sample */
 
   function resize(){
     var r = canvas.getBoundingClientRect();
@@ -51,88 +73,84 @@ var face = (function(){
     ctx.setTransform(DPR,0,0,DPR,0,0);
     rain = [];
     var cols = Math.floor(W/26);
-    for(var i=0;i<cols;i++) rain.push({ x: i*26+Math.random()*14, y: Math.random()*H, sp: 1.2+Math.random()*2.6, len: 6+Math.random()*10, ch: [] });
+    for(var i=0;i<cols;i++) rain.push({ x: i*26+Math.random()*14, y: Math.random()*H, sp: 1.2+Math.random()*2.6, len: 6+Math.random()*10 });
   }
 
-  function corners(){
-    return [ /* bottom ring then top ring */
-      [-WB,-HH/2,-WB],[WB,-HH/2,-WB],[WB,-HH/2,WB],[-WB,-HH/2,WB],
-      [-WT, HH/2,-WT],[WT, HH/2,-WT],[WT, HH/2,WT],[-WT, HH/2,WT]
-    ];
-  }
-  var FACES = [ [0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7] ];
-  function rot(p, a){
+  function rotY(p, a){
     var c=Math.cos(a), s=Math.sin(a);
     return [p[0]*c+p[2]*s, p[1], -p[0]*s+p[2]*c];
+  }
+  function rotX(p, a){
+    var c=Math.cos(a), s=Math.sin(a);
+    return [p[0], p[1]*c-p[2]*s, p[1]*s+p[2]*c];
   }
   function proj(p, f, cx, cy, S){
     var sc = f/(f+p[2]);
     return [cx+p[0]*sc*S, cy-p[1]*sc*S, sc, p[2]];
   }
-  function glyphAt(u, v, depth, glow){
-    /* football silhouette in face UV space */
-    var fu=(u-0.5)/0.30, fv=(v-0.50)/0.36;
-    var d2 = fu*fu+fv*fv;
-    var lace = Math.abs(u-0.5)<0.028 && Math.abs(v-0.50)<0.24;
-    var edge = d2<1.12 && d2>=1.0;
-    var bright = 0.30 + 0.70*depth;           /* depth shading */
-    if(edge) bright = Math.max(bright, 0.75);
-    if(d2<1){ bright = Math.max(bright, 0.9); } /* football body */
-    if(lace) bright = 1.0;
-    bright = Math.min(1, bright + glow*0.25 + state.energy*0.35);
-    var ch = GLYPHS[(Math.random()*GLYPHS.length)|0];
-    var rC, gC, bC;
-    if(d2<1 || lace){ rC=255; gC=215+((Math.random()*40)|0); bC=110; } /* gold-white ball */
-    else { rC=40; gC=255; bC=120; }                                    /* matrix green */
-    return { ch:ch, style:"rgba("+rC+","+gC+","+bC+","+bright.toFixed(2)+")", bright:bright };
-  }
 
-  function drawObelisk(cx, cy, S){
-    var a = state.spin, f = 4.2;
-    var cs = corners().map(function(p){ return rot(p, a); });
-    var gl = state.glow;
+  function drawBall(cx, cy, S){
+    var a = state.spin, f = 3.4, gl = state.glow;
     /* ambient green aura while thinking */
     if(gl>0.02){
-      var g = ctx.createRadialGradient(cx,cy,10,cx,cy,S*1.9);
+      var g = ctx.createRadialGradient(cx,cy,10,cx,cy,S*2.1);
       g.addColorStop(0,"rgba(23,201,100,"+(0.20*gl).toFixed(3)+")");
       g.addColorStop(1,"rgba(23,201,100,0)");
-      ctx.fillStyle=g; ctx.fillRect(cx-S*2,cy-S*2.6,S*4,S*5.2);
+      ctx.fillStyle=g; ctx.fillRect(cx-S*2.2,cy-S*2.2,S*4.4,S*4.4);
     }
-    /* edges first (dim) */
-    ctx.lineWidth = 1;
-    FACES.forEach(function(fi){
-      var pts = fi.map(function(i){ return proj(cs[i], f, cx, cy, S); });
-      /* visible if face normal (after rotation) faces camera: use winding via cross of first two edges in screen space */
-      var ax=pts[1][0]-pts[0][0], ay=pts[1][1]-pts[0][1], bx=pts[3][0]-pts[0][0], by=pts[3][1]-pts[0][1];
-      if(ax*by-ay*bx >= 0) return; /* back face */
-      ctx.strokeStyle = "rgba(23,201,100,"+(0.28+0.5*gl).toFixed(2)+")";
+    var i, p, q;
+    /* --- glyph skin: front hemisphere only, brightness encodes depth --- */
+    for(i=0;i<skin.length;i++){
+      p = rotX(rotY(skin[i], a), TILT);
+      if(p[2] < -0.08) continue;                    /* back of the ball */
+      q = proj(p, f, cx, cy, S);
+      var depth = Math.max(0, Math.min(1, (1.1-q[3])/2.1));
+      var bright = Math.min(1, 0.22 + 0.62*depth + gl*0.2 + state.energy*0.3);
+      var ch = GLYPHS[(Math.random()*GLYPHS.length)|0];
+      var fs = Math.max(6, 10.5*q[2]);
+      ctx.font = fs.toFixed(1)+"px monospace";
+      ctx.fillStyle = "rgba(46,255,128,"+bright.toFixed(2)+")";
+      ctx.fillText(ch, q[0]-fs*0.35, q[1]+fs*0.35);
+    }
+    /* --- seams: brighter, bolder glyphs --- */
+    var spts = [];
+    for(i=0;i<seam.length;i++){
+      p = rotX(rotY(seam[i], a), TILT);
+      q = proj(p, f, cx, cy, S);
+      spts.push(q);
+      if(p[2] < 0.02) continue;                     /* seam on the far side */
+      var ch2 = GLYPHS[(Math.random()*GLYPHS.length)|0];
+      var fs2 = Math.max(8, 13*q[2]);
+      ctx.font = "bold "+fs2.toFixed(1)+"px monospace";
+      ctx.fillStyle = "rgba(255,236,170,"+Math.min(1,0.75+gl*0.25+state.energy*0.25).toFixed(2)+")";
+      ctx.fillText(ch2, q[0]-fs2*0.35, q[1]+fs2*0.35);
+    }
+    /* --- stitching ticks: short bright dashes perpendicular to the seam --- */
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,214,110,"+Math.min(1,0.85+gl*0.15).toFixed(2)+")";
+    ctx.lineCap = "round";
+    for(i=0;i<seam.length;i+=STITCH_EVERY){
+      var prev = spts[(i-1+seam.length)%seam.length], cur = spts[i], nxt = spts[(i+1)%seam.length];
+      var pr = rotX(rotY(seam[i], a), TILT);
+      if(pr[2] < 0.02) continue;
+      var tx = nxt[0]-prev[0], ty = nxt[1]-prev[1];
+      var tl = Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
+      var nx=-ty, ny=tx, L=7*cur[2];
       ctx.beginPath();
-      ctx.moveTo(pts[0][0],pts[0][1]);
-      for(var k=1;k<4;k++) ctx.lineTo(pts[k][0],pts[k][1]);
-      ctx.closePath(); ctx.stroke();
-      /* glyph skin */
-      var NU=8, NV=14;
-      for(var iu=0;iu<=NU;iu++) for(var iv=0;iv<=NV;iv++){
-        var u=iu/NU, v=iv/NV;
-        /* bilinear interp across trapezoid corners b0,b1,t1,t0 */
-        var p0=cs[fi[0]],p1=cs[fi[1]],p2=cs[fi[2]],p3=cs[fi[3]];
-        var x=(p0[0]*(1-u)+p1[0]*u)*(1-v)+(p3[0]*(1-u)+p2[0]*u)*v;
-        var y=(p0[1]*(1-u)+p1[1]*u)*(1-v)+(p3[1]*(1-u)+p2[1]*u)*v;
-        var z=(p0[2]*(1-u)+p1[2]*u)*(1-v)+(p3[2]*(1-u)+p2[2]*u)*v;
-        var q=proj([x,y,z], f, cx, cy, S);
-        var depth = Math.max(0, Math.min(1, (1.6-q[3])/2.6));
-        var gl2 = glyphAt(u, v, depth, gl);
-        var fs = Math.max(6, 11*q[2]);
-        ctx.font = fs.toFixed(1)+"px monospace";
-        ctx.fillStyle = gl2.style;
-        ctx.fillText(gl2.ch, q[0]-fs*0.35, q[1]+fs*0.35);
-      }
-    });
+      ctx.moveTo(cur[0]-nx*L, cur[1]-ny*L);
+      ctx.lineTo(cur[0]+nx*L, cur[1]+ny*L);
+      ctx.stroke();
+    }
+    /* faint outline to sell the sphere (unit ball at focal distance 3.4) */
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "rgba(23,201,100,"+(0.35+0.45*gl).toFixed(2)+")";
+    ctx.beginPath(); ctx.arc(cx, cy, S*1.05, 0, Math.PI*2); ctx.stroke();
   }
 
   function drawRain(){
     ctx.font = "13px monospace";
-    rain.forEach(function(c){
+    for(var ci=0;ci<rain.length;ci++){
+      var c = rain[ci];
       c.y += c.sp;
       if(c.y - c.len*16 > H){ c.y = -Math.random()*120; c.sp = 1.2+Math.random()*2.6; }
       for(var i=0;i<c.len;i++){
@@ -140,23 +158,22 @@ var face = (function(){
         if(y<0||y>H) continue;
         var head = i===0;
         ctx.fillStyle = head ? "rgba(180,255,200,0.85)" : "rgba(23,201,100,"+(0.35*(1-i/c.len)).toFixed(2)+")";
-        var ch = GLYPHS[(Math.random()*GLYPHS.length)|0];
-        ctx.fillText(ch, c.x, y);
+        ctx.fillText(GLYPHS[(Math.random()*GLYPHS.length)|0], c.x, y);
       }
-    });
+    }
   }
 
   function frame(){
     state.t += 0.016;
-    if(state.mode==="idle"){ state.spin += 0.006; state.glow += (0-state.glow)*0.06; }
-    else if(state.mode==="thinking"){ state.spin += 0.05; state.glow = 0.55+0.45*Math.sin(state.t*7); }
-    else if(state.mode==="speaking"){ state.spin += 0.014; state.glow += (0.25-state.glow)*0.08; }
+    if(state.mode==="idle"){ state.spin += 0.008; state.glow += (0-state.glow)*0.06; }
+    else if(state.mode==="thinking"){ state.spin += 0.06; state.glow = 0.55+0.45*Math.sin(state.t*7); }
+    else if(state.mode==="speaking"){ state.spin += 0.016; state.glow = 0.3+0.25*Math.sin(state.t*5); }
     state.energy *= 0.93;
     ctx.fillStyle = "rgba(6,10,14,0.55)"; /* trails */
     ctx.fillRect(0,0,W,H);
     drawRain();
-    var S = Math.min(W,H)/3.1;
-    drawObelisk(W/2, H*0.52, S);
+    var S = Math.min(W,H)/2.9;
+    drawBall(W/2, H*0.52, S);
   }
 
   function loop(){ if(!reduced) requestAnimationFrame(loop); frame(); }
@@ -164,7 +181,7 @@ var face = (function(){
   resize(); frame(); if(!reduced) loop();
 
   return {
-    setMode: function(m){ state.mode = m; $("faceStatus").textContent = m==="idle"?"idle":(m==="thinking"?"thinking…":"responding…"); },
+    setMode: function(m){ state.mode = m; $("faceStatus").textContent = m==="idle"?"idle":(m==="thinking"?"thinking\u2026":"responding\u2026"); },
     pulse: function(){ state.energy = Math.min(1, state.energy+0.55); }
   };
 })();
@@ -189,7 +206,12 @@ function addMsg(role, html){
 function fmtText(t){
   return esc(t).replace(/\n/g,"<br>");
 }
-function stripDirectives(t){ return t.replace(/```gridiron\s*\n[\s\S]*?```/g,"").trim(); }
+function stripDirectives(t){
+  return String(t)
+    .replace(/```gridiron\s*\n[\s\S]*?```/g,"")
+    .replace(/```json\s*\n[\s\S]*?```/g,"")  /* models sometimes fence JSON here; never shown */
+    .trim();
+}
 
 function refreshPoolBar(){
   var c = cfg();
@@ -219,67 +241,116 @@ function exampleChips(){
   });
 }
 
-/* ---------- Pollinations LLM ---------- */
-var API = "https://text.pollinations.ai/";
-function callLLM(messages, model, onToken, onDone, onFail){
-  var ctrl = new AbortController();
-  var to = setTimeout(function(){ ctrl.abort(); }, 120000);
-  var full = "";
-  var gotToken = false;
-  function finishFail(msg){ clearTimeout(to); onFail(msg); }
+/* ---------- LLM provider chain ----------
+   Order: Pollinations free tier (keyless, verified working + CORS-open) →
+   your optional Gemini key (only if you pasted one) → on-device browser AI
+   (only if the browser reports one available) → honest failure message.
+   The status pill always shows which provider actually answered. */
+var GEMINI_KEY_LS = "giu_gemini_key";
+function getGeminiKey(){ try{ return (localStorage.getItem(GEMINI_KEY_LS)||"").trim(); }catch(e){ return ""; } }
+function providerStatus(html){ var el=$("providerStatus"); if(el) el.innerHTML = html; }
 
-  fetch(API, {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    signal: ctrl.signal,
-    body: JSON.stringify({ messages: messages, model: CORE.modelId(model), stream:true })
-  }).then(function(res){
-    if(res.status===404 || res.status===400){
-      return res.text().then(function(t){
-        if(model!=="openai"){
-          onFail({ fallback:true, note:"Model '"+model+"' isn't available on the free API right now — retrying with the default model." });
-        } else finishFail("The free API rejected the request ("+res.status+"). "+t.slice(0,120));
-      });
+function pollinationsGET(messages){
+  var prompt = messages.map(function(m){ return m.role.toUpperCase()+": "+m.content; }).join("\n\n");
+  return fetch("https://text.pollinations.ai/"+encodeURIComponent(prompt.slice(0,6000)))
+    .then(function(res){
+      if(!res.ok) throw { code:"http", message:"The free API returned HTTP "+res.status+"." };
+      return res.text();
+    });
+}
+function pollinationsStream(messages, model, onToken){
+  return new Promise(function(resolve, reject){
+    var ctrl;
+    try{ ctrl = new AbortController(); }catch(e){ ctrl = null; }
+    var to = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 120000);
+    var full = "", gotToken = false, settled = false;
+    function done(t){ if(settled) return; settled = true; clearTimeout(to); resolve(t); }
+    function fail(e){ if(settled) return; settled = true; clearTimeout(to); reject(e); }
+    function getFallback(){
+      pollinationsGET(messages).then(function(t){ onToken(t); done(t); }, fail);
     }
-    if(res.status===429){ finishFail("rate_limited"); return null; }
-    if(!res.ok){ finishFail("The free API returned "+res.status+" — wait a few seconds and try again."); return null; }
-    if(!res.body || !res.body.getReader()){ /* no streaming support: fall back */
-      return res.text().then(function(t){ full=t; onDone(full); clearTimeout(to); });
-    }
-    var reader = res.body.getReader();
-    var dec = new TextDecoder(), buf = "";
-    function pump(){
-      reader.read().then(function(r){
-        if(r.done){ clearTimeout(to); onDone(full); return; }
-        buf += dec.decode(r.value, {stream:true});
-        var lines = buf.split("\n"); buf = lines.pop();
-        lines.forEach(function(line){
-          line = line.trim();
-          if(line.indexOf("data:")!==0) return;
-          var data = line.slice(5).trim();
-          if(data==="[DONE]") return;
-          var piece = CORE.extractStreamContent(data);
-          if(piece){ full += piece; gotToken = true; onToken(piece); }
+    var fetchOpts = {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ messages: messages, model: CORE.modelId(model), stream:true })
+    };
+    if(ctrl) fetchOpts.signal = ctrl.signal;
+    fetch("https://text.pollinations.ai/", fetchOpts).then(function(res){
+      if(res.status===404 || res.status===400){
+        return res.text().then(function(){
+          fail({ code:"model_unavailable", message:"Model '"+model+"' isn't served by the free API right now ("+res.status+")." });
         });
-        pump();
-      }).catch(function(){ if(gotToken){ clearTimeout(to); onDone(full); } else fallbackGET(); });
-    }
-    pump();
-    return null;
-  }).catch(function(){ fallbackGET(); });
+      }
+      if(!res.ok){
+        return res.text().then(function(t){
+          fail({ code:"http", message:"The free API returned HTTP "+res.status+". "+String(t||"").slice(0,140) });
+        });
+      }
+      if(!res.body || !res.body.getReader()){
+        return res.text().then(function(t){ done(t); });
+      }
+      var reader = res.body.getReader(), dec = new TextDecoder(), buf = "";
+      (function pump(){
+        reader.read().then(function(r){
+          if(r.done){ done(full); return; }
+          buf += dec.decode(r.value, {stream:true});
+          var lines = buf.split("\n"); buf = lines.pop();
+          lines.forEach(function(line){
+            line = line.trim();
+            if(line.indexOf("data:")!==0) return;
+            var piece = CORE.extractStreamContent(line.slice(5).trim());
+            if(piece){ full += piece; gotToken = true; onToken(piece); }
+          });
+          pump();
+        }).catch(function(){ if(gotToken) done(full); else getFallback(); });
+      })();
+      return null;
+    }).catch(function(){ getFallback(); });
+  });
+}
 
-  function fallbackGET(){
-    /* non-streaming GET fallback */
-    var prompt = messages.map(function(m){ return m.role.toUpperCase()+": "+m.content; }).join("\n\n");
-    fetch(API+encodeURIComponent(prompt.slice(0,6000)), { signal: ctrl.signal })
-      .then(function(res){
-        if(res.status===429) throw "rate_limited";
-        if(!res.ok) throw "http "+res.status;
-        return res.text();
-      })
-      .then(function(t){ clearTimeout(to); onToken(t); onDone(t); })
-      .catch(function(e){ finishFail(e==="rate_limited"?"rate_limited":"Couldn't reach the free API. Check your connection and try again."); });
-  }
+/* Gemini via the visitor's own free key. The key is only ever sent to
+   Google's endpoint (see CORE.geminiUrl) and stored in localStorage. */
+function geminiRun(messages, onToken){
+  return CORE.geminiGenerateText(messages, getGeminiKey(), fetch).then(function(t){
+    onToken(t);
+    return t;
+  });
+}
+
+/* Chrome/Edge on-device AI (Prompt API). Only used when the browser itself
+   reports a model is available — never claimed otherwise. */
+function onDeviceRun(messages){
+  return new Promise(function(resolve, reject){
+    var LM = window.LanguageModel || (window.ai && window.ai.languageModel);
+    if(!LM){ reject({ code:"unavailable", message:"this browser has no on-device AI" }); return; }
+    var availP = (typeof LM.availability === "function")
+      ? LM.availability()
+      : Promise.resolve("available");
+    availP.then(function(av){
+      if(av !== "available"){
+        reject({ code:"unavailable", message:"on-device AI is '"+av+"' (needs a model download first)" });
+        return;
+      }
+      var sys = "";
+      var lastUser = "";
+      messages.forEach(function(m){
+        if(m.role==="system") sys += m.content+"\n";
+        else if(m.role==="user") lastUser = m.content;
+      });
+      LM.create(sys ? { systemPrompt: sys } : {}).then(function(session){
+        session.prompt(lastUser).then(function(out){
+          resolve(String(out==null?"":out));
+        }, function(e){
+          reject({ code:"ondevice", message:"on-device AI failed: "+String((e&&e.message)||e).slice(0,140) });
+        });
+      }, function(e){
+        reject({ code:"ondevice", message:"on-device AI failed to start: "+String((e&&e.message)||e).slice(0,140) });
+      });
+    }, function(){
+      reject({ code:"unavailable", message:"could not check on-device AI availability" });
+    });
+  });
 }
 
 /* ---------- action execution (through the real optimizer) ---------- */
@@ -561,27 +632,46 @@ function send(){
     scrollChat();
   }
   function onFail(err){
-    if(err && err.fallback){
-      var fb = addMsg("sys", esc(err.note));
-      void fb;
-      busy = false; $("sendBtn").disabled = false;
-      setFace("idle"); bubble.remove();
-      /* retry once with the default model */
-      $("modelSel").value = "openai";
-      $("chatInput").value = text;
-      send();
-      return;
-    }
     busy = false; $("sendBtn").disabled = false;
     setFace("idle");
     bubble.classList.remove("streaming");
-    var msg = err==="rate_limited"
-      ? "The free API is rate-limited right now — wait a few seconds and try again."
-      : String(err||"Something went wrong talking to the free API.");
-    body.innerHTML = '<span style="color:var(--gold-soft)">'+esc(msg)+'</span>';
+    providerStatus("⚠️ all providers failed");
+    var attempts = (err && err.attempts) || [];
+    var lines = attempts.map(function(a){ return "• "+a.label+" — "+a.error; });
+    var creditsHit = attempts.some(function(a){ return CORE.isCreditsError(a.error); });
+    var md = "**Grid couldn't reach any AI provider right now.**\n\n" +
+      (lines.length ? "Tried:\n"+lines.join("\n")+"\n\n" : "") +
+      (creditsHit
+        ? "The free tier looks out of credits at the moment — it usually recovers on its own, so try again in a bit.\n\n"
+        : "") +
+      (getGeminiKey()
+        ? "Your saved Gemini key didn't work either — double-check it at [AI Studio](https://aistudio.google.com/apikey)."
+        : "Tip: paste a free Gemini key from [AI Studio](https://aistudio.google.com/apikey) above and Grid will use it automatically whenever the free tier is busy. It stays in your browser — never sent anywhere but Google.");
+    body.innerHTML = CORE.renderRich(md);
     scrollChat();
   }
-  callLLM(msgs, model, onToken, onDone, onFail);
+  /* build the provider chain: keyless free tier first, then optional user key,
+     then on-device AI — whichever answers first wins, and the pill says who */
+  var models = (model==="gpt-oss") ? ["gpt-oss","openai"] : ["openai","gpt-oss"];
+  var providers = models.map(function(m){
+    return { id:"pollinations-"+m, label:"Pollinations free tier ("+m+")",
+             run:function(){ return pollinationsStream(msgs, m, onToken); } };
+  });
+  if(getGeminiKey()){
+    providers.push({ id:"gemini-key", label:"your Gemini key",
+                     run:function(){ return geminiRun(msgs, onToken); } });
+  }
+  providers.push({ id:"ondevice", label:"on-device AI",
+                   run:function(){ return onDeviceRun(msgs).then(function(t){ onToken(t); return t; }); } });
+
+  CORE.runProviderChain(providers, function(p){
+    providerStatus("⏳ trying "+esc(p.label)+"…");
+  }).then(function(res){
+    providerStatus("✅ answered by "+esc(res.provider.label));
+    onDone(res.text);
+  }, function(chainErr){
+    onFail(chainErr);
+  });
 }
 
 /* ---------- settings wiring ---------- */
@@ -610,6 +700,32 @@ $("clearBtn").addEventListener("click", function(){
   $("chatLog").innerHTML = "";
   greeting();
 });
+/* Gemini key settings: stays in localStorage, only ever sent to Google */
+function refreshGemUI(){
+  var has = !!getGeminiKey();
+  var inp = $("gemKey");
+  if(inp){
+    inp.value = "";
+    inp.placeholder = has ? "Key saved ✓ — paste a new one to replace" : "Paste AI Studio key";
+  }
+  var lbl = $("gemState");
+  if(lbl) lbl.textContent = has ? "saved in this browser" : "not set";
+}
+var gemSave = $("gemSave"), gemClear = $("gemClear");
+if(gemSave) gemSave.addEventListener("click", function(){
+  var v = ($("gemKey").value||"").trim();
+  if(!v){ return; }
+  try{ localStorage.setItem(GEMINI_KEY_LS, v); }catch(e){}
+  refreshGemUI();
+  addMsg("sys", "Gemini key saved in this browser. Grid will use it automatically whenever the free tier is busy or down.");
+});
+if(gemClear) gemClear.addEventListener("click", function(){
+  try{ localStorage.removeItem(GEMINI_KEY_LS); }catch(e){}
+  refreshGemUI();
+  addMsg("sys", "Gemini key removed from this browser.");
+});
+refreshGemUI();
+providerStatus("ready — free tier first");
 wireTabs("cSite","site", onCfgChange);
 wireTabs("cSport","sport", onCfgChange);
 wireTabs("cMode","mode", onCfgChange);

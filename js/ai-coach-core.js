@@ -109,9 +109,118 @@ function validateAction(d, pool){
   return { ok:false, error:"Unhandled action." };
 }
 
-/* ---------- model mapping ---------- */
-var MODEL_IDS = { openai:"openai", mistral:"mistral", llama:"llama", deepseek:"deepseek" };
+/* ---------- model mapping (only models verified working anonymously) ---------- */
+var MODEL_IDS = { openai:"openai", "gpt-oss":"gpt-oss" };
 function modelId(name){ return MODEL_IDS[name] || "openai"; }
+var POLLINATIONS_MODELS = ["openai", "gpt-oss"];
+
+/* ---------- credits / rate-limit detection ----------
+   Pollinations' free tier sometimes answers with a "not enough credits / top
+   up" message instead of a real reply. Detect it so the provider chain can
+   fail over instead of showing it as an answer. */
+function isCreditsError(t){
+  return /enough credits|top[\s-]?up|complete a quest|insufficient|quota exceeded|rate[\s-_]?limit|429|payment required|402/i
+    .test(String(t||""));
+}
+
+/* ---------- safe markdown-lite renderer (pure, DOM-free) ----------
+   Escape HTML first, then render `code`, **bold**, [text](url) and bare
+   URLs. Only http(s) links are emitted — javascript:/data: etc. never linkify. */
+function escHtml(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function renderRich(text){
+  var s = escHtml(text);
+  var codes = [];
+  s = s.replace(/`([^`\n]+)`/g, function(m,c){ codes.push(c); return "\uE000"+(codes.length-1)+"\uE000"; });
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, function(m,t,u){
+    return '<a href="'+u+'" target="_blank" rel="noopener">'+t+'</a>';
+  });
+  s = s.replace(/(^|[\s(>])((https?:\/\/)[^\s<)]+)/g, function(m,pre,url){
+    return pre+'<a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
+  });
+  s = s.replace(/\uE000(\d+)\uE000/g, function(m,i){ return "<code>"+codes[+i]+"</code>"; });
+  return s;
+}
+
+/* ---------- Gemini (user-supplied free key) ----------
+   The key is ONLY ever sent to Google's endpoint (as a query param, per
+   Google's API). geminiUrl is pure so tests can pin the host. */
+var GEMINI_HOST = "https://generativelanguage.googleapis.com";
+function geminiUrl(key){
+  return GEMINI_HOST + "/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key);
+}
+function errMessage(err){
+  if(!err) return "unknown error";
+  if(typeof err === "string") return err;
+  return String(err.message || err.code || err);
+}
+/* fetchFn is injected so node tests can mock it. Never sends the key anywhere
+   except geminiUrl(key). */
+function geminiGenerateText(messages, key, fetchFn){
+  var sys = "", contents = [];
+  (messages||[]).forEach(function(m){
+    if(m.role==="system"){ sys += (sys?"\n":"")+m.content; }
+    else contents.push({ role: m.role==="assistant" ? "model" : "user",
+                         parts: [{ text: String(m.content) }] });
+  });
+  var body = { contents: contents,
+               generationConfig: { temperature: 0.7, maxOutputTokens: 1500 } };
+  if(sys) body.system_instruction = { parts: [{ text: sys }] };
+  return fetchFn(geminiUrl(key), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }).then(function(res){
+    return res.text().then(function(t){
+      var data;
+      try{ data = JSON.parse(t); }
+      catch(e){ throw { code:"bad_response", message:"Gemini returned a non-JSON response." }; }
+      if(!res.ok){
+        var msg = (data.error && data.error.message) || ("HTTP "+res.status);
+        throw { code: res.status===400 ? "bad_key" : "gemini_error",
+                message: "Gemini: "+String(msg).slice(0,200) };
+      }
+      var parts = data.candidates && data.candidates[0] &&
+                  data.candidates[0].content && data.candidates[0].content.parts;
+      var text = (parts||[]).map(function(p){ return p.text||""; }).join("");
+      if(!text) throw { code:"empty", message:"Gemini returned no text." };
+      return text;
+    });
+  });
+}
+
+/* ---------- provider chain (pure orchestration, providers injected) ----------
+   Tries providers in order; records every attempt; resolves with
+   {provider, text, attempts} or rejects with Error("all_failed") carrying
+   .attempts. A "credits" reply counts as a failure, never an answer. */
+function runProviderChain(providers, onAttempt){
+  var attempts = [];
+  var i = 0;
+  function next(){
+    if(i >= providers.length){
+      var e = new Error("all_failed");
+      e.attempts = attempts;
+      return Promise.reject(e);
+    }
+    var p = providers[i++];
+    if(onAttempt){ try{ onAttempt(p); }catch(ign){} }
+    return Promise.resolve()
+      .then(function(){ return p.run(); })
+      .then(function(text){
+        if(isCreditsError(text)) throw { code:"credits", message:"provider reported insufficient credits" };
+        return { provider:p, text:text, attempts:attempts };
+      })
+      .catch(function(err){
+        attempts.push({ id:p.id, label:p.label, error:errMessage(err) });
+        return next();
+      });
+  }
+  return next();
+}
 
 /* ---------- SSE stream helper ----------
    Extracts assistant text from one OpenAI-style SSE data line.
@@ -146,13 +255,20 @@ function systemPrompt(ctx){
 
 var api = {
   ACTIONS: ACTIONS, MAX_POOL_IN_PROMPT: MAX_POOL_IN_PROMPT,
+  POLLINATIONS_MODELS: POLLINATIONS_MODELS, GEMINI_HOST: GEMINI_HOST,
   extractDirectives: extractDirectives,
   buildPromptContext: buildPromptContext,
   validateAction: validateAction,
   findPlayer: findPlayer,
   modelId: modelId,
   extractStreamContent: extractStreamContent,
-  systemPrompt: systemPrompt
+  systemPrompt: systemPrompt,
+  isCreditsError: isCreditsError,
+  renderRich: renderRich,
+  escHtml: escHtml,
+  geminiUrl: geminiUrl,
+  geminiGenerateText: geminiGenerateText,
+  runProviderChain: runProviderChain
 };
 
 if(typeof module !== "undefined" && module.exports){ module.exports = api; }

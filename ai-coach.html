@@ -52,6 +52,15 @@ ul.ins{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:.88rem}
 ul.ins li{margin-bottom:4px}
 .caption{font-size:.76rem;color:var(--faint);margin-top:14px;line-height:1.5}
 .caption a{color:var(--muted);text-decoration:underline}
+.provider-status{font-size:.82rem;color:var(--muted);background:var(--bg-3);border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;min-width:170px}
+.key-field{min-width:230px}
+.key-row{display:flex;gap:8px}
+.key-row input{flex:1;background:var(--bg-3);border:1px solid var(--line);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:.9rem;min-width:0}
+.key-row input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow)}
+.key-note{font-size:.72rem;color:var(--faint);margin-top:6px;line-height:1.5}
+.key-note a{color:var(--muted);text-decoration:underline}
+.msg.sys a{color:var(--gold);font-weight:600}
+.msg.grid a{color:var(--gold);font-weight:600}
 .typing{display:inline-block}
 .typing span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px;animation:tp 1s infinite}
 .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
@@ -75,10 +84,10 @@ ul.ins li{margin-bottom:4px}
 
 <div class="wrap coach-layout">
   <aside class="card face-panel">
-    <canvas id="faceCanvas" aria-label="Grid's face: a rotating obelisk rendered in Matrix code with a football silhouette"></canvas>
+    <canvas id="faceCanvas" aria-label="Grid's face: a rotating baseball rendered in Matrix code with stitched seams"></canvas>
     <div class="face-name">GRID</div>
     <div class="face-status" id="faceStatus">idle</div>
-    <p class="caption" style="text-align:left">Grid's face: a rotating obelisk skinned in falling Matrix code, with a football wrapped around it in brighter glyphs. Spins faster while thinking, pulses while talking.</p>
+    <p class="caption" style="text-align:left">Grid's face: a rotating baseball skinned in falling Matrix code, with stitched seams drawn in brighter glyphs. Spins faster while thinking, pulses while talking.</p>
   </aside>
 
   <div class="card">
@@ -88,11 +97,20 @@ ul.ins li{margin-bottom:4px}
       <div class="field"><label>Contest</label><div class="tabs" id="cMode" style="margin:0"><button class="tab" data-v="cash">50/50 Cash</button><button class="tab" data-v="gpp">Tournament</button></div></div>
       <div class="field"><label>AI model (free)</label>
         <select id="modelSel">
-          <option value="openai" selected>openai — default, works</option>
-          <option value="mistral">mistral — may be unavailable</option>
-          <option value="llama">llama — may be unavailable</option>
-          <option value="deepseek">deepseek — may be unavailable</option>
+          <option value="openai" selected>openai — gpt-oss-20b, default</option>
+          <option value="gpt-oss">gpt-oss — alternate free model</option>
         </select>
+      </div>
+      <div class="field"><label>Provider status</label>
+        <div class="provider-status" id="providerStatus">—</div>
+      </div>
+      <div class="field key-field"><label>Gemini key <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+        <div class="key-row">
+          <input id="gemKey" type="password" placeholder="Paste AI Studio key" autocomplete="off" aria-label="Gemini API key">
+          <button class="btn btn-sm" type="button" id="gemSave">Save</button>
+          <button class="btn btn-sm" type="button" id="gemClear" title="Remove saved key">✕</button>
+        </div>
+        <div class="key-note"><span id="gemState">not set</span> · free key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> — stays in your browser, only ever sent to Google. Used automatically when the free tier is busy.</div>
       </div>
     </div>
 
@@ -106,7 +124,7 @@ ul.ins li{margin-bottom:4px}
         <button class="btn btn-sm" type="button" id="clearBtn" title="Clear chat">Clear</button>
       </div>
     </form>
-    <p class="caption">Grid runs on <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations'</a> free community text API — shared and rate-limited, no account or API key needed. Lineups are optimizer outputs built from your own editable projections in the <a href="dfs.html">DFS Lab</a>, not predictions — nothing here guarantees wins. Never wager more than you can afford to lose.</p>
+    <p class="caption">Grid tries providers in order: the free <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations</a> tier (no key needed), your optional Gemini key, then on-device browser AI if available. The status pill above always shows which provider actually answered. Lineups are optimizer outputs built from your own editable projections in the <a href="dfs.html">DFS Lab</a>, not predictions — nothing here guarantees wins. Never wager more than you can afford to lose.</p>
   </div>
 </div>
 
