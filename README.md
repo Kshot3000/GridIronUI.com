@@ -31,6 +31,7 @@ python3 -m http.server 8080   # serve locally
 node tests/test-betmath.js    # bet math tests
 node tests/test-odds.js       # odds logic tests
 node tests/test-dfs.js        # DFS optimizer tests
+node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 ```
 
 ## Deploy

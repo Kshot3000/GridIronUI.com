@@ -20,6 +20,7 @@ var NAV = [
   ["Weather","weather.html"],
   ["Watch","watch.html"],
   ["DFS Lab","dfs.html"],
+  ["AI Coach","ai-coach.html"],
   ["Tools","tools.html"],
   ["Guides","guides/betting-101.html"],
   ["Links","links.html"]
@@ -80,6 +81,7 @@ var footerHtml =
      '<li><a href="'+P("weather.html")+'">Game weather</a></li>'+
      '<li><a href="'+P("watch.html")+'">Watch</a></li>'+
      '<li><a href="'+P("dfs.html")+'">DFS Lab</a></li>'+
+     '<li><a href="'+P("ai-coach.html")+'">AI Coach</a></li>'+
    '</ul></div>'+
    '<div><h4>Company</h4><ul>'+
      '<li><a href="'+P("about.html")+'">About</a></li>'+

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lineup Coach — Grid | GridIronUI</title>
+<meta name="description" content="Talk to Grid, GridIronUI's AI DFS coach. Build DraftKings and FanDuel lineups conversationally — powered by a free LLM and the DFS Lab optimizer.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+.coach-layout{display:grid;grid-template-columns:340px 1fr;gap:22px;margin-top:26px;align-items:start}
+@media(max-width:900px){.coach-layout{grid-template-columns:1fr}}
+.face-panel{position:sticky;top:90px;text-align:center;overflow:hidden}
+@media(max-width:900px){.face-panel{position:static}}
+#faceCanvas{width:100%;height:380px;display:block;border-radius:var(--radius-sm);background:#060a0e;border:1px solid var(--line-soft)}
+.face-name{font-family:var(--font-display);font-weight:900;letter-spacing:.35em;font-size:1.5rem;margin:14px 0 2px;background:linear-gradient(180deg,#d8ffe8,#17c964);-webkit-background-clip:text;background-clip:text;color:transparent}
+.face-status{font-size:.8rem;color:var(--green);text-transform:uppercase;letter-spacing:.2em;min-height:1.2em}
+.face-status::before{content:"●";margin-right:6px;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.face-status::before{animation:none}}
+.coach-settings{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:14px}
+.coach-settings .field{min-width:150px}
+.coach-settings label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:block;margin-bottom:6px}
+.coach-settings select,.chat-input input{background:var(--bg-3);border:1px solid var(--line);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:.95rem;width:100%}
+.coach-settings select:focus,.chat-input input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow)}
+.pool-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;font-size:.86rem}
+.pool-pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;color:var(--muted)}
+.pool-pill b{color:var(--green)}
+.demo-tag{color:var(--gold);font-weight:700;font-size:.75rem}
+.pool-warn{color:var(--gold-soft)}
+.pool-warn a{color:var(--gold);font-weight:600}
+.chat-log{display:flex;flex-direction:column;gap:14px;max-height:560px;overflow-y:auto;padding:6px 2px;margin-bottom:14px}
+.msg{max-width:92%;padding:12px 15px;border-radius:var(--radius-sm);font-size:.94rem;line-height:1.55}
+.msg .who{font-size:.68rem;letter-spacing:.25em;color:var(--green);font-weight:700;margin-bottom:6px}
+.msg.grid{background:rgba(23,201,100,.07);border:1px solid rgba(23,201,100,.22);align-self:flex-start}
+.msg.user{background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.25);align-self:flex-end;text-align:left}
+.msg.sys{align-self:center;background:var(--bg-3);border:1px dashed var(--line);color:var(--muted);font-size:.82rem;max-width:100%}
+.msg.streaming{border-color:var(--green);box-shadow:0 0 18px -6px var(--green-glow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{background:var(--bg-3);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;transition:border-color .15s,color .15s}
+.chip:hover{border-color:var(--green);color:var(--text)}
+.chat-input{display:flex;gap:10px}
+.chat-input input{flex:1}
+.btn-row{display:flex;gap:8px}
+.action-note{font-size:.82rem;color:var(--gold-soft);margin-top:10px}
+.action-note.err{color:var(--red)}
+.lineup-card{margin-top:12px;background:rgba(255,255,255,.03)}
+ul.ins{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:.88rem}
+ul.ins li{margin-bottom:4px}
+.caption{font-size:.76rem;color:var(--faint);margin-top:14px;line-height:1.5}
+.caption a{color:var(--muted);text-decoration:underline}
+.typing{display:inline-block}
+.typing span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px;animation:tp 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){.typing span{animation:none}}
+</style>
+</head>
+<body>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=1600&q=65&auto=format&fit=crop')"></div>
+  <div class="wrap hero-inner">
+    <a class="back-link" href="dfs.html" style="position:relative;z-index:2">← DFS Lab</a>
+    <span class="kicker">Conversational optimizer</span>
+    <h1>AI Lineup Coach</h1>
+    <p class="lede">Meet <b>Grid</b> — talk through your slate, compare players, and have real optimizer-built lineups dealt right into the chat. Free to use, no account, powered by a community LLM.</p>
+  </div>
+</section>
+
+<div class="wrap coach-layout">
+  <aside class="card face-panel">
+    <canvas id="faceCanvas" aria-label="Grid's face: a rotating obelisk rendered in Matrix code with a football silhouette"></canvas>
+    <div class="face-name">GRID</div>
+    <div class="face-status" id="faceStatus">idle</div>
+    <p class="caption" style="text-align:left">Grid's face: a rotating obelisk skinned in falling Matrix code, with a football wrapped around it in brighter glyphs. Spins faster while thinking, pulses while talking.</p>
+  </aside>
+
+  <div class="card">
+    <div class="coach-settings">
+      <div class="field"><label>Site</label><div class="tabs" id="cSite" style="margin:0"><button class="tab" data-v="DK">DraftKings</button><button class="tab" data-v="FD">FanDuel</button></div></div>
+      <div class="field"><label>Sport</label><div class="tabs" id="cSport" style="margin:0"><button class="tab" data-v="NFL">NFL</button><button class="tab" data-v="NBA">NBA</button></div></div>
+      <div class="field"><label>Contest</label><div class="tabs" id="cMode" style="margin:0"><button class="tab" data-v="cash">50/50 Cash</button><button class="tab" data-v="gpp">Tournament</button></div></div>
+      <div class="field"><label>AI model (free)</label>
+        <select id="modelSel">
+          <option value="openai" selected>openai — default, works</option>
+          <option value="mistral">mistral — may be unavailable</option>
+          <option value="llama">llama — may be unavailable</option>
+          <option value="deepseek">deepseek — may be unavailable</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pool-bar" id="poolBar"></div>
+    <div class="chat-log" id="chatLog" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form class="chat-input" id="chatForm">
+      <input id="chatInput" type="text" placeholder="Ask Grid anything — e.g. build me 3 GPP lineups…" autocomplete="off" aria-label="Message Grid">
+      <div class="btn-row">
+        <button class="btn btn-green" type="submit" id="sendBtn">Send</button>
+        <button class="btn btn-sm" type="button" id="clearBtn" title="Clear chat">Clear</button>
+      </div>
+    </form>
+    <p class="caption">Grid runs on <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations'</a> free community text API — shared and rate-limited, no account or API key needed. Lineups are optimizer outputs built from your own editable projections in the <a href="dfs.html">DFS Lab</a>, not predictions — nothing here guarantees wins. Never wager more than you can afford to lose.</p>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/dfs-opt.js"></script>
+<script src="js/ai-coach-core.js"></script>
+<script src="js/ai-coach.js"></script>
+</body>
+</html>
