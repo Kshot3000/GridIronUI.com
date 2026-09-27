@@ -1,6 +1,13 @@
 /* GridIronUI AI Coach — pure logic (no DOM, no fetch).
    Directive extraction, prompt-context building, action validation, SSE helpers.
    Browser: window.AICoachCore · node: module.exports */
+var TEAM_ABBR = { chiefs:"KC", bills:"BUF", eagles:"PHI", cowboys:"DAL",
+  "49ers":"SF", niners:"SF", lions:"DET", ravens:"BAL", dolphins:"MIA",
+  seahawks:"SEA", packers:"GB", bengals:"CIN", patriots:"NE", jets:"NYJ",
+  giants:"NYG", commanders:"WAS", bears:"CHI", vikings:"MIN", falcons:"ATL",
+  panthers:"CAR", saints:"NO", buccaneers:"TB", bucs:"TB", cardinals:"ARI",
+  rams:"LAR", chargers:"LAC", broncos:"DEN", raiders:"LV", steelers:"PIT",
+  browns:"CLE", texans:"HOU", colts:"IND", titans:"TEN", jaguars:"JAX" };
 (function(){
 "use strict";
 
@@ -262,6 +269,11 @@ function salvageIntent(replyText, userText, pool){
     var d = { action:"build_lineup", mode:mode, num_lineups:n,
               locks:[], excludes:[], stacks:[] };
     var sm = t.match(/\b([A-Za-z]{2,3})\s+stack\b/i);
+    if(!sm){
+      /* full team names: "chiefs stack", "bills stack" — map to abbreviations */
+      var tm = low.match(/\b(chiefs|bills|eagles|cowboys|49ers|niners|lions|ravens|dolphins|seahawks|packers|bengals|patriots|jets|giants|commanders|bears|vikings|falcons|panthers|saints|buccaneers|bucs|cardinals|rams|chargers|broncos|raiders|steelers|browns|texans|colts|titans|jaguars)\s+stack\b/);
+      if(tm) sm = [tm[0], TEAM_ABBR[tm[1]] || tm[1].slice(0,2).toUpperCase()];
+    }
     if(sm) d.stacks = [{ team: sm[1].toUpperCase() }];
     if(validateAction(d, pool).ok) return d;
     d.stacks = [];
@@ -439,6 +451,7 @@ function cleanModelEcho(t){
 var api = {
   ACTIONS: ACTIONS, MAX_POOL_IN_PROMPT: MAX_POOL_IN_PROMPT,
   NANO_MAX_POOL: NANO_MAX_POOL, GEMINI_HOST: GEMINI_HOST,
+  TEAM_ABBR: TEAM_ABBR,
   extractDirectives: extractDirectives,
   extractDirectivesLenient: extractDirectivesLenient,
   findMalformedDirectives: findMalformedDirectives,

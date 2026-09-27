@@ -179,6 +179,10 @@ var s4 = C.salvageIntent("Josh Allen looks great this week.", "Who is the best Q
 ok("salvage: no build intent → null", s4===null);
 var s5 = C.salvageIntent("Building!", "Build me 99 lineups", pool2);
 ok("salvage: lineup count capped at 20", !!s5 && s5.num_lineups===20);
+var s6 = C.salvageIntent("on it", "Build me 3 GPP lineups with a Chiefs stack", poolKC);
+ok("salvage: full team name 'Chiefs stack' → KC", !!s6 && s6.stacks.length===1 && s6.stacks[0].team==="KC");
+var s7 = C.salvageIntent("on it", "Build me 3 GPP lineups with a Bills stack", poolKC);
+ok("salvage: unmatched team name stack dropped, build still runs", !!s7 && s7.stacks.length===0);
 
 /* ---- on-device model output hygiene (Nano is the primary provider) ---- */
 var e1 = C.cleanModelEcho("CPU backendFastest inferenceTopK: 64, Temp: 1\nUser: Build me 3 GPP lineups\nEnd.Model:\nHere are your lineups!");
