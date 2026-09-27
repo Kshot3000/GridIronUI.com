@@ -17,6 +17,7 @@ var sandbox = {
 sandbox.window.GIU = sandbox.GIU;
 vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/team-brand.js"), "utf8"), sandbox);
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/wx-shared.js"), "utf8"), sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/weather.js"), "utf8"), sandbox);
 var G = sandbox.GIU;
 

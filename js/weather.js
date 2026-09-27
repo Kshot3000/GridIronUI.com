@@ -1,141 +1,25 @@
 /* GridIronUI Game Weather — NFL stadium dataset + Open-Meteo hourly forecasts.
+   Pure venue/impact core lives in js/wx-shared.js (loaded before this file);
+   this file is the weather page: forecast fetching, the 4-hour game-window
+   strip, the GameDay matchup header, and the page bootstrap.
    Dome/retractable venues show "Dome — weather N/A". Open-air games get a
    4-hour game-window strip (kickoff, +1h, +2h, +3h) with temp, sustained wind,
    gusts and precip per hour; impact tags are computed over the whole window. */
 (function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
-/* [abbr, stadium, city, lat, lon, roof] — roof: open | dome | retractable */
-var STADIUMS = [
-  ["ARI","State Farm Stadium","Glendale, AZ",33.5277,-112.2626,"retractable"],
-  ["ATL","Mercedes-Benz Stadium","Atlanta, GA",33.7554,-84.4008,"retractable"],
-  ["BAL","M&T Bank Stadium","Baltimore, MD",39.2780,-76.6227,"open"],
-  ["BUF","Highmark Stadium","Orchard Park, NY",42.7738,-78.7869,"open"],
-  ["CAR","Bank of America Stadium","Charlotte, NC",35.2258,-80.8528,"open"],
-  ["CHI","Soldier Field","Chicago, IL",41.8623,-87.6167,"open"],
-  ["CIN","Paycor Stadium","Cincinnati, OH",39.0954,-84.5160,"open"],
-  ["CLE","Huntington Bank Field","Cleveland, OH",41.5061,-81.6995,"open"],
-  ["DAL","AT&T Stadium","Arlington, TX",32.7473,-97.0945,"retractable"],
-  ["DEN","Empower Field at Mile High","Denver, CO",39.7439,-105.0201,"open"],
-  ["DET","Ford Field","Detroit, MI",42.3400,-83.0456,"dome"],
-  ["GB","Lambeau Field","Green Bay, WI",44.5013,-88.0622,"open"],
-  ["HOU","NRG Stadium","Houston, TX",29.6847,-95.4107,"retractable"],
-  ["IND","Lucas Oil Stadium","Indianapolis, IN",39.7601,-86.1639,"retractable"],
-  ["JAX","EverBank Stadium","Jacksonville, FL",30.3239,-81.6373,"open"],
-  ["KC","GEHA Field at Arrowhead","Kansas City, MO",39.0489,-94.4839,"open"],
-  ["LV","Allegiant Stadium","Las Vegas, NV",36.0909,-115.1833,"dome"],
-  ["LAC","SoFi Stadium","Inglewood, CA",33.9535,-118.3392,"open"],
-  ["LAR","SoFi Stadium","Inglewood, CA",33.9535,-118.3392,"open"],
-  ["MIA","Hard Rock Stadium","Miami Gardens, FL",25.9580,-80.2389,"open"],
-  ["MIN","U.S. Bank Stadium","Minneapolis, MN",44.9740,-93.2581,"dome"],
-  ["NE","Gillette Stadium","Foxborough, MA",42.0909,-71.2643,"open"],
-  ["NO","Caesars Superdome","New Orleans, LA",29.9509,-90.0811,"dome"],
-  ["NYG","MetLife Stadium","East Rutherford, NJ",40.8135,-74.0745,"open"],
-  ["NYJ","MetLife Stadium","East Rutherford, NJ",40.8135,-74.0745,"open"],
-  ["PHI","Lincoln Financial Field","Philadelphia, PA",39.9008,-75.1675,"open"],
-  ["PIT","Acrisure Stadium","Pittsburgh, PA",40.4468,-80.0158,"open"],
-  ["SF","Levi's Stadium","Santa Clara, CA",37.4030,-121.9699,"open"],
-  ["SEA","Lumen Field","Seattle, WA",47.5952,-122.3316,"open"],
-  ["TB","Raymond James Stadium","Tampa, FL",27.9759,-82.5033,"open"],
-  ["TEN","Nissan Stadium","Nashville, TN",36.1665,-86.7713,"open"],
-  ["WAS","Northwest Stadium","Landover, MD",38.9077,-76.8645,"open"],
-  ["WSH","Northwest Stadium","Landover, MD",38.9077,-76.8645,"open"] /* ESPN uses WSH */
-];
-function stadiumFor(abbr){
-  for(var i=0;i<STADIUMS.length;i++) if(STADIUMS[i][0]===abbr) return STADIUMS[i];
-  return null;
-}
-/* Neutral-site / international venues: [name match, stadium, city, lat, lon, roof].
-   ESPN's scoreboard carries the real venue per game — when it names one of these
-   instead of the home team's stadium, we use the neutral venue's coordinates so
-   the forecast matches where the game is actually played. */
-var NEUTRAL_VENUES = [
-  ["maracan", "Maracanã Stadium","Rio de Janeiro, Brazil",-22.9122,-43.2302,"open"],
-  ["wembley","Wembley Stadium","London, UK",51.5558,-0.2796,"open"],
-  ["tottenham","Tottenham Hotspur Stadium","London, UK",51.6043,-0.0664,"open"],
-  ["twickenham","Twickenham Stadium","London, UK",51.4552,-0.3416,"open"],
-  ["allianz arena","Allianz Arena","Munich, Germany",48.2188,11.6247,"open"],
-  ["deutsche bank","Deutsche Bank Park","Frankfurt, Germany",50.0685,8.6452,"open"],
-  ["bernabeu","Santiago Bernabéu Stadium","Madrid, Spain",40.4531,-3.6883,"open"],
-  ["azteca","Estadio Azteca","Mexico City, Mexico",19.3029,-99.1505,"open"],
-  ["croke","Croke Park","Dublin, Ireland",53.3607,-6.2507,"open"]
-];
-function neutralFor(venueName){
-  var n = String(venueName||"").toLowerCase();
-  for(var i=0;i<NEUTRAL_VENUES.length;i++) if(n.indexOf(NEUTRAL_VENUES[i][0])!==-1) return NEUTRAL_VENUES[i];
-  return null;
-}
-/* Resolve the true venue for a game: prefer ESPN's per-game venue when it names
-   a known neutral site, otherwise the home team's stadium. */
-function venueFor(ev, homeAbbr){
-  var espnV = (ev.competitions[0]||{}).venue || {};
-  var nv = neutralFor(espnV.fullName);
-  if(nv) return {row:[homeAbbr, nv[1], nv[2], nv[3], nv[4], nv[5]], neutral:true};
-  var st = stadiumFor(homeAbbr);
-  return {row:st, neutral:false};
-}
-function compass(deg){
-  var dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
-  return dirs[Math.round(deg/22.5)%16];
-}
+
 var wxCache = {};
-/* Pure: slice the game window out of parsed Open-Meteo hourly data — the hour
-   nearest kickoff plus the next three (a ~4h game). Exported for tests. */
-function sliceWindow(d, kickoffISO){
-  var times = d.hourly.time, target = Date.parse(kickoffISO), bi = 0, bd = Infinity;
-  times.forEach(function(t,i){
-    var diff = Math.abs(Date.parse(t)-target);
-    if(diff<bd){ bd=diff; bi=i; }
-  });
-  var hrs = [];
-  for(var k=0;k<4 && bi+k<times.length;k++){
-    var j = bi+k;
-    hrs.push({
-      temp: Math.round(d.hourly.temperature_2m[j]),
-      precip: d.hourly.precipitation_probability[j],
-      wind: Math.round(d.hourly.wind_speed_10m[j]),
-      gust: Math.round(d.hourly.wind_gusts_10m[j]),
-      wdir: compass(d.hourly.wind_direction_10m[j]),
-      when: times[j]
-    });
-  }
-  return hrs;
-}
 function forecast(st, kickoffISO){
   var key = st[0]+"|"+kickoffISO.slice(0,10);
   if(wxCache[key]) return Promise.resolve(wxCache[key]);
   var url = "https://api.open-meteo.com/v1/forecast?latitude="+st[3]+"&longitude="+st[4]+
     "&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m"+
     "&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=UTC&forecast_days=16";
-  /* timezone=UTC: hourly stamps have no offset but parse as UTC, so the epoch
-     comparison below matches ESPN's ISO kickoff regardless of the visitor's timezone.
-     (timezone=auto returns stadium-local stamps, which Date.parse would misread.) */
   return GIU.fetchJSON(url).then(function(d){
-    var hrs = sliceWindow(d, kickoffISO);
+    var hrs = GIU.wxSliceWindow(d, kickoffISO);
     wxCache[key]=hrs; return hrs;
   });
-}
-function impact(w){
-  /* Accepts a single kickoff snapshot {temp,precip,wind} (legacy callers) or an
-     array of hourly points — thresholds are computed over the whole game window,
-     because a gust front in the 4th quarter matters as much as kickoff conditions. */
-  var hrs = Array.isArray(w) ? w : [w];
-  var wind = 0, gust = 0, precip = 0, temp = Infinity;
-  hrs.forEach(function(h){
-    if(h.wind > wind) wind = h.wind;
-    if(h.gust > gust) gust = h.gust;
-    if(h.precip > precip) precip = h.precip;
-    if(h.temp < temp) temp = h.temp;
-  });
-  var notes = [];
-  if(gust >= 30) notes.push('<span class="tag red">Gusts '+gust+' mph — strong Under lean, kicking nightmare</span>');
-  else if(gust >= 24) notes.push('<span class="tag">Gusts '+gust+' mph — field-goal risk</span>');
-  if(wind >= 20) notes.push('<span class="tag red">Wind '+wind+' mph sustained — strong Under lean</span>');
-  else if(wind >= 13) notes.push('<span class="tag">Wind '+wind+' mph — mild Under lean</span>');
-  if(precip >= 60) notes.push('<span class="tag">Rain '+precip+'% — favors run game</span>');
-  if(temp <= 25) notes.push('<span class="tag blue">Freezing '+temp+'°F</span>');
-  else if(temp >= 90) notes.push('<span class="tag">Heat '+temp+'°F</span>');
-  return notes.length ? notes.join(" ") : '<span class="tag green">No major concerns</span>';
 }
 /* Game-window strip: one compact column per game hour (kickoff, +1h, +2h, +3h)
    with temp, sustained wind (gusts in parens) and precip chance. */
@@ -153,8 +37,7 @@ function windowHTML(hrs){
   }).join("");
   return '<div class="wx-strip" style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px">'+cols+'</div>';
 }
-/* Pure builders, exported on GIU for node tests (tests/test-weather.js).
-   GameDay matchup header: both team identities (logo + real color chip + name)
+/* GameDay matchup header: both team identities (logo + real color chip + name)
    with an "at" between — same identity system as scores + homepage. */
 function matchupHTML(away, home){
   function side(t){
@@ -166,9 +49,7 @@ function matchupHTML(away, home){
   return '<div class="wx-matchup">'+side(away)+'<span class="at">at</span>'+side(home)+'</div>';
 }
 GIU.wxMatchupHTML = matchupHTML;
-GIU.wxImpact = impact;
 GIU.wxWindowHTML = windowHTML;
-GIU.wxSliceWindow = sliceWindow;
 
 GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard").then(function(d){
   var evs = (d.events||[]).filter(function(ev){
@@ -181,7 +62,7 @@ GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreb
     var c = ev.competitions[0];
     var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0];
     var away = c.competitors.filter(function(t){return t.homeAway==="away";})[0];
-    var v = venueFor(ev, home.team.abbreviation);
+    var v = GIU.wxVenueFor(ev, home.team.abbreviation);
     var st = v.row;
     var when = "";
     try{ var dt=new Date(ev.date);
@@ -207,7 +88,7 @@ GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreb
       return;
     }
     forecast(st, card.getAttribute("data-kick")).then(function(hrs){
-      body.innerHTML = windowHTML(hrs)+impact(hrs);
+      body.innerHTML = windowHTML(hrs)+GIU.wxImpact(hrs);
     }).catch(function(){
       body.innerHTML = '<p style="color:var(--faint)">Forecast unavailable for this game.</p>';
     });

@@ -252,6 +252,14 @@ td.flash{animation:flash 1.2s ease-out}
 .spark-dot{fill:var(--gold)}
 .spark-cap{flex-basis:100%;font-size:.74rem;color:var(--faint)}
 
+/* game-day weather badge (odds board, NFL tab) — wind moves totals */
+.wx-badge{margin:2px 0 12px;padding:10px 14px;border:1px solid var(--line-soft);
+  border-left:3px solid var(--gold);border-radius:var(--radius);
+  background:rgba(212,175,55,.06);font-size:.86rem;line-height:1.7}
+.wx-badge .wx-venue{font-weight:700;color:var(--text)}
+.wx-badge .tag{margin:0 2px}
+.wx-badge a{margin-left:8px;font-size:.82rem;white-space:nowrap}
+
 /* cross-book edge: where Polymarket and Kalshi disagree (markets page, NFL tab) */
 .disagree-card{margin-bottom:20px;border-color:rgba(23,201,100,.35)}
 .disagree-note{font-size:.82rem;color:var(--faint);margin:2px 0 14px;max-width:70ch}

@@ -4,6 +4,7 @@
 (function(){
 "use strict";
 var OL = window.OddsLogic;
+var WX = window.OddsWx;
 var $ = function(id){ return document.getElementById(id); };
 /* ---- line-movement window (pure, exported for tests) ----
    Lines move most around live games and just before kickoff: a game is
@@ -178,6 +179,12 @@ function render(opts){
     refreshPickMarks();
     renderSlip();
     setStatus();
+    /* NFL tab bonus, after the board is on screen: game-day weather badges
+       on open-air game cards. One Open-Meteo fetch (no key, no quota cost),
+       venue cross-checked against ESPN so neutral-site games are never
+       mislabeled. A forecast hiccup leaves the badges off — the board is
+       the product, weather is a bonus. */
+    maybeWxBadges(events, mySeq);
   }).catch(function(e){
     if(mySeq !== renderSeq) return; /* stale sport response — discard */
     if(silent){
@@ -194,6 +201,43 @@ function render(opts){
     }
     setStatus();
   });
+}
+
+/* ---- game-day weather badges (NFL tab) ----
+   Wind moves totals — the site's own pitch — so the odds board now shows
+   the game's weather impact on open-air NFL game cards. Venues are resolved
+   against ESPN's scoreboard (neutral-site games get their real venue), the
+   forecast comes from one multi-location Open-Meteo request, and badges
+   only appear when the shared impact model flags something real. Quiet by
+   default, honest by construction: no venue confirmation, no badge. */
+var espnWxP = null;
+function maybeWxBadges(events, mySeq){
+  if(sport !== "americanfootball_nfl" || !WX || !events || !events.length) return;
+  if(!espnWxP){
+    espnWxP = GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
+      .then(function(d){ return d.events || []; })
+      .catch(function(){ return []; });
+  }
+  Promise.all([espnWxP, GIU.teamDir()]).then(function(r){
+    if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return; /* board moved on */
+    var games = WX.resolveGames(events, r[0], r[1], GIU.teamFind, GIU.wxVenueFor, Date.now());
+    if(!games.length) return;
+    var url = WX.wxUrl(games);
+    if(!url) return;
+    return GIU.fetchJSON(url).then(function(d){
+      if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return;
+      var arr = Array.isArray(d) ? d : [d];
+      games.forEach(function(g, i){
+        var hourly = (arr[i] && arr[i].hourly) || {time:[]};
+        var notes = GIU.wxImpactNotes(GIU.wxSliceWindow({hourly:hourly}, g.kickISO));
+        if(!notes.length) return; /* calm day — nothing to say */
+        var slot = document.querySelector('[data-wxbadge="'+g.oddsId+'"]');
+        if(!slot) return;
+        slot.innerHTML = WX.badgeHtml(g.stadium, g.city, notes, GIU.esc);
+        slot.hidden = false;
+      });
+    });
+  }).catch(function(){ /* badges stay off; the board already rendered fine */ });
 }
 
 /* Steam watch: the biggest consensus line moves since this browser's
@@ -353,10 +397,15 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
   }
 
   var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
+  /* Weather badge slot (NFL tab only): filled after the board renders, once
+     the venue is confirmed against ESPN and the forecast is in. Hidden
+     until then — no badge is better than a placeholder. */
+  var wxSlot = (sport === "americanfootball_nfl")
+    ? '<div class="wx-badge" data-wxbadge="'+GIU.esc(ev.id)+'" hidden></div>' : "";
   return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
-    consLineHtml()+histHtml()+bestCard+
+    consLineHtml()+histHtml()+wxSlot+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' spread</th><th>'+GIU.esc(OL.shortName(h))+' spread</th>'+
     '<th>Over</th><th>Under</th>'+
