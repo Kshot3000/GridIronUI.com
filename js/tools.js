@@ -130,4 +130,24 @@ $("vGo").addEventListener("click", function(){
       '<p style="margin:10px 0 0;color:var(--muted);font-size:.9rem">Bookmaker hold on this market: <b class="num" style="color:var(--gold-soft)">'+nv.hold+'%</b>. If another book beats the fair price, you\'re getting value.</p>');
   }catch(e){ err("vOut", e.message); }
 });
+/* 7 — hedge & arbitrage */
+$("hGo").addEventListener("click", function(){
+  if(isEmpty("hA")||isEmpty("hB")){ note("hOut", "Enter odds for both sides above, then hit Check for arb. "+EXAMPLE); return; }
+  try{
+    var dA = toDecimal(val("hA"), val("hFa")), dB = toDecimal(val("hB"), val("hFb"));
+    var stakeRaw = val("hStake"), hasStake = stakeRaw !== "";
+    var r = BetMath.hedge(dA, dB, hasStake ? parseFloat(stakeRaw) : null);
+    var verdict = r.isArb
+      ? '<span style="color:#7fe8a0"><strong>Arbitrage available — '+r.arbPct.toFixed(2)+'% guaranteed.</strong></span> The books disagree enough that both sides pay. <span style="color:var(--muted)">(Rare, and lines move fast — confirm both prices are live before betting.)</span>'
+      : '<span style="color:#ffd37f"><strong>No arbitrage.</strong></span> The book holds <b class="num">'+r.holdPct.toFixed(2)+'%</b> on this pair of prices — no stake split can beat it.';
+    var stakePlan = "";
+    if(hasStake){
+      var g = r.guaranteedProfit >= 0
+        ? 'Guaranteed profit: <b class="num" style="color:#7fe8a0">$'+r.guaranteedProfit.toFixed(2)+'</b> — profit either way, this is the locked arb.'
+        : 'This hedge costs you <b class="num" style="color:#ff9aa3">$'+Math.abs(r.guaranteedProfit).toFixed(2)+'</b> to lock in — you guarantee <b class="num" style="color:var(--text)">$'+r.guaranteedReturn.toFixed(2)+'</b> back no matter who wins. That\'s the price of insuring your ticket.';
+      stakePlan = '<p style="margin:10px 0 0">Bet <b class="num gold">$'+r.stakeB.toFixed(2)+'</b> on side B to balance the payouts. Total staked: <b class="num">$'+r.totalStaked.toFixed(2)+'</b> → guaranteed return <b class="num">$'+r.guaranteedReturn.toFixed(2)+'</b>.<br>'+g+'</p>';
+    }
+    show("hOut", '<div>Implied: side A <b class="num">'+r.impA.toFixed(2)+'%</b> · side B <b class="num">'+r.impB.toFixed(2)+'%</b></div><p style="margin:8px 0 0">'+verdict+'</p>'+stakePlan);
+  }catch(e){ err("hOut", e.message); }
+});
 })();

@@ -80,6 +80,29 @@ var M = {
       hold: round((tot-1)*100, 2)
     };
   },
+  /* ---- hedge & arbitrage: dA/dB = decimal odds for side A (your bet) and side B
+         (hedge). stakeA optional. Returns implied probs, book hold vs arb %,
+         and — when a stake is given — the equal-payout hedge stake on B plus
+         the guaranteed return/profit (negative profit = the cost of insuring). */
+  hedge: function(dA, dB, stakeA){
+    dA=Number(dA); dB=Number(dB);
+    if(!(dA>1) || !(dB>1)) throw new Error("Odds must be decimal > 1");
+    var qA = 1/dA, qB = 1/dB, sum = qA+qB;
+    var r = {
+      impA: round(qA*100,2), impB: round(qB*100,2),
+      isArb: sum < 1, arbPct: round((1-sum)*100,2), holdPct: round((sum-1)*100,2)
+    };
+    if(stakeA !== undefined && stakeA !== null && stakeA !== ""){
+      var s = Number(stakeA);
+      if(!(s>0)) throw new Error("Stake must be greater than 0");
+      var hb = s*dA/dB, tot = s+hb, ret = s*dA;
+      r.stakeB = round(hb,2);
+      r.totalStaked = round(tot,2);
+      r.guaranteedReturn = round(ret,2);
+      r.guaranteedProfit = round(ret-tot,2);
+    }
+    return r;
+  },
   round: round
 };
 

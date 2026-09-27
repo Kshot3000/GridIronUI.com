@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Betting Calculators — Odds, Parlay, Kelly, Vig | GridIronUI</title>
-<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, Kelly stake and vig remover. All math runs in your browser.">
+<title>Betting Calculators — Odds, Parlay, Kelly, Vig, Hedge | GridIronUI</title>
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, Kelly stake, vig remover, hedge and arbitrage finder. All math runs in your browser.">
 <meta property="og:image" content="img/og-image.jpg">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Six tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Seven tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -95,6 +95,23 @@
       </div>
       <button class="btn btn-gold btn-sm" id="vGo">Remove the vig</button>
       <div class="result-box" id="vOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="hedge">
+      <span class="tag">Sharp money</span>
+      <h3>Hedge &amp; arbitrage finder</h3>
+      <p class="hint">Holding a ticket and want to lock profit — or think two books have left an arb on the table? Enter both sides' prices and find out.</p>
+      <div class="form-row">
+        <div class="field"><label>Side A odds (your bet)</label><input type="text" id="hA" placeholder="-110"></div>
+        <div class="field"><label>Format</label><select id="hFa"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Side B odds (hedge)</label><input type="text" id="hB" placeholder="+105"></div>
+        <div class="field"><label>Format</label><select id="hFb"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <div class="field"><label>My stake on side A ($) — optional</label><input type="number" id="hStake" placeholder="100" min="0" step="any"></div>
+      <button class="btn btn-gold btn-sm" id="hGo">Check for arb</button>
+      <div class="result-box" id="hOut" style="display:none"></div>
     </div>
 
   </div>

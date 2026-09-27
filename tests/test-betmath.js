@@ -43,6 +43,30 @@ eq("no-vig fair1", nv.fair1, -138, 1);
 eq("no-vig fair2", nv.fair2, 138, 1);
 eq("no-vig hold %", nv.hold, 3.48, 0.05);
 
+/* hedge & arbitrage: side A +110 (2.10) vs side B +105 (2.05) is a real arb */
+var ha = M.hedge(2.10, 2.05);
+eq("arb impA", ha.impA, 47.62, 0.01);
+eq("arb impB", ha.impB, 48.78, 0.01);
+eq("arb isArb", ha.isArb ? 1 : 0, 1);
+eq("arb pct", ha.arbPct, 3.60, 0.01);
+
+var hh = M.hedge(2.10, 2.05, 100);
+eq("arb hedge stakeB", hh.stakeB, 102.44, 0.01);
+eq("arb total staked", hh.totalStaked, 202.44, 0.01);
+eq("arb guaranteed return", hh.guaranteedReturn, 210, 0.01);
+eq("arb guaranteed profit", hh.guaranteedProfit, 7.56, 0.01);
+
+/* -110/-110 pair: no arb, hedge costs money to insure */
+var hb2 = M.hedge(1.9090909, 1.9090909, 100);
+eq("no-arb isArb", hb2.isArb ? 1 : 0, 0);
+eq("no-arb hold %", hb2.holdPct, 4.76, 0.01);
+eq("no-arb hedge stakeB", hb2.stakeB, 100, 0.01);
+eq("no-arb hedge profit (insurance cost)", hb2.guaranteedProfit, -9.09, 0.01);
+
+/* equal-payout invariant: stakeB*dB === stakeA*dA */
+var hx = M.hedge(2.5, 1.8, 60);
+eq("equal payout invariant", 60*2.5, hx.stakeB*1.8, 0.01);
+
 /* error cases */
 [["zero american",function(){M.americanToDecimal(0);}],
  ["decimal <1",function(){M.decimalToAmerican(0.9);}],
