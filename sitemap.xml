@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GridIronUI sitemap. Canonical base is the live GitHub Pages URL until the
+     custom domain migration, at which point every loc moves to the new domain. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/</loc><lastmod>2026-09-27</lastmod><priority>1.0</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/odds.html</loc><lastmod>2026-09-27</lastmod><priority>0.9</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/scores.html</loc><lastmod>2026-09-27</lastmod><priority>0.9</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/news.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/markets.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/dfs.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/tools.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/guides/betting-101.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/guides/bet-types.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/guides/bankroll.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/guides/advanced.html</loc><lastmod>2026-09-27</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/predictions.html</loc><lastmod>2026-09-27</lastmod><priority>0.7</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/injuries.html</loc><lastmod>2026-09-27</lastmod><priority>0.7</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/weather.html</loc><lastmod>2026-09-27</lastmod><priority>0.7</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/watch.html</loc><lastmod>2026-09-27</lastmod><priority>0.7</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/ai-coach.html</loc><lastmod>2026-09-27</lastmod><priority>0.7</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/glossary.html</loc><lastmod>2026-09-27</lastmod><priority>0.6</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/legality.html</loc><lastmod>2026-09-27</lastmod><priority>0.6</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/links.html</loc><lastmod>2026-09-27</lastmod><priority>0.6</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/about.html</loc><lastmod>2026-09-27</lastmod><priority>0.5</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/contact.html</loc><lastmod>2026-09-27</lastmod><priority>0.5</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/partners.html</loc><lastmod>2026-09-27</lastmod><priority>0.5</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/affiliate-disclosure.html</loc><lastmod>2026-09-27</lastmod><priority>0.4</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/privacy.html</loc><lastmod>2026-09-27</lastmod><priority>0.4</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/terms.html</loc><lastmod>2026-09-27</lastmod><priority>0.4</priority></url>
+  <url><loc>https://kshot3000.github.io/GridIronUI.com/responsible-gambling.html</loc><lastmod>2026-09-27</lastmod><priority>0.4</priority></url>
+</urlset>
