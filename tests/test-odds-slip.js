@@ -53,5 +53,25 @@ ok("unchanged leg untouched", r[1].prevPrice === undefined && r[1].price === 2.0
 var r2 = [leg("q", 1.5)];
 ok("reprice empty map -> none moved", S.reprice(r2, {}).length === 0 && r2[0].price === 1.5);
 
+/* implied break-even probability */
+ok("implied +301 parlay = 25%", Math.abs(S.implied(slip) - 1/4.011) < 1e-9, S.implied(slip));
+ok("implied -110 single = 52.38%", Math.abs(S.implied([leg("a",1.91)]) - 1/1.91) < 1e-9);
+ok("implied empty -> null", S.implied([]) === null);
+ok("payout carries implied", Math.abs(p.implied - 1/4.011) < 1e-9, p.implied);
+
+/* sameGame groups */
+function legG(id, game, side){ return { id:id, game:game, market:"h2h", side:side, book:"dk", bookTitle:"DK", label:"x", price:2.0 }; }
+var sg0 = [legG("a","Chiefs @ Raiders","Chiefs"), legG("b","Bills @ Jets","Bills")];
+ok("sameGame none -> []", S.sameGame(sg0).length === 0);
+var sg1 = [legG("a","Chiefs @ Raiders","Chiefs -3"), legG("b","Chiefs @ Raiders","Chiefs ML"), legG("c","Bills @ Jets","Bills")];
+var g1 = S.sameGame(sg1);
+ok("sameGame one group", g1.length === 1 && g1[0].game === "Chiefs @ Raiders", JSON.stringify(g1));
+ok("sameGame sides listed", g1[0].sides.join("|") === "Chiefs -3|Chiefs ML");
+ok("sameGame order stable, two groups", (function(){
+  var g = S.sameGame([legG("a","Bills @ Jets","x"), legG("b","Chiefs @ Raiders","y"), legG("c","Bills @ Jets","z"), legG("d","Chiefs @ Raiders","w")]);
+  return g.length === 2 && g[0].game === "Bills @ Jets" && g[1].game === "Chiefs @ Raiders";
+})());
+ok("sameGame ignores gameless legs", S.sameGame([legG("a","","x"), legG("b",null,"y")]).length === 0);
+
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL ODDS-SLIP TESTS PASSED");
 process.exit(fails ? 1 : 0);

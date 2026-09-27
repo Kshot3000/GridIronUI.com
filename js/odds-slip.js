@@ -20,7 +20,29 @@ var S = {
     stake = Number(stake) || 0;
     var c = S.combined(legs);
     var total = stake * c;
-    return { combined:c, combinedAm:S.dec2am(c), total:total, profit:total - stake };
+    return { combined:c, combinedAm:S.dec2am(c), implied:S.implied(legs),
+             total:total, profit:total - stake };
+  },
+  /* break-even win probability of the parlay, 0-1: 1 / combined decimal.
+     A +300 parlay must win 25% of the time to break even. Null when empty. */
+  implied: function(legs){
+    if(!legs.length) return null;
+    var c = S.combined(legs);
+    return c > 1 ? 1 / c : null;
+  },
+  /* groups of legs sharing one game (2+ legs) — books treat same-game legs
+     as correlated, so an independence-assuming parlay price won't hold there.
+     Returns [{game, sides:[...]}]; empty when every leg is its own game. */
+  sameGame: function(legs){
+    var byGame = {}, order = [];
+    legs.forEach(function(l){
+      var g = (l && l.game) ? String(l.game) : "";
+      if(!g) return;
+      if(!byGame[g]){ byGame[g] = { game:g, sides:[] }; order.push(g); }
+      byGame[g].sides.push(String(l.side || "?"));
+    });
+    return order.filter(function(g){ return byGame[g].sides.length > 1; })
+                .map(function(g){ return byGame[g]; });
   },
   /* toggle a leg by id; returns true if added, false if removed */
   toggle: function(legs, leg){

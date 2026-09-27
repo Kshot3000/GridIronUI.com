@@ -71,9 +71,9 @@ let pass = 0, fail = 0;
 function ok(name, cond){ cond ? pass++ : (fail++, console.log("FAIL:", name)); }
 
 /* fake pick button on the board */
-function pickBtn(id, price, side, label, book){
+function pickBtn(id, price, side, label, book, game){
   const b = makeEl("btn");
-  Object.assign(b.attrs, { "data-slip": id, "data-game": "Chiefs @ Raiders", "data-market": "h2h",
+  Object.assign(b.attrs, { "data-slip": id, "data-game": game || "Chiefs @ Raiders", "data-market": "h2h",
     "data-side": side, "data-book": book, "data-booktitle": book,
     "data-label": label, "data-price": String(price) });
   return b;
@@ -107,6 +107,13 @@ els.oddsBoard.fire("click", { target: { closest: sel => sel === ".pick-btn" ? b1
 els.oddsBoard.fire("click", { target: { closest: sel => sel === ".pick-btn" ? b2 : null } });
 ok("count 2", String(els.slipCount.textContent) === "2");
 ok("parlay american +301", els.slipPanel.innerHTML.indexOf("+301") !== -1);
+/* v1.31.0: implied break-even probability on the totals (1/4.011 = 24.9%) */
+ok("implied probability row shown", els.slipPanel.innerHTML.indexOf("Implied probability") !== -1 &&
+                                    els.slipPanel.innerHTML.indexOf("24.9%") !== -1);
+/* v1.31.0: both legs share "Chiefs @ Raiders" -> same-game correlation warning */
+ok("same-game warning shown", els.slipPanel.innerHTML.indexOf("slip-warn") !== -1 &&
+                              els.slipPanel.innerHTML.indexOf("Same-game legs") !== -1 &&
+                              els.slipPanel.innerHTML.indexOf("correlated") !== -1);
 /* stake input -> totals update live (1.91*2.10=4.011, $50 -> payout 200.55, profit 150.55) */
 const totalsBefore = els.slipPanel.innerHTML;
 els.slipPanel.fire("input", { target: { id: "slipStake", value: "50" } });
@@ -132,6 +139,15 @@ els.slipToggle.fire("click");
 ok("panel opens", !els.slipPanel.hasAttribute("hidden") && els.slipToggle.attrs["aria-expanded"] === "true");
 els.slipToggle.fire("click");
 ok("panel closes", els.slipPanel.hasAttribute("hidden") && els.slipToggle.attrs["aria-expanded"] === "false");
+
+/* 8. legs from different games -> no correlation warning */
+const b3 = pickBtn("g2|dk|h2h|Bills", 1.91, "Bills", "-110", "draftkings", "Bills @ Jets");
+const b4 = pickBtn("g3|dk|h2h|Packers", 1.91, "Packers", "-110", "draftkings", "Packers @ Bears");
+els.oddsBoard.fire("click", { target: { closest: sel => sel === ".pick-btn" ? b3 : null } });
+els.oddsBoard.fire("click", { target: { closest: sel => sel === ".pick-btn" ? b4 : null } });
+ok("count 2 (different games)", String(els.slipCount.textContent) === "2");
+ok("no same-game warning across games", els.slipPanel.innerHTML.indexOf("slip-warn") === -1);
+ok("implied shown for cross-game parlay", els.slipPanel.innerHTML.indexOf("Implied probability") !== -1);
 
 console.log(`odds-slip-dom: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

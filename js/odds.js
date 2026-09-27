@@ -378,10 +378,28 @@ function slipIdHtml(l){
   return '<span class="slip-id">'+GIU.teamLogo(t, 22)+GIU.teamChip(t, t.abbr)+'</span> ';
 }
 function totalsHtml(p){
+  var imp = (p && p.implied != null)
+    ? '<div><span>Implied probability</span><b class="num">'+(p.implied*100).toFixed(1)+
+      '% <span style="color:var(--faint);font-weight:400">break-even</span></b></div>' : "";
   return '<div><span>Combined odds</span><b class="num">'+GIU.esc(String(p.combinedAm))+
-    ' <span style="color:var(--faint);font-weight:400">'+p.combined.toFixed(3)+' dec</span></b></div>'+
+    ' <span style="color:var(--faint);font-weight:400">'+p.combined.toFixed(3)+' dec</span></b></div>'+imp+
     '<div><span>To win</span><b class="num" style="color:var(--green)">$'+p.profit.toFixed(2)+'</b></div>'+
     '<div><span>Total payout</span><b class="num">$'+p.total.toFixed(2)+'</b></div>';
+}
+/* Same-game legs ride together: the combined price above is independent-
+   outcome math, but books price same-game legs as correlated — and most
+   won't take both sides of one game in a single parlay. */
+function sameGameWarnHtml(slip){
+  var groups = Slip.sameGame(slip);
+  if(!groups.length) return "";
+  var list = groups.map(function(g){
+    return GIU.esc(g.game)+' \u00d7'+g.sides.length+
+      ' ('+g.sides.map(function(s){ return GIU.esc(s); }).join(', ')+')';
+  }).join('; ');
+  return '<div class="slip-warn" role="note"><b>\u26a0 Same-game legs.</b> '+list+
+    ' \u2014 books treat these as correlated, so the combined price above '+
+    '(independent-outcome math) won\u2019t match the book\u2019s, and most books '+
+    'won\u2019t let you parlay both sides of one game.</div>';
 }
 function renderSlip(){
   var panel = $("slipPanel"), n = slip.length;
@@ -403,7 +421,7 @@ function renderSlip(){
   }).join("");
   panel.innerHTML =
     '<div class="slip-head"><b>Your slip</b><span class="tag">'+n+' leg'+(n>1?"s":"")+'</span></div>'+
-    '<div class="slip-legs">'+rows+'</div>'+
+    '<div class="slip-legs">'+rows+'</div>'+sameGameWarnHtml(slip)+
     '<div class="field" style="margin:14px 0 8px"><label for="slipStake">Stake ($)</label>'+
     '<input type="number" id="slipStake" min="0" step="1" value="'+stakeVal+'" inputmode="numeric"></div>'+
     '<div class="slip-totals" id="slipTotals">'+totalsHtml(Slip.payout(slip, stakeVal))+'</div>'+
