@@ -230,6 +230,21 @@ td.flash{animation:flash 1.2s ease-out}
 .mover-d{font-size:.84rem;color:var(--gold-soft)}
 @media(prefers-reduced-motion:reduce){.mover{transition:none}}
 
+/* cross-book edge: where Polymarket and Kalshi disagree (markets page, NFL tab) */
+.disagree-card{margin-bottom:20px;border-color:rgba(23,201,100,.35)}
+.disagree-note{font-size:.82rem;color:var(--faint);margin:2px 0 14px;max-width:70ch}
+.disagree-rows{display:flex;flex-direction:column;gap:8px}
+.disagree-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;
+  border:1px solid rgba(255,255,255,.09);border-radius:10px;background:rgba(255,255,255,.02);
+  transition:border-color .18s,background .18s}
+.disagree-row:hover{border-color:rgba(23,201,100,.55);background:rgba(23,201,100,.05)}
+.disagree-row:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.disagree-teams{display:flex;align-items:center;gap:8px;min-width:170px}
+.disagree-nums{display:flex;align-items:baseline;gap:6px;font-size:.9rem}
+.disagree-src{font-size:.68rem;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;margin-right:6px}
+.disagree-agree{color:var(--faint);font-size:.88rem}
+@media(prefers-reduced-motion:reduce){.disagree-row{transition:none}}
+
 /* ---------- reveal on scroll ---------- */
 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s cubic-bezier(.22,.8,.3,1)}
 .rv.in{opacity:1;transform:none}
