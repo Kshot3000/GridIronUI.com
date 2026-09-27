@@ -441,3 +441,6 @@ td.best .pick-btn.picked{box-shadow:inset 0 0 0 2px var(--gold)}
   html{scroll-behavior:auto}
   .ticker-track{animation:none;flex-wrap:nowrap}
 }
+
+/* coach build version stamp — small, muted, quotable in bug reports */
+.coach-ver{font-size:.72rem;opacity:.55;letter-spacing:.04em;white-space:nowrap}
