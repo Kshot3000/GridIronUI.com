@@ -54,6 +54,21 @@ function bookLine(m){
   return ' · book <b class="num" style="color:var(--text)">'+bc+'¢/'+ac+'¢</b> '+
     '<span class="tag '+cls+'" title="Live bid/ask spread from Polymarket\'s order book — the gap between the best buy and sell price right now.">'+sp+'¢ spread · '+lbl+'</span>';
 }
+/* 7-day price movement + 24h volume, straight from Polymarket's own fields.
+   oneWeekPriceChange is the market's reported 7-day price move (0-1 units);
+   volume24hr is dollars traded in the last 24h. Missing fields → show nothing. */
+function chgChip(m){
+  var c = Number(m.oneWeekPriceChange);
+  if(!isFinite(c) || Math.abs(c) < 0.001) return "";
+  var cls = c>0 ? "mv-up" : "mv-dn";
+  return ' · <span class="'+cls+'" title="7-day price change for this market, reported by Polymarket — where the money has been pushing the price.">'+
+    (c>0?"▲ +":"▼ −")+(Math.abs(c)*100).toFixed(1)+'¢ <span style="color:var(--faint)">7d</span></span>';
+}
+function volLine(m){
+  var v24 = Number(m.volume24hr);
+  if(isFinite(v24) && v24 > 0) return "24h vol "+money(v24)+" · all-time "+money(m.volume);
+  return "Volume "+money(m.volume);
+}
 function marketRow(m){
   var outs = parseArr(m.outcomes), prices = parseArr(m.outcomePrices);
   if(outs.length!==2 || prices.length!==2) return "";
@@ -63,7 +78,7 @@ function marketRow(m){
       return '<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:4px"><span>'+GIU.esc(o[1])+'</span><b class="num" style="color:var(--gold-soft)">'+o[2]+'¢</b></div>'+
       '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:6px"><div style="height:100%;width:'+o[2]+'%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>';
     }).join("")+
-    '<div style="font-size:.76rem;color:var(--faint)">Volume '+money(m.volume)+bookLine(m)+'</div></div>';
+    '<div style="font-size:.76rem;color:var(--faint)">'+volLine(m)+bookLine(m)+chgChip(m)+'</div></div>';
 }
 
 function load(){

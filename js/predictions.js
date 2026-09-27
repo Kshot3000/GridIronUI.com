@@ -32,9 +32,16 @@ function shortQ(q){
   return String(q||"").replace(/^Will /,"").replace(/ on \d{4}-\d{2}-\d{2}\??$/,"")
     .replace(/ end in a draw\??$/," draw").replace(/\?$/,"");
 }
-function probRow(label, pct){
+function probRow(label, pct, chg){
   var hot = pct>=50;
-  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.9rem">'+GIU.esc(label)+'</span><b class="num" style="font-size:1.25rem;color:'+(hot?"var(--gold-soft)":"var(--muted)")+'">'+pct+'%</b></div>'+
+  /* 7-day price movement reported by Polymarket for this market (0-1 units).
+     Shown once per market, next to the first outcome — no derived claims. */
+  var c = Number(chg), chip = "";
+  if(isFinite(c) && Math.abs(c) >= 0.001){
+    chip = ' <span class="'+(c>0?"mv-up":"mv-dn")+'" style="font-size:.78rem" title="7-day price change for this market, reported by Polymarket — where the money has been pushing the price.">'+
+      (c>0?"▲ +":"▼ −")+(Math.abs(c)*100).toFixed(1)+'¢ 7d</span>';
+  }
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.9rem">'+GIU.esc(label)+'</span><b class="num" style="font-size:1.25rem;color:'+(hot?"var(--gold-soft)":"var(--muted)")+'">'+pct+'%'+chip+'</b></div>'+
   '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);margin-bottom:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(hot?"linear-gradient(90deg,var(--green),var(--gold))":"rgba(255,255,255,.18)")+'"></div></div>';
 }
 function load(key){
@@ -71,15 +78,15 @@ function load(key){
         var o = parseArr(r.mls[0].outcomes), p = parseArr(r.mls[0].outcomePrices);
         var p0 = Math.round(Number(p[0])*100);
         if(/^Yes$/i.test(o[0]) && /^No$/i.test(o[1])){
-          body = probRow(shortQ(r.mls[0].question)+" — Yes", p0) + probRow(shortQ(r.mls[0].question)+" — No", 100-p0);
+          body = probRow(shortQ(r.mls[0].question)+" — Yes", p0, r.mls[0].oneWeekPriceChange) + probRow(shortQ(r.mls[0].question)+" — No", 100-p0);
         } else {
-          body = probRow(o[0], p0) + probRow(o[1], 100-p0);
+          body = probRow(o[0], p0, r.mls[0].oneWeekPriceChange) + probRow(o[1], 100-p0);
         }
       } else {
-        /* 3-way style (soccer): each market's Yes price */
+        /* 3-way style (soccer): each market's Yes price, with its own 7d move */
         body = r.mls.map(function(m){
           var p = parseArr(m.outcomePrices);
-          return probRow(shortQ(m.question), Math.round(Number(p[0])*100));
+          return probRow(shortQ(m.question), Math.round(Number(p[0])*100), m.oneWeekPriceChange);
         }).join("");
       }
       return '<div class="card"><span class="tag green">Market-implied</span>'+
