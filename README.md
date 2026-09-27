@@ -35,7 +35,21 @@ node tests/test-odds-slip-dom.js  # bet-slip DOM wiring tests
 node tests/test-dfs.js        # DFS optimizer tests
 node tests/test-dfs-exposure.js  # DFS exposure summary tests
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
+node tests/test-kalshi.js     # Kalshi snapshot logic tests
 ```
+
+### Kalshi NFL snapshot
+
+Kalshi's public API rejects browser cross-origin requests, so the Markets
+page's "Kalshi · NFL" tab renders a server-side snapshot instead of a live
+feed. Refresh it (loop runs do this on every push):
+
+```bash
+python3 scripts/fetch-kalshi.py   # writes data/kalshi-nfl.json (timestamped)
+```
+
+The page labels the tab as a snapshot, shows when it was captured, and warns
+when it goes stale (>6h) — never presented as live prices.
 
 ## Deploy
 

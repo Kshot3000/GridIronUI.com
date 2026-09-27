@@ -10,6 +10,12 @@ var LEAGUES = [
   ["NHL","nhl"], ["College Football","cfb"], ["EPL","epl"]
 ];
 var cur = 0;
+/* Render generation: every tab click bumps tabSeq, and each async callback
+   only touches the DOM if its generation is still current. Without this, a
+   slow Polymarket response (or its error box) can overwrite a Kalshi render
+   the user asked for in the meantime — or one league's cards can land on
+   another league's tab. */
+var tabSeq = 0;
 
 function parseArr(s){
   try{ var v = typeof s==="string" ? JSON.parse(s) : s; return Array.isArray(v)?v:[]; }
@@ -81,7 +87,8 @@ function marketRow(m){
     '<div style="font-size:.76rem;color:var(--faint)">'+volLine(m)+bookLine(m)+chgChip(m)+'</div></div>';
 }
 
-function load(){
+function load(my){
+  my = (my===undefined) ? tabSeq : my;
   var box = $("marketGrid");
   box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
   $("marketNote").textContent = "Loading live markets — this is a large data feed, one moment…";
@@ -89,6 +96,7 @@ function load(){
   seriesFor(LEAGUES[cur][1]).then(function(sid){
     return GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20");
   }).then(function(d){
+    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     var evs = Array.isArray(d) ? d : (d.events||[]);
     var games = [];
     evs.forEach(function(ev){
@@ -128,19 +136,81 @@ function load(){
         '<div class="game-meta"><a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">Trade on Polymarket →</a></div></div>';
     }).join("");
   }).catch(function(){
+    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     box.innerHTML = GIU.failBox("Polymarket's API didn't respond. No prices are shown rather than stale ones.");
+    $("marketNote").textContent = "";
+  });
+}
+
+/* Kalshi — a second prediction-market book on this page. Kalshi's public API
+   rejects browser cross-origin calls, so the improvement-loop script
+   scripts/fetch-kalshi.py fetches it server-side and commits a timestamped
+   snapshot (data/kalshi-nfl.json), refreshed roughly every 15 minutes. This
+   tab renders that snapshot honestly: a "snapshot" tag, the refresh time, and
+   a stale warning if the snapshot goes cold — never presented as live. */
+function agoShort(iso){
+  var t = Date.parse(iso || ""); if(!isFinite(t)) return "";
+  var m = Math.floor((Date.now() - t) / 60000);
+  if(m < 1) return "just now";
+  if(m < 60) return m + "m ago";
+  var h = Math.floor(m / 60); if(h < 24) return h + "h ago";
+  return Math.floor(h / 24) + "d ago";
+}
+function kalshiCard(g){
+  var rows = g.teams.map(function(t){
+    var book = t.book
+      ? ' · book <b class="num" style="color:var(--text)">'+t.book.bid+'¢/'+t.book.ask+'¢</b> '+
+        '<span class="tag '+t.book.cls+'" title="Live bid/ask spread from Kalshi\'s order book at snapshot time — the gap between the best buy and sell price.">'+t.book.spread+'¢ spread · '+t.book.lbl+'</span>'
+      : "";
+    return '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:var(--faint);margin-bottom:5px">Yes — '+GIU.esc(t.name)+'</div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:4px"><span>'+GIU.esc(t.name)+' wins</span><b class="num" style="color:var(--gold-soft)">'+t.price+'¢</b></div>'+
+      '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:6px" role="img" aria-label="'+GIU.esc(t.name)+' priced at '+t.price+' cents"><div style="height:100%;width:'+t.price+'%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'+
+      '<div style="font-size:.76rem;color:var(--faint)">'+(t.vol ? GIU.esc(t.vol) : "No volume reported")+book+'</div></div>';
+  }).join("");
+  return '<div class="card"><span class="tag green">Kalshi</span> <span class="tag blue">NFL</span> '+
+    '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+
+    '<h3 style="margin:10px 0 4px">'+GIU.esc(g.title)+'</h3>'+
+    (g.sub ? '<div class="game-meta" style="margin-bottom:12px"><span>'+GIU.esc(g.sub)+'</span></div>' : '<div style="height:8px"></div>')+
+    rows+
+    '<div class="game-meta"><a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi →</a></div></div>';
+}
+function loadKalshi(my){
+  my = (my===undefined) ? tabSeq : my;
+  var box = $("marketGrid");
+  box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
+  $("marketNote").textContent = "Loading the Kalshi snapshot…";
+  GIU.fetchJSON("data/kalshi-nfl.json").then(function(snap){
+    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
+    var games = window.Kalshi.games(snap);
+    if(!games.length){
+      box.innerHTML = '<div class="empty">No priced Kalshi NFL game markets in the current snapshot. Markets cluster around game days — check back mid-week.</div>';
+      $("marketNote").textContent = "";
+      return;
+    }
+    var when = agoShort(snap.updated_at);
+    $("marketNote").textContent = games.length+" games · snapshot refreshed "+when+" · Kalshi's API blocks browsers, so prices update with each site refresh (~15 min)";
+    var stale = window.Kalshi.stale(snap.updated_at)
+      ? '<div class="notice" style="margin-bottom:16px"><strong>This snapshot is stale</strong> (over 6 hours old). Treat these prices as a rough guide until the next refresh — we\'d rather say so than let you bet on cold numbers.</div>'
+      : "";
+    box.innerHTML = stale + games.slice(0, 12).map(kalshiCard).join("");
+  }).catch(function(){
+    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
+    box.innerHTML = GIU.failBox("The Kalshi snapshot couldn't be loaded. Kalshi's API blocks browser requests, so this page depends on the server-side snapshot — nothing is shown rather than stale prices.");
     $("marketNote").textContent = "";
   });
 }
 
 $("marketTabs").innerHTML = LEAGUES.map(function(q,i){
   return '<button class="tab'+(i===0?" active":"")+'" data-i="'+i+'">'+q[0]+'</button>';
-}).join("");
+}).join("")+'<button class="tab" data-kalshi="1">Kalshi · NFL</button>';
 Array.prototype.forEach.call($("marketTabs").querySelectorAll(".tab"), function(t){
   t.addEventListener("click", function(){
     Array.prototype.forEach.call($("marketTabs").querySelectorAll(".tab"), function(x){x.classList.remove("active");});
-    t.classList.add("active"); cur = Number(t.getAttribute("data-i")); load();
+    t.classList.add("active");
+    var my = ++tabSeq;
+    if(t.getAttribute("data-kalshi")){ loadKalshi(my); return; }
+    cur = Number(t.getAttribute("data-i")); load(my);
   });
 });
-load();
+load(++tabSeq);
 })();
