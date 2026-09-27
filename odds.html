@@ -9,7 +9,7 @@
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1.24.0">
+<link rel="stylesheet" href="css/style.css?v=1.25.0">
 </head>
 <body data-feedcheck>
 <script>window.GIU_BASE=".";</script>
@@ -41,8 +41,9 @@
     <div class="tabs" id="sportTabs" style="margin:0"></div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span id="quota" style="font-size:.8rem;color:var(--faint)"></span>
-      <label style="font-size:.82rem;color:var(--muted);display:flex;gap:6px;align-items:center"><input type="checkbox" id="autoRef" style="width:auto"> auto-refresh (5 min)</label>
+      <label style="font-size:.82rem;color:var(--muted);display:flex;gap:6px;align-items:center" title="Re-pulls lines every 5 minutes while a game is in progress or near kickoff — and pauses itself otherwise, so it never burns your 500-request monthly quota on dead air."><input type="checkbox" id="autoRef" style="width:auto"> auto-refresh (5 min, quota-smart)</label>
       <button class="btn btn-ghost btn-sm" id="refreshBtn">↻ Refresh</button>
+      <span id="oddsStatus" class="live-status" aria-live="polite"></span>
     </div>
   </div>
 
@@ -61,6 +62,6 @@
 <script src="js/team-brand.js?v=1.18.0"></script>
 <script src="js/odds-logic.js?v=1.18.0"></script>
 <script src="js/odds-slip.js?v=1.18.0"></script>
-<script src="js/odds.js?v=1.19.0"></script>
+<script src="js/odds.js?v=1.25.0"></script>
 </body>
 </html>

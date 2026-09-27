@@ -5,6 +5,19 @@
 "use strict";
 var OL = window.OddsLogic;
 var $ = function(id){ return document.getElementById(id); };
+/* ---- line-movement window (pure, exported for tests) ----
+   Lines move most around live games and just before kickoff: a game is
+   "near" when it started within the last 4h (likely in progress) or
+   commences within the next 8h. */
+window.GIU = window.GIU || {};
+window.GIU.oddsNearWindow = function(events, nowMs){
+  nowMs = (nowMs === undefined) ? Date.now() : nowMs;
+  return (events||[]).some(function(ev){
+    var t = Date.parse(ev && ev.commence_time);
+    if(isNaN(t)) return false;
+    return t > nowMs - 4*3600*1000 && t < nowMs + 8*3600*1000;
+  });
+};
 var SPORTS = [
   ["americanfootball_nfl","NFL"],["basketball_nba","NBA"],["baseball_mlb","MLB"],
   ["icehockey_nhl","NHL"],["americanfootball_ncaaf","NCAAF"],["basketball_ncaab","NCAAB"],
@@ -20,6 +33,11 @@ var BOOK_LINKS = {
 var sport = SPORTS[0][0], key = "";
 try{ key = localStorage.getItem("giu_odds_key") || ""; }catch(e){}
 var autoTimer = null;
+/* renderSeq: generation guard — a slow response for a previous sport tab
+   never overwrites the board after the visitor has switched sports.
+   nearBySport: last-known "games near" state per sport, drives the
+   quota-smart auto-refresh (ticks only burn API quota when lines move). */
+var renderSeq = 0, boardHasGames = false, lastUpdated = null, nearBySport = {};
 
 /* ---- bet slip state (local only, never leaves the browser) ---- */
 var Slip = window.OddsSlip;
@@ -52,14 +70,64 @@ function setOpens(o){
   try{ localStorage.setItem(openKey(), JSON.stringify(o)); }catch(e){}
 }
 
-function render(){
+function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+function fmtClock(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function autoOn(){ var c = $("autoRef"); return !!(c && c.checked); }
+/* Live status line under the board controls (aria-live). Honest about what
+   auto-refresh is doing: re-pulling when games are near, and saying so —
+   instead of silently burning the visitor's 500-request monthly quota —
+   when there's nothing worth re-pulling. */
+function setStatus(overrideMsg, paused){
+  var s = $("oddsStatus"); if(!s) return;
+  if(overrideMsg !== undefined){
+    /* Explicit events (a pull in flight, a failed pull) are always worth
+       showing — the visitor asked for this fetch, or it just failed. */
+    s.className = "live-status" + (paused ? " paused" : "");
+    s.textContent = overrideMsg; return;
+  }
+  if(!autoOn() || !key){
+    s.className = "live-status"; s.textContent = ""; return;
+  }
+  var near = nearBySport[sport];
+  if(near){
+    s.className = "live-status";
+    s.innerHTML = '<span class="live-dot" aria-hidden="true"></span>' +
+      GIU.esc("Auto-refresh on — re-pulling lines every 5 min while games are near" +
+      (lastUpdated ? " · updated " + fmtClock(lastUpdated) : ""));
+  } else {
+    s.className = "live-status paused";
+    s.textContent = "Auto-refresh on — no games near kickoff, so your API quota stays untouched";
+  }
+}
+/* The 5-minute tick: refreshes in place (no board flash) only when lines are
+   actually moving; skips while the tab is hidden. */
+function autoTick(){
+  if(!autoOn() || !key || isHidden()) return;
+  if(nearBySport[sport]){
+    render({silent:true});
+  } else {
+    setStatus();
+  }
+}
+
+function render(opts){
+  opts = opts || {};
   var setup = $("oddsSetup"), board = $("oddsBoard");
-  if(!key){ setup.style.display="block"; board.innerHTML=""; $("quota").textContent=""; return; }
+  if(!key){ setup.style.display="block"; board.innerHTML=""; $("quota").textContent=""; setStatus(""); return; }
   setup.style.display="none";
   if($("keyInput").value !== key) $("keyInput").value = key;
+  var mySeq = ++renderSeq;
+  var silent = !!opts.silent && boardHasGames;
+  if(!silent){
+    board.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--faint)">Pulling live lines…</p>';
+  } else {
+    setStatus("Updating lines…");
+  }
   var url = "https://api.the-odds-api.com/v4/sports/"+sport+"/odds/?apiKey="+encodeURIComponent(key)+
             "&regions=us&markets=h2h,spreads,totals&oddsFormat=decimal";
-  board.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--faint)">Pulling live lines…</p>';
   var remaining = "?";
   /* Identity directory (ESPN logos/colors) loads in parallel; resolves to {}
      on failure so the board always renders, with or without identity. */
@@ -73,25 +141,39 @@ function render(){
   }).then(function(events){
     return dirP.then(function(dir){ return {events:events, dir:dir}; });
   }).then(function(payload){
+    if(mySeq !== renderSeq) return; /* stale sport response — discard */
     var events = payload.events, dir = payload.dir;
     $("quota").textContent = "API quota remaining: "+remaining+" requests this month";
+    nearBySport[sport] = window.GIU.oddsNearWindow(events);
+    lastUpdated = Date.now();
     var prev = getSnap(), now = {}, opens = getOpens();
     var html = events.length
       ? events.map(function(ev){ return renderGame(ev, prev, now, opens, dir, league); }).join("")
       : '<div class="empty">No upcoming games with odds for this league right now.</div>';
     board.innerHTML = html;
+    boardHasGames = true;
     setSnap(now);
     setOpens(opens);
     /* keep slip prices honest against the fresh board */
     if(slip.length){ Slip.reprice(slip, now); saveSlip(); }
     refreshPickMarks();
     renderSlip();
+    setStatus();
   }).catch(function(e){
+    if(mySeq !== renderSeq) return; /* stale sport response — discard */
+    if(silent){
+      /* A failed background re-pull never wipes the live board the visitor
+         is reading — it keeps the last good lines and says when they're from. */
+      setStatus("Re-pull failed ("+e.message+") — still showing lines from "+
+        (lastUpdated ? fmtClock(lastUpdated) : "your last successful load"), true);
+      return;
+    }
     if(e.message==="invalid-key"){
       board.innerHTML = '<div class="notice red"><strong>That API key didn\'t work.</strong> The Odds API said the key is invalid. Double-check it, or <a href="https://the-odds-api.com" target="_blank" rel="noopener">grab a free one here</a> (500 requests/month, no card).</div>';
     } else {
       board.innerHTML = GIU.failBox("The Odds API didn't respond ("+GIU.esc(e.message)+"). Your key and quota are untouched — try again in a minute.");
     }
+    setStatus();
   });
 }
 
@@ -280,12 +362,16 @@ Array.prototype.forEach.call($("sportTabs").querySelectorAll(".tab"), function(t
     t.classList.add("active"); sport = t.getAttribute("data-sport"); render();
   });
 });
-$("refreshBtn").addEventListener("click", render);
+$("refreshBtn").addEventListener("click", function(){ render({silent:true}); });
 $("autoRef").addEventListener("change", function(){
   if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
   if(this.checked){
-    autoTimer = setInterval(function(){ if(key) render(); }, 5*60*1000);
-    alert("Auto-refresh on: the board reloads every 5 minutes. Each reload uses API quota — the free tier is 500 requests/month.");
+    /* One timer only — never stacked. The tick itself decides whether a
+       fetch is worth the quota; nothing fires while the tab is hidden. */
+    autoTimer = setInterval(autoTick, 5*60*1000);
+    render({silent:true}); /* immediate pull so the status line reflects reality */
+  } else {
+    setStatus("");
   }
 });
 /* slip: toggle legs from the board (delegated, survives re-renders) */
