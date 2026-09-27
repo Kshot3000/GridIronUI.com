@@ -51,6 +51,61 @@ function leaderHtml(c){
    Scores for in-progress games re-pull the ESPN scoreboard every 60s, in
    place — no page reload, no spinner shimmer. The tick skips while the tab
    is hidden and carries on by itself when the tab returns. */
+/* ---- game detail (box-score detail per game) ----
+   In-progress and final games get a "Details" expander that fetches ESPN's
+   game-summary endpoint once per event and renders a scoring-plays timeline,
+   period-by-period scoring, and a team-stats comparison. Fetches are guarded
+   by a per-event generation so a slow summary can't fill another event's
+   region; open details survive the 60s silent board refresh, and open
+   in-progress details are silently re-pulled on each tick. */
+var detailOpen = {}, detailCache = {}, detailState = {}, detailLeague = {};
+var detailSeq = 0, detailGen = {};
+
+function setToggle(btn, open){
+  btn.setAttribute("aria-expanded", open ? "true" : "false");
+  btn.innerHTML = (open ? "Hide details" : "Details")+'<span class="gd-chev" aria-hidden="true"></span>';
+}
+function fetchDetail(id, silent){
+  var seq = ++detailSeq; detailGen[id] = seq;
+  var region = document.getElementById("gd-"+id);
+  if(region && !silent) region.innerHTML = '<div class="skel" style="height:80px"></div>';
+  GIU.fetchJSON(window.ScoresDetail.summaryUrl(detailLeague[id], id)).then(function(sum){
+    if(detailGen[id] !== seq || !detailOpen[id]) return;
+    var html = window.ScoresDetail.buildHtml(sum, detailLeague[id], GIU.esc);
+    if(!html) html = '<div class="empty">No box-score detail available for this game yet.</div>';
+    detailCache[id] = html;
+    var r2 = document.getElementById("gd-"+id);
+    if(r2 && detailOpen[id]) r2.innerHTML = html;
+  }).catch(function(){
+    if(detailGen[id] !== seq) return;
+    /* Keep the failure quiet and recoverable: collapse, and let the user
+       retry on the next click. */
+    delete detailOpen[id];
+    var r2 = document.getElementById("gd-"+id);
+    if(r2){ r2.hidden = true; r2.innerHTML = ""; }
+    var b = document.querySelector('.gd-toggle[data-ev="'+id+'"]');
+    if(b){ setToggle(b, false); b.title = "Couldn't load detail — click to retry"; }
+  });
+}
+function toggleDetails(id){
+  var btn = document.querySelector('.gd-toggle[data-ev="'+id+'"]');
+  var region = document.getElementById("gd-"+id);
+  if(detailOpen[id]){
+    delete detailOpen[id];
+    if(region) region.hidden = true;
+    if(btn) setToggle(btn, false);
+    return;
+  }
+  detailOpen[id] = true;
+  detailLeague[id] = detailLeague[id] || LEAGUES[cur][0];
+  if(btn){ setToggle(btn, true); btn.removeAttribute("title"); }
+  if(region){
+    region.hidden = false;
+    if(detailCache[id]){ region.innerHTML = detailCache[id]; return; }
+  }
+  fetchDetail(id, false);
+}
+
 var LIVE_MS = 60000;
 var liveTimer = null, autoOn = true, liveN = 0, lastUpdated = null;
 
@@ -111,10 +166,20 @@ function load(silent){
       var leaders = leaderHtml(c);
       var hw = st.state==="post" && Number(home.score)>Number(away.score);
       var aw = st.state==="post" && Number(away.score)>Number(home.score);
+      detailState[ev.id] = st.state;
+      var det = "";
+      if(st.state==="in" || st.state==="post"){
+        var open = !!detailOpen[ev.id];
+        det = '<div><button type="button" class="gd-toggle" data-ev="'+GIU.esc(ev.id)+'"'+
+          ' aria-expanded="'+(open?"true":"false")+'" aria-controls="gd-'+GIU.esc(ev.id)+'">'+
+          (open?"Hide details":"Details")+'<span class="gd-chev" aria-hidden="true"></span></button></div>'+
+          '<div class="gd-detail" id="gd-'+GIU.esc(ev.id)+'" role="region" aria-label="Box-score detail"'+
+          (open?"":" hidden")+'>'+(open && detailCache[ev.id] ? detailCache[ev.id] : "")+'</div>';
+      }
       return '<div class="game-card">'+badge+
         GIU.teamRow(away, aw)+ GIU.teamRow(home, hw)+
         '<div class="game-meta"><span>'+GIU.esc((c.venue||{}).fullName||"")+'</span>'+
-        (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+'</div>';
+        (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+det+'</div>';
       }).join("");
     }
     /* ---- live auto-refresh ----
@@ -124,6 +189,12 @@ function load(silent){
     liveN = liveCount(evs);
     lastUpdated = Date.now();
     renderLiveStatus();
+    /* Open details survive the re-render (restored from cache in the card
+       template above); open in-progress details are silently re-pulled so
+       the scoring timeline stays fresh on the 60s tick. */
+    Object.keys(detailOpen).forEach(function(id){
+      if(detailState[id] === "in") fetchDetail(id, true);
+    });
     if(liveN > 0 && autoOn){
       liveTimer = setInterval(function(){ if(!isHidden()) load(true); }, LIVE_MS);
     }
@@ -141,8 +212,11 @@ Array.prototype.forEach.call($("leagueTabs").querySelectorAll(".tab"), function(
     t.classList.add("active"); cur = Number(t.getAttribute("data-i")); load();
   });
 });
-$("prevDay").addEventListener("click", function(){ dayOffset--; load(); });
-$("nextDay").addEventListener("click", function(){ dayOffset++; load(); });
+$("scoreGrid").addEventListener("click", function(e){
+  var t = e.target && e.target.closest ? e.target.closest(".gd-toggle") : null;
+  if(t) toggleDetails(t.getAttribute("data-ev"));
+});
+$("prevDay").addEventListener("click", function(){ dayOffset--; load(); });$("nextDay").addEventListener("click", function(){ dayOffset++; load(); });
 $("todayBtn").addEventListener("click", function(){ dayOffset=0; load(); });
 $("pauseBtn").addEventListener("click", function(){
   autoOn = !autoOn;
