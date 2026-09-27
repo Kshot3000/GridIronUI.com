@@ -103,6 +103,85 @@ var M = {
     }
     return r;
   },
+
+  /* ---- deterministic PRNG (mulberry32) for seeded, reproducible simulations ---- */
+  mulberry32: function(seed){
+    var a = (Number(seed)>>>0) || 1;
+    return function(){
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a>>>15), 1 | a);
+      t = (t + Math.imul(t ^ (t>>>7), 61 | t)) ^ t;
+      return ((t ^ (t>>>14))>>>0) / 4294967296;
+    };
+  },
+
+  /* ---- bankroll Monte Carlo: what a run of nBets bets does to a bankroll ----
+     cfg: { startBankroll, stakeMode:"flat"|"pct", stake (flat $ or % of bankroll),
+            winProb 0..1, decimalOdds > 1, nBets >= 1, nSims >= 1,
+            ruinFrac (default 0): balance <= start*ruinFrac counts as ruined.
+            Use 0 for flat staking (true $0 ruin), ~0.05 for % staking
+            (proportional stakes never hit $0, so "down 95%+" is the ruin line). }
+     rand: function() -> [0,1). Pass M.mulberry32(seed) for deterministic tests;
+           the UI passes a Math.random-backed closure.
+     A stake can never exceed the current balance. Curves are recorded for the
+     first nCurves (default 40) simulations at ~80 evenly spaced checkpoints.
+     Returns { evPerBet, mean, median, p5, p95, pRuin, pHalf, pProfit, pDouble,
+               ends[], curves[][], ruinFrac }. */
+  simulateBankroll: function(cfg, rand){
+    cfg = cfg || {};
+    var start = Number(cfg.startBankroll);
+    var mode = cfg.stakeMode === "pct" ? "pct" : "flat";
+    var stake = Number(cfg.stake);
+    var p = Number(cfg.winProb);
+    var d = Number(cfg.decimalOdds);
+    var nBets = Math.floor(Number(cfg.nBets));
+    var nSims = Math.floor(Number(cfg.nSims));
+    var ruinFrac = cfg.ruinFrac === undefined ? 0 : Number(cfg.ruinFrac);
+    var nCurves = cfg.nCurves === undefined ? 40 : Math.floor(Number(cfg.nCurves));
+    if(!(start>0)) throw new Error("Starting bankroll must be greater than 0");
+    if(!(stake>0)) throw new Error("Stake must be greater than 0");
+    if(mode==="pct" && stake>100) throw new Error("Stake as % of bankroll must be <= 100");
+    if(!(p>0 && p<1)) throw new Error("Win probability must be between 0 and 1");
+    if(!(d>1)) throw new Error("Decimal odds must be > 1");
+    if(!(nBets>=1)) throw new Error("Number of bets must be at least 1");
+    if(!(nSims>=1)) throw new Error("Number of simulations must be at least 1");
+    if(!(ruinFrac>=0 && ruinFrac<1)) throw new Error("ruinFrac must be in [0, 1)");
+    if(typeof rand !== "function") throw new Error("A random function is required");
+    var ruinLine = start * ruinFrac;
+    var ends = new Array(nSims);
+    var curves = [];
+    var curveEvery = Math.max(1, Math.ceil(nBets/80));
+    var nRuin = 0, nHalf = 0, nProfit = 0, nDouble = 0, sum = 0;
+    for(var s=0; s<nSims; s++){
+      var b = start, ruined = b <= ruinLine, curve = null;
+      if(s < nCurves) curve = [round(b,2)];
+      for(var i=1; i<=nBets; i++){
+        if(b <= ruinLine){ ruined = true; break; }
+        var sAmt = mode==="flat" ? Math.min(stake, b) : b*stake/100;
+        if(rand() < p) b = b + sAmt*(d-1);
+        else b = b - sAmt;
+        if(curve && i % curveEvery === 0) curve.push(round(b,2));
+      }
+      if(b <= ruinLine) ruined = true;
+      ends[s] = round(b,2); sum += b;
+      if(ruined) nRuin++;
+      if(b < start*0.5) nHalf++;
+      if(b > start) nProfit++;
+      if(b >= start*2) nDouble++;
+      if(curve){ curve.push(round(b,2)); curves.push(curve); }
+    }
+    var sorted = ends.slice().sort(function(a,c){ return a-c; });
+    function pct(q){ return sorted[Math.min(sorted.length-1, Math.floor(q*sorted.length))]; }
+    return {
+      evPerBet: p*d - 1,
+      mean: round(sum/nSims, 2),
+      median: pct(0.5), p5: pct(0.05), p95: pct(0.95),
+      pRuin: nRuin/nSims, pHalf: nHalf/nSims,
+      pProfit: nProfit/nSims, pDouble: nDouble/nSims,
+      ruinFrac: ruinFrac, nSims: nSims, nBets: nBets,
+      ends: ends, curves: curves
+    };
+  },
   round: round
 };
 

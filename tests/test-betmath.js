@@ -77,5 +77,71 @@ eq("equal payout invariant", 60*2.5, hx.stakeB*1.8, 0.01);
   catch(e){ console.log("ok  ", c[0], "throws"); }
 });
 
+/* ---------- bankroll Monte Carlo ---------- */
+var MC = { startBankroll:1000, stakeMode:"flat", stake:100, winProb:0.55,
+           decimalOdds:1.9090909, nBets:500, nSims:2000 };
+
+/* seeded determinism: same seed -> identical results */
+var r1 = M.simulateBankroll(MC, M.mulberry32(7));
+var r2 = M.simulateBankroll(MC, M.mulberry32(7));
+eq("mc seeded deterministic (median)", r1.median, r2.median, 1e-9);
+eq("mc seeded deterministic (pRuin)", r1.pRuin, r2.pRuin, 1e-9);
+eq("mc seeded deterministic (ends[0])", r1.ends[0], r2.ends[0], 1e-9);
+var r3 = M.simulateBankroll(MC, M.mulberry32(8));
+if(r1.ends[0] === r3.ends[0] && r1.median === r3.median){ fails++; console.error("FAIL mc different seeds differ"); }
+else console.log("ok   mc different seeds differ");
+
+/* EV per bet identity: p*d - 1 */
+eq("mc evPerBet", r1.evPerBet, 0.55*1.9090909 - 1, 1e-9);
+
+/* always-win flat: 10 bets of $100 at 2.0 from $1000 -> exactly $2000 */
+var aw = M.simulateBankroll({startBankroll:1000, stakeMode:"flat", stake:100,
+  winProb:0.999999, decimalOdds:2.0, nBets:10, nSims:50, nCurves:0}, M.mulberry32(1));
+eq("mc always-win flat ends", aw.ends[0], 2000, 1e-9);
+eq("mc always-win flat pRuin", aw.pRuin, 0);
+eq("mc always-win flat pProfit", aw.pProfit, 1);
+eq("mc always-win flat pDouble", aw.pDouble, 1);
+
+/* always-lose flat: 10 bets of $100 -> $0, ruin */
+var al = M.simulateBankroll({startBankroll:1000, stakeMode:"flat", stake:100,
+  winProb:1e-9, decimalOdds:2.0, nBets:10, nSims:50, nCurves:0}, M.mulberry32(2));
+eq("mc always-lose flat ends", al.ends[0], 0, 1e-9);
+eq("mc always-lose flat pRuin", al.pRuin, 1);
+
+/* stake capped at balance: $1000 bankroll, $5000 flat stake, one win at 2.0 -> $2000 */
+var cap = M.simulateBankroll({startBankroll:1000, stakeMode:"flat", stake:5000,
+  winProb:0.999999, decimalOdds:2.0, nBets:1, nSims:10, nCurves:0}, M.mulberry32(3));
+eq("mc stake capped at balance", cap.ends[0], 2000, 1e-9);
+
+/* pct staking always-win: 1000 * 1.05^10 */
+var pct = M.simulateBankroll({startBankroll:1000, stakeMode:"pct", stake:5,
+  winProb:0.999999, decimalOdds:2.0, nBets:10, nSims:10, nCurves:0, ruinFrac:0.05}, M.mulberry32(4));
+eq("mc pct always-win growth", pct.ends[0], 1000*Math.pow(1.05,10), 0.05);
+eq("mc pct never ruins on wins", pct.pRuin, 0);
+
+/* pct staking always-lose never hits 0 -> ruinFrac line triggers: b<50 */
+var pctl = M.simulateBankroll({startBankroll:1000, stakeMode:"pct", stake:10,
+  winProb:1e-9, decimalOdds:2.0, nBets:500, nSims:10, nCurves:0, ruinFrac:0.05}, M.mulberry32(5));
+eq("mc pct ruinFrac triggers", pctl.pRuin, 1);
+eq("mc pct pHalf", pctl.pHalf, 1);
+
+/* curves recorded for first nCurves sims, non-increasing length sanity */
+var cv = M.simulateBankroll({startBankroll:1000, stakeMode:"flat", stake:100,
+  winProb:0.55, decimalOdds:2.0, nBets:160, nSims:5, nCurves:3}, M.mulberry32(6));
+eq("mc curves count", cv.curves.length, 3);
+var cvOk = cv.curves.every(function(c){ return c.length>=2 && c.length<=82 && c[0]===1000; });
+if(!cvOk){ fails++; console.error("FAIL mc curves shape"); }
+else console.log("ok   mc curves shape");
+
+/* validation throws */
+[["mc bad bankroll",function(){M.simulateBankroll({startBankroll:0,stakeMode:"flat",stake:100,winProb:0.5,decimalOdds:2,nBets:10,nSims:10},M.mulberry32(1));}],
+ ["mc bad winProb",function(){M.simulateBankroll({startBankroll:1000,stakeMode:"flat",stake:100,winProb:1,decimalOdds:2,nBets:10,nSims:10},M.mulberry32(1));}],
+ ["mc bad odds",function(){M.simulateBankroll({startBankroll:1000,stakeMode:"flat",stake:100,winProb:0.5,decimalOdds:1,nBets:10,nSims:10},M.mulberry32(1));}],
+ ["mc no rng",function(){M.simulateBankroll({startBankroll:1000,stakeMode:"flat",stake:100,winProb:0.5,decimalOdds:2,nBets:10,nSims:10});}]
+].forEach(function(c){
+  try{ c[1](); fails++; console.error("FAIL", c[0], "did not throw"); }
+  catch(e){ console.log("ok  ", c[0], "throws"); }
+});
+
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL BETMATH TESTS PASSED");
 process.exit(fails ? 1 : 0);

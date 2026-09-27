@@ -117,6 +117,34 @@
       <div class="result-box" id="hOut" style="display:none"></div>
     </div>
 
+    <div class="card calc" id="bankroll">
+      <span class="tag">Sharp money</span>
+      <h3>Bankroll risk simulator</h3>
+      <p class="hint">Monte Carlo: run thousands of simulated seasons at your win rate and price to see how a bankroll actually behaves — the losing streaks included. This is a model, not a prediction.</p>
+      <div class="form-row">
+        <div class="field"><label>Starting bankroll ($)</label><input type="number" id="mcBank" placeholder="1000" min="1" step="any" value="1000"></div>
+        <div class="field"><label>Stake per bet</label>
+          <div style="display:flex;gap:8px">
+            <input type="number" id="mcStake" placeholder="2" min="0.01" step="any" value="2" style="flex:1;min-width:0">
+            <select id="mcStakeMode" style="max-width:150px;flex:none">
+              <option value="pct" selected>% of bankroll</option>
+              <option value="flat">flat $</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Your win probability (%)</label><input type="number" id="mcProb" placeholder="55" min="1" max="99" step="any" value="55"></div>
+        <div class="field"><label>Average odds (American)</label><input type="text" id="mcOdds" placeholder="-110" value="-110"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Bets in the run</label><input type="number" id="mcBets" placeholder="500" min="10" max="10000" step="1" value="500"></div>
+        <div class="field"><label>Simulations</label><select id="mcSims"><option value="1000">1,000</option><option value="2500">2,500</option><option value="5000" selected>5,000</option><option value="10000">10,000</option></select></div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="mcGo">Run simulation</button>
+      <div class="result-box" id="mcOut" style="display:none"></div>
+    </div>
+
   </div>
 
   <div class="notice green" style="margin:34px 0">
