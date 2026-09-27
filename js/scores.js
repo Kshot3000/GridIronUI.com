@@ -18,6 +18,35 @@ function dayLabel(){
 }
 function teamName(t){ return t.abbreviation || t.shortDisplayName || t.displayName; }
 
+/* Stat-leader labels, verified against ESPN's real scoreboard payloads
+   (NFL: passingYards/rushingYards/receivingYards; MLB: MLBRating).
+   Unknown category keys are prettified from camelCase so nothing renders raw. */
+var LEAD_LABELS = {
+  passingYards:"Pass", rushingYards:"Rush", receivingYards:"Rec",
+  points:"PTS", rebounds:"REB", assists:"AST", steals:"STL", blocks:"BLK",
+  goals:"Goals", shots:"Shots", saves:"Saves",
+  MLBRating:"Top performer"
+};
+function leadLabel(name){
+  if(LEAD_LABELS[name]) return LEAD_LABELS[name];
+  return String(name||"Leader").replace(/([a-z0-9])([A-Z])/g,"$1 $2")
+    .replace(/^./, function(m){ return m.toUpperCase(); });
+}
+/* Full stat-leader line: one entry per ESPN leader category (first athlete each).
+   Entries missing a name or stat — or the pre-game "0-0" MLB placeholder — are
+   skipped rather than shown as junk. */
+function leaderHtml(c){
+  var cats = c.leaders||[], out = [];
+  cats.forEach(function(cat){
+    var L = (cat.leaders||[])[0];
+    if(!L) return;
+    var nm = GIU.esc((L.athlete||{}).displayName||""), val = GIU.esc(L.displayValue||"");
+    if(!nm || !val || val==="0-0") return;
+    out.push('<span><b>'+GIU.esc(leadLabel(cat.name))+'</b> '+nm+' <span class="num">'+val+'</span></span>');
+  });
+  return out.length ? '<div class="leaders">'+out.join("")+'</div>' : "";
+}
+
 function load(){
   var box = $("scoreGrid");
   box.innerHTML = '<div class="card"><div class="skel" style="height:110px"></div></div>'.repeat(3);
@@ -39,11 +68,7 @@ function load(){
         : '<span class="tag blue">'+GIU.esc(st.shortDetail||"Scheduled")+'</span>';
       var bc = ((c.broadcasts||[])[0]||{}).names;
       var odds = (c.odds&&c.odds[0]) ? '<span>Line: '+GIU.esc(c.odds[0].details||"")+(c.odds[0].overUnder? " · O/U "+c.odds[0].overUnder : "")+'</span>' : "";
-      var lead = "";
-      if(c.leaders && c.leaders.length && c.leaders[0].leaders && c.leaders[0].leaders.length){
-        var L = c.leaders[0].leaders[0];
-        lead = '<span>'+GIU.esc(c.leaders[0].name||"Leader")+': '+GIU.esc((L.athlete||{}).displayName||"")+" "+GIU.esc(L.displayValue||"")+'</span>';
-      }
+      var leaders = leaderHtml(c);
       function teamRow(t, winner){
         return '<div class="teams"><div class="team"><span class="abbr">'+GIU.esc(teamName(t.team||{}))+'</span>'+
           '<span class="nm">'+GIU.esc((t.team||{}).displayName||"")+'</span></div>'+
@@ -54,7 +79,7 @@ function load(){
       return '<div class="game-card">'+badge+
         teamRow(away, aw)+ teamRow(home, hw)+
         '<div class="game-meta"><span>'+GIU.esc((c.venue||{}).fullName||"")+'</span>'+
-        (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+lead+'</div></div>';
+        (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+'</div>';
     }).join("");
   }).catch(function(){
     box.innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond for "+LEAGUES[cur][1]+".");

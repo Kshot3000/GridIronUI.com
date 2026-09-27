@@ -4,7 +4,7 @@
    team, and the All/Out/Doubtful/Questionable filter chips filter correctly. */
 "use strict";
 var fs = require("fs"), vm = require("vm"), path = require("path");
-var ROOT = "/home/hatch/workspace/gridironui";
+var ROOT = path.join(__dirname, ".."); /* test the repo this file is checked out in */
 
 var failures = 0;
 function assert(cond, msg){

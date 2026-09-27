@@ -3,7 +3,7 @@
    canned Polymarket-shaped data, and asserts on the rendered HTML. */
 "use strict";
 var fs = require("fs"), vm = require("vm"), path = require("path");
-var ROOT = "/home/hatch/workspace/gridironui";
+var ROOT = path.join(__dirname, ".."); /* test the repo this file is checked out in */
 
 function makeEl(){
   return {
