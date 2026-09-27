@@ -23,6 +23,9 @@ function loadPool(){
     return (d && d.pool) ? d.pool : [];
   }catch(e){ return []; }
 }
+function savePool(){
+  try{ localStorage.setItem("giu_dfs_pool_"+cfgKey(), JSON.stringify({pool:pool})); }catch(e){}
+}
 function exposureCaps(){
   try{ return JSON.parse(localStorage.getItem(CHAT_KEY+cfgKey())||"{}")||{}; }catch(e){ return {}; }
 }
@@ -219,7 +222,7 @@ function refreshPoolBar(){
   var demo = pool.some(function(p){return p.demo;});
   $("poolBar").innerHTML =
     '<span class="pool-pill">📦 Pool: <b>'+n+'</b> players · '+c.site+' '+c.sport+' · $'+c.cap.toLocaleString()+' cap'+(demo?' · <span class="demo-tag">DEMO</span>':"")+'</span>'+
-    (n ? "" : '<span class="pool-warn">Pool is empty — <a href="dfs.html">load the demo slate or upload a CSV in the DFS Lab</a>, then come back.</span>');
+    (n ? "" : '<span class="pool-warn">Pool is empty — just ask me to build and I\'ll load the DEMO slate, or <a href="dfs.html">bring your own CSV in the DFS Lab</a>.</span>');
 }
 
 function greeting(){
@@ -698,11 +701,14 @@ function executeDirectives(text, hostEl, userText){
       return;
     }
     if(!pool.length && (d.action==="build_lineup"||d.action==="compare"||d.action==="explain_pick")){
+      /* zero-setup: the pool is empty, so load the DEMO slate right here
+         instead of sending the visitor to another page. Clearly labeled. */
+      pool = OPT.buildDemoSlate(cfg());
+      savePool(); refreshPoolBar();
       var w = document.createElement("div");
-      w.className = "action-note err";
-      w.innerHTML = "⚙️ Can't run '"+esc(d.action)+"': the pool is empty. <a href='dfs.html'>Load the demo slate or upload a CSV in the DFS Lab</a> first.";
+      w.className = "action-note";
+      w.innerHTML = "📦 Your pool was empty, so I loaded the <b>DEMO slate</b> — synthetic players with made-up projections, just for trying the optimizer. Your "+(d.action==="build_lineup"?"lineups are":"result is")+" below. To use real projections, upload a CSV in the <a href='dfs.html'>DFS Lab</a> anytime.";
       hostEl.appendChild(w);
-      return;
     }
     if(d.action==="build_lineup"){
       var mode = d.mode||settings.mode;

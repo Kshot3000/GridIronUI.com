@@ -381,11 +381,40 @@ function exposureSummary(exposures, got, pool, lockedIds, maxExp, numWanted){
   return rows;
 }
 
+/* ---------- demo slate (shared by the DFS Lab and the AI coach) ----------
+   Synthetic players with made-up projections, for trying the optimizer only.
+   Every entry carries demo:1 so UIs can label it DEMO. Pure: takes a CONFIGS
+   entry, returns a fresh pool array. */
+function buildDemoSlate(cfg){
+  var pool = [], pid = 1;
+  function P(name, pos, team, opp, salary, proj, floor, ceil, own){
+    pool.push({ id:pid++, name:name, pos:pos, team:team, opp:opp,
+      salary:salary, proj:proj, floor:floor, ceil:ceil, own:own, demo:1 });
+  }
+  var i, t;
+  if(cfg.sport !== "NBA"){
+    var T=[["KC","BUF"],["BUF","KC"],["PHI","DAL"],["DAL","PHI"],
+           ["SF","SEA"],["DET","GB"],["BAL","CIN"],["MIA","NE"]];
+    var dstPos = (cfg.site==="FanDuel") ? "DEF" : "DST";
+    for(i=0;i<8;i++) P("Demo QB"+(i+1),["QB"],T[i][0],T[i][1],8000-i*250,24-i*0.8,12,38,15-i);
+    for(i=0;i<14;i++){ t=T[i%8]; P("Demo RB"+(i+1),["RB"],t[0],t[1],7500-((i*280)%3500),16-(i%5),8,30,12); }
+    for(i=0;i<18;i++){ t=T[i%8]; P("Demo WR"+(i+1),["WR"],t[0],t[1],7200-((i*260)%3400),14-(i%5),7,29,10); }
+    for(i=0;i<8;i++){ t=T[i%8]; P("Demo TE"+(i+1),["TE"],t[0],t[1],5800-i*300,11-i*0.5,5,22,9); }
+    for(i=0;i<6;i++){ t=T[i%8]; P("Demo DST"+(i+1),[dstPos],t[0],t[1],3400-i*150,8,3,18,8); }
+  } else {
+    var P2=["PG","SG","SF","PF","C"];
+    for(i=0;i<40;i++){ var ps=P2[i%5]; P("Demo "+ps+(i+1),[ps],"DEM","OPP",7800-((i*330)%4800),36-(i%8)*2,20,55,10); }
+  }
+  return pool;
+}
+
 if(typeof module !== "undefined" && module.exports){
   module.exports = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
     greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
-    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor };
+    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor,
+    buildDemoSlate:buildDemoSlate };
 } else { window.DFSOpt = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
     greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, seatLocked:seatLocked, generate:generate,
-    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor }; }
+    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor,
+    buildDemoSlate:buildDemoSlate }; }
 })();

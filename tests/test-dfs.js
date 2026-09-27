@@ -95,5 +95,21 @@ ok("insights mention stack", ins.some(function(s){return /Stack:/.test(s);}));
 var insC = D.insights(r1.lineups[0], nfl, "cash", "DK_NFL");
 ok("cash insights mention safety", insC.some(function(s){return /Cash safety/.test(s);}));
 
+
+/* ---- buildDemoSlate (shared demo builder) ---- */
+var demoDK = D.buildDemoSlate(D.CONFIGS.DK_NFL);
+ok("demo: 54 NFL players", demoDK.length===54);
+ok("demo: all flagged demo", demoDK.every(function(p){ return p.demo===1; }));
+ok("demo: has all positions", ["QB","RB","WR","TE","DST"].every(function(pos){
+  return demoDK.some(function(p){ return p.pos[0]===pos; });
+}));
+ok("demo: KC has a QB (stacks work)", demoDK.some(function(p){ return p.team==="KC" && p.pos[0]==="QB"; }));
+var demoFD = D.buildDemoSlate(D.CONFIGS.FD_NFL);
+ok("demo: FanDuel uses DEF slot", demoFD.some(function(p){ return p.pos[0]==="DEF"; }) &&
+   !demoFD.some(function(p){ return p.pos[0]==="DST"; }));
+var demoNBA = D.buildDemoSlate(D.CONFIGS.DK_NBA);
+ok("demo: 40 NBA players", demoNBA.length===40);
+ok("demo: ids unique", (function(){ var s={}; return demoDK.every(function(p){ if(s[p.id]) return false; s[p.id]=1; return true; }); })());
+
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL DFS TESTS PASSED");
 process.exit(fails ? 1 : 0);

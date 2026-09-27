@@ -141,20 +141,8 @@ $("addPlayer").addEventListener("click", function(){
 /* ---------- demo slate ---------- */
 $("demoBtn").addEventListener("click", function(){
   if(pool.length && !confirm("Replace the current pool with the DEMO slate?")) return;
-  pool = []; pidSeq = 1;
-  var isNBA = cfg().sport==="NBA";
-  if(!isNBA){
-    var T=[["KC","BUF"],["BUF","KC"],["PHI","DAL"],["DAL","PHI"],["SF","SEA"],["DET","GB"],["BAL","CIN"],["MIA","NE"]];
-    for(var i=0;i<8;i++) pool.push({id:pidSeq++,name:"Demo QB"+(i+1),pos:["QB"],team:T[i][0],opp:T[i][1],salary:8000-i*250,proj:24-i*0.8,floor:12,ceil:38,own:15-i,demo:1});
-    for(var r=0;r<14;r++){ var t=T[r%8]; pool.push({id:pidSeq++,name:"Demo RB"+(r+1),pos:["RB"],team:t[0],opp:t[1],salary:7500-(r*280)%3500,proj:16-(r%5),floor:8,ceil:30,own:12,demo:1}); }
-    for(var w=0;w<18;w++){ var t2=T[w%8]; pool.push({id:pidSeq++,name:"Demo WR"+(w+1),pos:["WR"],team:t2[0],opp:t2[1],salary:7200-(w*260)%3400,proj:14-(w%5),floor:7,ceil:29,own:10,demo:1}); }
-    for(var te=0;te<8;te++){ var t3=T[te%8]; pool.push({id:pidSeq++,name:"Demo TE"+(te+1),pos:["TE"],team:t3[0],opp:t3[1],salary:5800-te*300,proj:11-te*0.5,floor:5,ceil:22,own:9,demo:1}); }
-    for(var d=0;d<6;d++){ var t4=T[d%8]; pool.push({id:pidSeq++,name:"Demo DST"+(d+1),pos:[cfgKey.indexOf("FD")===0?"DEF":"DST"],team:t4[0],opp:t4[1],salary:3400-d*150,proj:8,floor:3,ceil:18,own:8,demo:1}); }
-  } else {
-    var P2=["PG","SG","SF","PF","C"];
-    for(var p=0;p<40;p++){ var ps=P2[p%5]; pool.push({id:pidSeq++,name:"Demo "+ps+(p+1),pos:[ps],team:"DEM",opp:"OPP",salary:7800-(p*330)%4800,proj:36-(p%8)*2,floor:20,ceil:55,own:10,demo:1}); }
-  }
-  save(); renderPool();
+  pool = OPT.buildDemoSlate(cfg());
+  pidSeq = pool.length+1;  save(); renderPool();
 });
 $("clearPool").addEventListener("click", function(){
   if(!pool.length || confirm("Remove all "+pool.length+" players from the pool?")){ pool=[]; save(); renderPool(); }

@@ -141,7 +141,7 @@ function nanoSystemPrompt(ctx){
 "POOL:\n"+ctx.text+"\n"+
 "RULES: Only name players from the POOL. Never invent names, teams or salaries. "+
 "Lineups come from a rules-based optimizer using the user's own projections; they are NOT predictions and NEVER guarantee wins. "+
-"If the pool is empty, say to load the demo slate or upload a CSV in the DFS Lab (dfs.html). "+
+"If the pool is empty, the app auto-loads the DEMO slate (synthetic players) — just note results are from demo data. "+
 "To act, end your reply with a fenced block:\n"+
 "```gridiron\n{\"action\":\"build_lineup\",\"mode\":\"gpp\",\"num_lineups\":3,\"locks\":[],\"excludes\":[],\"stacks\":[{\"team\":\"KC\"}],\"max_exposure\":60}\n```\n"+
 "Actions: build_lineup, set_exposure {player,pct}, compare {players:[2+]}, explain_pick {player}. "+
@@ -411,7 +411,7 @@ function systemPrompt(ctx){
 "RULES:\n"+
 "1. Only reference players from the pool above. NEVER invent player names, teams, or salaries. If the user asks about someone not in the pool, say so plainly and suggest they add the player in the DFS Lab.\n"+
 "2. Lineups are built by a rules-based optimizer from the user's own editable projections — they are NOT predictions and NEVER guarantee wins. Never promise or imply guaranteed profit. Say this when you build lineups.\n"+
-"3. If the pool is empty, do NOT invent players. Tell the user to load the DEMO slate or upload a CSV in the DFS Lab (dfs.html), then come back.\n"+
+"3. If the pool is empty, do NOT invent players — the app auto-loads the DEMO slate (synthetic players); note results are from demo data.\n"+
 "4. Keep answers conversational and concise. Use the data (value = projection/salary, ownership, ceiling) to justify picks.\n"+
 "5. When the user wants lineups built, comparisons, or a pick explained, end your reply with one or more fenced directive blocks like:\n"+
 "```gridiron\n{\"action\":\"build_lineup\",\"mode\":\"gpp\",\"num_lineups\":3,\"locks\":[],\"excludes\":[],\"stacks\":[{\"team\":\"KC\"}],\"max_exposure\":60}\n```\n"+
