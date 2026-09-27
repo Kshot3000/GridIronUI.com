@@ -210,6 +210,8 @@ input[type=text],input[type=number],input[type=email],select,textarea{
   border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body);
 }
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+/* visible keyboard focus for links, buttons and cards (keyboard/screen-reader users) */
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
 /* placeholders are examples only — keep them visibly "ghost" so they never read as real values */
 ::placeholder{color:#5b657d;font-style:italic;opacity:1}
 :-ms-input-placeholder{color:#5b657d;font-style:italic}

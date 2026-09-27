@@ -40,7 +40,7 @@ var navHtml = NAV.map(function(n){
 var headerHtml =
  '<div class="wrap header-inner">'+
    '<a class="brand" href="'+P("index.html")+'"><span class="brand-mark">G</span>GridIron<em>UI</em></a>'+
-   '<button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>'+
+   '<button class="nav-toggle" id="navToggle" aria-label="Menu" aria-controls="mainNav" aria-expanded="false">☰</button>'+
    '<nav class="main-nav" id="mainNav">'+navHtml+'</nav>'+
    '<span class="feed-pill" id="feedPill" title="Live data feed status"><span class="feed-dot"></span><span id="feedTxt">FEEDS</span></span>'+
  '</div>'+
@@ -102,8 +102,24 @@ function mount(){
   if(h){ h.outerHTML = '<header class="site-header">'+headerHtml+'</header>'; }
   var f = document.getElementById("site-footer");
   if(f){ f.outerHTML = '<footer class="site-footer">'+footerHtml+'</footer>'; }
-  var t = document.getElementById("navToggle");
-  if(t) t.addEventListener("click", function(){ document.getElementById("mainNav").classList.toggle("open"); });
+  var t = document.getElementById("navToggle"), nav = document.getElementById("mainNav");
+  if(t && nav){
+    t.addEventListener("click", function(){
+      var open = nav.classList.toggle("open");
+      t.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    /* close the mobile menu on link tap or Escape so it never traps the page */
+    nav.addEventListener("click", function(e){
+      if(e.target.closest("a") && nav.classList.contains("open")){
+        nav.classList.remove("open"); t.setAttribute("aria-expanded","false");
+      }
+    });
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape" && nav.classList.contains("open")){
+        nav.classList.remove("open"); t.setAttribute("aria-expanded","false"); t.focus();
+      }
+    });
+  }
   var c = document.getElementById("copyPrl");
   if(c) c.addEventListener("click", function(){
     var txt = document.getElementById("prlAddr").textContent;
