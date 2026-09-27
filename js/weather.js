@@ -36,11 +36,41 @@ var STADIUMS = [
   ["SEA","Lumen Field","Seattle, WA",47.5952,-122.3316,"open"],
   ["TB","Raymond James Stadium","Tampa, FL",27.9759,-82.5033,"open"],
   ["TEN","Nissan Stadium","Nashville, TN",36.1665,-86.7713,"open"],
-  ["WAS","Northwest Stadium","Landover, MD",38.9077,-76.8645,"open"]
+  ["WAS","Northwest Stadium","Landover, MD",38.9077,-76.8645,"open"],
+  ["WSH","Northwest Stadium","Landover, MD",38.9077,-76.8645,"open"] /* ESPN uses WSH */
 ];
 function stadiumFor(abbr){
   for(var i=0;i<STADIUMS.length;i++) if(STADIUMS[i][0]===abbr) return STADIUMS[i];
   return null;
+}
+/* Neutral-site / international venues: [name match, stadium, city, lat, lon, roof].
+   ESPN's scoreboard carries the real venue per game — when it names one of these
+   instead of the home team's stadium, we use the neutral venue's coordinates so
+   the forecast matches where the game is actually played. */
+var NEUTRAL_VENUES = [
+  ["maracan", "Maracanã Stadium","Rio de Janeiro, Brazil",-22.9122,-43.2302,"open"],
+  ["wembley","Wembley Stadium","London, UK",51.5558,-0.2796,"open"],
+  ["tottenham","Tottenham Hotspur Stadium","London, UK",51.6043,-0.0664,"open"],
+  ["twickenham","Twickenham Stadium","London, UK",51.4552,-0.3416,"open"],
+  ["allianz arena","Allianz Arena","Munich, Germany",48.2188,11.6247,"open"],
+  ["deutsche bank","Deutsche Bank Park","Frankfurt, Germany",50.0685,8.6452,"open"],
+  ["bernabeu","Santiago Bernabéu Stadium","Madrid, Spain",40.4531,-3.6883,"open"],
+  ["azteca","Estadio Azteca","Mexico City, Mexico",19.3029,-99.1505,"open"],
+  ["croke","Croke Park","Dublin, Ireland",53.3607,-6.2507,"open"]
+];
+function neutralFor(venueName){
+  var n = String(venueName||"").toLowerCase();
+  for(var i=0;i<NEUTRAL_VENUES.length;i++) if(n.indexOf(NEUTRAL_VENUES[i][0])!==-1) return NEUTRAL_VENUES[i];
+  return null;
+}
+/* Resolve the true venue for a game: prefer ESPN's per-game venue when it names
+   a known neutral site, otherwise the home team's stadium. */
+function venueFor(ev, homeAbbr){
+  var espnV = (ev.competitions[0]||{}).venue || {};
+  var nv = neutralFor(espnV.fullName);
+  if(nv) return {row:[homeAbbr, nv[1], nv[2], nv[3], nv[4], nv[5]], neutral:true};
+  var st = stadiumFor(homeAbbr);
+  return {row:st, neutral:false};
 }
 function compass(deg){
   var dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
@@ -93,20 +123,23 @@ GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreb
     var c = ev.competitions[0];
     var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0];
     var away = c.competitors.filter(function(t){return t.homeAway==="away";})[0];
-    var st = stadiumFor(home.team.abbreviation);
+    var v = venueFor(ev, home.team.abbreviation);
+    var st = v.row;
     var when = "";
     try{ var dt=new Date(ev.date);
       when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
     }catch(e){}
-    return '<div class="card" data-game="'+ev.id+'" data-home="'+home.team.abbreviation+'" data-kick="'+ev.date+'">'+
-      '<div class="game-meta"><span>'+when+'</span></div>'+
+    return '<div class="card" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
+      (st ? ' data-sname="'+GIU.esc(st[1])+'" data-scity="'+GIU.esc(st[2])+'" data-slat="'+st[3]+'" data-slon="'+st[4]+'" data-sroof="'+st[5]+'"' : "")+'>'+
+      '<div class="game-meta"><span>'+when+'</span>'+(v.neutral?'<span class="tag" style="margin-left:8px">neutral site</span>':"")+'</div>'+
       '<h3 style="margin:8px 0">'+GIU.esc(away.team.displayName)+' @ '+GIU.esc(home.team.displayName)+'</h3>'+
       (st ? '<p style="font-size:.86rem;color:var(--muted);margin:0 0 10px">🏟️ '+GIU.esc(st[1])+' · '+GIU.esc(st[2])+(st[5]==="open"?"":' · <span class="tag blue">'+st[5]+' roof</span>')+'</p>'
           : '<p style="color:var(--faint)">Stadium data unavailable</p>')+
       '<div class="wx-body"><div class="skel" style="height:60px"></div></div></div>';
   }).join("");
   Array.prototype.forEach.call(box.querySelectorAll("[data-game]"), function(card){
-    var st = stadiumFor(card.getAttribute("data-home"));
+    var ds = card.dataset;
+    var st = ds.sname ? [ds.sname, ds.sname, ds.scity, parseFloat(ds.slat), parseFloat(ds.slon), ds.sroof] : null;
     var body = card.querySelector(".wx-body");
     if(!st){ body.innerHTML = '<p style="color:var(--faint)">No stadium data.</p>'; return; }
     if(st[5] !== "open"){

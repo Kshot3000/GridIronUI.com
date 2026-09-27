@@ -110,6 +110,17 @@ function mount(){
   startTicker();
   startHeadlines();
   if(document.body.hasAttribute("data-feedcheck")) checkFeeds();
+  /* Collapse the ticker + headline strips once scrolled: the sticky header
+     shrinks to the nav row so it never swallows buttons or headings below it. */
+  var hdr = document.querySelector(".site-header"), slim = false;
+  if(hdr){
+    var onScroll = function(){
+      var c = (window.scrollY||window.pageYOffset||0) > 140;
+      if(c !== slim){ slim = c; hdr.classList.toggle("compact", c); }
+    };
+    window.addEventListener("scroll", onScroll, {passive:true});
+    onScroll();
+  }
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
 else mount();

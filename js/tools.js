@@ -5,7 +5,11 @@ function $(id){ return document.getElementById(id); }
 function val(id){ return $(id).value.trim(); }
 function num(id){ return parseFloat(val(id)); }
 function show(id, html){ var e=$(id); e.innerHTML = html; e.style.display="block"; }
-function err(id, msg){ show(id, '<span style="color:#ff9aa3">'+msg+'</span>'); }
+function err(id, msg){ show(id, '<span style="color:#ff9aa3">'+GIU.esc(msg)+'</span>'); }
+/* Friendly nudge for empty fields — not an error. Placeholders are examples only. */
+function note(id, msg){ show(id, '<span style="color:var(--muted)">'+GIU.esc(msg)+'</span>'); }
+function isEmpty(id){ return val(id)===""; }
+var EXAMPLE = "The grayed-out numbers are just examples — type your own values, then hit Calculate.";
 
 /* parse "any" odds input given a format into decimal */
 function toDecimal(str, fmt){
@@ -33,6 +37,7 @@ function fmtAll(d){
 
 /* 1 — converter */
 $("cGo").addEventListener("click", function(){
+  if(isEmpty("cIn")){ note("cOut", "Type some odds above, then hit Convert. "+EXAMPLE); return; }
   try{
     var d = toDecimal(val("cIn"), val("cFmt")), o = fmtAll(d);
     show("cOut", '<div class="grid grid-4" style="gap:10px">'+
@@ -45,6 +50,7 @@ $("cGo").addEventListener("click", function(){
 
 /* 2 — implied probability */
 $("iGo").addEventListener("click", function(){
+  if(isEmpty("iIn")){ note("iOut", "Type some odds above, then hit Calculate. "+EXAMPLE); return; }
   try{
     var d = toDecimal(val("iIn"), val("iFmt"));
     var p = BetMath.round(100/d, 2);
@@ -54,6 +60,7 @@ $("iGo").addEventListener("click", function(){
 
 /* 3 — payout */
 $("pGo").addEventListener("click", function(){
+  if(isEmpty("pOdds")||isEmpty("pStake")){ note("pOut", "Enter a stake and odds above, then hit Calculate. "+EXAMPLE); return; }
   try{
     var d = toDecimal(val("pOdds"), val("pFmt")), s = num("pStake");
     if(!(s>0)) throw new Error("Enter a stake greater than 0.");
@@ -75,6 +82,9 @@ function addLeg(){
 addLeg(); addLeg(); addLeg();
 $("addLeg").addEventListener("click", addLeg);
 $("plGo").addEventListener("click", function(){
+  var anyLeg = false;
+  for(var i=1;i<=legN;i++){ var el=$("leg"+i); if(el && el.value.trim()){ anyLeg=true; break; } }
+  if(!anyLeg){ note("plOut", "Add at least two legs' odds above, then hit Calculate parlay. The grayed-out numbers are just examples."); return; }
   try{
     var legs = [];
     for(var i=1;i<=legN;i++){
@@ -93,6 +103,7 @@ $("plGo").addEventListener("click", function(){
 
 /* 5 — kelly */
 $("kGo").addEventListener("click", function(){
+  if(isEmpty("kProb")||isEmpty("kOdds")){ note("kOut", "Enter your estimated win probability and the odds, then hit Calculate stake. "+EXAMPLE); return; }
   try{
     var p = num("kProb")/100, d = toDecimal(val("kOdds"), val("kFmt")), frac = parseFloat(val("kFrac"));
     var f = BetMath.kelly(p, d, frac);
@@ -107,6 +118,7 @@ $("kGo").addEventListener("click", function(){
 
 /* 6 — vig remover */
 $("vGo").addEventListener("click", function(){
+  if(isEmpty("vA1")||isEmpty("vA2")){ note("vOut", "Enter both sides of the market above, then hit Remove the vig. "+EXAMPLE); return; }
   try{
     var a1 = parseFloat(val("vA1")), a2 = parseFloat(val("vA2"));
     if(!isFinite(a1)||!isFinite(a2)||a1===0||a2===0) throw new Error("Enter two valid American prices, e.g. -110 and -110.");
