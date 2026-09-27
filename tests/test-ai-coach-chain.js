@@ -294,6 +294,78 @@ ok("worker: README exists", fs.existsSync(path.join(root, "worker", "README.md")
     t.indexOf('name = "gridironui-grid-chat"')!==-1 && t.indexOf('binding = "AI"')!==-1);
 })();
 
+/* ---- free-cloud (LLM7) — zero-setup instant provider ---- */
+ok("js: free-cloud provider id present",
+  coachJs.indexOf('id:"free-cloud"')!==-1);
+ok("js: provider order grid-cloud < free-cloud < nano < gemini-key",
+  coachJs.indexOf('id:"grid-cloud"') < coachJs.indexOf('id:"free-cloud"') &&
+  coachJs.indexOf('id:"free-cloud"') < coachJs.indexOf('id:"nano"') &&
+  coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"gemini-key"'));
+ok("js: LLM7 chat completions endpoint",
+  coachJs.indexOf("https://api.llm7.io/v1/chat/completions")!==-1);
+ok("js: LLM7 anonymous auth header (Bearer unused)",
+  coachJs.indexOf("Bearer unused")!==-1);
+ok("js: LLM7 model selector is \"default\"",
+  /model:\s*LLM7_MODEL/.test(coachJs) && coachJs.indexOf('LLM7_MODEL = "default"')!==-1);
+ok("js: LLM7 silent /v1/models reachability probe (no AI spend)",
+  coachJs.indexOf("https://api.llm7.io/v1/models")!==-1 &&
+  coachJs.indexOf("probeFreeCloud")!==-1);
+ok("js: LLM7 failure codes (no retry storm — one attempt, then fall through)",
+  coachJs.indexOf("freecloud_http")!==-1 &&
+  coachJs.indexOf("freecloud_empty")!==-1 &&
+  coachJs.indexOf("freecloud_fail")!==-1);
+ok("js: LLM7 25s timeout treated as failure",
+  coachJs.indexOf("25000")!==-1);
+ok("js: free-cloud badge text",
+  coachJs.indexOf("⚡ Answered instantly (free AI)")!==-1);
+ok("js: pill promises instant only after a probe succeeds",
+  coachJs.indexOf("probeFreeCloud().then")!==-1 &&
+  coachJs.indexOf("⚡ Ready — answers instantly")!==-1);
+ok("js: nano download banner only offered when no instant provider is ready",
+  coachJs.indexOf("!gridCloudConfigured() && !freeCloudReady")!==-1);
+ok("js: LLM7 sends OpenAI-style {system, messages} (last 10 turns), no stream",
+  coachJs.indexOf("stream: false")!==-1 &&
+  coachJs.indexOf("max_tokens: 800")!==-1 &&
+  coachJs.indexOf("temperature: 0.7")!==-1);
+ok("js: LLM7 parses OpenAI-compatible choices[0].message.content",
+  coachJs.indexOf("choices[0].message.content")!==-1 ||
+  coachJs.indexOf("j.choices[0].message.content")!==-1 ||
+  /choices\s*&&\s*j\.choices\[0\]/.test(coachJs));
+ok("html: honest free-cloud caption",
+  coachHtml.indexOf("Grid answers instantly through a free shared AI service")!==-1 &&
+  coachHtml.indexOf("no key, no download, no account")!==-1);
+
+/* 429 on the free provider falls through silently to the next provider */
+asyncTest("chain: free-cloud 429 falls through silently to nano", function(){
+  var order = [];
+  return C.runProviderChain([
+    { id:"free-cloud", label:"Free shared AI",
+      run: function(){ order.push("free-cloud");
+        return Promise.reject({ code:"freecloud_http", message:"the free AI service returned HTTP 429" }); } },
+    { id:"nano", label:"On-device AI",
+      run: function(){ order.push("nano"); return Promise.resolve("nano says hi"); } }
+  ]).then(function(res){
+    if(order.join(",")!=="free-cloud,nano") throw new Error("wrong order: "+order.join(","));
+    if(res.provider.id!=="nano" || res.text!=="nano says hi") throw new Error("wrong winner");
+    if(res.attempts.length!==1 || res.attempts[0].code!=="freecloud_http")
+      throw new Error("429 attempt not recorded: "+JSON.stringify(res.attempts));
+  });
+});
+
+/* directives survive an LLM7-style reply end to end (parse + validate) */
+(function(){
+  var pool = [
+    {id:"p1", name:"Josh Allen", team:"BUF", pos:["QB"], salary:8000, proj:22.5, floor:14, ceil:32, own:18},
+    {id:"p2", name:"Jalen Hurts", team:"PHI", pos:["QB"], salary:7800, proj:21.0, floor:13, ceil:30, own:15}
+  ];
+  var reply = "Here's your cash lineup, built by the optimizer from your projections — not a prediction, never a guarantee.\n```gridiron\n{\"action\":\"build_lineup\",\"mode\":\"cash\",\"num_lineups\":1,\"locks\":[{\"name\":\"Josh Allen\"}],\"excludes\":[],\"stacks\":[],\"max_exposure\":100}\n```";
+  var blocks = C.extractDirectivesLenient(reply);
+  ok("free-cloud: directive block parsed from LLM7-style reply",
+    blocks.length === 1 && blocks[0].action === "build_lineup");
+  ok("free-cloud: directive validates against pool",
+    C.validateAction(blocks[0], pool).ok === true);
+})();
+
 /* directives survive a cloud-style reply end to end (parse + validate) */
 (function(){
   var pool = [

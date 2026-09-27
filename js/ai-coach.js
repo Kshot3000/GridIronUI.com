@@ -244,12 +244,14 @@ function exampleChips(){
 /* ---------- LLM provider chain ----------
    1. Grid cloud (Cloudflare Worker) — instant answers, zero setup, once Kyle
       deploys it (see worker/README.md). Until then it self-skips silently.
-   2. Chrome/Edge built-in on-device AI (Gemini Nano) — one-tap download.
-   3. The visitor's optional free Gemini key (only if they pasted one).
-   4. An honest failure state naming the options — never a fake reply,
+   2. free-cloud (LLM7) — instant answers, zero setup for every visitor:
+      no key, no download, no account. Silent fall-through on 429/5xx/timeout.
+   3. Chrome/Edge built-in on-device AI (Gemini Nano) — one-tap download.
+   4. The visitor's optional free Gemini key (only if they pasted one).
+   5. An honest failure state naming the options — never a fake reply,
       never an endless spinner.
    The status pill always shows which provider actually answered, and never
-   promises "instant" unless the cloud worker is actually reachable. */
+   promises "instant" unless an instant provider actually answered a probe. */
 var GEMINI_KEY_LS = "giu_gemini_key";
 function getGeminiKey(){ try{ return (localStorage.getItem(GEMINI_KEY_LS)||"").trim(); }catch(e){ return ""; } }
 function providerStatus(html){ var el=$("providerStatus"); if(el) el.innerHTML = html; }
@@ -466,6 +468,67 @@ function probeGridCloud(){
     }, function(){
       clearTimeout(to);
       gridCloudReady = false;
+      return false;
+    });
+}
+
+/* ----- free-cloud (LLM7) — the zero-setup instant path -----
+   POST https://api.llm7.io/v1/chat/completions — OpenAI-compatible, fully
+   browser-callable (CORS *). Anonymous auth: header "Authorization: Bearer
+   unused". Model "default" is their stable selector (dynamic catalog — if it
+   ever 404s/400s we treat it as a provider failure and fall through).
+   Shared anonymous rate bucket: expect occasional 429s. ONE attempt only —
+   no retry storms — then silent fall-through to the next provider. */
+var LLM7_CHAT_URL = "https://api.llm7.io/v1/chat/completions";
+var LLM7_MODELS_URL = "https://api.llm7.io/v1/models";
+var LLM7_MODEL = "default";
+function llm7Run(messages, onToken){
+  /* full-context: system prompt + last 10 turns, same as the Gemini path */
+  var ctl = new AbortController();
+  var timedOut = false;
+  var to = setTimeout(function(){ timedOut = true; ctl.abort(); }, 25000);
+  var body = {
+    model: LLM7_MODEL,
+    messages: messages.slice(-11).map(function(m){ return { role:m.role, content:String(m.content) }; }),
+    max_tokens: 800,
+    temperature: 0.7,
+    stream: false
+  };
+  return fetch(LLM7_CHAT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer unused" },
+    body: JSON.stringify(body),
+    signal: ctl.signal
+  }).then(function(r){
+    clearTimeout(to);
+    if(!r.ok) throw { code:"freecloud_http", message:"the free AI service returned HTTP "+r.status };
+    return r.json();
+  }).then(function(j){
+    var t = String((j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content)||"").trim();
+    if(!t) throw { code:"freecloud_empty", message:"the free AI service returned nothing" };
+    onToken(t); /* non-streaming: one token callback with the full reply */
+    return t;
+  }, function(e){
+    clearTimeout(to);
+    throw { code:"freecloud_fail",
+            message: timedOut ? "the free AI service timed out" : "the free AI service didn't respond" };
+  });
+}
+/* Silent reachability probe: GET /v1/models returns the model catalog without
+   spending AI calls. Never shows UI; only used to word the status pill
+   honestly. */
+var freeCloudReady = false;
+function probeFreeCloud(){
+  var ctl = new AbortController();
+  var to = setTimeout(function(){ ctl.abort(); }, 8000);
+  return fetch(LLM7_MODELS_URL, { signal: ctl.signal })
+    .then(function(r){
+      clearTimeout(to);
+      freeCloudReady = !!r.ok;
+      return freeCloudReady;
+    }, function(){
+      clearTimeout(to);
+      freeCloudReady = false;
       return false;
     });
 }
@@ -797,15 +860,18 @@ function send(prefill, skipEcho){
     scrollChat();
   }
   /* provider chain: Grid cloud first (zero setup once Kyle deploys the
-     Worker — self-skips silently until then), then on-device Nano, then the
-     optional user-supplied Gemini key. Whichever answers first wins, and the
-     pill says who. */
-  if(!gridCloudConfigured()) maybeOfferNanoDownload();
+     Worker — self-skips silently until then), then the free shared AI
+     (zero setup for every visitor), then on-device Nano, then the
+     optional user-supplied Gemini key. Whichever answers first wins,
+     and the pill says who. */
+  if(!gridCloudConfigured() && !freeCloudReady) maybeOfferNanoDownload();
   var providers = [];
   if(gridCloudConfigured()){
     providers.push({ id:"grid-cloud", label:"instant cloud AI",
                      run:function(){ return gridCloudRun(msgs, onToken); } });
   }
+  providers.push({ id:"free-cloud", label:"free shared AI",
+                   run:function(){ return llm7Run(msgs, onToken); } });
   providers.push({ id:"nano", label:"on-device AI",
                    run:function(){ return nanoRun(text, onToken); } });
   if(getGeminiKey()){
@@ -817,6 +883,7 @@ function send(prefill, skipEcho){
     providerStatus("⏳ trying "+esc(p.label)+"…");
   }).then(function(res){
     if(res.provider.id==="grid-cloud") providerStatus("⚡ Answered instantly");
+    else if(res.provider.id==="free-cloud") providerStatus("⚡ Answered instantly (free AI)");
     else if(res.provider.id==="nano") providerStatus("✅ Running 100% on your device");
     else providerStatus("✅ Answered by Gemini (your free key)");
     onDone(res.text);
@@ -880,23 +947,29 @@ if(gemClear) gemClear.addEventListener("click", function(){
 refreshGemUI();
 providerStatus("⏳ checking AI options…");
 wireNanoBanner();
-/* Reachability probe for the Grid cloud worker (silent, no AI spend).
-   The pill only promises "instant" when the worker actually answers —
+/* Reachability probes for the instant providers (both silent, no AI spend).
+   The pill only promises "instant" when a provider actually answers —
    otherwise honest on-device wording, or a neutral prompt. */
 probeGridCloud().then(function(cloudOk){
   if(cloudOk){
     providerStatus("⚡ Ready — answers instantly");
     return;
   }
-  checkNanoAvailability().then(function(av){
-    if(av==="available"){
-      providerStatus("✅ Ready — on-device AI");
-    } else if(av==="downloadable" || av==="downloading"){
-      maybeOfferNanoDownload();
-      providerStatus("💻 Ready — download the free on-device model");
-    } else {
-      providerStatus("Choose a free AI option below");
+  probeFreeCloud().then(function(freeOk){
+    if(freeOk){
+      providerStatus("⚡ Ready — answers instantly");
+      return;
     }
+    checkNanoAvailability().then(function(av){
+      if(av==="available"){
+        providerStatus("✅ Ready — on-device AI");
+      } else if(av==="downloadable" || av==="downloading"){
+        maybeOfferNanoDownload();
+        providerStatus("💻 Ready — download the free on-device model");
+      } else {
+        providerStatus("Choose a free AI option below");
+      }
+    });
   });
 });
 wireTabs("cSite","site", onCfgChange);
