@@ -9,7 +9,7 @@
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1.22.0">
+<link rel="stylesheet" href="css/style.css?v=1.23.0">
 </head>
 <body data-feedcheck>
 <script>window.GIU_BASE=".";</script>
@@ -26,12 +26,16 @@
 </section>
 
 <div class="wrap" style="margin-top:30px">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+    <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
+    <button class="btn btn-ghost btn-sm" id="pauseBtn" aria-pressed="false" style="display:none">⏸ Pause live</button>
+  </div>
   <div class="tabs" id="newsTabs"></div>
   <div class="grid grid-2" id="newsGrid"></div>
 </div>
 
 <div id="site-footer"></div>
 <script src="js/site.js"></script>
-<script src="js/news.js"></script>
+<script src="js/news.js?v=1.23.0"></script>
 </body>
 </html>
