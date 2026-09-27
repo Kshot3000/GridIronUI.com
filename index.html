@@ -131,23 +131,30 @@
 <script src="js/site.js?v=1.30.1"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.16.0"></script>
+<script src="js/home-strip.js?v=1.33.0"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
-  /* today's games */
-  GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard").then(function(d){
-    var evs = (d.events||[]).slice(0,6);
-    if(!evs.length){ $("homeGames").innerHTML = '<div class="empty">No games on the board right now.</div>'; return; }
-    $("homeGames").innerHTML = evs.map(function(ev){
-      var c = ev.competitions[0], st = c.status.type;
-      var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0];
-      var away = c.competitors.filter(function(t){return t.homeAway==="away";})[0];
-      var badge = st.state==="in" ? '<span class="live-badge"><i></i>Live</span>' : '<span class="tag">'+GIU.esc(st.shortDetail||"Scheduled")+'</span>';
-      return '<div class="game-card">'+badge+
-        GIU.teamRow(away,false)+GIU.teamRow(home,false)+
-        '<div class="game-meta"><span>'+GIU.esc(c.venue.fullName||"")+'</span></div></div>';
+  var HS = window.GIU.homeStrip;
+  /* "Happening now": the four US-league scoreboards in parallel, finished
+     games dropped, live games ranked first, then earliest kickoff. Each
+     league failing alone never sinks the strip — only a total blackout does. */
+  var jobs = HS.LEAGUES.map(function(l){
+    return GIU.fetchJSON(HS.scoreUrl(l[0])).then(function(d){ return HS.collect(l[1], d); })
+      .catch(function(){ return []; });
+  });
+  Promise.all(jobs).then(function(parts){
+    var rows = HS.top([].concat.apply([], parts));
+    if(!rows.length){ $("homeGames").innerHTML = '<div class="empty">No games on the board right now.</div>'; return; }
+    $("homeGames").innerHTML = rows.map(function(r){
+      var badge = r.state==="in" ? '<span class="live-badge"><i></i>Live</span>'
+        : '<span class="tag">'+GIU.esc(r.shortDetail||"Scheduled")+'</span>';
+      return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center">'+
+        '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+'</div>'+
+        GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
+        '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div></div>';
     }).join("");
-  }).catch(function(){ $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond."); });
+  }).catch(function(){ $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feeds didn't respond."); });
 
   /* headlines */
   GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=4").then(function(d){
