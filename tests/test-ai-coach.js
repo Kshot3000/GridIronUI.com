@@ -180,5 +180,18 @@ ok("salvage: no build intent → null", s4===null);
 var s5 = C.salvageIntent("Building!", "Build me 99 lineups", pool2);
 ok("salvage: lineup count capped at 20", !!s5 && s5.num_lineups===20);
 
+/* ---- on-device model output hygiene (Nano is the primary provider) ---- */
+var e1 = C.cleanModelEcho("CPU backendFastest inferenceTopK: 64, Temp: 1\nUser: Build me 3 GPP lineups\nEnd.Model:\nHere are your lineups!");
+ok("cleanModelEcho: strips config-echo lines, keeps prose",
+   e1.indexOf("TopK") === -1 && e1.indexOf("End.Model") === -1 &&
+   e1.indexOf("Here are your lineups!") !== -1);
+var e2 = C.cleanModelEcho("The Chiefs stack looks strong this week.\nLock in the QB for upside.");
+ok("cleanModelEcho: normal prose untouched", e2.indexOf("Chiefs stack") !== -1);
+var e3 = C.cleanModelEcho("Model: gridiron-nano\nValue at RB is thin.");
+ok("cleanModelEcho: strips leading Model: line", e3.indexOf("Model:") === -1 && e3.indexOf("Value at RB") !== -1);
+var np = C.nanoSystemPrompt({ text: "POOL" });
+ok("nanoSystemPrompt: forbids repeating instructions/config",
+   /never repeat/i.test(np));
+
 console.log(fails ? ("\n"+fails+" FAILURES") : "\nALL PASS");
 process.exit(fails ? 1 : 0);

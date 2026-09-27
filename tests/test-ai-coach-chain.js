@@ -226,10 +226,11 @@ ok("js: no hardcoded API keys", !/sk-[A-Za-z0-9]{8,}/.test(coachJs));
 ok("js: pollinations fully removed", coachJs.toLowerCase().indexOf("pollinations")===-1);
 ok("js: puter fully removed", !/\bputer\b/i.test(coachJs) &&
   coachJs.indexOf("js.puter.com")===-1);
-ok("js: grid-cloud first in provider chain, then nano, then gemini key",
-  coachJs.indexOf('id:"grid-cloud"')!==-1 &&
-  coachJs.indexOf('id:"grid-cloud"') < coachJs.indexOf('id:"nano"') &&
-  coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"gemini-key"'));
+ok("js: nano (on-device) first in provider chain, then grid-cloud, free-cloud, gemini key",
+  coachJs.indexOf('id:"nano"')!==-1 &&
+  coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"grid-cloud"') &&
+  coachJs.indexOf('id:"grid-cloud"') < coachJs.indexOf('id:"free-cloud"') &&
+  coachJs.indexOf('id:"free-cloud"') < coachJs.indexOf('id:"gemini-key"'));
 ok("js: downloadprogress monitor wired",
   coachJs.indexOf("downloadprogress")!==-1 && coachJs.indexOf("LM.create(")!==-1);
 ok("js: on-device badge text", coachJs.indexOf("Running 100% on your device")!==-1);
@@ -297,10 +298,10 @@ ok("worker: README exists", fs.existsSync(path.join(root, "worker", "README.md")
 /* ---- free-cloud (LLM7) — zero-setup instant provider ---- */
 ok("js: free-cloud provider id present",
   coachJs.indexOf('id:"free-cloud"')!==-1);
-ok("js: provider order grid-cloud < free-cloud < nano < gemini-key",
+ok("js: provider order nano < grid-cloud < free-cloud < gemini-key",
+  coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"grid-cloud"') &&
   coachJs.indexOf('id:"grid-cloud"') < coachJs.indexOf('id:"free-cloud"') &&
-  coachJs.indexOf('id:"free-cloud"') < coachJs.indexOf('id:"nano"') &&
-  coachJs.indexOf('id:"nano"') < coachJs.indexOf('id:"gemini-key"'));
+  coachJs.indexOf('id:"free-cloud"') < coachJs.indexOf('id:"gemini-key"'));
 ok("js: LLM7 chat completions endpoint",
   coachJs.indexOf("https://api.llm7.io/v1/chat/completions")!==-1);
 ok("js: LLM7 anonymous auth header (Bearer unused)",
@@ -321,8 +322,9 @@ ok("js: free-cloud badge text",
 ok("js: pill promises instant only after a probe succeeds",
   coachJs.indexOf("probeFreeCloud().then")!==-1 &&
   coachJs.indexOf("⚡ Ready — answers instantly")!==-1);
-ok("js: nano download banner only offered when no instant provider is ready",
-  coachJs.indexOf("!gridCloudConfigured() && !freeCloudReady")!==-1);
+ok("js: nano download banner offered proactively (nano is the primary provider)",
+  coachJs.indexOf("maybeOfferNanoDownload();")!==-1 &&
+  coachJs.indexOf("!gridCloudConfigured() && !freeCloudReady")===-1);
 ok("js: LLM7 sends OpenAI-style {system, messages} (last 10 turns), no stream",
   coachJs.indexOf("stream: false")!==-1 &&
   coachJs.indexOf("max_tokens: 800")!==-1 &&
@@ -331,9 +333,9 @@ ok("js: LLM7 parses OpenAI-compatible choices[0].message.content",
   coachJs.indexOf("choices[0].message.content")!==-1 ||
   coachJs.indexOf("j.choices[0].message.content")!==-1 ||
   /choices\s*&&\s*j\.choices\[0\]/.test(coachJs));
-ok("html: honest free-cloud caption",
-  coachHtml.indexOf("Grid answers instantly through a free shared AI service")!==-1 &&
-  coachHtml.indexOf("no key, no download, no account")!==-1);
+ok("html: honest on-device-first caption",
+  coachHtml.indexOf("Grid runs on your device first")!==-1 &&
+  coachHtml.indexOf("automatically falls back to a free shared AI service")!==-1);
 
 /* 429 on the free provider falls through silently to the next provider */
 asyncTest("chain: free-cloud 429 falls through silently to nano", function(){

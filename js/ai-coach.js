@@ -210,10 +210,10 @@ function fmtText(t){
   return esc(t).replace(/\n/g,"<br>");
 }
 function stripDirectives(t){
-  return String(t)
+  return CORE.cleanModelEcho(String(t)
     .replace(/```gridiron\s*\n[\s\S]*?```/g,"")
     .replace(/```json\s*\n[\s\S]*?```/g,"")  /* models sometimes fence JSON here; never shown */
-    .trim();
+    .trim());
 }
 
 function refreshPoolBar(){
@@ -227,7 +227,7 @@ function refreshPoolBar(){
 
 function greeting(){
   addMsg("grid", fmtText(
-    "Hey, I'm Grid — your AI lineup coach. Tell me what you're building and I'll talk it through, "+
+    "Hey, I'm Grid — your AI lineup coach. I run on your device first (private, free, no account), with free cloud AI as automatic backup. Tell me what you're building and I'll talk it through, "+
     "compare players, or run the optimizer right here in chat.\n\n"+
     "Try: \"Build me 3 GPP lineups with a Chiefs stack\" — or ask me who's the best value under $6k."));
 }
@@ -245,11 +245,13 @@ function exampleChips(){
 }
 
 /* ---------- LLM provider chain ----------
-   1. Grid cloud (Cloudflare Worker) — instant answers, zero setup, once Kyle
+   1. Chrome/Edge built-in on-device AI (Gemini Nano) — the main source:
+      runs 100% on the visitor's hardware, private, free, no key. One-tap
+      ~1.7 GB download on first use; silently skipped where unsupported.
+   2. Grid cloud (Cloudflare Worker) — instant answers, zero setup, once Kyle
       deploys it (see worker/README.md). Until then it self-skips silently.
-   2. free-cloud (LLM7) — instant answers, zero setup for every visitor:
+   3. free-cloud (LLM7) — instant answers, zero setup for every visitor:
       no key, no download, no account. Silent fall-through on 429/5xx/timeout.
-   3. Chrome/Edge built-in on-device AI (Gemini Nano) — one-tap download.
    4. The visitor's optional free Gemini key (only if they pasted one).
    5. An honest failure state naming the options — never a fake reply,
       never an endless spinner.
@@ -933,21 +935,22 @@ function send(prefill, skipEcho){
     body.innerHTML = CORE.renderRich(md);
     scrollChat();
   }
-  /* provider chain: Grid cloud first (zero setup once Kyle deploys the
-     Worker — self-skips silently until then), then the free shared AI
-     (zero setup for every visitor), then on-device Nano, then the
-     optional user-supplied Gemini key. Whichever answers first wins,
+  /* provider chain: on-device Nano first — it's the main source, running
+     100% on the visitor's hardware. Where it's unavailable (unsupported
+     browser, model not downloaded yet) the chain falls through silently to
+     Grid cloud (once Kyle deploys the Worker), then the free shared AI,
+     then the visitor's own Gemini key. Whichever answers first wins,
      and the pill says who. */
-  if(!gridCloudConfigured() && !freeCloudReady) maybeOfferNanoDownload();
+  maybeOfferNanoDownload();
   var providers = [];
+  providers.push({ id:"nano", label:"on-device AI",
+                   run:function(){ return nanoRun(text, onToken); } });
   if(gridCloudConfigured()){
     providers.push({ id:"grid-cloud", label:"instant cloud AI",
                      run:function(){ return gridCloudRun(msgs, onToken); } });
   }
   providers.push({ id:"free-cloud", label:"free shared AI",
                    run:function(){ return llm7Run(msgs, onToken); } });
-  providers.push({ id:"nano", label:"on-device AI",
-                   run:function(){ return nanoRun(text, onToken); } });
   if(getGeminiKey()){
     providers.push({ id:"gemini-key", label:"your Gemini key",
                      run:function(){ return geminiRun(msgs, onToken); } });
