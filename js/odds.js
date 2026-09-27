@@ -69,10 +69,19 @@ function setOpens(o){
   }
   try{ localStorage.setItem(openKey(), JSON.stringify(o)); }catch(e){}
 }
+/* Line-movement history: per-game consensus samples feeding the sparkline
+   charts on each game card. Same 200-game cap discipline as the openers. */
+function histKey(){ return "giu_odds_hist_"+sport; }
+function getHist(){ try{ return JSON.parse(localStorage.getItem(histKey())||"{}"); }catch(e){ return {}; } }
+function setHist(h){ try{ localStorage.setItem(histKey(), JSON.stringify(h)); }catch(e){} }
 
 function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
 function fmtClock(ts){
   try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function fmtSince(ts){
+  try{ return new Date(ts).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }
   catch(e){ return ""; }
 }
 function autoOn(){ var c = $("autoRef"); return !!(c && c.checked); }
@@ -146,15 +155,24 @@ function render(opts){
     $("quota").textContent = "API quota remaining: "+remaining+" requests this month";
     nearBySport[sport] = window.GIU.oddsNearWindow(events);
     lastUpdated = Date.now();
-    var prev = getSnap(), now = {}, opens = getOpens();
+    var prev = getSnap(), now = {}, opens = getOpens(), hist = getHist();
+    /* Record this fetch's consensus per game — the sparkline history. Costs
+       no quota: it's just localStorage on data we already pulled. */
+    (events||[]).forEach(function(ev){
+      var c = OL.consensus(ev.bookmakers||[], ev);
+      var sp = c.spread.a ? c.spread.a.pt : null;
+      var tot = c.total.o ? c.total.o.pt : null;
+      if(sp !== null || tot !== null) OL.recordSample(hist, ev.id, lastUpdated, sp, tot);
+    });
     var cards = events.length
-      ? events.map(function(ev){ return renderGame(ev, prev, now, opens, dir, league); }).join("")
+      ? events.map(function(ev){ return renderGame(ev, prev, now, opens, hist, dir, league); }).join("")
       : '<div class="empty">No upcoming games with odds for this league right now.</div>';
     var movers = OL.biggestMovers(OL.moverEntries(events, opens), 5);
     board.innerHTML = (movers.length ? renderMovers(movers) : "") + cards;
     boardHasGames = true;
     setSnap(now);
     setOpens(opens);
+    setHist(hist);
     /* keep slip prices honest against the fresh board */
     if(slip.length){ Slip.reprice(slip, now); saveSlip(); }
     refreshPickMarks();
@@ -206,7 +224,7 @@ function renderMovers(movers){
     '<div class="movers">'+rows+'</div></section>';
 }
 
-function renderGame(ev, prev, now, opens, dir, league){
+function renderGame(ev, prev, now, opens, hist, dir, league){
   var books = ev.bookmakers||[];
   var h = ev.home_team, a = ev.away_team;
   /* GameDay identity: real ESPN logo + team-color chips when the matchup
@@ -303,12 +321,42 @@ function renderGame(ev, prev, now, opens, dir, league){
     if(!bits.length) return "";
     return ' <span class="open-line" title="Your personal opener — the consensus the first time this browser loaded this game. Cleared if you clear site data.">('+bits.join(" · ")+")</span>";
   }
+  /* Line-movement sparkline: the consensus path since this browser first
+     tracked the game — the shape of the steam, not just the delta. Only
+     renders with 2+ samples: one dot is not a trend. */
+  function histHtml(){
+    var samples = hist && hist[ev.id];
+    if(!samples || samples.length < 2) return "";
+    function cell(kind, label, fmt){
+      var vals = OL.sparkSeries(samples, kind);
+      var g = OL.spark(vals, 132, 36);
+      if(!g) return "";
+      var d = vals[vals.length-1] - vals[0];
+      var cls = d > 0 ? "mv-up" : (d < 0 ? "mv-dn" : "");
+      var arrow = d > 0 ? "▲" : (d < 0 ? "▼" : "—");
+      var aria = label+" consensus moved from "+fmt(vals[0])+" to "+fmt(vals[vals.length-1])+
+                 " across "+vals.length+" line updates since "+fmtSince(samples[0][0]);
+      return '<div class="spark-cell"><div class="spark-lab">'+GIU.esc(label)+
+        ' <span class="'+cls+'">'+arrow+' '+GIU.esc(fmtDelta(d))+'</span></div>'+
+        '<svg class="spark" width="132" height="36" viewBox="0 0 132 36" role="img" aria-label="'+GIU.esc(aria)+'">'+
+        '<path class="spark-area" d="'+g.area+'"/><path class="spark-line" d="'+g.line+'"/>'+
+        '<circle class="spark-dot" cx="'+g.lx+'" cy="'+g.ly+'" r="2.6"/></svg>'+
+        '<div class="spark-vals" aria-hidden="true"><span>'+GIU.esc(fmt(vals[0]))+'</span><span>'+
+        GIU.esc(fmt(vals[vals.length-1]))+'</span></div></div>';
+    }
+    var sp = cell("sp", "Spread", OL.fmtPt);
+    var tot = cell("tot", "Total", function(v){ return String(Math.round(v*10)/10); });
+    if(!sp && !tot) return "";
+    return '<div class="spark-row">'+sp+tot+
+      '<div class="spark-cap">📈 Line movement tracked since '+GIU.esc(fmtSince(samples[0][0]))+
+      ' in this browser — leave auto-refresh on and the chart grows on game day.</div></div>';
+  }
 
   var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
   return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
-    consLineHtml()+bestCard+
+    consLineHtml()+histHtml()+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' spread</th><th>'+GIU.esc(OL.shortName(h))+' spread</th>'+
     '<th>Over</th><th>Under</th>'+

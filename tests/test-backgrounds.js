@@ -102,9 +102,11 @@ assert(css.indexOf(".card::before") !== -1, "CSS has the card hairline accent");
 assert(/\.card::before\s*\{[^}]*linear-gradient\(90deg,transparent,rgba\(240,180,41/.test(css),
   "card hairline is a subtle gold gradient");
 
-/* ---- scroll-jank fix untouched ---- */
-assert(css.indexOf(".site-header.compact .ticker,.site-header.compact .headlines{display:none}") !== -1,
-  ".site-header.compact rule byte-identical (parallel fix untouched)");
+/* ---- scroll-jank fix: header strips collapse smoothly, never display:none ----
+   (v1.30.1 replaced the old snap rule; pin the smooth behavior instead) */
+assert(!/\.site-header\.compact\s+\.ticker[\s\S]{0,200}?display\s*:\s*none/.test(css) &&
+       /\.site-header\.compact\s+\.ticker,\s*\.site-header\.compact\s+\.headlines\s*\{\s*max-height\s*:\s*0/.test(css),
+  ".site-header.compact collapses smoothly via max-height (no display:none snap)");
 
 /* ---- hero-inner still above atmosphere layers ---- */
 assert(/\.hero-inner\s*\{[^}]*z-index:\s*2/.test(css), ".hero-inner keeps z-index:2 above atmosphere layers");

@@ -182,6 +182,61 @@ var L = {
         return d !== 0 ? d : (a.title < b.title ? -1 : (a.title > b.title ? 1 : 0));
       })
       .slice(0, Math.max(0, n));
+  },
+  /* ---- per-game line-movement history (sparkline charts) ----
+     hist: {eventId: [[t, spreadAwayPt, totalOverPt], ...]}, oldest first,
+     tracked in this browser only — the raw material for the movement chart
+     on each game card. recordSample appends the latest consensus; a sample
+     identical to the previous one only extends that sample's timestamp, so a
+     flat line keeps growing instead of stacking duplicate points. Caps: 72
+     samples per game, 200 games (oldest-tracked evicted first). Pure. */
+  recordSample: function(hist, id, t, sp, tot){
+    hist = hist || {};
+    id = String(id);
+    var s = hist[id];
+    if(!s){ s = []; hist[id] = s; }
+    var last = s[s.length-1];
+    if(last && last[1] === sp && last[2] === tot){ last[0] = t; }
+    else {
+      s.push([t, sp, tot]);
+      if(s.length > 72) s.splice(0, s.length - 72);
+    }
+    var ids = Object.keys(hist);
+    if(ids.length > 200){
+      ids.sort(function(a,b){ return ((hist[a][0]||[])[0]||0) - ((hist[b][0]||[])[0]||0); });
+      for(var i=0; i<ids.length-200; i++) delete hist[ids[i]];
+    }
+    return hist;
+  },
+  /* Numeric series for one kind ("sp" = away spread consensus, "tot" = total
+     consensus), skipping nulls — a market with no posted line leaves a gap,
+     never an invented point. */
+  sparkSeries: function(samples, kind){
+    var idx = kind === "tot" ? 2 : 1, out = [];
+    (samples||[]).forEach(function(p){
+      if(p && p[idx] !== null && p[idx] !== undefined && isFinite(p[idx])) out.push(Number(p[idx]));
+    });
+    return out;
+  },
+  /* SVG geometry for a sparkline. Returns null with fewer than 2 points —
+     a single dot is not a trend. A flat series draws a mid-height line
+     (no divide-by-zero). Returns {line, area, lx, ly}: the line path, the
+     area-fill path, and the last point's coords for the end dot. */
+  spark: function(vals, w, h){
+    vals = vals || [];
+    if(vals.length < 2) return null;
+    var p = 3, iw = Math.max(1, w - 2*p), ih = Math.max(1, h - 2*p);
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    function xy(i){
+      var x = p + iw * i / (vals.length - 1);
+      var y = (max === min) ? p + ih/2 : p + ih * (1 - (vals[i]-min)/(max-min));
+      return [Math.round(x*10)/10, Math.round(y*10)/10];
+    }
+    var d = "", i, pt;
+    for(i=0; i<vals.length; i++){ pt = xy(i); d += (i ? "L" : "M") + pt[0] + "," + pt[1]; }
+    var f = xy(0), l = xy(vals.length-1), base = p + ih;
+    return { line: d, area: d + "L" + l[0] + "," + base + "L" + f[0] + "," + base + "Z",
+             lx: l[0], ly: l[1] };
   }
 };
 if(typeof module !== "undefined" && module.exports){ module.exports = L; }

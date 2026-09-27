@@ -243,7 +243,10 @@ function mount(){
   var hdr = document.querySelector(".site-header"), slim = false;
   if(hdr){
     var onScroll = function(){
-      var c = (window.scrollY||window.pageYOffset||0) > 140;
+      var y = window.scrollY||window.pageYOffset||0;
+      /* hysteresis: compact past 170, expand below 110 — no threshold flutter,
+         and the CSS collapse is animated so the header never snaps the layout */
+      var c = slim ? y > 110 : y > 170;
       if(c !== slim){ slim = c; hdr.classList.toggle("compact", c); }
     };
     window.addEventListener("scroll", onScroll, {passive:true});

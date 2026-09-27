@@ -93,8 +93,19 @@ section.block{padding:56px 0}
 .feed-pill.warn{color:var(--gold-soft);border-color:rgba(240,180,41,.35)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 .nav-toggle{display:none;margin-left:auto;background:none;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:8px 11px;font-size:1.05rem;cursor:pointer}
-/* slim sticky header once scrolled: hide ticker + headlines so they can't cover page content */
-.site-header.compact .ticker,.site-header.compact .headlines{display:none}
+/* smooth-collapsing sticky header: the ticker + headlines strips shrink instead of
+   snapping, so crossing the compact threshold never lurches the page (no layout-shift jank) */
+.site-header .ticker,
+.site-header .headlines{
+  max-height:64px;overflow:hidden;
+  transition:max-height .28s ease,opacity .22s ease,border-bottom-width .28s ease,padding-top .28s ease,padding-bottom .28s ease;
+}
+.site-header.compact .ticker,
+.site-header.compact .headlines{max-height:0;opacity:0;border-bottom-width:0}
+.site-header.compact .headlines{padding-top:0;padding-bottom:0}
+@media (prefers-reduced-motion:reduce){
+  .site-header .ticker,.site-header .headlines{transition:none}
+}
 
 /* ---------- ticker tape ---------- */
 .ticker{
