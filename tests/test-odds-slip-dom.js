@@ -54,6 +54,11 @@ sandbox.window.window = sandbox.window;
 const GIUstub = {
   esc: s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"),
   failBox: m => '<div class="notice red">'+m+'</div>',
+  /* identity stubs: dir resolves empty, nothing matches — legs render plain */
+  teamDir: () => Promise.resolve({}),
+  teamFind: () => null,
+  teamLogo: () => "",
+  teamChip: () => "",
 };
 sandbox.GIU = GIUstub;
 sandbox.window.GIU = GIUstub;

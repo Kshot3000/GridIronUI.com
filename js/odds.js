@@ -205,6 +205,18 @@ function renderGame(ev, prev, now, opens, dir, league){
 }
 
 /* ---- bet slip UI ---- */
+/* ---- bet-slip GameDay identity ----
+   The team directory loads once in parallel with everything else. Legs render
+   in plain text until it arrives, then the slip re-renders with the real ESPN
+   logo + team-color chip for the leg's team. Legs whose side isn't a team
+   (Over/Under totals, unknown names, leagues with no directory) keep plain
+   text — nothing is guessed. */
+var slipDir = {};
+function slipIdHtml(l){
+  var t = GIU.teamFind(slipDir, OL.sportLeague(l.sport || sport), l.side);
+  if(!t) return "";
+  return '<span class="slip-id">'+GIU.teamLogo(t, 22)+GIU.teamChip(t, t.abbr)+'</span> ';
+}
 function totalsHtml(p){
   return '<div><span>Combined odds</span><b class="num">'+GIU.esc(String(p.combinedAm))+
     ' <span style="color:var(--faint);font-weight:400">'+p.combined.toFixed(3)+' dec</span></b></div>'+
@@ -224,7 +236,7 @@ function renderSlip(){
       var up = l.price > l.prevPrice;
       mv = ' <span class="'+(up?"mv-up":"mv-dn")+'">'+(up?"▲":"▼")+'</span>';
     }
-    return '<div class="slip-leg"><div><b>'+GIU.esc(l.side)+'</b> '+
+    return '<div class="slip-leg"><div><b>'+slipIdHtml(l)+GIU.esc(l.side)+'</b> '+
       '<span class="num">'+GIU.esc(l.label)+' ('+OL.dec2am(l.price)+')</span>'+mv+
       '<div class="slip-sub">'+GIU.esc(l.game)+' · '+GIU.esc(l.bookTitle)+'</div></div>'+
       '<button class="slip-x" data-unslip="'+GIU.esc(l.id)+'" aria-label="Remove '+GIU.esc(l.side)+' from slip">✕</button></div>';
@@ -284,7 +296,8 @@ $("oddsBoard").addEventListener("click", function(e){
     id:b.getAttribute("data-slip"), game:b.getAttribute("data-game"),
     market:b.getAttribute("data-market"), side:b.getAttribute("data-side"),
     book:b.getAttribute("data-book"), bookTitle:b.getAttribute("data-booktitle"),
-    label:b.getAttribute("data-label"), price:Number(b.getAttribute("data-price"))
+    label:b.getAttribute("data-label"), price:Number(b.getAttribute("data-price")),
+    sport:sport /* league context for slip-leg GameDay identity */
   };
   var added = Slip.toggle(slip, leg);
   saveSlip();
@@ -320,5 +333,6 @@ $("slipToggle").addEventListener("click", function(){
   else { p.setAttribute("hidden", ""); this.setAttribute("aria-expanded", "false"); }
 });
 renderSlip();
+GIU.teamDir().then(function(d){ slipDir = d || {}; renderSlip(); });
 render();
 })();
