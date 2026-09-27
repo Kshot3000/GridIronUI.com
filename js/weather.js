@@ -1,5 +1,7 @@
 /* GridIronUI Game Weather — NFL stadium dataset + Open-Meteo hourly forecasts.
-   Dome/retractable venues show "Dome — weather N/A". */
+   Dome/retractable venues show "Dome — weather N/A". Open-air games get a
+   4-hour game-window strip (kickoff, +1h, +2h, +3h) with temp, sustained wind,
+   gusts and precip per hour; impact tags are computed over the whole window. */
 (function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
@@ -77,39 +79,79 @@ function compass(deg){
   return dirs[Math.round(deg/22.5)%16];
 }
 var wxCache = {};
+/* Pure: slice the game window out of parsed Open-Meteo hourly data — the hour
+   nearest kickoff plus the next three (a ~4h game). Exported for tests. */
+function sliceWindow(d, kickoffISO){
+  var times = d.hourly.time, target = Date.parse(kickoffISO), bi = 0, bd = Infinity;
+  times.forEach(function(t,i){
+    var diff = Math.abs(Date.parse(t)-target);
+    if(diff<bd){ bd=diff; bi=i; }
+  });
+  var hrs = [];
+  for(var k=0;k<4 && bi+k<times.length;k++){
+    var j = bi+k;
+    hrs.push({
+      temp: Math.round(d.hourly.temperature_2m[j]),
+      precip: d.hourly.precipitation_probability[j],
+      wind: Math.round(d.hourly.wind_speed_10m[j]),
+      gust: Math.round(d.hourly.wind_gusts_10m[j]),
+      wdir: compass(d.hourly.wind_direction_10m[j]),
+      when: times[j]
+    });
+  }
+  return hrs;
+}
 function forecast(st, kickoffISO){
   var key = st[0]+"|"+kickoffISO.slice(0,10);
   if(wxCache[key]) return Promise.resolve(wxCache[key]);
   var url = "https://api.open-meteo.com/v1/forecast?latitude="+st[3]+"&longitude="+st[4]+
-    "&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m"+
+    "&hourly=temperature_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m"+
     "&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=UTC&forecast_days=16";
   /* timezone=UTC: hourly stamps have no offset but parse as UTC, so the epoch
      comparison below matches ESPN's ISO kickoff regardless of the visitor's timezone.
      (timezone=auto returns stadium-local stamps, which Date.parse would misread.) */
   return GIU.fetchJSON(url).then(function(d){
-    var times = d.hourly.time, target = Date.parse(kickoffISO), bi = 0, bd = Infinity;
-    times.forEach(function(t,i){
-      var diff = Math.abs(Date.parse(t)-target);
-      if(diff<bd){ bd=diff; bi=i; }
-    });
-    var w = {
-      temp: Math.round(d.hourly.temperature_2m[bi]),
-      precip: d.hourly.precipitation_probability[bi],
-      wind: Math.round(d.hourly.wind_speed_10m[bi]),
-      wdir: compass(d.hourly.wind_direction_10m[bi]),
-      when: times[bi]
-    };
-    wxCache[key]=w; return w;
+    var hrs = sliceWindow(d, kickoffISO);
+    wxCache[key]=hrs; return hrs;
   });
 }
 function impact(w){
+  /* Accepts a single kickoff snapshot {temp,precip,wind} (legacy callers) or an
+     array of hourly points — thresholds are computed over the whole game window,
+     because a gust front in the 4th quarter matters as much as kickoff conditions. */
+  var hrs = Array.isArray(w) ? w : [w];
+  var wind = 0, gust = 0, precip = 0, temp = Infinity;
+  hrs.forEach(function(h){
+    if(h.wind > wind) wind = h.wind;
+    if(h.gust > gust) gust = h.gust;
+    if(h.precip > precip) precip = h.precip;
+    if(h.temp < temp) temp = h.temp;
+  });
   var notes = [];
-  if(w.wind >= 20) notes.push('<span class="tag red">High wind '+w.wind+' mph — strong Under lean</span>');
-  else if(w.wind >= 13) notes.push('<span class="tag">Wind '+w.wind+' mph — mild Under lean</span>');
-  if(w.precip >= 60) notes.push('<span class="tag">Rain '+w.precip+'% — favors run game</span>');
-  if(w.temp <= 25) notes.push('<span class="tag blue">Freezing '+w.temp+'°F</span>');
-  else if(w.temp >= 90) notes.push('<span class="tag">Heat '+w.temp+'°F</span>');
+  if(gust >= 30) notes.push('<span class="tag red">Gusts '+gust+' mph — strong Under lean, kicking nightmare</span>');
+  else if(gust >= 24) notes.push('<span class="tag">Gusts '+gust+' mph — field-goal risk</span>');
+  if(wind >= 20) notes.push('<span class="tag red">Wind '+wind+' mph sustained — strong Under lean</span>');
+  else if(wind >= 13) notes.push('<span class="tag">Wind '+wind+' mph — mild Under lean</span>');
+  if(precip >= 60) notes.push('<span class="tag">Rain '+precip+'% — favors run game</span>');
+  if(temp <= 25) notes.push('<span class="tag blue">Freezing '+temp+'°F</span>');
+  else if(temp >= 90) notes.push('<span class="tag">Heat '+temp+'°F</span>');
   return notes.length ? notes.join(" ") : '<span class="tag green">No major concerns</span>';
+}
+/* Game-window strip: one compact column per game hour (kickoff, +1h, +2h, +3h)
+   with temp, sustained wind (gusts in parens) and precip chance. */
+function windowHTML(hrs){
+  var labels = ["Kickoff","+1h","+2h","+3h"];
+  var cols = hrs.map(function(h, i){
+    return '<div style="min-width:96px;flex:1">'+
+      '<div style="font-size:.68rem;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">'+labels[i]+'</div>'+
+      '<div class="num" style="font-size:1.25rem">'+h.temp+'°F</div>'+
+      '<div style="font-size:.85rem;margin-top:4px"><b class="num">'+h.wind+'</b> mph '+
+        '<span style="color:var(--muted)">'+h.wdir+'</span><br>'+
+        '<span style="color:var(--muted);font-size:.78rem">gusts '+h.gust+'</span></div>'+
+      '<div style="font-size:.78rem;color:var(--muted);margin-top:4px">☔ '+h.precip+'%</div>'+
+    '</div>';
+  }).join("");
+  return '<div class="wx-strip" style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px">'+cols+'</div>';
 }
 /* Pure builders, exported on GIU for node tests (tests/test-weather.js).
    GameDay matchup header: both team identities (logo + real color chip + name)
@@ -125,6 +167,8 @@ function matchupHTML(away, home){
 }
 GIU.wxMatchupHTML = matchupHTML;
 GIU.wxImpact = impact;
+GIU.wxWindowHTML = windowHTML;
+GIU.wxSliceWindow = sliceWindow;
 
 GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard").then(function(d){
   var evs = (d.events||[]).filter(function(ev){
@@ -162,13 +206,8 @@ GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreb
         (st[5]==="retractable" ? 'If the roof opens, conditions apply — check the team\'s official gameday report.' : '')+'</div>';
       return;
     }
-    forecast(st, card.getAttribute("data-kick")).then(function(w){
-      body.innerHTML =
-        '<div style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:10px">'+
-        '<div><div style="font-size:.72rem;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">Kickoff temp</div><b class="num" style="font-size:1.6rem">'+w.temp+'°F</b></div>'+
-        '<div><div style="font-size:.72rem;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">Wind</div><b class="num" style="font-size:1.6rem">'+w.wind+' mph</b> <span style="color:var(--muted)">'+w.wdir+'</span></div>'+
-        '<div><div style="font-size:.72rem;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">Precip</div><b class="num" style="font-size:1.6rem">'+w.precip+'%</b></div>'+
-        '</div>'+impact(w);
+    forecast(st, card.getAttribute("data-kick")).then(function(hrs){
+      body.innerHTML = windowHTML(hrs)+impact(hrs);
     }).catch(function(){
       body.innerHTML = '<p style="color:var(--faint)">Forecast unavailable for this game.</p>';
     });
