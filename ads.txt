@@ -1,4 +1,4 @@
-# ads.txt — GridIronUI (https://kshot3000.github.io/GridIronUI.com/)
+# ads.txt — GridIronUI (https://gridironui.xyz/)
 # AdSense publisher ID — live.
 # https://support.google.com/adsense/answer/7532444
 google.com, ca-pub-3316742664595468, DIRECT, f08c47fec0942fa0
