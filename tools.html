@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Betting Calculators — Odds, Parlay, Kelly, Vig | GridIronUI</title>
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, Kelly stake and vig remover. All math runs in your browser.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero"><div class="wrap hero-inner">
+  <a class="back-link" href="index.html">← Home</a>
+  <span class="kicker">Sharp tools</span>
+  <h1>Betting calculators</h1>
+  <p class="lede">Six tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+</div></section>
+
+<div class="wrap">
+  <div class="grid grid-2" style="margin-top:34px">
+
+    <div class="card calc" id="converter">
+      <span class="tag">Most used</span>
+      <h3>Odds converter</h3>
+      <p class="hint">Enter odds in any format — get all three plus the implied probability.</p>
+      <div class="form-row">
+        <div class="field"><label>Odds</label><input type="text" id="cIn" placeholder="-110" value="-110"></div>
+        <div class="field"><label>Format</label><select id="cFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="cGo">Convert</button>
+      <div class="result-box" id="cOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="implied">
+      <h3>Implied probability</h3>
+      <p class="hint">What win chance is the market actually assigning at this price?</p>
+      <div class="form-row">
+        <div class="field"><label>Odds</label><input type="text" id="iIn" placeholder="+150"></div>
+        <div class="field"><label>Format</label><select id="iFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="iGo">Calculate</button>
+      <div class="result-box" id="iOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="payout">
+      <h3>Payout calculator</h3>
+      <p class="hint">Stake in — profit and total return out.</p>
+      <div class="form-row">
+        <div class="field"><label>Stake ($)</label><input type="number" id="pStake" placeholder="100" min="0" step="any"></div>
+        <div class="field"><label>Odds</label><input type="text" id="pOdds" placeholder="-110"></div>
+      </div>
+      <div class="field"><label>Odds format</label><select id="pFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      <button class="btn btn-gold btn-sm" id="pGo">Calculate</button>
+      <div class="result-box" id="pOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="parlay">
+      <h3>Parlay calculator</h3>
+      <p class="hint">Add each leg's odds — see the true combined price before you lock it in.</p>
+      <div id="legRows"></div>
+      <button class="btn btn-ghost btn-sm" id="addLeg" style="margin-bottom:12px">+ Add leg</button>
+      <div class="field"><label>Stake ($) — optional</label><input type="number" id="plStake" placeholder="10" min="0" step="any"></div>
+      <button class="btn btn-gold btn-sm" id="plGo">Calculate parlay</button>
+      <div class="result-box" id="plOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="kelly">
+      <h3>Kelly stake calculator</h3>
+      <p class="hint">Size your bet to your edge. Be honest about your win probability — Kelly punishes optimism.</p>
+      <div class="form-row">
+        <div class="field"><label>Your estimated win probability (%)</label><input type="number" id="kProb" placeholder="55" min="0" max="100" step="any"></div>
+        <div class="field"><label>Odds (decimal)</label><input type="text" id="kOdds" placeholder="2.10"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Kelly fraction</label><select id="kFrac"><option value="1">Full Kelly</option><option value="0.5" selected>Half Kelly (recommended)</option><option value="0.25">Quarter Kelly (conservative)</option></select></div>
+        <div class="field"><label>Bankroll ($) — optional</label><input type="number" id="kBank" placeholder="1000" min="0" step="any"></div>
+      </div>
+      <div class="field" style="display:none"><select id="kFmt"><option value="decimal" selected>Decimal</option></select></div>
+      <button class="btn btn-gold btn-sm" id="kGo">Calculate stake</button>
+      <div class="result-box" id="kOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="vig">
+      <h3>Vig remover / fair odds</h3>
+      <p class="hint">Enter both sides of a two-way market — see the book's hold and the true no-vig price.</p>
+      <div class="form-row">
+        <div class="field"><label>Side 1 (American)</label><input type="text" id="vA1" placeholder="-110"></div>
+        <div class="field"><label>Side 2 (American)</label><input type="text" id="vA2" placeholder="-110"></div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="vGo">Remove the vig</button>
+      <div class="result-box" id="vOut" style="display:none"></div>
+    </div>
+
+  </div>
+
+  <div class="notice green" style="margin:34px 0">
+    <strong>How to use these like a sharp:</strong> convert every price you consider into implied probability, strip the vig to find the market's true opinion, and only bet when your own number disagrees with it. The calculators do the arithmetic — the edge is still yours to find. Learn the concepts in <a href="guides/betting-101.html">Betting 101</a> and <a href="guides/advanced.html">Advanced strategy</a>.
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/betmath.js"></script>
+<script src="js/tools.js"></script>
+</body>
+</html>

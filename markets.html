@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediction Markets — Polymarket & Kalshi | GridIronUI</title>
+<meta name="description" content="Live Polymarket sports markets: game odds in real prices. See what the crowd thinks, in cents on the dollar.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-feedcheck>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1600&q=65&auto=format&fit=crop')"></div>
+  <div class="wrap hero-inner">
+    <a class="back-link" href="index.html" style="position:relative;z-index:2">← Home</a>
+    <span class="kicker">Live data</span>
+    <h1>Prediction markets</h1>
+    <p class="lede">Real prices from real traders. A price of <b class="num" style="color:var(--gold-soft)">62¢</b> means the market thinks it happens <b class="num">62%</b> of the time — no pundits, no hot takes, just money talking.</p>
+  </div>
+</section>
+
+<div class="wrap" style="margin-top:30px">
+  <div class="section-head">
+    <div><div class="tabs" id="marketTabs" style="margin:0"></div></div>
+    <span id="marketNote" style="font-size:.82rem;color:var(--faint)"></span>
+  </div>
+  <div class="grid grid-3" id="marketGrid"></div>
+
+  <div class="notice" style="margin:30px 0">
+    <strong>How to read these.</strong> Each market is binary — Yes/No, Team A/Team B — and the two prices always sum to ~100¢. When a price disagrees with your own number, that's a potential edge; when it agrees with the sportsbooks, that's confirmation. Never treat a market price as a prediction <i>about</i> the game — it <i>is</i> the crowd's probability estimate, with real money behind it.
+  </div>
+
+  <div class="card" style="margin-bottom:34px">
+    <span class="tag blue">Kalshi</span>
+    <h3 style="margin-top:10px">What about Kalshi?</h3>
+    <p style="color:var(--muted);font-size:.93rem">Kalshi's public API blocks requests from browsers (their servers reject cross-origin calls), so we can't pull their order book into this page without faking it — and we don't fake data. Our link checker also couldn't verify their homepage from here, so we're not linking it blindly: find them at <b style="color:var(--text)">kalshi.com</b> and browse their sports markets directly.</p>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/markets.js"></script>
+</body>
+</html>

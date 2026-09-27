@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Betting Glossary A–Z | GridIronUI</title>
+<meta name="description" content="Every sports betting term, defined in plain English — from action to whiskers.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero"><div class="wrap hero-inner">
+  <a class="back-link" href="index.html">← Home</a>
+  <span class="kicker">Reference</span>
+  <h1>Betting glossary</h1>
+  <p class="lede">Every term you'll meet at the sportsbook, defined in plain English. No jargon about the jargon.</p>
+  <div class="alpha-nav" id="alphaNav"></div>
+</div></section>
+
+<div class="wrap"><div class="article" id="glossary" style="max-width:860px"></div></div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script>
+var TERMS = [
+["Action","Any live, graded bet. 'I have action on the Chiefs' = I bet on the Chiefs."],
+["Against the spread (ATS)","A team's record relative to the point spread, e.g. 8–4 ATS means they covered 8 times in 12 games."],
+["Arbitrage","Betting all outcomes across books at prices that guarantee profit. Rare, small, and books limit it fast."],
+["Backdoor cover","When a team scores late in garbage time to cover the spread after being out of the game."],
+["Bankroll","Money set aside exclusively for betting, separate from life expenses."],
+["Beard","Someone who places bets on behalf of a sharper bettor trying to avoid limits."],
+["Book / sportsbook","The company taking your bets and setting the lines."],
+["Buck","Slang for $100. 'Five bucks' = $500 in betting slang."],
+["Buy points","Paying extra juice to move the spread in your favor, e.g. −3.5 to −3."],
+["Chalk","The favorite. 'Laying the chalk' = betting the favorite."],
+["Closing line","The final price offered just before an event starts — the market's sharpest opinion."],
+["Closing line value (CLV)","Whether the price you took was better than the closing line. Consistently beating the close = skill."],
+["Cover","To beat the point spread. A −7 favorite that wins by 10 'covers'."],
+["Dime","Slang for $1,000. 'Two dimes' = $2,000."],
+["Dog","Short for underdog — the side expected to lose."],
+["Edge","Your estimated advantage over the market price, expressed as a percentage."],
+["Even money","A +100 / 2.00 price: bet $100 to win $100."],
+["Expected value (EV)","The average profit or loss per bet if repeated forever. +EV bets grow a bankroll; −EV bets shrink it."],
+["Exposure","Total amount you stand to lose across open bets."],
+["Fade","To bet against. 'Fading the public' = betting the opposite of the popular side."],
+["Favorite","The side expected to win, shown with negative American odds (−150)."],
+["Flat betting","Wagering the same stake (usually 1 unit) on every bet."],
+["Futures","Bets on outcomes decided far in the future: championships, win totals, awards."],
+["Handle","Total money wagered on a market. 'The handle is heavy on the Chiefs' = lots bet on KC."],
+["Handicapping","Researching and analyzing games to find betting value."],
+["Hedge","Betting the opposite side of an existing position to lock profit or cut loss."],
+["Hook","A half-point in a spread or total, e.g. the '.5' in −3.5. 'Losing by the hook' is a rite of passage."],
+["Implied probability","The win probability a price implies. −110 implies 52.38%."],
+["In-play / live betting","Wagering while the game is happening, with odds updating in real time."],
+["Juice / vig","The bookmaker's commission built into the odds. −110 both sides = 4.76% vig."],
+["Kelly criterion","A formula sizing bets proportionally to your edge. Usually applied at half or quarter strength."],
+["Key numbers","The most common margins of victory — 3 and 7 in the NFL — that make certain spreads far more valuable."],
+["Limit","The maximum a book will let you wager. Sharps get limited; it's a compliment."],
+["Line","The current spread, total or price on a market."],
+["Line movement","How the line changes from open to close, driven by money and news."],
+["Line shopping","Comparing prices across multiple sportsbooks to take the best number."],
+["Lock","Slang for a 'can't lose' bet. There are no locks. Anyone selling one is selling something."],
+["Longshot","A big underdog at long odds."],
+["Middle","Holding both sides of a spread at different numbers so both can win if the result lands between them."],
+["Moneyline","A bet on who wins outright, no spread involved."],
+["Nickel","Slang for $500."],
+["No-vig / fair odds","Probabilities with the bookmaker's margin removed — the market's true opinion."],
+["Off the board","A game temporarily unavailable for betting, usually due to injury uncertainty."],
+["Outright","Winning without any spread: the moneyline result."],
+["Over/under","See Totals."],
+["Parlay","Multiple bets combined: every leg must win. Payouts multiply; so does the house edge."],
+["Pick'em","A game with no favorite — spread of 0, both sides around −110."],
+["Point spread","The handicap applied to the favorite, e.g. −6.5."],
+["Price","The odds attached to a bet."],
+["Prop (proposition) bet","A wager on a specific event within a game: player stats, first scorer, etc."],
+["Push","A tie against the spread or total — stakes refunded."],
+["Reverse line movement","When the line moves against the popular side, suggesting sharp money on the other side."],
+["Rollover","How many times bonus funds must be wagered before withdrawal."],
+["Round robin","A set of smaller parlays built automatically from a group of teams."],
+["Runner","See Beard."],
+["Sharp","A professional, informed bettor whose action can move lines."],
+["Spread","See Point spread."],
+["Steam","A sudden, big line move caused by heavy respected money."],
+["Straight bet","A single wager on one outcome — the opposite of a parlay."],
+["Teaser","A parlay giving extra points on each spread in exchange for shorter odds."],
+["Totals","A bet on the combined score going over or under a set number."],
+["Underdog","The side expected to lose, shown with positive American odds (+150)."],
+["Unit","Your standard bet size, usually 1% of bankroll. The honest way to talk about results."],
+["Vig / vigorish","See Juice."],
+["Wager","A bet."],
+["Whale","A bettor wagering very large amounts."],
+["Wire","Slang for the latest news/odds feed. You've got a good one right here."]
+];
+(function(){
+  var g = document.getElementById("glossary"), nav = document.getElementById("alphaNav");
+  var letters = {};
+  TERMS.forEach(function(t){
+    var L = t[0].replace(/^[^A-Za-z]*/,"").charAt(0).toUpperCase();
+    (letters[L] = letters[L]||[]).push(t);
+  });
+  var abc = Object.keys(letters).sort();
+  nav.innerHTML = abc.map(function(L){ return '<a href="#L-'+L+'">'+L+'</a>'; }).join("");
+  g.innerHTML = abc.map(function(L){
+    return '<h2 id="L-'+L+'" style="margin-top:1.6em">'+L+'</h2>' +
+      letters[L].map(function(t){
+        return '<div class="gloss-term"><h3>'+GIU.esc(t[0])+'</h3><p>'+GIU.esc(t[1])+'</p></div>';
+      }).join("");
+  }).join("");
+})();
+</script>
+</body>
+</html>

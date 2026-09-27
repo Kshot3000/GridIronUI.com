@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Betting 101 — How Odds Work | GridIronUI</title>
+<meta name="description" content="Learn how American, decimal and fractional odds work, how to read a betting board, and what implied probability means.">
+<meta property="og:image" content="../img/og-image.jpg">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<script>window.GIU_BASE="..";</script>
+<div id="site-header"></div>
+
+<section class="page-hero"><div class="wrap hero-inner">
+  <a class="back-link" href="../index.html">← Home</a>
+  <span class="kicker">Guide · Start here</span>
+  <h1>Betting 101: how odds work</h1>
+  <p class="lede">Everything on a sportsbook — every line, every price, every payout — is built on odds. Understand these three formats and the idea of implied probability, and you can read any betting board on earth.</p>
+</div></section>
+
+<div class="wrap"><div class="article">
+  <div class="toc"><b>On this page</b><ol>
+    <li><a href="#formats">The three odds formats</a></li>
+    <li><a href="#american">American odds, explained</a></li>
+    <li><a href="#implied">Implied probability — the key concept</a></li>
+    <li><a href="#board">Reading a betting board</a></li>
+    <li><a href="#payout">Figuring your payout</a></li>
+  </ol></div>
+
+  <h2 id="formats">The three odds formats</h2>
+  <p>The same bet can be written three ways, depending on where you are in the world:</p>
+  <ul>
+    <li><b>American odds</b> (e.g. −110, +150) — the US standard. Negative numbers show favorites, positive numbers show underdogs.</li>
+    <li><b>Decimal odds</b> (e.g. 1.91, 2.50) — the European standard. Multiply your stake by the decimal to get your total return.</li>
+    <li><b>Fractional odds</b> (e.g. 10/11, 3/2) — the UK standard. The fraction shows profit relative to stake.</li>
+  </ul>
+  <p>They're just three languages for the same thing. A −110 American line is exactly the same bet as 1.91 decimal or 10/11 fractional. Try converting between them with our <a href="../tools.html#converter">odds converter</a>.</p>
+
+  <h2 id="american">American odds, explained</h2>
+  <p>American odds are always quoted relative to $100:</p>
+  <ul>
+    <li><b>Negative odds (−110, −200):</b> how much you must <i>risk</i> to win $100. At −110 you risk $110 to win $100. The bigger the negative number, the heavier the favorite.</li>
+    <li><b>Positive odds (+150, +300):</b> how much you <i>win</i> on a $100 bet. At +150 you win $150 on a $100 stake. The bigger the positive number, the bigger the underdog.</li>
+  </ul>
+  <div class="example"><b>Worked example.</b> The Chiefs are −150, the Raiders are +130. A $150 bet on the Chiefs returns $250 total ($100 profit + $150 stake). A $100 bet on the Raiders returns $230 total ($130 profit + $100 stake).</div>
+  <p>You don't have to bet $100 — the odds scale to any stake. A $55 bet at −110 wins $50. A $20 bet at +150 wins $30.</p>
+
+  <h2 id="implied">Implied probability — the key concept</h2>
+  <p>Every price implies a probability: how likely the outcome must be for the bet to "break even" before the bookmaker's margin. This is the single most important idea in betting.</p>
+  <div class="formula">Negative odds: |odds| ÷ (|odds| + 100) &nbsp;·&nbsp; Positive odds: 100 ÷ (odds + 100)</div>
+  <div class="example"><b>Worked example.</b> At −110, the implied probability is 110 ÷ 210 = <b>52.38%</b>. The book is saying: this side needs to win about 52.4% of the time for the price to be fair. If your own analysis says it wins 55% of the time, you may have found <a href="advanced.html#ev">value</a>.</div>
+  <p>Here's the catch: add up the implied probabilities of <i>both</i> sides of a market and you'll get more than 100% — usually 104–106%. That extra is the <b>vig</b> (juice), the bookmaker's cut. Our <a href="../tools.html#vig">vig remover</a> strips it out to show the true no-vig probabilities.</p>
+
+  <h2 id="board">Reading a betting board</h2>
+  <p>A standard board line for one game shows three markets side by side:</p>
+  <table class="data" style="min-width:0"><thead><tr><th>Team</th><th>Spread</th><th>Total</th><th>Moneyline</th></tr></thead>
+  <tbody>
+    <tr><td><b>Chiefs</b></td><td>−3 (−110)</td><td>O 47.5 (−110)</td><td>−150</td></tr>
+    <tr><td><b>Raiders</b></td><td>+3 (−110)</td><td>U 47.5 (−110)</td><td>+130</td></tr>
+  </tbody></table>
+  <ul>
+    <li><b>Spread:</b> the Chiefs must win by more than 3 points to "cover". The −110 in parentheses is the price you pay for that spread.</li>
+    <li><b>Total:</b> bet whether the combined score goes Over or Under 47.5 points.</li>
+    <li><b>Moneyline:</b> who wins the game, no points involved.</li>
+  </ul>
+  <p>Each of these is covered in depth — with worked examples — in <a href="bet-types.html">Bet types</a>.</p>
+
+  <h2 id="payout">Figuring your payout</h2>
+  <p>Two numbers matter: <b>profit</b> (what you win) and <b>total return</b> (profit + your original stake back). The easiest mental math uses decimal odds:</p>
+  <div class="formula">Total return = stake × decimal odds</div>
+  <div class="example"><b>Worked example.</b> $50 at 2.50 returns $125 total — $75 profit plus your $50 stake.</div>
+  <p>For American odds: at −110, divide your stake by 1.10 to get profit ($110 ÷ 1.10 = $100). At +150, multiply your stake by 1.50 ($100 × 1.50 = $150 profit). Or skip the math and use the <a href="../tools.html#payout">payout calculator</a>.</p>
+
+  <hr class="divider">
+  <p><b>Next:</b> <a href="bet-types.html">Bet types →</a> — moneyline, spread, totals, parlays, teasers, props, futures and live betting, each with a worked example.</p>
+</div></div>
+
+<div id="site-footer"></div>
+<script src="../js/site.js"></script>
+</body>
+</html>

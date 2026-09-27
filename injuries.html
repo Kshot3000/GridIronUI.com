@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Injury Reports | GridIronUI</title>
+<meta name="description" content="Who's out, who's questionable and who's expected back — injury reports per league and team.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-feedcheck>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero"><div class="wrap hero-inner">
+  <a class="back-link" href="index.html">← Home</a>
+  <span class="kicker">Live data</span>
+  <h1>Injury reports</h1>
+  <p class="lede">Injuries move lines more than any stat. Check who's out and who's questionable before you bet a side or a total.</p>
+</div></section>
+
+<div class="wrap" style="margin-top:30px">
+  <div class="section-head">
+    <div class="tabs" id="injTabs" style="margin:0"></div>
+    <div class="field" style="margin:0;min-width:220px"><input type="text" id="injSearch" placeholder="Search team or player…"></div>
+  </div>
+  <div class="grid grid-3" id="injGrid"></div>
+  <div class="notice" style="margin:30px 0">
+    <strong>Betting with injury news.</strong> Books adjust fast, but the first minutes after news breaks are where value lives — and where mistakes happen. Always confirm a player's status with the team's official report before kickoff; designations change.
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/injuries.js"></script>
+</body>
+</html>

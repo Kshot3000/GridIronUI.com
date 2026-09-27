@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game-Day Weather — NFL Stadium Forecasts | GridIronUI</title>
+<meta name="description" content="Kickoff temperature, wind and precipitation for every NFL game. Wind moves totals — know before you bet.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-feedcheck>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero"><div class="wrap hero-inner">
+  <a class="back-link" href="index.html">← Home</a>
+  <span class="kicker">Live data</span>
+  <h1>Game-day weather</h1>
+  <p class="lede">Kickoff temperature, wind and precipitation for every upcoming NFL game, mapped to the actual stadium.</p>
+</div></section>
+
+<div class="wrap" style="margin-top:30px">
+  <div class="notice green">
+    <strong>Why bettors care: wind moves totals more than rain.</strong> Sustained winds above ~15 mph suppress the passing game and field goals — historically pushing games under. Rain matters too, but mostly by pushing teams to run. Dome and retractable-roof games are marked so you don't handicap weather that isn't there.
+  </div>
+  <div class="grid grid-2" id="wxGrid" style="margin-top:22px">
+    <div class="card"><div class="skel" style="height:140px"></div></div>
+    <div class="card"><div class="skel" style="height:140px"></div></div>
+  </div>
+  <p style="font-size:.8rem;color:var(--faint);margin:24px 0">Forecasts: Open-Meteo (hourly, matched to kickoff) · Stadium coordinates: GridIronUI dataset, all 30 NFL stadiums.</p>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/weather.js"></script>
+</body>
+</html>

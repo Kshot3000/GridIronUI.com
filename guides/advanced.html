@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Strategy — EV, CLV, Vig, Hedging | GridIronUI</title>
+<meta name="description" content="Expected value, closing line value, removing the vig, hedging, middling and arbitrage — how sharp bettors think about price, with honest caveats.">
+<meta property="og:image" content="../img/og-image.jpg">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<script>window.GIU_BASE="..";</script>
+<div id="site-header"></div>
+
+<section class="page-hero"><div class="wrap hero-inner">
+  <a class="back-link" href="../index.html">← Home</a>
+  <span class="kicker">Guide · Advanced</span>
+  <h1>Thinking like a sharp</h1>
+  <p class="lede">Recreational bettors ask "who's going to win?" Sharp bettors ask "is this price wrong?" These are the concepts behind that shift — with the caveats nobody selling picks will give you.</p>
+</div></section>
+
+<div class="wrap"><div class="article">
+  <div class="toc"><b>On this page</b><ol>
+    <li><a href="#ev">Expected value (EV)</a></li><li><a href="#clv">Closing line value (CLV)</a></li>
+    <li><a href="#vig">The vig and no-vig fair odds</a></li><li><a href="#hedge">Hedging</a></li>
+    <li><a href="#middle">Middling</a></li><li><a href="#arb">Arbitrage</a></li>
+  </ol></div>
+
+  <h2 id="ev">Expected value — the only question that matters</h2>
+  <p>A bet has positive expected value (+EV) when the price is better than the true probability warrants. EV per $1 staked:</p>
+  <div class="formula">EV = (p × profit) − ((1 − p) × stake)</div>
+  <div class="example"><b>Worked example.</b> You estimate a team wins 40% (p = 0.40), offered at +170 (profit $1.70 per $1). EV = (0.40 × 1.70) − (0.60 × 1.00) = 0.68 − 0.60 = <b>+$0.08 per dollar</b> — an 8% edge. The market implies 100/270 = 37.0%; your 40% disagrees, so you bet.</div>
+  <p>The brutal part: you never know p exactly. Your "edge" is an estimate with error bars. Professionals think in ranges ("I'm 38–44% here") and only bet when the whole range clears the price. If your edge depends on your most optimistic estimate, you don't have an edge.</p>
+
+  <h2 id="clv">Closing line value — the pro's report card</h2>
+  <p>The <b>closing line</b> is the price just before the game starts — the market's final, sharpest opinion. <b>CLV</b> measures whether the price you took was better than the close. Beat the close consistently and you're almost certainly a winning bettor long-term, because the closing line is the best available proxy for true probability.</p>
+  <div class="example"><b>Worked example.</b> You bet the underdog +3.5 (−110) on Tuesday. By Sunday it closes +2.5. You got a full point of CLV — even if the bet loses, the process was right. Track "bet line vs. closing line" for every wager; it's a faster, cleaner signal of skill than wins and losses.</div>
+  <p>Practical takeaway: bet early when you expect the market to move toward you (injury news you caught first), bet late when you want the most information. And books notice consistent CLV — it's the fastest way to get your limits cut, which is perversely a compliment.</p>
+
+  <h2 id="vig">The vig — and the no-vig truth underneath</h2>
+  <p>Both sides of a −110/−110 market imply 52.38% — totaling 104.76%. That extra 4.76% is the book's margin. Removing it reveals the market's true opinion:</p>
+  <div class="formula">No-vig probability = implied ÷ total implied</div>
+  <div class="example"><b>Worked example.</b> Chiefs −150 (60.0%) vs. Raiders +130 (43.5%) totals 103.5%. No-vig: Chiefs 60.0/103.5 = <b>58.0%</b>, Raiders 43.5/103.5 = <b>42.0%</b>. Fair odds: Chiefs −138, Raiders +138. If another book offers the Chiefs at −130, you're getting a better-than-fair price.</div>
+  <p>Different books hold different margins — reduced-juice books (−105) are structurally cheaper to bet into. Use the <a href="../tools.html#vig">vig remover</a> on any two-sided market.</p>
+
+  <h2 id="hedge">Hedging — buying certainty</h2>
+  <p>Hedging is betting the other side to lock in profit or cut a loss. It's neither cowardly nor clever by default — it's a price question.</p>
+  <div class="example"><b>Worked example.</b> You hold a $100 Super Bowl future on the Bills at +800 (pays $900 total). They reach the final against the Chiefs, who are −130. Betting $390 on the Chiefs −130 guarantees: Bills win → $900 − $390 = $510 profit; Chiefs win → $390/1.30 = $300 profit − $100 original = $200 profit. You've converted variance into a locked $200–$510 window.</div>
+  <p>Honest caveat: hedging usually <i>costs</i> EV — you're paying the book's margin twice. Hedge when the money matters to your life or bankroll (a life-changing payout), not out of nerves over $40.</p>
+
+  <h2 id="middle">Middling — winning both sides</h2>
+  <p>When lines move, you can sometimes hold both sides at different numbers and win twice if the final lands between them.</p>
+  <div class="example"><b>Worked example.</b> You bet Favorite −2.5 early. The line moves to −6.5; you take Underdog +6.5. If the favorite wins by 3, 4, 5 or 6, <b>both</b> bets cash. If not, you lose only the juice on one side. Middles around key numbers (3, 7 in football) are the ones with real math behind them.</div>
+  <p>Books hate middles and steam-chasers; opportunities are real but thin, and forcing them is just paying double juice.</p>
+
+  <h2 id="arb">Arbitrage — the "risk-free" profit with teeth</h2>
+  <p>When books disagree enough, you can bet every outcome across books and lock a profit regardless of result.</p>
+  <div class="example"><b>Worked example.</b> Book A: Chiefs −105 (51.2%). Book B: Raiders +115 (46.5%). Total implied: 97.7% &lt; 100% — an arb. Stake proportionally ($515/$485 on $1,000) and you profit ~$23 no matter who wins.</div>
+  <p>Honest caveats, because the sellers won't list them: true arbs are rare and small (1–3%), lines move while you're placing the second leg, books limit or ban arb bettors fast, and a voided or mis-graded leg turns "risk-free" into a very risky single bet. Treat it as a pricing curiosity, not an income plan. Prediction markets (<a href="../markets.html">live here</a>) sometimes show arbs against sportsbooks — same warnings apply.</p>
+
+  <hr class="divider">
+  <p><b>Keep learning:</b> <a href="../glossary.html">Glossary →</a> · <a href="../tools.html">Calculators →</a> · <a href="bankroll.html">Bankroll management →</a></p>
+</div></div>
+
+<div id="site-footer"></div>
+<script src="../js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predictions — Market-Implied Win Probabilities | GridIronUI</title>
+<meta name="description" content="Win probabilities derived from live prediction-market prices — with the methodology shown, not hidden.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-feedcheck>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero"><div class="wrap hero-inner">
+  <a class="back-link" href="index.html">← Home</a>
+  <span class="kicker">Live data</span>
+  <h1>Predictions</h1>
+  <p class="lede">Win probabilities for upcoming games — derived from live prediction-market prices, not from a pundit's gut.</p>
+</div></section>
+
+<div class="wrap" style="margin-top:30px">
+  <div class="notice green">
+    <strong>Methodology — no black box.</strong> Each probability below is a live Polymarket price converted directly: a 62¢ contract = a 62% market-implied chance. We show the source market for every number. Markets move as money moves, so these update in real time. This page makes no picks of its own.
+  </div>
+  <div class="tabs" id="predTabs" style="margin-bottom:18px">
+    <button class="tab active" data-k="nfl">NFL</button>
+    <button class="tab" data-k="nba">NBA</button>
+    <button class="tab" data-k="mlb">MLB</button>
+    <button class="tab" data-k="nhl">NHL</button>
+    <button class="tab" data-k="epl">EPL</button>
+  </div>
+  <div class="grid grid-2" id="predGrid" style="margin-top:22px">
+    <div class="card"><div class="skel" style="height:140px"></div></div>
+    <div class="card"><div class="skel" style="height:140px"></div></div>
+  </div>
+  <div class="notice" style="margin:30px 0">
+    <strong>Use these correctly.</strong> A market-implied probability is a starting point, not an answer. Your job is to disagree with it <i>for a reason</i> — an injury the market hasn't priced, a matchup edge, weather. Compare against sportsbook prices on the <a href="odds.html">odds board</a>: when the market and the books disagree, one of them is wrong.
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/predictions.js"></script>
+</body>
+</html>

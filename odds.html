@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Odds Board — Best Prices Across Books | GridIronUI</title>
+<meta name="description" content="Live spreads, moneylines and totals across US sportsbooks with best-price highlighting. Find the best place to place your bets.">
+<meta property="og:image" content="img/og-image.jpg">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-feedcheck>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&q=65&auto=format&fit=crop')"></div>
+  <div class="wrap hero-inner">
+    <a class="back-link" href="index.html" style="position:relative;z-index:2">← Home</a>
+    <span class="kicker">Live data</span>
+    <h1>Odds board</h1>
+    <p class="lede">Every book's number, side by side. The <b style="color:var(--green)">best price on each outcome is highlighted in green</b>, and every game names the <b style="color:var(--gold-soft)">best place to bet it</b> — because a half point is real money.</p>
+  </div>
+</section>
+
+<div class="wrap" style="margin-top:30px">
+  <div class="card" id="oddsSetup">
+    <span class="tag">Setup — one time, 60 seconds</span>
+    <h3 style="margin-top:10px">Connect your free odds API key</h3>
+    <p style="color:var(--muted);font-size:.93rem">Live odds come from <a href="https://the-odds-api.com" target="_blank" rel="noopener">The Odds API</a>, which is free for 500 requests/month — no credit card. Your key is stored <b style="color:var(--text)">only in this browser</b> (localStorage); it never touches our servers, because there are no servers — this site is 100% static.</p>
+    <div class="form-row" style="max-width:640px">
+      <div class="field"><label>Your Odds API key</label><input type="text" id="keyInput" placeholder="paste key here" autocomplete="off"></div>
+      <div class="field"><label>&nbsp;</label><div style="display:flex;gap:10px"><button class="btn btn-gold btn-sm" id="saveKey">Save &amp; load odds</button><button class="btn btn-ghost btn-sm" id="clearKey">Forget key</button></div></div>
+    </div>
+    <p style="font-size:.85rem;color:var(--faint)">No key? <a href="https://the-odds-api.com" target="_blank" rel="noopener">Get one free at the-odds-api.com →</a> Until then, everything below stays empty — we never show sample or stale lines as if they were live.</p>
+  </div>
+
+  <div class="section-head" style="margin-top:26px">
+    <div class="tabs" id="sportTabs" style="margin:0"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span id="quota" style="font-size:.8rem;color:var(--faint)"></span>
+      <label style="font-size:.82rem;color:var(--muted);display:flex;gap:6px;align-items:center"><input type="checkbox" id="autoRef" style="width:auto"> auto-refresh (5 min)</label>
+      <button class="btn btn-ghost btn-sm" id="refreshBtn">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div id="oddsBoard"></div>
+
+  <div class="notice" style="margin:30px 0">
+    <strong>How to read this board.</strong> Green cells are the best available price for that outcome across every book shown. The "best place to bet" badge goes to the book holding the most best prices for that game. ▲▼ marks movement since your last refresh. Odds update when books move them — always confirm the final price in the sportsbook app before betting.
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js"></script>
+<script src="js/odds-logic.js"></script>
+<script src="js/odds.js"></script>
+</body>
+</html>
