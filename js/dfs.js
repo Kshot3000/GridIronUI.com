@@ -4,6 +4,7 @@
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
 var OPT = window.DFSOpt;
+var INJ = window.DFSInj || null; /* js/dfs-injuries.js — ESPN injury cross-check */
 var cfgKey = "DK_NFL", mode = "cash";
 var pool = [], pidSeq = 1;
 
@@ -148,9 +149,116 @@ $("clearPool").addEventListener("click", function(){
   if(!pool.length || confirm("Remove all "+pool.length+" players from the pool?")){ pool=[]; save(); renderPool(); }
 });
 
+/* ---------- ESPN injury cross-check ----------
+   Flags pool players who appear on the ESPN injury report (fetched once per
+   sport per page load, after the pool renders so a feed hiccup never blocks
+   the optimizer). Chips are painted in place — no table rebuild, no lost
+   input focus. Never invents: only exact or unambiguous last-name matches. */
+var injFlags = {};
+var injFeeds = {}; /* sport -> {state:"idle"|"loading"|"ready"|"error", entries} */
+function injSport(){ return cfg().sport; }
+function injLeague(){ return injSport()==="NBA" ? "basketball/nba" : "football/nfl"; }
+function refreshInjuryFlags(){
+  var f = injFeeds[injSport()];
+  if(!INJ || !f || f.state!=="ready" || !f.entries) return {};
+  return INJ.matchInjuries(pool, f.entries);
+}
+function injChip(p){
+  var fl = injFlags[p.id];
+  if(!fl) return "";
+  var label = fl.severity===3 ? "OUT" : (fl.severity===2 ? "DOUBT" : "QUES");
+  var prob = fl.strength==="probable" ? " (probable match on last name + team)" : "";
+  var title = OPT_esc(fl.status+" — "+fl.espnName+prob+" · via ESPN injury report"+
+    (fl.comment ? " · "+fl.comment : ""));
+  return '<span class="inj-chip sev'+fl.severity+'" title="'+title+'">⚠ '+label+
+    (fl.strength==="probable" ? "?" : "")+"</span>";
+}
+function renderInjBanner(){
+  var b = $("injBanner");
+  if(!b) return;
+  if(!pool.length){ b.style.display="none"; b.innerHTML=""; return; }
+  var f = injFeeds[injSport()] || {state:"idle"};
+  if(f.state==="loading" || f.state==="idle"){
+    b.style.display=""; b.className="inj-banner idle";
+    b.innerHTML = "🏥 <b>Injury check</b> <span>· checking the ESPN injury report…</span>";
+    return;
+  }
+  if(f.state==="error"){
+    b.style.display=""; b.className="inj-banner idle";
+    b.innerHTML = "🏥 <b>Injury check</b> <span>· couldn't reach the ESPN injury feed — lineups still build normally. <a href=\"injuries.html\">Open the injury report →</a></span>";
+    return;
+  }
+  var s = INJ.summarize(injFlags), ids = Object.keys(injFlags);
+  if(!ids.length){
+    b.style.display=""; b.className="inj-banner ok";
+    b.innerHTML = "🏥 <b>Injury check</b> <span>· via ESPN injury report — no pool players on the report. <a href=\"injuries.html\">Full report →</a></span>";
+    return;
+  }
+  var parts = [];
+  if(s.out) parts.push(s.out+" OUT");
+  if(s.doubtful) parts.push(s.doubtful+" doubtful");
+  if(s.questionable) parts.push(s.questionable+" questionable");
+  var html = "🏥 <b>Injury check</b> <span>· via ESPN injury report — <b style=\"color:var(--text)\">"+
+    s.total+" pool player"+(s.total>1?"s":"")+"</b> flagged ("+parts.join(" · ")+").</span>";
+  if(s.out) html += ' <button class="btn btn-ghost btn-sm" id="injExcludeOut">🚫 Exclude all OUT</button>';
+  html += ' <a href="injuries.html" style="font-size:.82rem">Full report →</a>';
+  b.style.display=""; b.className="inj-banner";
+  b.innerHTML = html;
+  var ex = $("injExcludeOut");
+  if(ex) ex.addEventListener("click", function(){
+    pool.forEach(function(p){
+      var fl = injFlags[p.id];
+      if(fl && fl.severity===3){ p.banned = true; p.locked = false; }
+    });
+    save(); renderPool();
+  });
+}
+function maybeInjuryFetch(){
+  if(!INJ || !pool.length) return;
+  var sp = injSport();
+  var f = injFeeds[sp];
+  if(f && f.state!=="idle") return; /* one fetch per sport per page load */
+  injFeeds[sp] = { state:"loading", entries:null };
+  renderInjBanner();
+  GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+injLeague()+"/injuries", 12000).then(function(d){
+    var cur = injFeeds[sp];
+    if(!cur || cur.state!=="loading") return; /* sport switched mid-flight */
+    cur.entries = INJ.flattenInjuries(d);
+    cur.state = "ready";
+    injFlags = refreshInjuryFlags();
+    paintChipsInPlace();
+    renderInjBanner();
+  }).catch(function(){
+    var cur = injFeeds[sp];
+    if(cur && cur.state==="loading") cur.state = "error";
+    renderInjBanner();
+  });
+}
+/* Paint chips onto existing rows without rebuilding the table, so a feed
+   response that lands while the user edits projections never steals focus. */
+function paintChipsInPlace(){
+  var wrap = $("poolWrap");
+  if(!wrap) return;
+  Array.prototype.forEach.call(wrap.querySelectorAll("tr[data-id]"), function(tr){
+    var id = Number(tr.getAttribute("data-id"));
+    var pl = pool.filter(function(x){ return x.id===id; })[0];
+    if(!pl) return;
+    var cell = tr.querySelector("td.pname");
+    if(cell){
+      Array.prototype.forEach.call(cell.querySelectorAll(".inj-chip"), function(c){ c.remove(); });
+      var tmp = document.createElement("span");
+      tmp.innerHTML = injChip(pl);
+      if(tmp.firstChild) cell.appendChild(tmp.firstChild);
+    }
+    var fl = injFlags[id];
+    tr.classList.toggle("row-inj-out", !!(fl && fl.severity===3));
+  });
+}
+
 /* ---------- pool table ---------- */
 function renderPool(){
   var c = cfg();
+  injFlags = refreshInjuryFlags();
   var nl = pool.filter(function(p){ return p.locked; }).length;
   var nb = pool.filter(function(p){ return p.banned; }).length;
   $("poolCount").textContent = pool.length+" players · "+c.site+" "+c.sport+" · $"+c.cap.toLocaleString()+" cap"+
@@ -158,14 +266,17 @@ function renderPool(){
   $("rulesLine").textContent = "Roster: "+c.slots.join(" · ")+" — always confirm current rules on the official "+c.site+" site before entering.";
   if(!pool.length){
     $("poolWrap").innerHTML = '<div class="empty">Pool is empty. Import a CSV, add players manually, or load the DEMO slate to try the optimizer.</div>';
+    renderInjBanner();
     return;
   }
   var demo = pool.some(function(p){return p.demo;});
   var html = (demo?'<div class="notice" style="margin:0 0 12px"><strong>DEMO SLATE.</strong> These are synthetic players with made-up projections, for testing the optimizer only. Not real players, not real numbers.</div>':"")+
   '<div class="table-scroll"><table class="data"><thead><tr><th>Player</th><th>Pos</th><th>Team</th><th>Opp</th><th>Sal</th><th>Proj</th><th>Floor</th><th>Ceil</th><th>Own%</th><th>Lineup</th></tr></thead><tbody>'+
   pool.map(function(p){
-    var rowCls = p.locked ? ' class="row-locked"' : (p.banned ? ' class="row-banned"' : "");
-    return '<tr data-id="'+p.id+'"'+rowCls+'><td><b>'+OPT_esc(p.name)+'</b></td><td>'+p.pos.join("/")+'</td><td>'+OPT_esc(p.team)+'</td><td>'+OPT_esc(p.opp||"—")+'</td>'+
+    var fl = injFlags[p.id];
+    var rowCls = p.locked ? "row-locked" : (p.banned ? "row-banned" : "");
+    if(fl && fl.severity===3) rowCls += (rowCls ? " " : "")+"row-inj-out";
+    return '<tr data-id="'+p.id+'"'+(rowCls ? ' class="'+rowCls+'"' : "")+'><td class="pname"><b>'+OPT_esc(p.name)+'</b>'+injChip(p)+'</td><td>'+p.pos.join("/")+'</td><td>'+OPT_esc(p.team)+'</td><td>'+OPT_esc(p.opp||"—")+'</td>'+
     '<td class="num">$'+p.salary.toLocaleString()+'</td>'+
     '<td><input type="number" step="any" data-k="proj" value="'+p.proj+'" style="width:70px;padding:6px"></td>'+
     '<td><input type="number" step="any" data-k="floor" value="'+p.floor+'" style="width:70px;padding:6px"></td>'+
@@ -207,6 +318,8 @@ function renderPool(){
       if(pl){ pl.banned = !pl.banned; if(pl.banned) pl.locked = false; save(); renderPool(); }
     });
   });
+  renderInjBanner();
+  maybeInjuryFetch();
 }
 
 /* ---------- config tabs ---------- */
@@ -268,6 +381,18 @@ function renderResults(res, ms, wanted, extra){
     note += '<div class="notice" style="margin:0 0 14px"><strong>Exposure cap relaxed:</strong> '+
       Math.round(res.askedExp*100)+'% can\'t fill '+wanted+' lineup(s) — each player needs at least '+
       Math.round(res.effExp*100)+'% to appear once. Raised to '+Math.round(res.effExp*100)+'% to build your lineups.</div>';
+  }
+  /* injury cross-check: a locked player who is OUT per ESPN would land in
+     EVERY lineup — warn before the user enters anything. */
+  var lockOut = (x.locked||[]).map(function(id){
+    var pl = pool.filter(function(p){ return p.id===id; })[0];
+    var fl = injFlags[id];
+    return (pl && fl && fl.severity===3) ? OPT_esc(pl.name)+" ("+OPT_esc(fl.status)+")" : null;
+  }).filter(Boolean);
+  if(lockOut.length){
+    note = '<div class="notice red" style="margin:0 0 14px"><strong>⚠ Locked player on the injury report:</strong> '+
+      lockOut.join(", ")+' — OUT per the ESPN injury report, and locked players appear in <b>every</b> lineup. '+
+      'Unlock or exclude before entering a contest.</div>' + note;
   }
   /* shortfall hint: GPP exposure caps legitimately cut the lineup count, but
      "1 of 3 requested lineups" alone leaves users guessing why. */

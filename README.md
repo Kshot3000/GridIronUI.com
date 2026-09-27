@@ -36,6 +36,8 @@ node tests/test-odds-slip-dom.js  # bet-slip DOM wiring tests
 node tests/test-odds-slip-identity.js  # bet-slip GameDay identity (logo + team-color chips on slip legs)
 node tests/test-dfs.js        # DFS optimizer tests
 node tests/test-dfs-exposure.js  # DFS exposure summary tests
+node tests/test-dfs-injuries.js  # DFS injury cross-check logic (ESPN flatten, severity ranks, conservative name+team matching)
+node tests/test-dfs-injuries-dom.js  # injury wiring in shipped dfs.js (fetch-once, chips, banner, exclude-OUT, locked-OUT warning)
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 node tests/test-kalshi.js     # Kalshi snapshot logic tests
 node tests/test-team-brand.js  # ESPN team logo/color identity tests
