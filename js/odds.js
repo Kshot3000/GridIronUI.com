@@ -39,6 +39,18 @@ function fmtT(iso){
 function snapKey(){ return "giu_odds_prev_"+sport; }
 function getSnap(){ try{ return JSON.parse(localStorage.getItem(snapKey())||"{}"); }catch(e){ return {}; } }
 function setSnap(s){ try{ localStorage.setItem(snapKey(), JSON.stringify(s)); }catch(e){} }
+/* First-seen ("open") consensus per event, tracked in this browser only.
+   Your personal opener: what the line was the first time YOU loaded it. */
+function openKey(){ return "giu_odds_open_"+sport; }
+function getOpens(){ try{ return JSON.parse(localStorage.getItem(openKey())||"{}"); }catch(e){ return {}; } }
+function setOpens(o){
+  var ks = Object.keys(o);
+  if(ks.length > 200){
+    ks.sort(function(a,b){ return (o[a].t||0)-(o[b].t||0); });
+    for(var i=0;i<ks.length-200;i++) delete o[ks[i]];
+  }
+  try{ localStorage.setItem(openKey(), JSON.stringify(o)); }catch(e){}
+}
 
 function render(){
   var setup = $("oddsSetup"), board = $("oddsBoard");
@@ -56,12 +68,13 @@ function render(){
     return r.json();
   }).then(function(events){
     $("quota").textContent = "API quota remaining: "+remaining+" requests this month";
-    var prev = getSnap(), now = {};
+    var prev = getSnap(), now = {}, opens = getOpens();
     var html = events.length
-      ? events.map(function(ev){ return renderGame(ev, prev, now); }).join("")
+      ? events.map(function(ev){ return renderGame(ev, prev, now, opens); }).join("")
       : '<div class="empty">No upcoming games with odds for this league right now.</div>';
     board.innerHTML = html;
     setSnap(now);
+    setOpens(opens);
     /* keep slip prices honest against the fresh board */
     if(slip.length){ Slip.reprice(slip, now); saveSlip(); }
     refreshPickMarks();
@@ -75,7 +88,7 @@ function render(){
   });
 }
 
-function renderGame(ev, prev, now){
+function renderGame(ev, prev, now, opens){
   var books = ev.bookmakers||[];
   var h = ev.home_team, a = ev.away_team;
   var spreadBest = OL.bestSpread(books, ev),
@@ -83,6 +96,14 @@ function renderGame(ev, prev, now){
       mlBest     = OL.bestML(books, ev);
   var cons = OL.consensus(books, ev);
   var top = OL.topBook(books, [spreadBest, totalBest, mlBest]);
+  /* personal opener: first consensus seen in this browser for this game */
+  var op = (opens||{})[ev.id];
+  if(!op){
+    op = { t: Date.now(),
+           sp: cons.spread.a ? cons.spread.a.pt : null,
+           tot: cons.total.o ? cons.total.o.pt : null };
+    if(opens) opens[ev.id] = op;
+  }
 
   function cell(mkey, bkKey, bkTitle, name, side, label, idKey, price, point){
     var id = ev.id+"|"+bkKey+"|"+mkey+"|"+name;  /* book key included: movement is per-book */
@@ -142,7 +163,21 @@ function renderGame(ev, prev, now){
     if(cons.ml.a && cons.ml.h)
       parts.push("ML "+OL.shortName(a)+" "+OL.dec2am(cons.ml.a.pr)+" · "+OL.shortName(h)+" "+OL.dec2am(cons.ml.h.pr));
     if(!parts.length) return "";
-    return '<div class="game-meta cons-line"><span title="The median line across every book listed for this game — the reference point for spotting stale or shaded numbers.">📊 Market consensus ('+cons.n+' book'+(cons.n>1?"s":"")+'): '+GIU.esc(parts.join(" · "))+'</span></div>';
+    return '<div class="game-meta cons-line"><span title="The median line across every book listed for this game — the reference point for spotting stale or shaded numbers.">📊 Market consensus ('+cons.n+' book'+(cons.n>1?"s":"")+'): '+GIU.esc(parts.join(" · "))+'</span>'+openHtml()+'</div>';
+  }
+  /* Movement since your personal opener (first time this browser saw the game). */
+  function openHtml(){
+    var bits = [];
+    if(op.sp!=null && cons.spread.a && cons.spread.a.pt !== op.sp){
+      var d = cons.spread.a.pt - op.sp;
+      bits.push("spread opened "+OL.fmtPt(op.sp)+' <span class="'+(d>0?"mv-up":"mv-dn")+'">'+(d>0?"▲":"▼")+" "+OL.fmtPt(d)+"</span>");
+    }
+    if(op.tot!=null && cons.total.o && cons.total.o.pt !== op.tot){
+      var d2 = Math.round((cons.total.o.pt - op.tot)*10)/10;
+      bits.push("total opened "+op.tot+' <span class="'+(d2>0?"mv-up":"mv-dn")+'">'+(d2>0?"▲":"▼")+" "+(d2>0?"+":"")+d2+"</span>");
+    }
+    if(!bits.length) return "";
+    return ' <span class="open-line" title="Your personal opener — the consensus the first time this browser loaded this game. Cleared if you clear site data.">('+bits.join(" · ")+")</span>";
   }
 
   return '<div class="card" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+

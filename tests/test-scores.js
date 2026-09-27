@@ -85,6 +85,7 @@ for(var i=0;i<7;i++){
   getEl("leagueTabs")._children.push(b);
 }
 
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/team-brand.js"), "utf8"), sandbox, {filename: "js/team-brand.js"});
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/scores.js"), "utf8"), sandbox, {filename: "js/scores.js"});
 
 setTimeout(function(){

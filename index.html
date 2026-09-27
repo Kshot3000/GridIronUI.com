@@ -12,14 +12,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1.7.7">
+<link rel="stylesheet" href="css/style.css?v=1.15.0">
 </head>
 <body data-feedcheck>
 <script>window.GIU_BASE=".";</script>
 <div id="site-header"></div>
 
 <section class="hero">
-  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=1920&q=70&auto=format&fit=crop')"></div>
+  <canvas id="heroPulse" class="hero-pulse" aria-hidden="true"></canvas>
   <div class="wrap hero-inner">
     <span class="kicker">Sports betting, decoded</span>
     <h1>The one-stop shop for <span class="accent">sports betting</span> knowledge.</h1>
@@ -122,6 +122,8 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js"></script>
+<script src="js/team-brand.js?v=1.15.0"></script>
+<script src="js/hero-pulse.js?v=1.15.0"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -135,8 +137,7 @@
       var away = c.competitors.filter(function(t){return t.homeAway==="away";})[0];
       var badge = st.state==="in" ? '<span class="live-badge"><i></i>Live</span>' : '<span class="tag">'+GIU.esc(st.shortDetail||"Scheduled")+'</span>';
       return '<div class="game-card">'+badge+
-        '<div class="teams"><div class="team"><span class="abbr">'+away.team.abbreviation+'</span><span class="nm">'+GIU.esc(away.team.displayName)+'</span></div><span class="sc num">'+away.score+'</span></div>'+
-        '<div class="teams"><div class="team"><span class="abbr">'+home.team.abbreviation+'</span><span class="nm">'+GIU.esc(home.team.displayName)+'</span></div><span class="sc num">'+home.score+'</span></div>'+
+        GIU.teamRow(away,false)+GIU.teamRow(home,false)+
         '<div class="game-meta"><span>'+GIU.esc(c.venue.fullName||"")+'</span></div></div>';
     }).join("");
   }).catch(function(){ $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond."); });

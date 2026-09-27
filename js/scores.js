@@ -69,15 +69,10 @@ function load(){
       var bc = ((c.broadcasts||[])[0]||{}).names;
       var odds = (c.odds&&c.odds[0]) ? '<span>Line: '+GIU.esc(c.odds[0].details||"")+(c.odds[0].overUnder? " · O/U "+c.odds[0].overUnder : "")+'</span>' : "";
       var leaders = leaderHtml(c);
-      function teamRow(t, winner){
-        return '<div class="teams"><div class="team"><span class="abbr">'+GIU.esc(teamName(t.team||{}))+'</span>'+
-          '<span class="nm">'+GIU.esc((t.team||{}).displayName||"")+'</span></div>'+
-          '<span class="sc num" style="'+(winner?"color:var(--gold)":"")+'">'+GIU.esc(t.score==null?"–":t.score)+'</span></div>';
-      }
       var hw = st.state==="post" && Number(home.score)>Number(away.score);
       var aw = st.state==="post" && Number(away.score)>Number(home.score);
       return '<div class="game-card">'+badge+
-        teamRow(away, aw)+ teamRow(home, hw)+
+        GIU.teamRow(away, aw)+ GIU.teamRow(home, hw)+
         '<div class="game-meta"><span>'+GIU.esc((c.venue||{}).fullName||"")+'</span>'+
         (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+'</div>';
     }).join("");

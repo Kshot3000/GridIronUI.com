@@ -127,6 +127,7 @@ function mount(){
   });
   startTicker();
   startHeadlines();
+  initReveal();
   if(document.body.hasAttribute("data-feedcheck")) checkFeeds();
   /* Collapse the ticker + headline strips once scrolled: the sticky header
      shrinks to the nav row so it never swallows buttons or headings below it. */
@@ -234,6 +235,37 @@ function startHeadlines(){
       if(!hlTimer) hlTimer = setInterval(function(){ i = (i+1)%items.length; show(); }, 7000);
     });
   });
+}
+
+/* ---------- reveal-on-scroll ---------- */
+/* Cards fade/slide in as they enter the viewport — applied automatically to
+   .card and .game-card, including content rendered later by page scripts.
+   Disabled under prefers-reduced-motion. */
+function initReveal(){
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce || !("IntersectionObserver" in window)) return;
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, {threshold:0.06, rootMargin:"0px 0px -24px 0px"});
+  function sweep(root){
+    var els = (root===document ? document : root).querySelectorAll ?
+      root.querySelectorAll(".card:not(.rv):not(.in),.game-card:not(.rv):not(.in)") : [];
+    for(var i=0;i<els.length;i++){ els[i].classList.add("rv"); io.observe(els[i]); }
+  }
+  sweep(document);
+  if("MutationObserver" in window){
+    var mo = new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        for(var i=0;i<m.addedNodes.length;i++){
+          var n = m.addedNodes[i];
+          if(n.nodeType===1) sweep(n);
+        }
+      });
+    });
+    if(document.body) mo.observe(document.body, {childList:true, subtree:true});
+  }
 }
 
 /* ---------- feed health indicator ---------- */
