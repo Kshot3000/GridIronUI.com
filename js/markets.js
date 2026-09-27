@@ -42,6 +42,18 @@ function shortQ(q){
   return String(q||"").replace(/^Will /,"").replace(/ on \d{4}-\d{2}-\d{2}\??$/,"")
     .replace(/ end in a draw\??$/," draw").replace(/\?$/,"");
 }
+/* Live order-book line: bid/ask spread straight from Polymarket's book.
+   A 1-2¢ spread means a deep, tight market (the quoted price is real);
+   a wide spread means thin liquidity — the price may slip on real size. */
+function bookLine(m){
+  var b = Number(m.bestBid), a = Number(m.bestAsk);
+  if(!(b>0) || !(a>=b)) return ""; /* no book posted — show nothing rather than junk */
+  var bc = Math.round(b*100), ac = Math.round(a*100), sp = Math.max(0, ac-bc);
+  var cls = sp<=2 ? "green" : sp<=5 ? "blue" : "red";
+  var lbl = sp<=2 ? "tight book" : sp<=5 ? "decent liquidity" : "thin — price may move";
+  return ' · book <b class="num" style="color:var(--text)">'+bc+'¢/'+ac+'¢</b> '+
+    '<span class="tag '+cls+'" title="Live bid/ask spread from Polymarket\'s order book — the gap between the best buy and sell price right now.">'+sp+'¢ spread · '+lbl+'</span>';
+}
 function marketRow(m){
   var outs = parseArr(m.outcomes), prices = parseArr(m.outcomePrices);
   if(outs.length!==2 || prices.length!==2) return "";
@@ -51,7 +63,7 @@ function marketRow(m){
       return '<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:4px"><span>'+GIU.esc(o[1])+'</span><b class="num" style="color:var(--gold-soft)">'+o[2]+'¢</b></div>'+
       '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:6px"><div style="height:100%;width:'+o[2]+'%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>';
     }).join("")+
-    '<div style="font-size:.76rem;color:var(--faint)">Volume '+money(m.volume)+'</div></div>';
+    '<div style="font-size:.76rem;color:var(--faint)">Volume '+money(m.volume)+bookLine(m)+'</div></div>';
 }
 
 function load(){
