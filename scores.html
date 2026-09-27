@@ -9,7 +9,7 @@
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1.19.0">
+<link rel="stylesheet" href="css/style.css?v=1.20.0">
 </head>
 <body data-feedcheck>
 <script>window.GIU_BASE=".";</script>
@@ -33,17 +33,19 @@
       <button class="btn btn-ghost btn-sm" id="todayBtn">Today</button>
       <button class="btn btn-ghost btn-sm" id="nextDay">→</button>
       <span id="dayLabel" style="font-size:.85rem;color:var(--muted);min-width:180px"></span>
+      <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
+      <button class="btn btn-ghost btn-sm" id="pauseBtn" style="display:none" aria-pressed="false">⏸ Pause live</button>
     </div>
   </div>
   <div class="grid grid-3" id="scoreGrid"></div>
   <div class="notice" style="margin:30px 0">
-    <strong>About "live".</strong> Scores refresh when you change day or league; use your browser refresh for the latest in-game state. Lines shown are ESPN's consensus data, not a sportsbook's live price — check the <a href="odds.html">odds board</a> before betting.
+    <strong>About "live".</strong> When games are in progress, the board refreshes itself every 60 seconds while this tab is open — no browser refresh needed. Lines shown are ESPN's consensus data, not a sportsbook's live price — check the <a href="odds.html">odds board</a> before betting.
   </div>
 </div>
 
 <div id="site-footer"></div>
 <script src="js/site.js"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
-<script src="js/scores.js"></script>
+<script src="js/scores.js?v=1.20.0"></script>
 </body>
 </html>

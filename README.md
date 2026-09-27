@@ -41,6 +41,8 @@ node tests/test-kalshi.js     # Kalshi snapshot logic tests
 node tests/test-team-brand.js  # ESPN team logo/color identity tests
 node tests/test-teams.js     # team-directory lookup (abbr/name/normalized) + vs-header tests
 node tests/test-weather.js    # weather matchup header + impact tests
+node tests/test-scores.js     # ESPN scoreboard stat-leader line tests
+node tests/test-scores-live.js  # scores page live auto-refresh (60s tick, hidden-tab skip, pause/resume, no stacking)
 ```
 
 ### Team identity directory

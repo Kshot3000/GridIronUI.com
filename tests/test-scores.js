@@ -19,6 +19,7 @@ function makeEl(id){
     id: id, innerHTML: "", textContent: "", style: {}, value: "",
     _children: [],
     addEventListener: function(ev, fn){ (handlers[ev]=handlers[ev]||[]).push(fn); },
+    setAttribute: function(){},
     querySelectorAll: function(){ return this._children; },
     getAttribute: function(){ return null; },
     classList: { add: function(){}, remove: function(){}, toggle: function(){} },
@@ -67,6 +68,7 @@ var fetchStub = function(url){ return Promise.resolve(payload); };
 
 var sandbox = {
   console: console, setTimeout: setTimeout, clearTimeout: clearTimeout,
+  setInterval: function(){ return 0; }, clearInterval: function(){},
   document: { getElementById: getEl },
   window: {},
   GIU: {

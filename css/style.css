@@ -304,6 +304,10 @@ select option{background:#141a26}
   padding:4px 10px;border-radius:999px;text-transform:uppercase;
 }
 .live-badge i{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite}
+/* scores page auto-refresh status */
+.live-status{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;font-weight:600;color:var(--green);min-height:22px}
+.live-status.paused{color:var(--muted)}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.4s infinite}
 .game-card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:18px}
 .game-card .teams{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0}
 .team{display:flex;align-items:center;gap:10px}

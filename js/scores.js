@@ -47,9 +47,50 @@ function leaderHtml(c){
   return out.length ? '<div class="leaders">'+out.join("")+'</div>' : "";
 }
 
-function load(){
+/* ---- live auto-refresh machinery ----
+   Scores for in-progress games re-pull the ESPN scoreboard every 60s, in
+   place — no page reload, no spinner shimmer. The tick skips while the tab
+   is hidden and carries on by itself when the tab returns. */
+var LIVE_MS = 60000;
+var liveTimer = null, autoOn = true, liveN = 0, lastUpdated = null;
+
+function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+function clearLive(){ if(liveTimer){ clearInterval(liveTimer); liveTimer = null; } }
+function liveCount(evs){
+  var n = 0;
+  (evs||[]).forEach(function(ev){
+    var c = ev.competitions && ev.competitions[0];
+    if(c && c.status && c.status.type && c.status.type.state === "in") n++;
+  });
+  return n;
+}
+function fmtClock(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function renderLiveStatus(){
+  var s = $("liveStatus"), b = $("pauseBtn");
+  if(!s) return;
+  if(liveN > 0 && autoOn){
+    s.className = "live-status live";
+    s.innerHTML = '<span class="live-dot" aria-hidden="true"></span>'+
+      GIU.esc(liveN)+ ' live — auto-refresh every 60s'+
+      (lastUpdated ? ' · updated '+GIU.esc(fmtClock(lastUpdated)) : "");
+    if(b){ b.style.display = ""; b.innerHTML = "⏸ Pause live"; b.setAttribute("aria-pressed","false"); }
+  } else if(liveN > 0){
+    s.className = "live-status paused";
+    s.textContent = liveN + " live game" + (liveN > 1 ? "s" : "") + " · auto-refresh paused";
+    if(b){ b.style.display = ""; b.innerHTML = "▶ Resume live"; b.setAttribute("aria-pressed","true"); }
+  } else {
+    s.className = "live-status"; s.textContent = "";
+    if(b){ b.style.display = "none"; }
+  }
+}
+
+function load(silent){
+  clearLive(); /* league/day switches and silent refreshes always reschedule */
   var box = $("scoreGrid");
-  box.innerHTML = '<div class="card"><div class="skel" style="height:110px"></div></div>'.repeat(3);
+  if(!silent) box.innerHTML = '<div class="card"><div class="skel" style="height:110px"></div></div>'.repeat(3);
   $("dayLabel").textContent = dayLabel();
   var d = new Date(); d.setDate(d.getDate()+dayOffset);
   var url = "https://site.api.espn.com/apis/site/v2/sports/"+LEAGUES[cur][0]+"/scoreboard?dates="+ymd(d);
@@ -57,9 +98,8 @@ function load(){
     var evs = data.events||[];
     if(!evs.length){
       box.innerHTML = '<div class="empty">No games on '+GIU.esc(dayLabel())+'. Try another day or league.</div>';
-      return;
-    }
-    box.innerHTML = evs.map(function(ev){
+    } else {
+      box.innerHTML = evs.map(function(ev){
       var c = ev.competitions[0], st = c.status.type;
       var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0] || c.competitors[0];
       var away = c.competitors.filter(function(t){return t.homeAway==="away";})[0] || c.competitors[1] || {};
@@ -75,7 +115,18 @@ function load(){
         GIU.teamRow(away, aw)+ GIU.teamRow(home, hw)+
         '<div class="game-meta"><span>'+GIU.esc((c.venue||{}).fullName||"")+'</span>'+
         (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+'</div>';
-    }).join("");
+      }).join("");
+    }
+    /* ---- live auto-refresh ----
+       In-progress games keep the board fresh every 60s. Ticks skip while the
+       tab is hidden (nothing to see), and resume on their own when it comes
+       back — no visibility listeners needed. */
+    liveN = liveCount(evs);
+    lastUpdated = Date.now();
+    renderLiveStatus();
+    if(liveN > 0 && autoOn){
+      liveTimer = setInterval(function(){ if(!isHidden()) load(true); }, LIVE_MS);
+    }
   }).catch(function(){
     box.innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond for "+LEAGUES[cur][1]+".");
   });
@@ -93,5 +144,10 @@ Array.prototype.forEach.call($("leagueTabs").querySelectorAll(".tab"), function(
 $("prevDay").addEventListener("click", function(){ dayOffset--; load(); });
 $("nextDay").addEventListener("click", function(){ dayOffset++; load(); });
 $("todayBtn").addEventListener("click", function(){ dayOffset=0; load(); });
+$("pauseBtn").addEventListener("click", function(){
+  autoOn = !autoOn;
+  if(autoOn && liveN > 0){ load(true); }  /* resume: refresh now, timer reschedules */
+  else { clearLive(); renderLiveStatus(); }
+});
 load();
 })();
