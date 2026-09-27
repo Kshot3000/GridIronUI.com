@@ -835,8 +835,10 @@ function send(prefill, skipEcho){
       pendingAfterDownload = text;
       showNanoBanner();
       providerStatus("💻 needs the on-device model or a Gemini key");
-      var mdDl =
-        "**Grid needs an AI to talk to — pick either option, both are free:**\n\n";
+      var busyFree = attempts.some(function(a){ return a.id==="free-cloud" && CORE.isCreditsError((a.error||"")+" "+(a.code||"")); });
+      var mdDl = busyFree
+        ? "**The free shared AI is busy right now (rate limit) —** it clears on its own, so just try your message again in a bit. Or skip the wait, both options are free:\n\n"
+        : "**Grid needs an AI to talk to — pick either option, both are free:**\n\n";
       mdDl +=
         "**1. On-device AI (recommended):** hit **Download free model** above (~1.7 GB, one time). It then runs 100% on your device — private, no key, no bill.\n\n" +
         "**2. Free Gemini key:** paste one from [AI Studio](https://aistudio.google.com/apikey) above (free tier, no credit card — it stays in your browser, only ever sent to Google).\n\n" +
