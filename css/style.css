@@ -538,3 +538,33 @@ td.best .pick-btn.picked{box-shadow:inset 0 0 0 2px var(--gold)}
 @media (prefers-reduced-motion:reduce){
   .gd-toggle .gd-chev{transition:none}
 }
+
+/* ============================================================
+   v1.29.0 — display-ad slots (AdSense-ready) + referral cards.
+   .ad-slot marks a placement; it stays an empty div until AdSense
+   goes live (initAds in js/site.js removes unfilled slots entirely,
+   so the page is clean while ad-unit IDs are still pending).
+   .ref-row/.ref-card are the Polymarket/Kalshi partner CTAs — they
+   render only when referral links are configured. Gold leading edge
+   ignites on hover/focus, visible focus ring, reduced-motion snaps.
+   ============================================================ */
+.ad-slot{margin:26px auto;max-width:970px;padding:0 12px}
+.ad-slot.is-live::before{content:"Advertisement";display:block;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(154,166,187,.5);margin-bottom:6px}
+.ad-slot.is-live{border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding-top:10px;padding-bottom:12px;min-height:90px}
+.ad-slot .adsbygoogle{background:rgba(255,255,255,.015)}
+
+.ref-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:18px auto 6px;max-width:970px;padding:0 12px}
+.ref-card{position:relative;border-radius:12px;background:linear-gradient(180deg,rgba(19,25,38,.9),rgba(14,18,25,.9));border:1px solid rgba(154,166,187,.16);overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.ref-card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,rgba(240,180,41,.28),rgba(240,180,41,.06));transition:background .22s ease,box-shadow .22s ease}
+.ref-card:hover,.ref-card:focus-within{transform:translateY(-2px);border-color:rgba(240,180,41,.4);box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.ref-card:hover::before,.ref-card:focus-within::before{background:linear-gradient(180deg,var(--gold-soft),var(--gold));box-shadow:0 0 12px var(--gold-glow)}
+.ref-link{display:flex;align-items:center;gap:12px;padding:14px 16px;color:inherit;text-decoration:none}
+.ref-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:12px}
+.ref-badge{flex:none;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(154,166,187,.65);border:1px solid rgba(154,166,187,.28);border-radius:999px;padding:3px 8px}
+.ref-text{display:flex;flex-direction:column;gap:2px}
+.ref-text strong{font-size:15px;color:#fff}
+.ref-text small{font-size:12px;color:rgba(154,166,187,.8)}
+@media (prefers-reduced-motion:reduce){
+  .ref-card,.ref-card::before{transition:none}
+  .ref-card:hover,.ref-card:focus-within{transform:none}
+}

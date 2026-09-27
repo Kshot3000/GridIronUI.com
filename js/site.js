@@ -97,6 +97,113 @@ var footerHtml =
  '<div class="footer-bottom"><span>© 2026 GridIronUI · Educational content only. No real-money wagering on this site.</span><span>Photography via Unsplash · Data: ESPN, Polymarket, Open-Meteo</span></div>'+
  '</div>';
 
+/* ---------- v1.29.0 — display ads (AdSense-ready) + referral links ----------
+   Display ads: slots marked [data-ad-slot] are filled only when
+   GIU.CONFIG.ads.client holds a real publisher ID; otherwise they're removed
+   from the page entirely, so the site stays clean until ad revenue is on.
+   Ad-unit slot IDs stay "" until real units exist — a placement without an
+   ad-unit ID is removed too. Fill is lazy: the AdSense library is already in
+   the page <head>; a fallback injects it if it's ever missing, then each
+   slot gets an <ins> that AdSense sizes itself.
+   Referrals: slots marked [data-ref-slot] render a small sponsored CTA only
+   when GIU.CONFIG.referrals holds a link for that partner; otherwise the
+   slot is removed so the page stays clean until it's earning. Cards carry a
+   "Partner" badge, rel="sponsored noopener nofollow" and a 21+ affiliate
+   note, per the affiliate-disclosure page. */
+window.GIU = window.GIU || {};
+window.GIU.CONFIG = window.GIU.CONFIG || {};
+window.GIU.CONFIG.ads = {
+  client: "ca-pub-3316742664595468", /* live — Kyle's AdSense */
+  slots: {
+    homeLeaderboard: "", /* index.html — below the Market Pulse hero */
+    newsInline: "",      /* news.html — under the news wire */
+    oddsInline: ""       /* odds.html — under the odds board */
+  }
+};
+window.GIU.CONFIG.referrals = {
+  polymarket: "https://polymarket.us/squad/join/vLoDh9A8ch54gJmkbqrE?referrer=fancyjaguar1280", /* Kyle's Polymarket squad referral link */
+  kalshi: "https://kalshi.com/t/9g8izs5o" /* Kyle's Kalshi referral link */
+};
+
+window.GIU.initAds = function(){
+  if(!document.querySelectorAll) return; /* ancient DOM — slots can't exist */
+  var slots = Array.prototype.slice.call(document.querySelectorAll("[data-ad-slot]"));
+  if(!slots.length) return;
+  var cfg = (window.GIU.CONFIG && window.GIU.CONFIG.ads) || {};
+  var client = (cfg.client || "").trim();
+  if(!client){
+    slots.forEach(function(s){ s.remove(); });
+    return;
+  }
+  var libLoaded = false;
+  function ensureLib(){
+    if(libLoaded) return;
+    libLoaded = true;
+    /* The AdSense library is also in the page <head>; this is a fallback so
+       slots work even if the head tag is ever removed. */
+    if(document.querySelector('script[src*="pagead2.googlesyndication.com"]')) return;
+    var sc = document.createElement("script");
+    sc.async = true;
+    sc.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" + encodeURIComponent(client);
+    sc.crossOrigin = "anonymous";
+    document.head.appendChild(sc);
+  }
+  ensureLib();
+  slots.forEach(function(el){
+    var name = el.getAttribute("data-ad-slot");
+    var slotId = ((((cfg.slots || {})[name]) || "") + "").trim();
+    if(!slotId){ el.remove(); return; } /* placement without an ad-unit ID stays empty */
+    el.classList.add("is-live");
+    el.setAttribute("role", "complementary");
+    el.setAttribute("aria-label", "Advertisement");
+    var ins = document.createElement("ins");
+    ins.className = "adsbygoogle";
+    ins.style.display = "block";
+    ins.setAttribute("data-ad-client", client);
+    ins.setAttribute("data-ad-slot", slotId);
+    ins.setAttribute("data-ad-format", "auto");
+    ins.setAttribute("data-full-width-responsive", "true");
+    el.appendChild(ins);
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){ /* ad-blocked or offline — slot stays quiet */ }
+  });
+};
+
+window.GIU.initReferrals = function(){
+  if(!document.querySelectorAll) return; /* ancient DOM — slots can't exist */
+  var META = {
+    polymarket: { label: "Polymarket", blurb: "Live prediction markets", cta: "Trade on Polymarket" },
+    kalshi:     { label: "Kalshi",     blurb: "Regulated US prediction market", cta: "Trade on Kalshi" }
+  };
+  Array.prototype.slice.call(document.querySelectorAll("[data-ref-slot]")).forEach(function(el){
+    var key = el.getAttribute("data-ref-slot");
+    var meta = META[key];
+    var href = ((((window.GIU.CONFIG && window.GIU.CONFIG.referrals) || {})[key]) || "").trim();
+    if(!meta || !href){ el.remove(); return; }
+    el.classList.add("ref-card");
+    el.setAttribute("role", "complementary");
+    el.setAttribute("aria-label", "Sponsored link: " + meta.label);
+    var a = document.createElement("a");
+    a.className = "ref-link";
+    a.href = href;
+    a.target = "_blank";
+    a.rel = "sponsored noopener nofollow";
+    var badge = document.createElement("span");
+    badge.className = "ref-badge";
+    badge.textContent = "Partner";
+    var t = document.createElement("span");
+    t.className = "ref-text";
+    var cta = document.createElement("strong");
+    cta.textContent = meta.cta + " \u2197";
+    var sub = document.createElement("small");
+    sub.textContent = meta.blurb + " \u00b7 21+ \u00b7 affiliate link";
+    t.appendChild(cta);
+    t.appendChild(sub);
+    a.appendChild(badge);
+    a.appendChild(t);
+    el.appendChild(a);
+  });
+};
+
 function mount(){
   var h = document.getElementById("site-header");
   if(h){ h.outerHTML = '<header class="site-header">'+headerHtml+'</header>'; }
@@ -128,6 +235,8 @@ function mount(){
   startTicker();
   startHeadlines();
   initReveal();
+  window.GIU.initAds();
+  window.GIU.initReferrals();
   if(document.body.hasAttribute("data-feedcheck")) checkFeeds();
   /* Collapse the ticker + headline strips once scrolled: the sticky header
      shrinks to the nav row so it never swallows buttons or headings below it. */
@@ -312,4 +421,5 @@ window.GIU.esc = function(s){
 window.GIU.failBox = function(msg){
   return '<div class="notice"><strong>Couldn\'t load live data.</strong> '+window.GIU.esc(msg)+' Please check your connection and refresh. Nothing here is cached or estimated — when a feed is down, we say so.</div>';
 };
+
 })();
