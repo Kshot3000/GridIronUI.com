@@ -68,6 +68,42 @@ ok("ML home 3.05 vs consensus 2.95: not flagged (~1.1% implied)", L.offMarket(c,
 ok("single-book board never flags", (function(){ var s=L.consensus(books.slice(0,1),ev); return L.offMarket(s,"spreads","a",-6.5,1.91)===false && L.offMarket(s,"h2h","a",null,1.40)===false; })());
 ok("missing consensus slot: no flag", L.offMarket(ct,"spreads","a",-6.5,1.9)===false);
 ok("unknown market: no flag", L.offMarket(c,"props","a",-6.5,1.9)===false);
+/* ---- steam watch: biggest line movers ---- */
+var evA = {id:"aaa111", away_team:"Kansas City Chiefs", home_team:"Las Vegas Raiders",
+           bookmakers:books};
+var evB = {id:"bbb222", away_team:"Kansas City Chiefs", home_team:"Las Vegas Raiders",
+           bookmakers:books.slice(0,1)}; /* thin board, single book, no line move */
+var evNoOpen = {id:"ccc333", away_team:"Dallas Cowboys", home_team:"Philadelphia Eagles",
+           bookmakers:books};
+var opens = {
+  aaa111: {t: 1000, sp:-5.5, tot:46.5},   /* spread moved -5.5 -> -6.5 consensus; total 46.5 -> 47.5 */
+  bbb222: {t: 1000, sp:-6.5, tot:47.5}    /* single book DK: -6.5 / 47.5 -> zero deltas */
+  /* ccc333 has no opener -> excluded */
+};
+var entries = L.moverEntries([evA, evB, evNoOpen], opens);
+ok("entries: one spread + one total per game with opener", entries.length===4, entries.length);
+var spA = entries.filter(function(e){return e.kind==="spread" && e.id==="aaa111";})[0];
+ok("spread entry: delta -6.5 - (-5.5) = -1", spA && spA.delta===-1, JSON.stringify(spA));
+ok("spread openFmt uses + sign", spA && spA.openFmt==="-5.5", spA && spA.openFmt);
+ok("spread anchor sanitized", spA && spA.anchor==="game-aaa111", spA && spA.anchor);
+var totA = entries.filter(function(e){return e.kind==="total" && e.id==="aaa111";})[0];
+ok("total entry: delta 47.5 - 46.5 = 1", totA && totA.delta===1, JSON.stringify(totA));
+ok("no-opener game contributes nothing", entries.filter(function(e){return e.id==="ccc333";}).length===0);
+ok("zero-delta entries dropped by biggestMovers", L.biggestMovers(entries,10).filter(function(e){return e.id==="bbb222";}).length===0);
+var movers = L.biggestMovers(entries, 5);
+ok("movers sorted by |delta| desc", movers[0].id==="aaa111" && Math.abs(movers[0].delta)===1);
+ok("tie-break on title is stable", (function(){
+  var t = L.biggestMovers([{id:"x",anchor:"g-x",title:"Zeta",kind:"spread",openFmt:"-3",delta:1},
+                           {id:"y",anchor:"g-y",title:"Alpha",kind:"spread",openFmt:"-3",delta:-1}],2);
+  return t[0].title==="Alpha" && t[1].title==="Zeta";
+})());
+ok("n caps the list", L.biggestMovers(entries,1).length===1);
+ok("sub-0.05-point noise excluded", L.biggestMovers([{id:"x",anchor:"g-x",title:"T",kind:"spread",openFmt:"-3",delta:0.04}],5).length===0);
+ok("anchor strips unsafe chars", (function(){
+  var e = L.moverEntries([{id:"a b/c?d", away_team:"X", home_team:"Y", bookmakers:books}],
+                         {"a b/c?d":{t:1,sp:-3,tot:40}});
+  return e[0].anchor==="game-abcd";
+})());
 
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL ODDS-LOGIC TESTS PASSED");
 process.exit(fails ? 1 : 0);

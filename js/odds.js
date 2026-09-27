@@ -147,10 +147,11 @@ function render(opts){
     nearBySport[sport] = window.GIU.oddsNearWindow(events);
     lastUpdated = Date.now();
     var prev = getSnap(), now = {}, opens = getOpens();
-    var html = events.length
+    var cards = events.length
       ? events.map(function(ev){ return renderGame(ev, prev, now, opens, dir, league); }).join("")
       : '<div class="empty">No upcoming games with odds for this league right now.</div>';
-    board.innerHTML = html;
+    var movers = OL.biggestMovers(OL.moverEntries(events, opens), 5);
+    board.innerHTML = (movers.length ? renderMovers(movers) : "") + cards;
     boardHasGames = true;
     setSnap(now);
     setOpens(opens);
@@ -175,6 +176,34 @@ function render(opts){
     }
     setStatus();
   });
+}
+
+/* Steam watch: the biggest consensus line moves since this browser's
+   personal opener for each game — where the money is pushing. The strip
+   only renders when something actually moved (biggestMovers drops zero
+   deltas), so a fresh first load stays clean and honest. */
+function fmtDelta(d){
+  var r = Math.round(d*10)/10;
+  return (r>0?"+":"") + r;
+}
+function renderMovers(movers){
+  var rows = movers.map(function(m){
+    var dir = m.delta>0 ? "mv-up" : "mv-dn";
+    var arrow = m.delta>0 ? "▲" : "▼";
+    var kind = m.kind === "spread" ? "Spread" : "Total";
+    var aria = m.title + ": " + kind.toLowerCase() + " opened " + m.openFmt +
+               ", now moved " + fmtDelta(m.delta) + " points. Jump to the game.";
+    return '<a class="mover" href="#'+GIU.esc(m.anchor)+'" aria-label="'+GIU.esc(aria)+'">'+
+      '<span class="mover-title">'+GIU.esc(m.title)+'</span>'+
+      '<span class="mover-d">'+GIU.esc(kind)+' opened '+GIU.esc(m.openFmt)+
+      ' <span class="'+dir+'">'+arrow+' '+GIU.esc(fmtDelta(m.delta))+'</span></span></a>';
+  }).join("");
+  return '<section class="card movers-card" aria-label="Biggest line moves since your first look">'+
+    '<div class="section-head" style="margin-bottom:10px"><div>'+
+    '<h3 style="margin:0">🔥 Biggest line moves</h3>'+
+    '<div class="game-meta"><span>Since this browser first saw each game — where the money is pushing. '+
+    'Tap a row to jump to the game.</span></div></div></div>'+
+    '<div class="movers">'+rows+'</div></section>';
 }
 
 function renderGame(ev, prev, now, opens, dir, league){
@@ -275,7 +304,8 @@ function renderGame(ev, prev, now, opens, dir, league){
     return ' <span class="open-line" title="Your personal opener — the consensus the first time this browser loaded this game. Cleared if you clear site data.">('+bits.join(" · ")+")</span>";
   }
 
-  return '<div class="card" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
+  var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
+  return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
     consLineHtml()+bestCard+

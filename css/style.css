@@ -218,6 +218,18 @@ td.flash{animation:flash 1.2s ease-out}
 .open-line{color:var(--faint)!important;font-size:.8rem}
 .offmkt{color:var(--gold);font-weight:700;cursor:help}
 
+/* steam watch: biggest line movers strip on the odds board */
+.movers-card{margin-bottom:20px;border-color:rgba(240,180,41,.35)}
+.movers{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.mover{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid rgba(255,255,255,.09);
+  border-radius:10px;background:rgba(255,255,255,.02);color:inherit;text-decoration:none;
+  transition:border-color .18s,background .18s,transform .18s}
+.mover:hover{border-color:rgba(240,180,41,.6);background:rgba(240,180,41,.06)}
+.mover:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.mover-title{font-weight:700;font-size:.92rem}
+.mover-d{font-size:.84rem;color:var(--gold-soft)}
+@media(prefers-reduced-motion:reduce){.mover{transition:none}}
+
 /* ---------- reveal on scroll ---------- */
 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s cubic-bezier(.22,.8,.3,1)}
 .rv.in{opacity:1;transform:none}

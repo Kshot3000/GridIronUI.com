@@ -142,6 +142,46 @@ var L = {
     var top=null;
     Object.keys(count).forEach(function(bk){ if(!top || count[bk]>count[top]) top=bk; });
     return top ? {key:top, count:count[top]} : null;
+  },
+  /* ---- biggest line movers ("steam watch") ----
+     Builds one candidate per event per kind (spread / total) comparing the
+     visitor's personal opener (first consensus this browser ever saw, stored
+     in the giu_odds_open_* maps) against the current consensus. Entries
+     without an opener, or without both an open and a current number, are
+     skipped — a game only qualifies once it has real movement history.
+     Returns [{id, anchor, title, kind, openFmt, delta, dir}]; delta is in
+     points and can be negative. Pure — fully testable. */
+  moverEntries: function(events, opens){
+    var out = [];
+    (events||[]).forEach(function(ev){
+      var op = (opens||{})[ev && ev.id];
+      if(!op) return;
+      var cons = L.consensus(ev.bookmakers||[], ev);
+      var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
+      var title = ev.away_team + " @ " + ev.home_team;
+      if(op.sp!=null && cons.spread.a && cons.spread.a.pt!=null){
+        out.push({ id: ev.id, anchor: anchor, title: title, kind: "spread",
+                   openFmt: L.fmtPt(op.sp), delta: cons.spread.a.pt - op.sp });
+      }
+      if(op.tot!=null && cons.total.o && cons.total.o.pt!=null){
+        out.push({ id: ev.id, anchor: anchor, title: title, kind: "total",
+                   openFmt: String(op.tot), delta: cons.total.o.pt - op.tot });
+      }
+    });
+    return out;
+  },
+  /* Biggest movers first by |delta| (points); zero deltas and anything
+     below 0.05 points are noise and never shown. Stable tie-break on
+     title so the strip doesn't shuffle between refreshes. */
+  biggestMovers: function(entries, n){
+    n = (n === undefined) ? 5 : n;
+    return (entries||[])
+      .filter(function(e){ return Math.abs(e.delta) >= 0.05 - 1e-9; })
+      .sort(function(a,b){
+        var d = Math.abs(b.delta) - Math.abs(a.delta);
+        return d !== 0 ? d : (a.title < b.title ? -1 : (a.title > b.title ? 1 : 0));
+      })
+      .slice(0, Math.max(0, n));
   }
 };
 if(typeof module !== "undefined" && module.exports){ module.exports = L; }
