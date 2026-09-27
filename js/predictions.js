@@ -5,6 +5,55 @@
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
 var LEAGUES = [["NFL","nfl"],["NBA","nba"],["MLB","mlb"],["NHL","nhl"],["EPL","epl"]];
+var curKey = "nfl";
+/* Render generation: every tab click bumps tabSeq, and each async callback
+   only touches the DOM if its generation is still current. Without this, a
+   slow response for one league can overwrite another league's cards the user
+   asked for in the meantime. */
+var tabSeq = 0;
+
+/* ---- live auto-refresh machinery (same contract as markets.js v1.21.0) ----
+   Polymarket prices move with the games, so the cards keep themselves fresh
+   in place — no reload, no skeleton shimmer. The refresh tick only runs while
+   a shown game is likely in-progress (started within the last 4 hours —
+   Polymarket exposes startTime but no in-progress flag, and games rarely run
+   longer). Ticks skip while the tab is hidden and resume on their own when it
+   returns. Timers never stack: every load clears the old timer first. */
+var PM_MS = 90000, LIVE_WINDOW_MS = 4*3600*1000;
+var liveTimer = null, autoOn = true, liveN = 0, lastUpdated = null;
+
+function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+function clearLive(){ if(liveTimer){ clearInterval(liveTimer); liveTimer = null; } }
+function likelyLive(rows){
+  var now = Date.now(), n = 0;
+  (rows||[]).forEach(function(r){
+    var t = startOf(r.ev || {});
+    if(t < now && now - t < LIVE_WINDOW_MS) n++;
+  });
+  return n;
+}
+function fmtClock(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function renderLiveStatus(){
+  var s = $("liveStatus"), b = $("pauseBtn");
+  if(!s) return;
+  if(liveN > 0 && autoOn){
+    s.className = "live-status live";
+    s.innerHTML = '<span class="live-dot" aria-hidden="true"></span>'+
+      GIU.esc(liveN + (liveN > 1 ? " live games" : " live game") + " — auto-refresh every 90s")+
+      (lastUpdated ? " · updated "+GIU.esc(fmtClock(lastUpdated)) : "");
+    if(b){ b.style.display = ""; b.innerHTML = "⏸ Pause live"; b.setAttribute("aria-pressed","false"); }
+  } else if(liveN > 0){
+    s.className = "live-status paused";
+    s.textContent = liveN + (liveN > 1 ? " games" : " game") + " · auto-refresh paused";
+    if(b){ b.style.display = ""; b.innerHTML = "▶ Resume live"; b.setAttribute("aria-pressed","true"); }
+  } else {
+    s.className = "live-status"; s.textContent = "";
+    if(b){ b.style.display = "none"; }
+  }
+}
 function parseArr(s){ try{ var v = typeof s==="string"?JSON.parse(s):s; return Array.isArray(v)?v:[]; }catch(e){ return []; } }
 
 function skel(){
@@ -44,14 +93,18 @@ function probRow(label, pct, chg){
   return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.9rem">'+GIU.esc(label)+'</span><b class="num" style="font-size:1.25rem;color:'+(hot?"var(--gold-soft)":"var(--muted)")+'">'+pct+'%'+chip+'</b></div>'+
   '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);margin-bottom:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(hot?"linear-gradient(90deg,var(--green),var(--gold))":"rgba(255,255,255,.18)")+'"></div></div>';
 }
-function load(key){
-  skel();
+function load(key, my, silent){
+  key = key || curKey; curKey = key;
+  my = (my===undefined) ? tabSeq : my;
+  clearLive(); /* tab switches and silent refreshes always reschedule */
+  if(!silent) skel();
   seriesFor(key).then(function(sid){
     return Promise.all([
       GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20"),
       GIU.teamDir()
     ]);
   }).then(function(x){
+    if(my !== tabSeq) return; /* user moved to another league meanwhile */
     var d = x[0], dir = x[1];
     var evs = Array.isArray(d) ? d : (d.events||[]);
     var rows = [];
@@ -71,6 +124,7 @@ function load(key){
     rows = rows.slice(0,10);
     if(!rows.length){
       $("predGrid").innerHTML = '<div class="empty">No upcoming game markets with clear win probabilities for this league right now — check back closer to game day.</div>';
+      liveN = 0; renderLiveStatus();
       return;
     }
     $("predGrid").innerHTML = rows.map(function(r){
@@ -102,16 +156,34 @@ function load(key){
         body+
         '<div class="game-meta"><span>Source: Polymarket live price</span>'+(slug?'<a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">View market →</a>':"")+'</div></div>';
     }).join("");
+    /* ---- live auto-refresh ----
+       Refresh in-place every 90s, but only while a shown game is likely
+       in-progress — otherwise the timer would burn requests on dead pages. */
+    liveN = likelyLive(rows);
+    lastUpdated = Date.now();
+    renderLiveStatus();
+    if(liveN > 0 && autoOn){
+      liveTimer = setInterval(function(){ if(!isHidden()) load(curKey, tabSeq, true); }, PM_MS);
+    }
   }).catch(function(){
+    if(my !== tabSeq) return; /* user moved to another league meanwhile */
     $("predGrid").innerHTML = GIU.failBox("Polymarket's API didn't respond, so there are no implied probabilities to show.");
+    liveN = 0; renderLiveStatus();
   });
 }
-load("nfl");
+$("pauseBtn").addEventListener("click", function(){
+  autoOn = !autoOn;
+  if(autoOn && liveN > 0){
+    /* resume: refresh now; the loader reschedules the timer */
+    load(curKey, tabSeq, true);
+  } else { clearLive(); renderLiveStatus(); }
+});
+load(curKey, ++tabSeq);
 Array.prototype.forEach.call($("predTabs").querySelectorAll(".tab"), function(t){
   t.addEventListener("click", function(){
     Array.prototype.forEach.call($("predTabs").querySelectorAll(".tab"), function(x){x.classList.remove("active");});
     t.classList.add("active");
-    load(t.getAttribute("data-k"));
+    load(t.getAttribute("data-k"), ++tabSeq);
   });
 });
 })();
