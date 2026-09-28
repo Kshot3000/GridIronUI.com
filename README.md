@@ -33,6 +33,7 @@ node tests/test-roundrobin.js   # round-robin combinations + payout/scenario mat
 node tests/test-roundrobin-dom.js  # round-robin wiring in shipped tools.js (leg rows, size boxes, results, empty/bad-input states)
 node tests/test-tickethedge.js   # ticket hedge planner math (equal lock, free-roll, custom outcomes, error paths)
 node tests/test-tickethedge-dom.js  # ticket hedge wiring in shipped tools.js (three plans, custom stake, empty/bad-input states)
+node tests/test-tools-labels.js   # tools label/layout: ticket-hedge label fits its column, form-row tracks shrink so labels wrap
 node tests/test-dutching.js   # dutching stake-split math (equal returns, arb vs locked-loss verdicts, error paths)
 node tests/test-dutching-dom.js  # dutching wiring in shipped tools.js (named selections, table values, verdicts, empty/bad-input states)
 node tests/test-teaser.js     # teaser key-number math (teased lines, crossings, Wong/dead legs, breakeven, error paths)

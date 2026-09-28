@@ -87,5 +87,25 @@ ok("menu closes on Escape", !nav.classList.contains("open"));
 ok("aria-expanded=false after Escape", tog.attrs["aria-expanded"] === "false");
 ok("focus returns to toggle on Escape", focused === "navToggle");
 
+// skip link + aria-current (v1.58.0): keyboard/screen-reader navigation polish
+var injected = els["site-header"].outerHTML || "";
+ok("skip link injected before header", injected.indexOf('class="skip-link"') !== -1);
+ok("skip link targets #giu-main", injected.indexOf('href="#giu-main"') !== -1);
+ok("skip link reads 'Skip to main content'", injected.indexOf(">Skip to main content</a>") !== -1);
+ok("active nav link carries aria-current=page",
+  /<a href="[^"]*index\.html"[^>]*aria-current="page"/.test(injected));
+ok("exactly one nav link is aria-current", (injected.match(/aria-current="page"/g) || []).length === 1);
+ok("skip-target tagging code tags first content block",
+  headerSrc.indexOf('main.id = "giu-main"') !== -1 && headerSrc.indexOf('tabindex","-1"') !== -1);
+// skip-link styles exist and reveal on focus
+var cssSrc = fs.readFileSync(__dirname + "/../css/style.css", "utf8");
+ok("skip-link CSS hides off-screen until focused",
+  /\.skip-link\{[^}]*top:-70px/.test(cssSrc));
+ok("skip-link CSS reveals at top:0 on focus",
+  /\.skip-link:focus[^{]*\{[^}]*top:0/.test(cssSrc));
+ok("skip-link sits above the sticky header (z-index 400 > 60)",
+  /\.skip-link\{[^}]*z-index:400/.test(cssSrc));
+ok("skip-link honors reduced-motion", /prefers-reduced-motion[^}]*\.skip-link/.test(cssSrc));
+
 console.log(`nav-a11y: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -35,7 +35,8 @@ function isActive(href){
 }
 
 var navHtml = NAV.map(function(n){
-  return '<a href="'+P(n[1])+'" class="'+(isActive(n[1])?"active":"")+'">'+n[0]+'</a>';
+  var act = isActive(n[1]);
+  return '<a href="'+P(n[1])+'" class="'+(act?"active":"")+'"'+(act?' aria-current="page"':"")+'>'+n[0]+'</a>';
 }).join("");
 
 var headerHtml =
@@ -207,7 +208,17 @@ window.GIU.initReferrals = function(){
 
 function mount(){
   var h = document.getElementById("site-header");
-  if(h){ h.outerHTML = '<header class="site-header">'+headerHtml+'</header>'; }
+  if(h){
+    /* Skip link first in tab order: keyboard and screen-reader users jump past
+       the 15-link nav straight to the content. The target is tagged at runtime
+       (first content block after the header) so every page gets a working
+       anchor with no per-page markup edits. */
+    h.outerHTML = '<a class="skip-link" href="#giu-main">Skip to main content</a>'+
+      '<header class="site-header">'+headerHtml+'</header>';
+    var hdrEl = document.querySelector(".site-header"), main = hdrEl && hdrEl.nextElementSibling;
+    while(main && main.tagName === "SCRIPT") main = main.nextElementSibling;
+    if(main){ if(!main.id) main.id = "giu-main"; main.setAttribute("tabindex","-1"); }
+  }
   var f = document.getElementById("site-footer");
   if(f){ f.outerHTML = '<footer class="site-footer">'+footerHtml+'</footer>'; }
   var t = document.getElementById("navToggle"), nav = document.getElementById("mainNav");

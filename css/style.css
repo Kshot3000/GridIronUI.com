@@ -321,12 +321,22 @@ input[type=text],input[type=number],input[type=email],select,textarea{
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
 /* visible keyboard focus for links, buttons and cards (keyboard/screen-reader users) */
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+/* Skip link: off-screen until focused, then pinned top-left above the sticky header */
+.skip-link{position:absolute;left:12px;top:-70px;z-index:400;background:var(--gold);color:#241a03;
+  font-weight:700;font-size:.85rem;padding:10px 18px;border-radius:0 0 12px 12px;text-decoration:none;
+  transition:top .15s ease;white-space:nowrap}
+.skip-link:focus,.skip-link:focus-visible{top:0;color:#241a03;outline:2px solid #fff;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.skip-link{transition:none}}
 /* placeholders are examples only — keep them visibly "ghost" so they never read as real values */
 ::placeholder{color:#5b657d;font-style:italic;opacity:1}
 :-ms-input-placeholder{color:#5b657d;font-style:italic}
 ::-ms-input-placeholder{color:#5b657d;font-style:italic}
 select option{background:#141a26}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+/* form-row fields must be allowed to shrink below content width so long labels
+   wrap inside their column instead of bleeding into the neighbor (seen on the
+   ticket-hedge planner: "Ticket pays in full ($), stake included" clipped over
+   the Format select on desktop) */
 .result-box{
   background:rgba(23,201,100,.07);border:1px solid rgba(23,201,100,.3);border-radius:var(--radius-sm);
   padding:18px;margin-top:16px;
