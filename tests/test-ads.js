@@ -6,8 +6,10 @@
    - no placeholder/example ad IDs anywhere;
    - CSS carries the .ad-slot "Advertisement" label + .ref-card rules;
    - slot markup exists on the right pages with the right slot names;
-   - GIU.CONFIG holds Kyle's real publisher ID and exact referral URLs;
-   - ad slots are removed from the DOM while client/slot-IDs are empty;
+   - GIU.CONFIG holds Kyle's real publisher ID, the three real AdSense ad-unit
+     slot IDs, and exact referral URLs;
+   - ad slots render live <ins> tags while client + slot IDs are configured,
+     and are removed from the DOM when the client is empty;
    - a configured ad-unit slot renders a live <ins> with client + slot ID;
    - referral slots render Partner cards (sponsored rel, _blank, 21+ affiliate
      note) and are removed when their link is empty;
@@ -22,7 +24,7 @@ function assert(cond, msg){
 }
 
 /* ---------------- static file checks ---------------- */
-var ADS_LINE = "google.com, ca-pub-3316742664595468, DIRECT, f08c47fec0942fa0";
+var ADS_LINE = "google.com, pub-3316742664595468, DIRECT, f08c47fec0942fa0";
 var ads = fs.readFileSync(path.join(ROOT, "ads.txt"), "utf8");
 assert(ads.indexOf(ADS_LINE) !== -1, "ads.txt carries the exact AdSense authorized-sellers line");
 assert(ads.indexOf("GridIronUI") !== -1, "ads.txt header names GridIronUI");
@@ -146,29 +148,38 @@ var GIU = sandbox.window.GIU;
 assert(GIU && GIU.CONFIG, "GIU.CONFIG exists after boot");
 assert(GIU.CONFIG.ads.client === "ca-pub-3316742664595468",
        "CONFIG.ads.client is Kyle's AdSense publisher ID");
-assert(GIU.CONFIG.ads.slots.homeLeaderboard === "" &&
-       GIU.CONFIG.ads.slots.newsInline === "" &&
-       GIU.CONFIG.ads.slots.oddsInline === "",
-       "all three ad-unit slot IDs start empty (no accidental fill)");
+assert(GIU.CONFIG.ads.slots.homeLeaderboard === "4554911928" &&
+       GIU.CONFIG.ads.slots.newsInline === "9231775101" &&
+       GIU.CONFIG.ads.slots.oddsInline === "1437045569",
+       "all three ad-unit slot IDs are the real AdSense units (v1.41.0)");
 assert(GIU.CONFIG.referrals.polymarket ===
          "https://polymarket.us/squad/join/vLoDh9A8ch54gJmkbqrE?referrer=fancyjaguar1280",
        "Polymarket referral URL is Kyle's exact squad link");
 assert(GIU.CONFIG.referrals.kalshi === "https://kalshi.com/t/9g8izs5o",
        "Kalshi referral URL is Kyle's exact link");
 
-/* ad slots: removed while ad-unit IDs are empty (the shipped state) */
+/* ad slots: kept and rendered live while ad-unit IDs are configured (live state) */
 slotMode = "ads";
+var EXPECTED = { homeLeaderboard: "4554911928", newsInline: "9231775101", oddsInline: "1437045569" };
 adSlots = ["homeLeaderboard","newsInline","oddsInline"].map(function(n){
   return makeEl("div", { "data-ad-slot": n });
 });
 GIU.initAds();
-assert(adSlots.every(function(s){ return s.removed; }),
-       "ad slots removed while ad-unit IDs are empty — page stays clean");
+adSlots.forEach(function(el){
+  var name = el.getAttribute("data-ad-slot");
+  assert(!el.removed, name + " slot kept while its ad-unit ID is configured");
+  assert(el.classList.contains("is-live"), name + " slot gets the is-live class");
+  assert(el.children.length === 1 && el.children[0].tagName === "INS",
+         name + " slot gets exactly one <ins>");
+  assert(el.children[0].getAttribute("data-ad-slot") === EXPECTED[name],
+         name + " ins carries the real ad-unit ID " + EXPECTED[name]);
+  assert(el.children[0].getAttribute("data-ad-client") === "ca-pub-3316742664595468",
+         name + " ins carries the publisher ID");
+});
 
 /* ad slots: removed when the publisher client is empty */
 var savedClient = GIU.CONFIG.ads.client;
 GIU.CONFIG.ads.client = "";
-GIU.CONFIG.ads.slots.homeLeaderboard = "1234567890";
 adSlots = [makeEl("div", { "data-ad-slot": "homeLeaderboard" })];
 GIU.initAds();
 assert(adSlots[0].removed, "ad slot removed when publisher client is empty");
@@ -189,11 +200,10 @@ var ins = s.children[0];
 assert(ins.className === "adsbygoogle", "ins carries the adsbygoogle class");
 assert(ins.getAttribute("data-ad-client") === "ca-pub-3316742664595468",
        "ins carries the publisher ID");
-assert(ins.getAttribute("data-ad-slot") === "1234567890", "ins carries the ad-unit ID");
+assert(ins.getAttribute("data-ad-slot") === "4554911928", "ins carries the ad-unit ID");
 assert(ins.getAttribute("data-ad-format") === "auto" &&
        ins.getAttribute("data-full-width-responsive") === "true",
        "ins is responsive auto-format");
-GIU.CONFIG.ads.slots.homeLeaderboard = ""; /* restore shipped state */
 
 /* referrals: Partner cards render with compliant attrs */
 slotMode = "refs";

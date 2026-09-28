@@ -101,8 +101,8 @@ var footerHtml =
    Display ads: slots marked [data-ad-slot] are filled only when
    GIU.CONFIG.ads.client holds a real publisher ID; otherwise they're removed
    from the page entirely, so the site stays clean until ad revenue is on.
-   Ad-unit slot IDs stay "" until real units exist — a placement without an
-   ad-unit ID is removed too. Fill is lazy: the AdSense library is already in
+   Ad-unit slot IDs are filled from the AdSense account's real display units
+   (v1.41.0) — a placement without an ad-unit ID is removed too. Fill is lazy: the AdSense library is already in
    the page <head>; a fallback injects it if it's ever missing, then each
    slot gets an <ins> that AdSense sizes itself.
    Referrals: slots marked [data-ref-slot] render a small sponsored CTA only
@@ -115,9 +115,9 @@ window.GIU.CONFIG = window.GIU.CONFIG || {};
 window.GIU.CONFIG.ads = {
   client: "ca-pub-3316742664595468", /* live — Kyle's AdSense */
   slots: {
-    homeLeaderboard: "", /* index.html — below the Market Pulse hero */
-    newsInline: "",      /* news.html — under the news wire */
-    oddsInline: ""       /* odds.html — under the odds board */
+    homeLeaderboard: "4554911928", /* index.html — below the Market Pulse hero */
+    newsInline: "9231775101",      /* news.html — under the news wire */
+    oddsInline: "1437045569"       /* odds.html — under the odds board */
   }
 };
 window.GIU.CONFIG.referrals = {
