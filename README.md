@@ -68,6 +68,8 @@ node tests/test-scores.js     # ESPN scoreboard stat-leader line tests
 node tests/test-scores-live.js  # scores page live auto-refresh (60s tick, hidden-tab skip, pause/resume, no stacking)
 node tests/test-scores-detail.js  # game-detail logic (ESPN summary -> scoring timeline, period table, team-stats comparison)
 node tests/test-scores-detail-dom.js  # game-detail expander wiring (toggle, cache, failure retry, stale-response guard)
+node tests/test-winprob.js  # win-probability series, biggest swing, Matchup Predictor, chart/predictor markup
+node tests/test-winprob-dom.js  # win-prob canvas paint + scores.js paint wiring (fetch, cache reopen, pregame toggle)
 node tests/test-markets-live.js  # markets page live auto-refresh (90s Polymarket tick on likely-live games, 5-min Kalshi snapshot tick, hidden-tab skip, pause/resume, no stacking)
 node tests/test-predictions-live.js  # predictions page live auto-refresh (90s tick on likely-live games, render-generation guard, hidden-tab skip, pause/resume, no stacking)
 node tests/test-kalshi-predrow.js  # Kalshi "two crowds" row on the predictions page (prices, gap chip, stale withhold, missing-data, XSS)

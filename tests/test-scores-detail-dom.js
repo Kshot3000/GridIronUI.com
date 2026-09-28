@@ -1,10 +1,11 @@
-/* DOM-wiring tests for the scores page game-detail expander (v1.28.0).
+/* DOM-wiring tests for the scores page game-detail expander (v1.28.0,
+   pregame toggle added v1.57.0).
    Loads the REAL js/scores.js in a vm sandbox with a stubbed DOM and a
-   canned fetch, then drives: Details button appears on in/post games only,
-   clicking opens the region and fills it with real ESPN-summary-shaped
-   detail HTML, clicking again collapses, a failed fetch collapses quietly
-   and stays retryable, and the league-generation guard drops a stale
-   summary response. */
+   canned fetch, then drives: Details button appears on pre/in/post games
+   (pregame for the Matchup Predictor), clicking opens the region and fills
+   it with real ESPN-summary-shaped detail HTML, clicking again collapses,
+   a failed fetch collapses quietly and stays retryable, and the
+   league-generation guard drops a stale summary response. */
 "use strict";
 var fs = require("fs"), vm = require("vm"), path = require("path");
 var ROOT = path.join(__dirname, "..");
@@ -137,8 +138,8 @@ function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
     t.setAttribute("data-ev", m[1]); t.setAttribute("aria-expanded", m[2]); t.setAttribute("aria-controls", m[3]);
     gridEl._toggles.push(t);
   }
-  assert(found["ev-in"] && found["ev-post"], "Details toggle rendered for in-progress and final games");
-  assert(!found["ev-pre"], "no Details toggle on pre-game cards");
+  assert(found["ev-in"] && found["ev-post"] && found["ev-pre"],
+    "Details toggle rendered for in-progress, final, and pregame cards (pregame carries the Matchup Predictor)");
   assert(found["ev-in"].controls === "gd-ev-in", "toggle aria-controls points at the detail region");
   assert(found["ev-in"].expanded === "false", "toggle starts collapsed with aria-expanded=false");
   assert(/id="gd-ev-in"[^>]*role="region"[^>]*hidden/.test(html), "detail region starts hidden");

@@ -53,17 +53,30 @@ function leaderHtml(c){
    is hidden and carries on by itself when the tab returns. */
 /* ---- game detail (box-score detail per game) ----
    In-progress and final games get a "Details" expander that fetches ESPN's
-   game-summary endpoint once per event and renders a scoring-plays timeline,
-   period-by-period scoring, and a team-stats comparison. Fetches are guarded
-   by a per-event generation so a slow summary can't fill another event's
-   region; open details survive the 60s silent board refresh, and open
-   in-progress details are silently re-pulled on each tick. */
+   game-summary endpoint once per event and renders a win-probability chart
+   (with the biggest swing annotated), a scoring-plays timeline,
+   period-by-period scoring, and a team-stats comparison. Pregame games get
+   the same expander for ESPN's Matchup Predictor projection. Fetches are
+   guarded by a per-event generation so a slow summary can't fill another
+   event's region; open details survive the 60s silent board refresh, and
+   open in-progress details are silently re-pulled on each tick. */
 var detailOpen = {}, detailCache = {}, detailState = {}, detailLeague = {};
 var detailSeq = 0, detailGen = {};
 
 function setToggle(btn, open){
   btn.setAttribute("aria-expanded", open ? "true" : "false");
   btn.innerHTML = (open ? "Hide details" : "Details")+'<span class="gd-chev" aria-hidden="true"></span>';
+}
+/* Win-probability canvases are recreated on every innerHTML insert, so the
+   paint must run after each one (fetch, cache hit, and board re-render).
+   Defensive: a no-op where querySelectorAll or ScoresDetail is missing. */
+function paintDetailCanvases(scope){
+  var root = scope || (typeof document !== "undefined" ? document : null);
+  if(!root || !root.querySelectorAll || !window.ScoresDetail ||
+     !window.ScoresDetail.paintWinProb) return;
+  Array.prototype.forEach.call(root.querySelectorAll(".gd-wp"), function(cv){
+    try{ window.ScoresDetail.paintWinProb(cv); }catch(e){}
+  });
 }
 function fetchDetail(id, silent){
   var seq = ++detailSeq; detailGen[id] = seq;
@@ -75,7 +88,7 @@ function fetchDetail(id, silent){
     if(!html) html = '<div class="empty">No box-score detail available for this game yet.</div>';
     detailCache[id] = html;
     var r2 = document.getElementById("gd-"+id);
-    if(r2 && detailOpen[id]) r2.innerHTML = html;
+    if(r2 && detailOpen[id]){ r2.innerHTML = html; paintDetailCanvases(r2); }
   }).catch(function(){
     if(detailGen[id] !== seq) return;
     /* Keep the failure quiet and recoverable: collapse, and let the user
@@ -101,7 +114,7 @@ function toggleDetails(id){
   if(btn){ setToggle(btn, true); btn.removeAttribute("title"); }
   if(region){
     region.hidden = false;
-    if(detailCache[id]){ region.innerHTML = detailCache[id]; return; }
+    if(detailCache[id]){ region.innerHTML = detailCache[id]; paintDetailCanvases(region); return; }
   }
   fetchDetail(id, false);
 }
@@ -168,12 +181,13 @@ function load(silent){
       var aw = st.state==="post" && Number(away.score)>Number(home.score);
       detailState[ev.id] = st.state;
       var det = "";
-      if(st.state==="in" || st.state==="post"){
+      if(st.state==="in" || st.state==="post" || st.state==="pre"){
         var open = !!detailOpen[ev.id];
+        var detAria = st.state === "pre" ? "Game detail" : "Box-score detail";
         det = '<div><button type="button" class="gd-toggle" data-ev="'+GIU.esc(ev.id)+'"'+
           ' aria-expanded="'+(open?"true":"false")+'" aria-controls="gd-'+GIU.esc(ev.id)+'">'+
           (open?"Hide details":"Details")+'<span class="gd-chev" aria-hidden="true"></span></button></div>'+
-          '<div class="gd-detail" id="gd-'+GIU.esc(ev.id)+'" role="region" aria-label="Box-score detail"'+
+          '<div class="gd-detail" id="gd-'+GIU.esc(ev.id)+'" role="region" aria-label="'+detAria+'"'+
           (open?"":" hidden")+'>'+(open && detailCache[ev.id] ? detailCache[ev.id] : "")+'</div>';
       }
       return '<div class="game-card">'+badge+
@@ -195,6 +209,9 @@ function load(silent){
     Object.keys(detailOpen).forEach(function(id){
       if(detailState[id] === "in") fetchDetail(id, true);
     });
+    /* Cached detail HTML re-inserted by the card template above carries
+       fresh (unpainted) canvases — paint them after every re-render. */
+    paintDetailCanvases(box);
     if(liveN > 0 && autoOn){
       liveTimer = setInterval(function(){ if(!isHidden()) load(true); }, LIVE_MS);
     }
