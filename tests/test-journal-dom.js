@@ -154,7 +154,7 @@ ok("event escaped", $("jBetsBody").innerHTML.includes("&lt;script&gt;") && !$("j
 /* 8 — CSV export */
 blobParts.length = 0;
 $("jExport").fire("click");
-ok("csv blob built", blobParts.length === 1 && blobParts[0].startsWith("date,sport,event,market,pick,price,stake,result,profit_usd"));
+ok("csv blob built", blobParts.length === 1 && blobParts[0].startsWith("date,sport,event,market,pick,price,close,stake,result,profit_usd"));
 ok("csv has 3 rows", blobParts[0].split("\n").length === 4);
 ok("csv escapes event", blobParts[0].includes('"<script>alert(1)</script>"') === false && blobParts[0].includes("&lt;script&gt;") === false);
 ok("csv quotes the angle-bracket event", blobParts[0].includes("<script>alert(1)</script>"));

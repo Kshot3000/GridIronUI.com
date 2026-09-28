@@ -5,6 +5,16 @@
 
 function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a||1; }
 function round(x, n){ var f=Math.pow(10,n); return Math.round(x*f)/f; }
+/* A validated whole American number, or null. American odds live outside
+   (-100, +100): even money is +100, and -100 is not a real price. */
+function amNum(v){
+  var s = String(v == null ? "" : v).trim();
+  if(!/^[+-]?\d+$/.test(s)) return null;
+  var n = Number(s);
+  if(Math.abs(n) < 100 || n === -100) return null;
+  return n;
+}
+function fmtAm(v){ var n = Number(v); return (n > 0 ? "+" : "") + n; }
 
 var M = {
   /* ---- conversions ---- */
@@ -444,7 +454,45 @@ var M = {
     if(Math.abs(price) < 100 || price === -100) return "American prices can't sit between -100 and +100 (even money is +100).";
     var stake = Number(b.stake);
     if(!(stake > 0) || !isFinite(stake)) return "Stake must be more than $0.";
+    var cErr = M.closeValid(b.close);
+    if(cErr) return cErr;
     return null;
+  },
+  /* Closing price is optional (unknown until kickoff) but when given it must
+     be a real American price. Shared by journalValid and the journal's
+     inline close-price editor. */
+  closeValid: function(raw){
+    var s = String(raw == null ? "" : raw).trim();
+    if(s === "") return null;
+    if(!/^[+-]?\d+$/.test(s)) return "Closing price must be a whole American number too (e.g. -105) — or leave it blank.";
+    var n = Number(s);
+    if(Math.abs(n) < 100 || n === -100) return "American prices can't sit between -100 and +100 (even money is +100).";
+    return null;
+  },
+  /* ---- closing line value (CLV) ----
+     Did the bettor's price beat the closing price? A back bet is always
+     worth more at a higher decimal payout, whatever the side, so compare
+     decimals: 1 = beat the close, -1 = worse, 0 = same, null = either side
+     missing or invalid. */
+  clv: function(got, close){
+    var g = amNum(got), c = amNum(close);
+    if(g === null || c === null) return null;
+    var d = M.americanToDecimal(g) - M.americanToDecimal(c);
+    if(Math.abs(d) < 1e-9) return 0;
+    return d > 0 ? 1 : -1;
+  },
+  /* Count how many journaled bets beat / missed / matched the close,
+     among the bets that carry a closing price. */
+  journalClvStats: function(bets){
+    var s = {beat:0, worse:0, same:0, total:0};
+    (bets || []).forEach(function(b){
+      if(!b) return;
+      var v = M.clv(b.price, b.close);
+      if(v === null) return;
+      s.total++;
+      if(v > 0) s.beat++; else if(v < 0) s.worse++; else s.same++;
+    });
+    return s;
   },
   journalProfit: function(b){
     /* Dollars won/lost on a settled bet; 0 for pending or push.
@@ -487,9 +535,11 @@ var M = {
       v = (v === undefined || v === null) ? "" : String(v);
       return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
     };
-    var rows = [["date","sport","event","market","pick","price","stake","result","profit_usd"]];
+    var rows = [["date","sport","event","market","pick","price","close","stake","result","profit_usd"]];
     (bets || []).forEach(function(b){
-      rows.push([b.date, b.sport, b.event, b.market, b.pick, b.price, b.stake, b.result, M.journalProfit(b)]);
+      rows.push([b.date, b.sport, b.event, b.market, b.pick, b.price,
+        (b.close == null || String(b.close).trim() === "" ? "" : b.close),
+        b.stake, b.result, M.journalProfit(b)]);
     });
     return rows.map(function(r){ return r.map(cell).join(","); }).join("\n");
   },

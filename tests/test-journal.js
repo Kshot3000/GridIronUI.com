@@ -74,10 +74,42 @@ ok("profit written back on bets", s && log[0].profit === 100 && log[3].profit ==
 /* ---- journalCSV ---- */
 var csv = BM.journalCSV([bet({id:1, event:'Bears "da" Bears, @ Packers', result:"win", price:-110, stake:100})]);
 var lines = csv.split("\n");
-ok("csv header", lines[0] === "date,sport,event,market,pick,price,stake,result,profit_usd");
+ok("csv header has close column", lines[0] === "date,sport,event,market,pick,price,close,stake,result,profit_usd");
 ok("csv quotes commas+quotes", lines[1].indexOf('"Bears ""da"" Bears, @ Packers"') !== -1);
 ok("csv profit column", /,win,90.91$/.test(lines[1]), lines[1]);
+ok("csv empty close is blank", lines[1].indexOf(",-110,,100,") !== -1, lines[1]);
+ok("csv records close", BM.journalCSV([bet({close:-105})]).split("\n")[1].indexOf(",-110,-105,100,") !== -1);
 ok("csv empty log is header only", BM.journalCSV([]).split("\n").length === 1);
+
+/* ---- closeValid ---- */
+ok("close blank ok", BM.closeValid("") === null && BM.closeValid(null) === null && BM.closeValid("   ") === null);
+ok("close good", BM.closeValid("-105") === null && BM.closeValid("+130") === null);
+ok("close text rejected", /whole American/.test(BM.closeValid("abc")));
+ok("close -100 rejected", /between -100 and/.test(BM.closeValid("-100")));
+ok("journalValid accepts close", BM.journalValid(bet({close:-105})) === null);
+ok("journalValid rejects bad close", /Closing price/.test(BM.journalValid(bet({close:"nope"}))));
+
+/* ---- clv: did you beat the close? ---- */
+ok("fav: -110 vs close -120 beats it", BM.clv(-110, -120) === 1);
+ok("fav: -120 vs close -110 worse", BM.clv(-120, -110) === -1);
+ok("dog: +150 vs close +130 beats it", BM.clv(150, 130) === 1);
+ok("dog: +120 vs close +140 worse", BM.clv(120, 140) === -1);
+ok("same price is 0", BM.clv(-110, -110) === 0);
+ok("missing close -> null", BM.clv(-110, null) === null && BM.clv(-110, "") === null);
+ok("missing price -> null", BM.clv(null, -110) === null);
+ok("invalid price -> null", BM.clv("abc", -110) === null && BM.clv(-50, -110) === null);
+
+/* ---- journalClvStats ---- */
+var clvLog = [
+  bet({price:-110, close:-120}), /* beat */
+  bet({price:-120, close:-110}), /* worse */
+  bet({price:150, close:130}),   /* beat */
+  bet({price:-110, close:-110}), /* same */
+  bet({price:-110}),             /* no close: skipped */
+];
+var cs = BM.journalClvStats(clvLog);
+ok("clv counts", cs.beat === 2 && cs.worse === 1 && cs.same === 1 && cs.total === 4, JSON.stringify(cs));
+ok("clv empty", JSON.stringify(BM.journalClvStats([])) === JSON.stringify({beat:0,worse:0,same:0,total:0}));
 
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL JOURNAL LOGIC TESTS PASSED");
 process.exit(fails ? 1 : 0);

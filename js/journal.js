@@ -46,9 +46,31 @@ function resultChip(r){
 
 var bets = [];
 var settings = { unitSize: 100 };
+/* closeEditing: id of the bet whose closing price is being edited inline
+   (null = no row in edit mode). Editing survives validation failures so a
+   typo doesn't eat what was typed. */
+var closeEditing = null;
 
 function summarize(){
-  return BM.journalStats(bets, settings.unitSize);
+  var s = BM.journalStats(bets, settings.unitSize);
+  s.clv = BM.journalClvStats(bets);
+  return s;
+}
+
+/* American price with an explicit + sign, e.g. +150 / -110. */
+function fmtAm(v){ var n = Number(v); return (n > 0 ? "+" : "") + n; }
+
+/* One-line closing-line-value readout under the bet's price: "▲ close -105".
+   Silent when no closing price is recorded — no data beats invented data. */
+function clvLine(b){
+  var v = BM.clv(b.price, b.close);
+  if(v === null) return "";
+  var cls = v > 0 ? "jr-pos" : (v < 0 ? "jr-neg" : "");
+  var arrow = v > 0 ? "▲" : (v < 0 ? "▼" : "=");
+  var what = v > 0 ? "beat the close" : (v < 0 ? "worse than the close" : "same as the close");
+  return '<br><span class="' + cls + '" style="font-size:.72rem;white-space:nowrap" title="Your ' +
+    esc(fmtAm(b.price)) + " vs the closing " + esc(fmtAm(b.close)) + " — " + what + '.">' +
+    arrow + " close " + esc(fmtAm(b.close)) + "</span>";
 }
 
 function summaryHtml(s){
@@ -58,12 +80,23 @@ function summaryHtml(s){
   }
   var units = (s.units > 0 ? "+" : "") + s.units.toFixed(2) + "u";
   var profitCls = s.profit > 0 ? "jr-pos" : (s.profit < 0 ? "jr-neg" : "");
-  return stat("Record", s.wins + "-" + s.losses + "-" + s.pushes) +
+  var html = stat("Record", s.wins + "-" + s.losses + "-" + s.pushes) +
     stat("Net profit", money(s.profit), "(" + units + ")", profitCls) +
     stat("ROI", (s.roi > 0 ? "+" : "") + s.roi.toFixed(1) + "%") +
     stat("Win rate", s.winRate.toFixed(1) + "%", s.wins + "/" + (s.wins + s.losses) + " decided") +
     stat("Streak", esc(s.streak)) +
     stat("Pending", String(s.pending));
+  /* Beat the close: the sharp bettor's report card. Only appears once at
+     least one bet carries a closing price — a perpetually-empty stat would
+     be decoration, not information. */
+  if(s.clv && s.clv.total > 0){
+    var pct = Math.round(100 * s.clv.beat / s.clv.total);
+    var clvCls = pct >= 55 ? "jr-pos" : (pct <= 45 ? "jr-neg" : "");
+    html += stat("Beat the close", s.clv.beat + "/" + s.clv.total, pct + "% of recorded closes", clvCls);
+    html += '<div class="hint" style="margin-top:8px;font-size:.74rem;line-height:1.5">Closing prices are self-reported — books close differently. ' +
+      "Pros judge themselves against the close: beating it consistently is what sharp action looks like.</div>";
+  }
+  return html;
 }
 
 function perSportHtml(s){
@@ -90,7 +123,7 @@ function betMatches(b, fSport, fResult){
 function betsHtml(fSport, fResult){
   var rows = bets.filter(function(b){ return betMatches(b, fSport, fResult); });
   if(!rows.length){
-    return '<tr><td colspan="6" class="hint" style="text-align:left">' +
+    return '<tr><td colspan="7" class="hint" style="text-align:left">' +
       (bets.length ? "No bets match these filters." : "No bets logged yet — log your first bet above.") + "</td></tr>";
   }
   return rows.map(function(b){
@@ -107,11 +140,25 @@ function betsHtml(fSport, fResult){
         '" title="Back to pending">↩</button>';
     }
     actions += ' <button class="btn btn-ghost btn-sm j-del" data-id="' + b.id + '" title="Delete bet">✕</button>';
+    /* Record (or fix) the closing price — only knowable after kickoff, so it
+       lives on the row as an inline editor rather than in the log form. */
+    actions += ' <button class="btn btn-ghost btn-sm j-close-edit" data-id="' + b.id +
+      '" title="Record the closing price (optional — what the price was at kickoff)">✎</button>';
+    var priceCell;
+    if(closeEditing === b.id){
+      priceCell = '<input id="jCloseIn" inputmode="numeric" value="' +
+        esc(b.close == null ? "" : String(b.close)) +
+        '" placeholder="e.g. -105" aria-label="Closing price, American" style="width:88px">' +
+        ' <button class="btn btn-ghost btn-sm j-close-save" data-id="' + b.id + '" title="Save closing price">✓</button>' +
+        ' <button class="btn btn-ghost btn-sm j-close-cancel" title="Cancel">↩</button>';
+    } else {
+      priceCell = priceChip(b.price) + clvLine(b);
+    }
     return "<tr>" +
       "<td>" + esc(b.date || "") + "</td>" +
       "<td style=\"text-align:left\"><b>" + esc(b.event) + '</b><br><span class="hint">' +
         esc(b.sport) + " · " + esc(b.market) + " · " + esc(b.pick) + "</span></td>" +
-      "<td>" + priceChip(b.price) + "</td>" +
+      "<td>" + priceCell + "</td>" +
       "<td>" + money(Number(b.stake)) + "</td>" +
       "<td>" + resultChip(b.result) + "</td>" +
       '<td class="' + pCls + '">' + (b.result === "pending" ? "—" : money(p)) + "</td>" +
@@ -288,6 +335,17 @@ function tableClick(ev){
   } else if(t.classList.contains("j-del")){
     if(!window.confirm("Delete this bet from the journal?")) return;
     bets.splice(i, 1);
+  } else if(t.classList.contains("j-close-edit")){
+    closeEditing = id; /* re-render paints the inline editor on this row */
+  } else if(t.classList.contains("j-close-save")){
+    var raw = ($("jCloseIn") || {}).value;
+    var err = BM.closeValid(raw);
+    if(err){ showErr(err); return; } /* stay in edit mode; nothing lost */
+    var s = String(raw == null ? "" : raw).trim();
+    if(s === "") delete bets[i].close; else bets[i].close = Number(s);
+    closeEditing = null;
+  } else if(t.classList.contains("j-close-cancel")){
+    closeEditing = null;
   } else return;
   saveBets(bets);
   render();
