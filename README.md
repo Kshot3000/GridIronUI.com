@@ -43,6 +43,8 @@ node tests/test-cashout.js    # cash-out evaluator math (fair value, book margin
 node tests/test-cashout-dom.js  # cash-out wiring in shipped tools.js (verdicts, money math, format selector, empty/bad-input states)
 node tests/test-journal.js    # bet journal math (validation, profit, record/ROI/win-rate/streak/per-sport, CSV export)
 node tests/test-journal-dom.js  # journal wiring in shipped journal.js (add validation, settle/undo/delete, filters, unit size, CSV, escaping, empty states)
+node tests/test-journal-curve.js  # bankroll curve math (cumulative settled profit, date order, pending excluded, pushes flat)
+node tests/test-journal-curve-dom.js  # bankroll-curve wiring in shipped journal.js (hide when unsettled, DPR paint, aria, caption, null-context safety)
 node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph set + layering, hero-pulse cache key
 node tests/test-odds-inj.js   # injury-badge pure logic (severity ranks, per-team counts, card lines, badge HTML)
 node tests/test-odds-inj-dom.js  # injury-badge wiring in shipped odds.js (hidden slots, live injection, quiet cases, feed failure)

@@ -458,6 +458,29 @@ var M = {
     if(b.result === "loss") return round(-stake, 2);
     return 0;
   },
+  journalCurve: function(bets){
+    /* Cumulative profit-over-time for the journal's bankroll curve.
+       Settled bets (win/loss/push) sorted by date (id tiebreak, same as
+       journalStats); pending bets are excluded; pushes contribute $0 but
+       keep their slot so a grinding flat stretch reads honestly. Returns
+       one point per settled bet: {date, cum, id}, plus the settled count
+       and the final cumulative profit. */
+    bets = (bets || []).slice();
+    bets.sort(function(a, b){
+      var d = String(a.date || "").localeCompare(String(b.date || ""));
+      return d || (Number(a.id) || 0) - (Number(b.id) || 0);
+    });
+    var cum = 0, pts = [];
+    bets.forEach(function(b){
+      if(!b || b.result === "pending") return;
+      var p = M.journalProfit(b);
+      if(typeof p !== "number" || !isFinite(p)) return;
+      cum = round(cum + p, 2);
+      pts.push({ date: String(b.date || ""), cum: cum, id: Number(b.id) || 0 });
+    });
+    return { points: pts, settled: pts.length,
+             final: pts.length ? pts[pts.length-1].cum : 0 };
+  },
   journalCSV: function(bets){
     /* Machine-readable export: header + one row per bet, RFC-4180 quoting. */
     var cell = function(v){

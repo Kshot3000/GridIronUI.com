@@ -59,6 +59,15 @@
     <span class="tag">Dashboard</span>
     <h3>Your record</h3>
     <div class="hero-stats" id="jSummary" role="status" aria-label="Betting record summary"></div>
+    <!-- v1.60.0 — bankroll curve: cumulative settled profit, painted by js/journal.js -->
+    <div id="jCurveWrap" style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:12px">
+        <span class="tag">Bankroll curve</span>
+        <span class="num" id="jCurveCap" style="font-size:.82rem;color:var(--muted)"></span>
+      </div>
+      <canvas id="jCurve" role="img" aria-label="Bankroll curve" style="width:100%;height:220px;display:block"></canvas>
+      <p style="margin-top:10px;font-size:.76rem;color:var(--faint);line-height:1.5">Cumulative profit in the order bets were settled — pending bets don't move the curve, pushes sit flat. Tilt shows up here before it shows up anywhere else.</p>
+    </div>
     <div id="jPerSport" style="margin-top:18px"></div>
   </div>
 
@@ -92,7 +101,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.59.0"></script>
-<script src="js/betmath.js?v=1.56.0"></script>
-<script src="js/journal.js?v=1.53.0"></script>
+<script src="js/betmath.js?v=1.60.0"></script>
+<script src="js/journal.js?v=1.60.0"></script>
 </body>
 </html>

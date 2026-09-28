@@ -119,9 +119,105 @@ function betsHtml(fSport, fResult){
   }).join("");
 }
 
+function curveCaption(curve){
+  if(!curve.settled) return "";
+  var f = curve.final;
+  return "cumulative " + (f >= 0 ? "+" : "") + money(f).replace("$-", "-$") +
+    " over " + curve.settled + " settled bet" + (curve.settled === 1 ? "" : "s");
+}
+
+function paintCurve(){
+  /* Bankroll curve: DPR-aware static canvas of cumulative settled profit.
+     Quiet empty state (no settled bets -> the whole block hides); null
+     canvas context -> silent no-op. */
+  var cv = $("jCurve"), wrap = $("jCurveWrap");
+  if(!cv || !wrap) return;
+  var curve = BM.journalCurve(bets);
+  if(!curve.settled){ wrap.style.display = "none"; return; }
+  wrap.style.display = "";
+  var ctx = cv.getContext && cv.getContext("2d");
+  if(!ctx) return;
+  var W = cv.clientWidth || 640, H = cv.clientHeight || 220;
+  var DPR = Math.min(2, (window.devicePixelRatio || 1));
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  var padL = 56, padR = 60, padT = 14, padB = 28;
+  var iw = W - padL - padR, ih = H - padT - padB;
+  var pts = curve.points;
+  var vals = pts.map(function(p){ return p.cum; });
+  var lo = Math.min.apply(null, [0].concat(vals));
+  var hi = Math.max.apply(null, [0].concat(vals));
+  if(hi - lo < 1) hi = lo + 1;              /* flat stretch still gets breathing room */
+  var pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+  function X(i){ return padL + (pts.length === 1 ? iw / 2 : iw * i / (pts.length - 1)); }
+  function Y(v){ return padT + ih * (1 - (v - lo) / (hi - lo)); }
+  var up = curve.final >= 0;
+  var line = up ? "#17c964" : "#f04452";
+  /* faint quarter gridlines + labels */
+  ctx.font = "10.5px Inter, system-ui, sans-serif";
+  ctx.textBaseline = "middle";
+  [0, 0.25, 0.5, 0.75, 1].forEach(function(q, qi){
+    var v = lo + (hi - lo) * q, y = Y(v);
+    ctx.strokeStyle = qi === 0 || qi === 4 ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.035)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,.38)";
+    ctx.textAlign = "left";
+    ctx.fillText((v < 0 ? "-" : "") + "$" + Math.abs(v).toFixed(0), 6, y);
+  });
+  /* zero line */
+  ctx.strokeStyle = "rgba(240,180,41,.45)";
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(padL, Y(0)); ctx.lineTo(W - padR, Y(0)); ctx.stroke();
+  ctx.setLineDash([]);
+  /* area fill */
+  var grad = ctx.createLinearGradient(0, padT, 0, padT + ih);
+  grad.addColorStop(0, up ? "rgba(23,201,100,.28)" : "rgba(240,68,82,.28)");
+  grad.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.beginPath();
+  ctx.moveTo(X(0), Y(0));
+  pts.forEach(function(p, i){ ctx.lineTo(X(i), Y(p.cum)); });
+  ctx.lineTo(X(pts.length - 1), Y(0));
+  ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  /* the line itself */
+  ctx.beginPath();
+  pts.forEach(function(p, i){ if(i === 0) ctx.moveTo(X(i), Y(p.cum)); else ctx.lineTo(X(i), Y(p.cum)); });
+  ctx.strokeStyle = line; ctx.lineWidth = 2.4;
+  ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.stroke();
+  /* dots on each settled bet */
+  ctx.fillStyle = line;
+  pts.forEach(function(p, i){
+    ctx.beginPath(); ctx.arc(X(i), Y(p.cum), 3, 0, Math.PI * 2); ctx.fill();
+  });
+  /* first/last dates along the bottom */
+  ctx.fillStyle = "rgba(255,255,255,.42)";
+  ctx.textAlign = pts.length === 1 ? "center" : "left";
+  ctx.fillText(pts[0].date, X(0), H - 10);
+  if(pts.length > 1){
+    ctx.textAlign = "right";
+    ctx.fillText(pts[pts.length - 1].date, X(pts.length - 1), H - 10);
+  }
+  /* final value pinned at the last point */
+  var last = pts[pts.length - 1];
+  ctx.textAlign = "left"; ctx.font = "700 12.5px Inter, system-ui, sans-serif";
+  ctx.fillStyle = line;
+  ctx.fillText((last.cum >= 0 ? "+" : "-") + "$" + Math.abs(last.cum).toFixed(2),
+               Math.min(X(pts.length - 1) + 8, W - padR - 58), Y(last.cum));
+  if(cv.setAttribute){
+    cv.setAttribute("aria-label",
+      "Bankroll curve: " + curve.settled + " settled bets, net " + money(curve.final) +
+      ", from " + pts[0].date + " to " + last.date + ".");
+  }
+  var cap = $("jCurveCap");
+  if(cap) cap.textContent = curveCaption(curve);
+}
+
 function render(){
   var s = summarize();
   $("jSummary").innerHTML = summaryHtml(s);
+  paintCurve();
   $("jPerSport").innerHTML = perSportHtml(s);
   var fSport = $("jFilterSport").value, fResult = $("jFilterResult").value;
   $("jBetsBody").innerHTML = betsHtml(fSport, fResult);
