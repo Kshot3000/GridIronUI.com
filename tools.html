@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Calculators — Odds, Parlay, Kelly, Vig, Hedge | GridIronUI</title>
-<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, bankroll simulator. All math runs in your browser.">
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, dutching calculator, bankroll simulator. All math runs in your browser.">
 <meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
 <meta property="og:url" content="https://gridironui.xyz/tools.html">
 <link rel="canonical" href="https://gridironui.xyz/tools.html">
@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Ten tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Eleven tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -144,6 +144,17 @@
       <div class="field"><label>Hedge stake ($) — optional, for your own plan</label><input type="number" id="thCustom" placeholder="500" min="0" step="any"></div>
       <button class="btn btn-gold btn-sm" id="thGo">Plan my hedge</button>
       <div class="result-box" id="thOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="dutching">
+      <span class="tag">Sharp money</span>
+      <h3>Dutching calculator</h3>
+      <p class="hint">Backing several outcomes where only one can win — a few golfers, a couple of division winners? Split your stake so the payout is identical whichever one lands. Name each selection (optional) and enter its price.</p>
+      <div id="duLegRows"></div>
+      <button class="btn btn-ghost btn-sm" id="duAddLeg" style="margin-bottom:12px">+ Add selection</button>
+      <div class="field"><label>Total stake across all selections ($)</label><input type="number" id="duStake" placeholder="100" min="0" step="any" value="100"></div>
+      <button class="btn btn-gold btn-sm" id="duGo">Split my stake</button>
+      <div class="result-box" id="duOut" style="display:none"></div>
     </div>
 
     <div class="card calc" id="bankroll">

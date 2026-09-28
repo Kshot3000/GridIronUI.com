@@ -258,6 +258,60 @@ $("thGo").addEventListener("click", function(){
   }catch(e){ err("thOut", e.message); }
 });
 
+/* 11 — dutching: split one stake across mutually-exclusive outcomes */
+var duLegN = 0;
+function duLegs(){
+  var legs = [];
+  for(var i=1;i<=duLegN;i++){
+    var el = $("duLeg"+i);
+    if(el && el.value.trim()){
+      legs.push({ name: (($("duName"+i)||{}).value||"").trim() || ("Selection "+i),
+                  dec: toDecimal(el.value, $("duLegf"+i).value) });
+    }
+  }
+  return legs;
+}
+function duAddLeg(){
+  duLegN++;
+  var wrap = document.createElement("div");
+  wrap.style.marginBottom = "10px";
+  wrap.innerHTML = '<div class="field" style="margin-bottom:8px"><label>Selection '+duLegN+' name (optional)</label><input type="text" id="duName'+duLegN+'" placeholder="Scheffler"></div>'+
+    '<div class="form-row"><div><label>Odds</label><input type="text" id="duLeg'+duLegN+'" placeholder="+800"></div>'+
+    '<div><label>Format</label><select id="duLegf'+duLegN+'"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div></div>';
+  $("duLegRows").appendChild(wrap);
+}
+duAddLeg(); duAddLeg(); duAddLeg();
+$("duAddLeg").addEventListener("click", duAddLeg);
+$("duGo").addEventListener("click", function(){
+  try{
+    var legs = duLegs();
+    if(!legs.length){ note("duOut", "Add at least two selections' odds above, then hit Split my stake. The grayed-out numbers are just examples."); return; }
+    if(legs.length < 2) throw new Error("Enter at least two selections.");
+    var S = num("duStake");
+    if(!(S>0)) throw new Error("Enter a total stake greater than 0.");
+    var r = BetMath.dutch(legs.map(function(l){ return l.dec; }), S);
+    function money(v){ return "$"+v.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2}); }
+    var verdict = r.isArb
+      ? '<p style="margin:12px 0 0;font-size:.9rem"><b class="num" style="color:#7fe8a0">\u2696\uFE0F Arbitrage.</b> <span style="color:var(--muted)">These prices imply under 100% combined — a <b class="num" style="color:var(--text)">'+money(r.profit)+'</b> guaranteed profit ('+r.roiPct.toFixed(2)+'% ROI) if you can get every price before it moves. Arbs vanish in seconds and books limit arb bettors.</span></p>'
+      : '<p style="margin:12px 0 0;font-size:.9rem"><b class="num" style="color:#ff9aa3">Locked loss.</b> <span style="color:var(--muted)">These prices imply '+r.totalImpliedPct.toFixed(2)+'% combined — over 100% — so dutching locks in a <b class="num" style="color:var(--text)">'+money(r.profit)+'</b> loss ('+r.roiPct.toFixed(2)+'% ROI). That gap is the books\u2019 margin: dutching spreads it around, it never removes it.</span></p>';
+    var html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.95rem">'+
+      '<tr style="color:var(--muted);text-align:left"><th style="padding:6px">Selection</th><th style="padding:6px">Odds</th><th style="padding:6px">Implied</th><th style="padding:6px">Stake</th><th style="padding:6px">Returns if wins</th></tr>';
+    r.legs.forEach(function(l, i){
+      html += '<tr style="border-top:1px solid rgba(255,255,255,.08)">'+
+        '<td style="padding:8px 6px;font-weight:700">'+GIU.esc(legs[i].name)+'</td>'+
+        '<td class="num" style="padding:8px 6px">'+BetMath.round(l.decimal,2).toFixed(2)+'</td>'+
+        '<td class="num" style="padding:8px 6px">'+l.impliedPct.toFixed(2)+'%</td>'+
+        '<td class="num" style="padding:8px 6px">'+money(l.stake)+'</td>'+
+        '<td class="num" style="padding:8px 6px">'+money(r.equalReturn)+'</td></tr>';
+    });
+    html += '</table></div>'+
+      '<p style="margin:12px 0 0;color:var(--muted);font-size:.9rem">Total staked: <b class="num" style="color:var(--text)">'+money(r.totalStaked)+'</b> \u00B7 combined implied <b class="num" style="color:var(--text)">'+r.totalImpliedPct.toFixed(2)+'%</b> \u00B7 every winner pays <b class="num gold">'+money(r.equalReturn)+'</b>.</p>'+
+      verdict+
+      '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Dutching only works when exactly one selection can win — overlapping outcomes (two golfers who could both place, two legs of one parlay) break the math. Stakes are rounded to the cent; the equal payout holds exactly on the unrounded stakes.</p>';
+    show("duOut", html);
+  }catch(e){ err("duOut", e.message); }
+});
+
 /* ================= bankroll risk simulator (Monte Carlo) ================= */
 function mcMoney(v){
   var a = Math.abs(v);

@@ -199,6 +199,42 @@ var M = {
     };
   },
 
+  /* ---- dutching: split one stake across mutually-exclusive outcomes so the
+         return is identical no matter which one wins. The classic use: several
+         golfers in one tournament, multiple division winners, or one side of
+         several games — exactly one selection can win.
+         legs = array of decimal odds (> 1); totalStake S > 0.
+         stake_i = S * (1/d_i) / sum(1/d_j); every winner returns S/sum(1/d_j).
+         sum(1/d) < 1  -> the prices contain an arb: guaranteed profit.
+         sum(1/d) > 1  -> you lock in a loss: the books' margin, priced in.
+         Returns per-leg stakes (rounded to cents), implied %, total implied %,
+         the equal return, profit, ROI, and the verdict. */
+  dutch: function(legs, totalStake){
+    if(!Array.isArray(legs) || legs.length < 2) throw new Error("Dutching needs at least 2 selections");
+    legs = legs.map(function(d){
+      d = Number(d);
+      if(!(d > 1)) throw new Error("Selection odds must be decimal > 1");
+      return d;
+    });
+    var S = Number(totalStake);
+    if(!(S > 0)) throw new Error("Total stake must be greater than 0.");
+    var imps = legs.map(function(d){ return 1/d; });
+    var tot = imps.reduce(function(a,q){ return a+q; }, 0);
+    var stakes = imps.map(function(q){ return round(S*q/tot, 2); });
+    var ret = round(S/tot, 2), profit = round(ret - S, 2);
+    return {
+      legs: legs.map(function(d, i){
+        return { decimal: round(d,4), impliedPct: round(imps[i]*100, 2), stake: stakes[i] };
+      }),
+      totalImpliedPct: round(tot*100, 2),
+      totalStaked: round(stakes.reduce(function(a,s){ return a+s; }, 0), 2),
+      equalReturn: ret,
+      profit: profit,
+      roiPct: round(profit/S*100, 2),
+      isArb: tot < 1
+    };
+  },
+
   /* ---- deterministic PRNG (mulberry32) for seeded, reproducible simulations ---- */
   mulberry32: function(seed){
     var a = (Number(seed)>>>0) || 1;
