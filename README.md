@@ -2,7 +2,7 @@
 
 The sharpest free sports betting knowledge hub — guides, calculators, live odds, prediction markets, scores, news, injuries, weather, video, and a DFS lineup lab.
 
-**Live:** https://kshot3000.github.io/GridIronUI.com/
+**Live:** https://gridironui.xyz/
 
 ## What it is
 
@@ -59,6 +59,8 @@ node tests/test-odds-wx-dom.js  # weather badge wiring in shipped odds.js (hidde
 node tests/test-cache-keys.js  # cache-key regression guard (every js ?v= key >= the release that last changed that file)
 node tests/test-arbs.js       # cross-book arbitrage logic (stake splits, moneyline/spread/total pairing, same-book exclusion, 3-way EPL)
 node tests/test-arbs-dom.js   # Sure bets strip wiring in shipped odds.js (strip render, game flags, quiet-when-empty)
+node tests/test-odds-pm.js     # market-check logic (Polymarket live moneylines, no-vig fair probs, 5-pt gap flag, pinned-market exclusion)
+node tests/test-odds-pm-dom.js # market-check wiring in shipped odds.js (hidden slot, live-price reveal, pinned silence, no NBA fetches)
 ```
 
 ### Team identity directory

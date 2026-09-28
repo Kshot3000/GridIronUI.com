@@ -257,6 +257,15 @@ td.flash{animation:flash 1.2s ease-out}
  background:rgba(46,204,113,.08)}
 @media(prefers-reduced-motion:reduce){.arb{transition:none}}
 
+/* v1.38.0 — market check: Polymarket's live moneyline vs what the best book
+   prices imply, on NFL odds-board game cards. A quiet one-liner next to the
+   consensus line; the gap chip only appears when the market and the books
+   disagree by 5+ points — that's where edge lives. */
+.pm-check{margin:-8px 0 14px;font-size:.84rem}
+.pm-gap{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:999px;
+ font-size:.72rem;font-weight:700;letter-spacing:.02em;white-space:nowrap;
+ color:var(--gold);border:1px solid rgba(240,180,41,.5);background:rgba(240,180,41,.12)}
+
 /* line-movement sparklines on odds game cards: the consensus path since this
    browser first tracked the game. Static SVG (no motion to reduce). */
 .spark-row{display:flex;gap:16px 22px;flex-wrap:wrap;align-items:flex-end;margin:10px 0 2px}

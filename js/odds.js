@@ -5,6 +5,7 @@
 "use strict";
 var OL = window.OddsLogic;
 var WX = window.OddsWx;
+var PMK = window.OddsPm;
 var $ = function(id){ return document.getElementById(id); };
 /* ---- line-movement window (pure, exported for tests) ----
    Lines move most around live games and just before kickoff: a game is
@@ -187,6 +188,11 @@ function render(opts){
        mislabeled. A forecast hiccup leaves the badges off — the board is
        the product, weather is a bonus. */
     maybeWxBadges(events, mySeq);
+    /* NFL tab bonus, after the board is on screen: market check — live
+       Polymarket moneyline price on each game card, next to what the best
+       book prices imply. One CORS-open gamma fetch (zero Odds-API quota);
+       a hiccup leaves the lines off, never the board. */
+    maybePmCheck(events, mySeq);
   }).catch(function(e){
     if(mySeq !== renderSeq) return; /* stale sport response — discard */
     if(silent){
@@ -240,6 +246,50 @@ function maybeWxBadges(events, mySeq){
       });
     });
   }).catch(function(){ /* badges stay off; the board already rendered fine */ });
+}
+
+/* ---- market check: Polymarket vs the books (NFL tab) ----
+   The predictions page tells visitors to compare market-implied
+   probabilities against sportsbook prices — this puts that comparison on
+   the board itself, where lines are shopped. One CORS-open gamma fetch per
+   board render (zero Odds-API quota), painted after the board so a hiccup
+   never blocks lines; render-generation guarded like the weather badges.
+   Quiet by default: unmatched or unpriced games stay silent — no badge
+   beats a wrong badge. */
+var pmSeriesP = null;
+function pmSeriesId(){
+  /* The series lookup is stable (Polymarket rotates series rarely); cache it
+     for the session, but re-fetch the events on every board render so the
+     prices on the cards stay live across auto-refreshes. */
+  if(!pmSeriesP){
+    pmSeriesP = GIU.fetchJSON("https://gamma-api.polymarket.com/sports").then(function(ss){
+      var s = (ss||[]).filter(function(x){ return x.sport==="nfl"; })[0];
+      return (s && s.series) || null;
+    }).catch(function(){ return null; });
+  }
+  return pmSeriesP;
+}
+function maybePmCheck(events, mySeq){
+  if(sport !== "americanfootball_nfl" || !PMK || !events || !events.length) return;
+  Promise.all([pmSeriesId(), GIU.teamDir()]).then(function(r){
+    if(mySeq !== renderSeq || sport !== "americanfootball_nfl" || !r[0]) return;
+    return GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+r[0]+
+      "&active=true&closed=false&limit=20").catch(function(){ return []; })
+      .then(function(d){
+        if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return; /* board moved on */
+        var pmEvents = Array.isArray(d) ? d : (d.events||[]);
+        var map = PMK.pmPrices(pmEvents, r[1], GIU.teamFind);
+        if(!map || !Object.keys(map).length) return;
+        events.forEach(function(ev){
+          var rec = PMK.check(ev, map, r[1], GIU.teamFind, OL.oneOutcome);
+          if(!rec) return;
+          var slot = document.querySelector('[data-pmcheck="'+ev.id+'"]');
+          if(!slot) return;
+          slot.innerHTML = PMK.badgeHtml(rec, GIU.esc);
+          slot.hidden = false;
+        });
+      });
+  }).catch(function(){ /* check stays off; the board already rendered fine */ });
 }
 
 /* Sure bets: cross-book arbitrage found in this pull. Every outcome is
@@ -452,10 +502,15 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
      until then — no badge is better than a placeholder. */
   var wxSlot = (sport === "americanfootball_nfl")
     ? '<div class="wx-badge" data-wxbadge="'+GIU.esc(ev.id)+'" hidden></div>' : "";
+  /* Market-check slot (NFL tab only): Polymarket's live moneyline price vs
+     what the best book prices imply — filled after the board renders, once
+     the gamma fetch resolves. Hidden until then: no badge beats a wrong one. */
+  var pmSlot = (sport === "americanfootball_nfl")
+    ? '<div class="game-meta pm-check" data-pmcheck="'+GIU.esc(ev.id)+'" hidden></div>' : "";
   return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
-    arbFlagHtml()+consLineHtml()+histHtml()+wxSlot+bestCard+
+    arbFlagHtml()+consLineHtml()+pmSlot+histHtml()+wxSlot+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' spread</th><th>'+GIU.esc(OL.shortName(h))+' spread</th>'+
     '<th>Over</th><th>Under</th>'+
