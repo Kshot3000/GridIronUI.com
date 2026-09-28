@@ -1,6 +1,8 @@
 /* GridIronUI hero canvas — "market pulse".
    Drifting glowing line charts over a faint grid: a trading-terminal feel for
-   the hero. Pure decoration (aria-hidden). Disabled entirely under
+   the hero. Chart drift runs at half speed (stepEvery doubled on 2026-09-27).
+   Behind the charts falls a gentle rain of balls, bills, and tokens.
+   Pure decoration (aria-hidden). Disabled entirely under
    prefers-reduced-motion; paused when the tab is hidden or the hero scrolls
    out of view so it never burns battery in the background. */
 (function(){
@@ -18,6 +20,8 @@ function init(){
     W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
     cv.width = W*DPR; cv.height = H*DPR;
     ctx.setTransform(DPR,0,0,DPR,0,0);
+    if(rain.length) rain.forEach(function(p){ p.x = Math.min(p.x, W); });
+    else seedRain();
   }
   function makeLine(color, amp, yBase, width, stepEvery){
     var pts=[], n=90, v=0.5, i;
@@ -29,10 +33,65 @@ function init(){
       } };
   }
   var lines = [
-    makeLine("240,180,41", 0.30, 0.56, 2.2, 3),  /* gold — hero line */
-    makeLine("23,201,100", 0.22, 0.64, 1.8, 4),  /* felt green */
-    makeLine("74,168,255", 0.26, 0.46, 1.4, 2)   /* ice blue */
+    makeLine("240,180,41", 0.30, 0.56, 2.2, 6),  /* gold — hero line (half speed) */
+    makeLine("23,201,100", 0.22, 0.64, 1.8, 8),  /* felt green (half speed) */
+    makeLine("74,168,255", 0.26, 0.46, 1.4, 4)   /* ice blue (half speed) */
   ];
+  /* ---- falling rain: balls, bills, and tokens drifting down behind the charts ---- */
+  var RAIN_GLYPHS = [
+    { g:"\uD83C\uDFC8", kind:"emoji" },                          /* football */
+    { g:"\u26BE",       kind:"emoji" },                          /* baseball */
+    { g:"\uD83C\uDFC0", kind:"emoji" },                          /* basketball */
+    { g:"\uD83D\uDCB5", kind:"emoji" },                          /* hundred-dollar bill */
+    { g:"\u20BF",       kind:"token", bg:"240,180,41",  fg:"#241a05" }, /* bitcoin */
+    { g:"\u039E",       kind:"token", bg:"150,170,255", fg:"#0c1226" }  /* ethereum */
+  ];
+  var rain = [];
+  function scatter(p, initial){
+    p.x = Math.random()*W;
+    p.y = initial ? Math.random()*H : -p.size - Math.random()*H*0.25;
+    p.size = 15 + Math.random()*15;                 /* 15–30px */
+    p.vy = 0.35 + Math.random()*0.60;              /* gentle fall */
+    p.sway = 0.2 + Math.random()*0.8;              /* horizontal drift */
+    p.phase = Math.random()*Math.PI*2;
+    p.rot = (Math.random()-0.5)*0.6;
+    p.vr = (Math.random()-0.5)*0.01;
+    p.alpha = 0.28 + Math.random()*0.17;
+    p.gl = RAIN_GLYPHS[(Math.random()*RAIN_GLYPHS.length)|0];
+  }
+  function seedRain(){
+    var n = Math.max(12, Math.min(30, Math.round(W/46)));
+    rain = [];
+    for(var i=0;i<n;i++){ var p={}; scatter(p, true); rain.push(p); }
+  }
+  function drawRain(){
+    var i, p, r;
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    for(i=0;i<rain.length;i++){
+      p = rain[i];
+      p.y += p.vy;
+      p.x += Math.sin(frame/55 + p.phase)*p.sway*0.35;
+      p.rot += p.vr;
+      if(p.y > H + p.size + 8) scatter(p, false);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+      if(p.gl.kind === "token"){
+        r = p.size*0.58;
+        ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
+        ctx.fillStyle = "rgba("+p.gl.bg+",0.85)"; ctx.fill();
+        ctx.font = "bold "+Math.round(p.size*0.72)+"px sans-serif";
+        ctx.fillStyle = p.gl.fg;
+        ctx.fillText(p.gl.g, 0, 1);
+      }else{
+        ctx.font = Math.round(p.size)+"px serif";
+        ctx.fillText(p.gl.g, 0, 0);
+      }
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
   function draw(){
     if(!running) return;
     frame++;
@@ -44,6 +103,7 @@ function init(){
     for(gx=0.5; gx<W; gx+=72){ ctx.moveTo(gx,0); ctx.lineTo(gx,H); }
     for(gy=0.5; gy<H; gy+=56){ ctx.moveTo(0,gy); ctx.lineTo(W,gy); }
     ctx.stroke();
+    drawRain();   /* balls, bills, and tokens fall behind the charts */
     lines.forEach(function(L, li){
       if(frame % L.stepEvery === 0) L.step();
       var i, x, y;

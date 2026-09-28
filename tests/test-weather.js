@@ -2,6 +2,10 @@
    impact tags. Loads team-brand.js first so GIU.teamLogo/teamChip exist, with
    GIU.fetchJSON stubbed so the live ESPN fetch never fires in tests. */
 "use strict";
+/* The sliceWindow fixtures mix timezone-naive hourly strings with Z-suffixed
+   kickoffs, so nearest-hour matching only lands deterministically under one
+   zone — pin UTC so the suite passes in any runner environment. */
+process.env.TZ = "UTC";
 var fs = require("fs"), vm = require("vm"), path = require("path");
 var ROOT = path.join(__dirname, "..");
 var failures = 0;
