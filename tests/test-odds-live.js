@@ -139,7 +139,9 @@ var sandbox = {
     has: function(){ return false; }, toggle: function(){ return true; },
     reprice: function(){},
     payout: function(){ return {combinedAm:"+100", combined:2.0, profit:100, total:200}; },
-    remove: function(){}, clear: function(){}
+    remove: function(){}, clear: function(){},
+    normalize: function(legs){ return legs; },
+    valueSummary: function(){ return null; }
   }
 };
 sandbox.window.GIU = sandbox.GIU;

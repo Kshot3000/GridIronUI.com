@@ -179,6 +179,34 @@ var S = {
     for(var i=0;i<legs.length;i++){ if(legs[i].id === id) return true; }
     return false;
   },
+  /* backfill `captured` (the price a leg was added at) for legs saved
+     before this field existed — claim no move, start tracking now. */
+  normalize: function(legs){
+    legs.forEach(function(l){
+      if(l && l.captured === undefined) l.captured = Number(l.price);
+    });
+    return legs;
+  },
+  /* Slip value summary: the board's current prices vs what each leg was
+     captured at. Every slip leg is a back (tap-a-price), so a bigger
+     current decimal = a better payout on offer now = the line moved your
+     way. Returns null when nothing is priceable. */
+  valueSummary: function(legs){
+    var better = 0, worse = 0, same = 0, n = 0, cap = 1, cur = 1;
+    legs.forEach(function(l){
+      var c = Number(l && l.captured), p = Number(l && l.price);
+      if(!(c > 1) || !(p > 1)) return;
+      n++;
+      cap *= c; cur *= p;
+      var d = p - c;
+      if(d > 0.0001) better++;
+      else if(d < -0.0001) worse++;
+      else same++;
+    });
+    if(!n) return null;
+    return { n:n, better:better, worse:worse, same:same,
+             captured:cap, current:cur };
+  },
   /* re-price legs against the board's fresh id->decimal map.
      Mutates legs in place; returns ids whose price moved. */
   reprice: function(legs, idToPrice){

@@ -61,6 +61,7 @@ if(!(alertThr === 1 || alertThr === 1.5 || alertThr === 2)) alertThr = 0;
 var Slip = window.OddsSlip;
 var slip = [];
 try{ slip = JSON.parse(localStorage.getItem("giu_slip") || "[]"); }catch(e){ slip = []; }
+Slip.normalize(slip); /* legs saved before `captured` existed: track from now */
 var stakeVal = 100;
 try{ stakeVal = Number(localStorage.getItem("giu_slip_stake")) || 100; }catch(e){}
 function saveSlip(){ try{ localStorage.setItem("giu_slip", JSON.stringify(slip)); }catch(e){} }
@@ -654,6 +655,27 @@ function sameGameWarnHtml(slip){
     '(independent-outcome math) won\u2019t match the book\u2019s, and most books '+
     'won\u2019t let you parlay both sides of one game.</div>';
 }
+/* Slip value summary: how the live board's prices compare to what each leg
+   was captured at — the bettor's "did the lines move on me?" readout. */
+function slipValueHtml(){
+  var v = Slip.valueSummary(slip);
+  if(!v) return "";
+  var cls, txt;
+  if(v.better || v.worse){
+    var bits = [];
+    if(v.better) bits.push(v.better + " moved your way \u25b2");
+    if(v.worse) bits.push(v.worse + " moved against you \u25bc");
+    cls = v.worse ? (v.better ? "mixed" : "bad") : "good";
+    txt = "Line moves on your slip: " + bits.join(" \u00b7 ") +
+      " \u2014 combined " + OL.dec2am(v.current) +
+      " (was " + OL.dec2am(v.captured) + ")";
+  }else{
+    cls = "quiet";
+    txt = "No line moves on your slip yet \u2014 tracking from your captured prices.";
+  }
+  return '<div class="slip-value ' + cls + '" role="status">' +
+    GIU.esc(txt) + "</div>";
+}
 function renderSlip(){
   var panel = $("slipPanel"), n = slip.length;
   $("slipCount").textContent = n;
@@ -685,6 +707,7 @@ function renderSlip(){
   panel.innerHTML =
     sharedHtml +
     '<div class="slip-head"><b>Your slip</b><span class="tag">'+n+' leg'+(n>1?"s":"")+'</span></div>'+
+    slipValueHtml()+
     '<div class="slip-legs">'+rows+'</div>'+sameGameWarnHtml(slip)+
     '<div class="field" style="margin:14px 0 8px"><label for="slipStake">Stake ($)</label>'+
     '<input type="number" id="slipStake" min="0" step="1" value="'+stakeVal+'" inputmode="numeric"></div>'+
@@ -759,6 +782,7 @@ var sharedTs = 0; /* 0 = none, -1 = decode failure, >0 = capture timestamp */
   if(!d || !d.legs.length){ sharedTs = -1; }
   else{
     slip = d.legs; stakeVal = d.stake; sharedTs = d.ts;
+    Slip.normalize(slip); /* captured = the shared price, matching the banner */
     saveSlip(); saveStake();
   }
   try{
@@ -834,6 +858,7 @@ $("oddsBoard").addEventListener("click", function(e){
     market:b.getAttribute("data-market"), side:b.getAttribute("data-side"),
     book:b.getAttribute("data-book"), bookTitle:b.getAttribute("data-booktitle"),
     label:b.getAttribute("data-label"), price:Number(b.getAttribute("data-price")),
+    captured:Number(b.getAttribute("data-price")), /* line-move baseline */
     sport:sport /* league context for slip-leg GameDay identity */
   };
   var added = Slip.toggle(slip, leg);
