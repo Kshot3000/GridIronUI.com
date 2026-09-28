@@ -240,6 +240,22 @@ td.flash{animation:flash 1.2s ease-out}
 .mover-title{font-weight:700;font-size:.92rem}
 .mover-d{font-size:.84rem;color:var(--gold-soft)}
 @media(prefers-reduced-motion:reduce){.mover{transition:none}}
+/* sure bets: cross-book arbitrage strip on the odds board */
+.arb-card{margin-bottom:20px;border-color:rgba(46,204,113,.4)}
+.arb{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid rgba(255,255,255,.09);
+ border-radius:10px;color:inherit;text-decoration:none;transition:border-color .18s,background .18s}
+.arb:hover{border-color:rgba(46,204,113,.65);background:rgba(46,204,113,.06)}
+.arb:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.arb-mkt{font-size:.76rem;font-weight:600;color:var(--faint);border:1px solid rgba(255,255,255,.14);
+ border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+.arb-legs{font-size:.84rem;color:var(--muted)}
+.arb-profit{font-size:.92rem;font-weight:700;color:var(--green)}
+.arb-sub{font-weight:400;color:var(--faint);font-size:.8rem}
+.arb-flag{margin:0 0 10px;display:flex;gap:8px;flex-wrap:wrap}
+.arb-chip{display:inline-block;font-size:.8rem;font-weight:700;color:var(--green);
+ border:1px solid rgba(46,204,113,.5);border-radius:99px;padding:3px 10px;
+ background:rgba(46,204,113,.08)}
+@media(prefers-reduced-motion:reduce){.arb{transition:none}}
 
 /* line-movement sparklines on odds game cards: the consensus path since this
    browser first tracked the game. Static SVG (no motion to reduce). */

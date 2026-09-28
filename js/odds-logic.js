@@ -218,6 +218,132 @@ var L = {
     });
     return out;
   },
+  /* ---- cross-book arbitrage ("sure bets") ----
+     A market arbs when the best available price on EVERY outcome, taken at
+     different books, implies a total probability under 100%. Prices are
+     decimal; stakes are the standard dutch-book split for a $100 total.
+     A same-book "arb" is never shown — you can't bet both sides of a
+     palpable error at one book and expect to get paid. Stale lines misfire
+     and books limit arb bettors fast, so the strip says so out loud. */
+  stakeSplit: function(prices, total){
+    total = (total === undefined) ? 100 : total;
+    var inv = prices.map(function(p){ return 1/p; });
+    var s = inv.reduce(function(a,b){ return a+b; }, 0);
+    return {
+      stakes: inv.map(function(v){ return Math.round(total*v/s*100)/100; }),
+      profit: Math.round((total/s - total)*100)/100,
+      profitPct: Math.round((1/s - 1)*10000)/100
+    };
+  },
+  /* Best decimal price for one named outcome, optionally pinned to an exact
+     line (spreads/totals pair sides at the same number). Returns
+     {name, book, bookTitle, price, point} or null. */
+  bestAt: function(books, mkey, name, point){
+    var best = null;
+    (books||[]).forEach(function(bk){
+      var o = L.oneOutcome(bk, mkey, name);
+      if(!o || !isFinite(o.price) || o.price <= 1) return;
+      if(point !== undefined &&
+         (o.point === null || o.point === undefined ||
+          Math.abs(o.point - point) > 1e-9)) return;
+      if(!best || o.price > best.price)
+        best = { name: name, book: bk.key, bookTitle: bk.title || bk.key,
+                 price: o.price, point: (o.point == null ? null : o.point) };
+    });
+    return best;
+  },
+  /* True only when legs cover every outcome, come from at least two books,
+     and sum under 100% implied. Returns the arb record or null. */
+  checkArb: function(legs, mkey, label){
+    legs = (legs||[]).filter(function(l){ return !!l; });
+    if(legs.length < 2) return null;
+    var distinct = {};
+    legs.forEach(function(l){ distinct[l.book] = 1; });
+    if(Object.keys(distinct).length < 2) return null;
+    var sum = legs.reduce(function(s, l){ return s + 1/l.price; }, 0);
+    if(!(sum < 1 - 1e-9)) return null;
+    var sp = L.stakeSplit(legs.map(function(l){ return l.price; }), 100);
+    return { market: mkey, marketLabel: label, legs: legs,
+             profitPct: sp.profitPct, stakes: sp.stakes,
+             total: 100, profit: sp.profit };
+  },
+  /* Every arb on one event: moneyline (n-way, so the EPL draw counts),
+     then spread and total pairings at each posted line. */
+  arbsForEvent: function(ev){
+    var books = ev.bookmakers || [];
+    if(books.length < 2) return [];
+    var out = [];
+    /* moneyline: outcome names in a stable order — away, home, then extras */
+    var names = [];
+    [ev.away_team, ev.home_team].forEach(function(n){
+      if(n && names.indexOf(n) < 0) names.push(n);
+    });
+    books.forEach(function(bk){
+      L.outcomesOf(bk, "h2h").forEach(function(o){
+        if(o && o.name && names.indexOf(o.name) < 0) names.push(o.name);
+      });
+    });
+    var ml = L.checkArb(names.map(function(nm){
+      return L.bestAt(books, "h2h", nm);
+    }), "h2h", "Moneyline");
+    if(ml) out.push(ml);
+    /* spreads: away -6.5 and home +6.5 are the same line — pair them */
+    var seenSp = {};
+    books.forEach(function(bk){
+      L.outcomesOf(bk, "spreads").forEach(function(o){
+        if(!o || o.name !== ev.away_team || o.point == null) return;
+        var k = "sp" + Math.round(o.point*100);
+        if(seenSp[k]) return;
+        seenSp[k] = 1;
+        var a = L.checkArb([
+          L.bestAt(books, "spreads", ev.away_team, o.point),
+          L.bestAt(books, "spreads", ev.home_team, -o.point)
+        ], "spreads", "Spread " + L.fmtPt(o.point));
+        if(a) out.push(a);
+      });
+    });
+    /* totals: Over and Under must share the number */
+    var seenTot = {};
+    books.forEach(function(bk){
+      L.outcomesOf(bk, "totals").forEach(function(o){
+        if(!o || o.name !== "Over" || o.point == null) return;
+        var k = "tot" + Math.round(o.point*100);
+        if(seenTot[k]) return;
+        seenTot[k] = 1;
+        var t = L.checkArb([
+          L.bestAt(books, "totals", "Over", o.point),
+          L.bestAt(books, "totals", "Under", o.point)
+        ], "totals", "Total " + o.point);
+        if(t) out.push(t);
+      });
+    });
+    return out;
+  },
+  /* Flatten every event's arbs for the board strip. */
+  arbEntries: function(events){
+    var out = [];
+    (events||[]).forEach(function(ev){
+      var arbs = L.arbsForEvent(ev);
+      if(!arbs.length) return;
+      var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
+      var title = ev.away_team + " @ " + ev.home_team;
+      arbs.forEach(function(a){
+        out.push({ id: ev.id, anchor: anchor, title: title,
+                   market: a.market, marketLabel: a.marketLabel, legs: a.legs,
+                   profitPct: a.profitPct, stakes: a.stakes,
+                   total: a.total, profit: a.profit });
+      });
+    });
+    return out;
+  },
+  /* Richest arbs first; stable title tie-break so the strip never shuffles. */
+  biggestArbs: function(entries, n){
+    n = (n === undefined) ? 5 : n;
+    return (entries||[]).slice().sort(function(a, b){
+      var d = b.profitPct - a.profitPct;
+      return d !== 0 ? d : (a.title < b.title ? -1 : (a.title > b.title ? 1 : 0));
+    }).slice(0, Math.max(0, n));
+  },
   /* SVG geometry for a sparkline. Returns null with fewer than 2 points —
      a single dot is not a trend. A flat series draws a mid-height line
      (no divide-by-zero). Returns {line, area, lx, ly}: the line path, the

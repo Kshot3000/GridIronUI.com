@@ -169,7 +169,9 @@ function render(opts){
       ? events.map(function(ev){ return renderGame(ev, prev, now, opens, hist, dir, league); }).join("")
       : '<div class="empty">No upcoming games with odds for this league right now.</div>';
     var movers = OL.biggestMovers(OL.moverEntries(events, opens), 5);
-    board.innerHTML = (movers.length ? renderMovers(movers) : "") + cards;
+    var arbs = OL.biggestArbs(OL.arbEntries(events), 5);
+    board.innerHTML = (arbs.length ? renderArbs(arbs, lastUpdated) : "") +
+                      (movers.length ? renderMovers(movers) : "") + cards;
     boardHasGames = true;
     setSnap(now);
     setOpens(opens);
@@ -238,6 +240,38 @@ function maybeWxBadges(events, mySeq){
       });
     });
   }).catch(function(){ /* badges stay off; the board already rendered fine */ });
+}
+
+/* Sure bets: cross-book arbitrage found in this pull. Every outcome is
+   covered at a different book, so the listed prices lock a guaranteed
+   profit — at least until a line moves, which is why the strip says when
+   the pull happened and links the guide's honest arbitrage section. Only
+   renders when a real arb exists; a quiet board stays quiet. */
+function renderArbs(arbs, updated){
+  var rows = arbs.map(function(a){
+    var legs = a.legs.map(function(l, i){
+      return GIU.esc(l.name) + " @ " + GIU.esc(l.bookTitle) + " " +
+             OL.dec2am(l.price) + " ($" + a.stakes[i].toFixed(2) + ")";
+    }).join(" · ");
+    var aria = a.title + ": " + a.marketLabel + " arbitrage — " + legs +
+               ". Guaranteed profit " + a.profitPct.toFixed(2) +
+               " percent on a $100 split. Jump to the game.";
+    return '<a class="arb" href="#'+GIU.esc(a.anchor)+'" aria-label="'+GIU.esc(aria)+'">'+
+      '<span class="mover-title">'+GIU.esc(a.title)+
+      ' <span class="arb-mkt">'+GIU.esc(a.marketLabel)+'</span></span>'+
+      '<span class="arb-legs">'+legs+'</span>'+
+      '<span class="arb-profit">+'+a.profitPct.toFixed(2)+'%'+
+      ' <span class="arb-sub">($'+a.profit.toFixed(2)+' locked on $100)</span></span></a>';
+  }).join("");
+  return '<section class="card arb-card" aria-label="Cross-book arbitrage opportunities">'+
+    '<div class="section-head" style="margin-bottom:10px"><div>'+
+    '<h3 style="margin:0">⚖️ Sure bets</h3>'+
+    '<div class="game-meta"><span>Cross-book arbitrage — every outcome at a different book, '+
+    'total implied probability under 100%. Stakes are the dutch-book split for $100. '+
+    'Live at the last pull'+(updated ? " ("+fmtClock(updated)+")" : "")+
+    ' — arbs vanish in seconds, stale lines misfire, and books limit arb bettors fast. '+
+    'Confirm both prices before you bet. <a href="guides/advanced.html#arb">How arbitrage works →</a></span></div></div></div>'+
+    '<div class="movers">'+rows+'</div></section>';
 }
 
 /* Steam watch: the biggest consensus line moves since this browser's
@@ -396,6 +430,22 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
       ' in this browser — leave auto-refresh on and the chart grows on game day.</div></div>';
   }
 
+  /* Sure-bet flag: this game has a live cross-book arb in this pull.
+     Chips name each arbed market + locked profit; the strip above has the
+     full legs and stakes. Silent when there's nothing — like everything
+     else on this board. */
+  function arbFlagHtml(){
+    var arbs = OL.arbsForEvent(ev);
+    if(!arbs.length) return "";
+    var chips = arbs.map(function(a){
+      return '<span class="arb-chip" title="Cross-book arbitrage on the '+GIU.esc(a.marketLabel)+
+        ' — every outcome at a different book, +'+a.profitPct.toFixed(2)+
+        '% locked at the listed prices. See the Sure bets strip for legs and stakes.">⚖️ '+
+        GIU.esc(a.marketLabel)+' +'+a.profitPct.toFixed(2)+'%</span>';
+    }).join(" ");
+    return '<div class="arb-flag" role="note">'+chips+'</div>';
+  }
+
   var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
   /* Weather badge slot (NFL tab only): filled after the board renders, once
      the venue is confirmed against ESPN and the forecast is in. Hidden
@@ -405,7 +455,7 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
   return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
-    consLineHtml()+histHtml()+wxSlot+bestCard+
+    arbFlagHtml()+consLineHtml()+histHtml()+wxSlot+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' spread</th><th>'+GIU.esc(OL.shortName(h))+' spread</th>'+
     '<th>Over</th><th>Under</th>'+
