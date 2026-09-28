@@ -1,4 +1,4 @@
-/* GridIronUI live-betting guide test (v1.59.0).
+/* GridIronUI live-betting guide test (v1.59.0, counts refreshed v1.64.0).
    New 5th guide guides/live-betting.html must be fully wired: TOC anchors
    resolve, every cross-link target exists, footer/index/sitemap/bet-types
    all point at it, guide math stays exact, and cache keys are current. */
@@ -42,10 +42,10 @@ ok("middle window 4-10 intact", guide.indexOf("4–10") !== -1);
 
 /* wiring */
 const index = read("index.html");
-ok("index hero counts 5 guides",
-  /<b>5<\/b><span>in-depth guides<\/span>/.test(index));
+ok("index hero counts 6 guides",
+  /<b>6<\/b><span>in-depth guides<\/span>/.test(index));
 const cards = (index.match(/class="card" href="guides\/[a-z0-9-]+\.html"/g) || []).length;
-ok("index has 5 guide cards", cards === 5);
+ok("index has 6 guide cards", cards === 6);
 ok("index links the new guide", index.indexOf('href="guides/live-betting.html"') !== -1);
 
 const sitejs = read("js/site.js");
@@ -68,7 +68,7 @@ ok("canonical points at custom domain",
   guide.indexOf('<link rel="canonical" href="https://gridironui.xyz/guides/live-betting.html">') !== -1);
 ok("meta description present", /<meta name="description" content="[^"]{50,}"/.test(guide));
 ok("new guide uses current site.js key",
-  guide.indexOf("../js/site.js?v=1.59.0") !== -1);
+  guide.indexOf("../js/site.js?v=1.64.0") !== -1);
 ok("new guide uses current style.css key",
   guide.indexOf("../css/style.css?v=1.59.0") !== -1);
 

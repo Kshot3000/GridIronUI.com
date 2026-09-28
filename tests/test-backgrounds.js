@@ -90,7 +90,7 @@ assert((css.match(/data:image\/svg\+xml/g) || []).length >= 6,
 var tagged = pages.filter(function(p){
   return /<section class="page-hero sport-/.test(fs.readFileSync(p, "utf8"));
 });
-assert(tagged.length === 15, "15 photo-less pages tagged with sport line-art classes (found " + tagged.length + ")");
+assert(tagged.length === 16, "16 photo-less pages tagged with sport line-art classes (found " + tagged.length + ")");
 var photoPagesTagged = heroBgPages.filter(function(p){
   return /<section class="page-hero sport-/.test(fs.readFileSync(p, "utf8"));
 });
