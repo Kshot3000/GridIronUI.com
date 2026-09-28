@@ -576,6 +576,18 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
     if(!parts.length) return "";
     return '<div class="game-meta cons-line"><span title="The median line across every book listed for this game — the reference point for spotting stale or shaded numbers.">📊 Market consensus ('+cons.n+' book'+(cons.n>1?"s":"")+'): '+GIU.esc(parts.join(" · "))+'</span>'+openHtml()+'</div>';
   }
+  /* No-vig fair line: the vig-free moneyline implied by the book consensus —
+     what a fair book would pay each side. The sharp reference: a book price
+     better than the fair price is value; worse is paying extra juice. Silent
+     when the moneyline consensus is incomplete — one side is not a price. */
+  function fairLineHtml(){
+    var f = OL.fairMoneyline(cons);
+    if(!f) return "";
+    return '<div class="game-meta fair-line"><span title="The vig-free price implied by the book consensus — what a fair book would pay. Derived from the listed books\u2019 median prices, so it\u2019s an estimate, not a quote: if a book beats the fair price, that\u2019s value.">📐 No-vig fair: '+
+      GIU.esc(OL.shortName(a))+' '+GIU.esc(String(f.a.am))+' ('+f.a.prob+'%) · '+
+      GIU.esc(OL.shortName(h))+' '+GIU.esc(String(f.h.am))+' ('+f.h.prob+'%)'+
+      ' <span style="opacity:.75">— books hold ≈ '+f.holdPct+'%</span></span></div>';
+  }
   /* Movement since your personal opener (first time this browser saw the game). */
   function openHtml(){
     var bits = [];
@@ -656,7 +668,7 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
   return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
-    arbFlagHtml()+consLineHtml()+pmSlot+injSlot+histHtml()+wxSlot+bestCard+
+    arbFlagHtml()+consLineHtml()+fairLineHtml()+pmSlot+injSlot+histHtml()+wxSlot+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' spread</th><th>'+GIU.esc(OL.shortName(h))+' spread</th>'+
     '<th>Over</th><th>Under</th>'+

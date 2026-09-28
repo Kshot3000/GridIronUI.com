@@ -115,6 +115,24 @@ var L = {
                 h: slot(collect("h2h", ev.home_team, "price"), "pr") }
     };
   },
+  /* No-vig fair moneyline: strip the book hold out of the consensus price
+     pair. Each side's fair implied probability is its consensus probability
+     rescaled so the two sum to 100%; fair prices are those probs converted
+     back to American. Returns {a:{am,prob}, h:{am,prob}, holdPct} or null
+     when either side of the consensus pair is missing — a fair price off
+     one side is a guess, and this board doesn't guess. */
+  fairMoneyline: function(cons){
+    var a = cons && cons.ml && cons.ml.a, h = cons && cons.ml && cons.ml.h;
+    if(!a || !h || !(a.pr > 1) || !(h.pr > 1)) return null;
+    var pa = 1/a.pr, ph = 1/h.pr, tot = pa+ph;
+    var fa = pa/tot, fh = ph/tot;
+    function r4(x){ return Math.round(x*10000)/10000; }
+    return {
+      a: { am: String(L.dec2am(1/fa)), prob: r4(fa*100) },
+      h: { am: String(L.dec2am(1/fh)), prob: r4(fh*100) },
+      holdPct: Math.round((tot-1)*100*100)/100
+    };
+  },
   /* Off-market flag: a book's line differs from the consensus by a meaningful
      amount — a full point on spreads/totals, or 3% of implied probability on
      moneylines. That's either a stale line or a deliberate lean; either way

@@ -88,6 +88,8 @@ node tests/test-odds-wx-dom.js  # weather badge wiring in shipped odds.js (hidde
 node tests/test-cache-keys.js  # cache-key regression guard (every js ?v= key >= the release that last changed that file)
 node tests/test-arbs.js       # cross-book arbitrage logic (stake splits, moneyline/spread/total pairing, same-book exclusion, 3-way EPL)
 node tests/test-arbs-dom.js   # Sure bets strip wiring in shipped odds.js (strip render, game flags, quiet-when-empty)
+node tests/test-fairline.js    # no-vig fair moneyline math (vig removal, orientation, hold, null paths)
+node tests/test-fairline-dom.js  # fair line wiring in shipped odds.js (render, hold figure, quiet-when-one-sided)
 node tests/test-odds-alerts.js # line-move alert candidates (threshold gating, baseline seeding, started-game skip, no re-fire)
 node tests/test-odds-alerts-dom.js # alert wiring in shipped odds.js (seed-quiet first pull, toast content/jump/dismiss, off stops all)
 node tests/test-odds-pm.js     # market-check logic (Polymarket live moneylines, no-vig fair probs, 5-pt gap flag, pinned-market exclusion)

@@ -226,6 +226,9 @@ td.flash{animation:flash 1.2s ease-out}
 /* market consensus line + off-market flag on the odds board */
 .cons-line{margin:-8px 0 14px;font-size:.84rem}
 .cons-line span{color:var(--gold-soft)}
+/* no-vig fair line: sits directly under the consensus line, muted */
+.fair-line{margin:-12px 0 14px;font-size:.84rem}
+.fair-line span{color:var(--muted)}
 .open-line{color:var(--faint)!important;font-size:.8rem}
 .offmkt{color:var(--gold);font-weight:700;cursor:help}
 
