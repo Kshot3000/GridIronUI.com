@@ -1,6 +1,8 @@
 /* GridIronUI hero canvas — "market pulse".
    Drifting glowing line charts over a faint grid: a trading-terminal feel for
-   the hero. Chart drift runs at half speed (stepEvery doubled on 2026-09-27).
+   the hero. Chart drift runs at half speed (stepEvery doubled on 2026-09-27)
+   with a continuous per-frame glide between data steps so the motion is
+   smooth, never choppy.
    Behind the charts falls a gentle rain of balls, bills, and tokens.
    Pure decoration (aria-hidden). Disabled entirely under
    prefers-reduced-motion; paused when the tab is hidden or the hero scrolls
@@ -26,7 +28,7 @@ function init(){
   function makeLine(color, amp, yBase, width, stepEvery){
     var pts=[], n=90, v=0.5, i;
     for(i=0;i<n;i++){ v+=(Math.random()-0.5)*0.12; v=Math.max(0.06,Math.min(0.94,v)); pts.push(v); }
-    return { color:color, amp:amp, yBase:yBase, width:width, stepEvery:stepEvery, pts:pts,
+    return { color:color, amp:amp, yBase:yBase, width:width, stepEvery:stepEvery, pts:pts, off:0,
       step:function(){
         var v=this.pts[this.pts.length-1]+(Math.random()-0.5)*0.10;
         this.pts.push(Math.max(0.06,Math.min(0.94,v))); this.pts.shift();
@@ -44,8 +46,21 @@ function init(){
     { g:"\uD83C\uDFC0", kind:"emoji" },                          /* basketball */
     { g:"\uD83D\uDCB5", kind:"emoji" },                          /* hundred-dollar bill */
     { g:"\u20BF",       kind:"token", bg:"240,180,41",  fg:"#241a05" }, /* bitcoin */
-    { g:"\u039E",       kind:"token", bg:"150,170,255", fg:"#0c1226" }  /* ethereum */
+    { g:"eth",          kind:"eth",   bg:"150,170,255" }                /* ethereum */
   ];
+  /* Ethereum octahedron mark: four facets in two blues, drawn with paths so
+     it reads as the ETH diamond on every platform (no font glyph needed). */
+  function ethDiamond(r){
+    var w=r*0.62, t=-r, b=r, m=r*0.24;
+    ctx.beginPath(); ctx.moveTo(0,t); ctx.lineTo(-w,0); ctx.lineTo(0,m); ctx.closePath();
+    ctx.fillStyle="#a9bcfb"; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0,t); ctx.lineTo(w,0); ctx.lineTo(0,m); ctx.closePath();
+    ctx.fillStyle="#7e96f4"; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0,b); ctx.lineTo(-w,0); ctx.lineTo(0,m); ctx.closePath();
+    ctx.fillStyle="#627eea"; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0,b); ctx.lineTo(w,0); ctx.lineTo(0,m); ctx.closePath();
+    ctx.fillStyle="#4a5fc4"; ctx.fill();
+  }
   var rain = [];
   function scatter(p, initial){
     p.x = Math.random()*W;
@@ -77,7 +92,12 @@ function init(){
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rot);
       ctx.globalAlpha = p.alpha;
-      if(p.gl.kind === "token"){
+      if(p.gl.kind === "eth"){
+        r = p.size*0.62;
+        ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
+        ctx.fillStyle = "rgba("+p.gl.bg+",0.30)"; ctx.fill();
+        ethDiamond(r*0.72);
+      }else if(p.gl.kind === "token"){
         r = p.size*0.58;
         ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
         ctx.fillStyle = "rgba("+p.gl.bg+",0.85)"; ctx.fill();
@@ -105,11 +125,15 @@ function init(){
     ctx.stroke();
     drawRain();   /* balls, bills, and tokens fall behind the charts */
     lines.forEach(function(L, li){
-      if(frame % L.stepEvery === 0) L.step();
+      var dx=W/(L.pts.length-1);
+      if(frame % L.stepEvery === 0){ L.step(); L.off=0; }
+      /* glide left a fraction of one point-width per frame between data steps,
+         so the half-speed drift stays continuous instead of jumping */
+      else L.off-=dx/L.stepEvery;
       var i, x, y;
       ctx.beginPath();
       for(i=0;i<L.pts.length;i++){
-        x=(i/(L.pts.length-1))*W;
+        x=(i/(L.pts.length-1))*W+L.off;
         y=H*(L.yBase+(L.pts[i]-0.5)*L.amp*2);
         if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
       }
