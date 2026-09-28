@@ -70,6 +70,7 @@ node tests/test-odds-alerts.js # line-move alert candidates (threshold gating, b
 node tests/test-odds-alerts-dom.js # alert wiring in shipped odds.js (seed-quiet first pull, toast content/jump/dismiss, off stops all)
 node tests/test-odds-pm.js     # market-check logic (Polymarket live moneylines, no-vig fair probs, 5-pt gap flag, pinned-market exclusion)
 node tests/test-odds-pm-dom.js # market-check wiring in shipped odds.js (hidden slot, live-price reveal, pinned silence, no NBA fetches)
+node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific cadence promises, loop refresh rule, snapshot shape, markets.js cache key)
 ```
 
 ### Team identity directory
@@ -86,7 +87,8 @@ python3 scripts/fetch-teams.py    # writes data/teams.json (NFL/NBA/MLB/NHL/EPL)
 
 Kalshi's public API rejects browser cross-origin requests, so the Markets
 page's "Kalshi · NFL" tab renders a server-side snapshot instead of a live
-feed. Refresh it (loop runs do this on every push):
+feed. Refresh it on every push — loop runs do this when the snapshot is
+older than about two hours:
 
 ```bash
 python3 scripts/fetch-kalshi.py   # writes data/kalshi-nfl.json (timestamped)

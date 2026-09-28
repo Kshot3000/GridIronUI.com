@@ -11,8 +11,9 @@ Honesty rules: the snapshot carries its own updated_at; the page labels it as
 a snapshot and warns when it goes stale. Nothing here invents a price.
 
 Usage:  python3 scripts/fetch-kalshi.py
-Refresh cadence: every improvement-loop run that pushes, or at minimum when
-the snapshot is older than ~2 hours.
+Refresh cadence: improvement-loop runs refresh this on push whenever the
+snapshot is older than about two hours. (A scheduled GitHub Actions
+workflow is the planned long-term fix — see the goal workspace notes.)
 """
 import json, os, sys, time, urllib.request
 

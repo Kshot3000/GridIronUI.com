@@ -19,7 +19,7 @@ var tabSeq = 0;
 
 /* ---- live auto-refresh machinery (same contract as scores.js v1.20.0) ----
    Polymarket prices move with the games, and the Kalshi snapshot gets rebuilt
-   server-side roughly every 15 minutes, so both tabs keep themselves fresh in
+   the Kalshi snapshot is rebuilt regularly server-side, so both tabs keep themselves fresh in
    place — no reload, no skeleton shimmer. Ticks skip while the tab is hidden
    and resume on their own when it returns. Timers never stack: every load
    clears the old timer before scheduling a new one. */
@@ -155,7 +155,7 @@ function disagreeCard(games, snap, dir){
   var dis = D.disagreements(mtchs, 3);
   var head = '<div class="card disagree-card"><span class="tag">Cross-book edge</span>'+
     '<h3 style="margin:10px 0 4px">Where the two markets disagree</h3>'+
-    '<p class="disagree-note">Polymarket (live) and Kalshi (snapshot, rebuilt about every 15 minutes) price the same '+
+    '<p class="disagree-note">Polymarket (live) and Kalshi (snapshot, rebuilt regularly) price the same '+
     'game-winners. A gap of 3¢ or more means the books disagree — one of them is off, and that\'s where edge lives. '+
     'Kalshi\'s numbers can lag the snapshot and their fee structure differs from Polymarket\'s, so confirm both '+
     'prices are live before you bet.</p>';
@@ -277,7 +277,7 @@ function load(my, silent){
 /* Kalshi — a second prediction-market book on this page. Kalshi's public API
    rejects browser cross-origin calls, so the improvement-loop script
    scripts/fetch-kalshi.py fetches it server-side and commits a timestamped
-   snapshot (data/kalshi-nfl.json), refreshed roughly every 15 minutes. This
+   snapshot (data/kalshi-nfl.json), refreshed regularly. This
    tab renders that snapshot honestly: a "snapshot" tag, the refresh time, and
    a stale warning if the snapshot goes cold — never presented as live. */
 function agoShort(iso){
@@ -336,13 +336,13 @@ function loadKalshi(my, silent){
       return;
     }
     var when = agoShort(snap.updated_at);
-    $("marketNote").textContent = games.length+" games · snapshot refreshed "+when+" · Kalshi's API blocks browsers, so prices update when the snapshot rebuilds (~15 min)";
+    $("marketNote").textContent = games.length+" games · snapshot refreshed "+when+" · Kalshi's API blocks browsers, so prices update when the snapshot rebuilds";
     var stale = window.Kalshi.stale(snap.updated_at)
       ? '<div class="notice" style="margin-bottom:16px"><strong>This snapshot is stale</strong> (over 6 hours old). Treat these prices as a rough guide until the next refresh — we\'d rather say so than let you bet on cold numbers.</div>'
       : "";
     box.innerHTML = stale + games.slice(0, 12).map(function(g){ return kalshiCard(g, dir); }).join("");
     /* ---- live auto-refresh ----
-       The snapshot file is rebuilt server-side roughly every 15 minutes, so a
+       The snapshot file is rebuilt regularly server-side, so a
        silent 5-minute re-fetch picks up fresh prices between site pushes —
        no page reload, no shimmer. */
     kalshiTab = true;
