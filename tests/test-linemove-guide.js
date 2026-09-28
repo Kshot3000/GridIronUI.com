@@ -51,13 +51,14 @@ ok("honesty: RLM section admits splits aren't shown here",
 
 /* wiring */
 const index = read("index.html");
-ok("index hero counts 6 guides",
-  /<b>6<\/b><span>in-depth guides<\/span>/.test(index));
+ok("index hero counts 7 guides",
+  /<b>7<\/b><span>in-depth guides<\/span>/.test(index));
 ok("index hero counts 16 tools",
   /<b>16<\/b><span>betting tools<\/span>/.test(index));
 ok("index links the new guide", index.indexOf('href="guides/line-movement.html"') !== -1);
-ok("index moves the New tag to the new guide",
-  /guides\/line-movement\.html[\s\S]{0,400}?<span class="tag">New<\/span>/.test(index));
+ok("New tag moved off line-movement onto the props guide (v1.66.0)",
+  !/guides\/line-movement\.html[\s\S]{0,400}?<span class="tag">New<\/span>/.test(index) &&
+  /guides\/props\.html[\s\S]{0,500}?<span class="tag">New<\/span>/.test(index));
 
 const sitejs = read("js/site.js");
 ok("footer Learn list links the new guide",
@@ -75,7 +76,7 @@ ok("canonical points at custom domain",
   guide.indexOf('<link rel="canonical" href="https://gridironui.xyz/guides/line-movement.html">') !== -1);
 ok("meta description present", /<meta name="description" content="[^"]{50,}"/.test(guide));
 ok("new guide uses current site.js key",
-  guide.indexOf("../js/site.js?v=1.64.0") !== -1);
+  guide.indexOf("../js/site.js?v=1.66.0") !== -1);
 ok("new guide uses current style.css key",
   guide.indexOf("../css/style.css?v=1.62.0") !== -1);
 ok("footer branding via site.js (donation/21+/helpline live in footer)",

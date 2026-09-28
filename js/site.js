@@ -72,6 +72,7 @@ var footerHtml =
      '<li><a href="'+P("guides/advanced.html")+'">Advanced strategy</a></li>'+
      '<li><a href="'+P("guides/live-betting.html")+'">Live betting</a></li>'+
      '<li><a href="'+P("guides/line-movement.html")+'">Reading line movement</a></li>'+
+     '<li><a href="'+P("guides/props.html")+'">Player props playbook</a></li>'+
      '<li><a href="'+P("glossary.html")+'">Glossary</a></li>'+
      '<li><a href="'+P("tools.html")+'">Betting calculators</a></li>'+
    '</ul></div>'+
