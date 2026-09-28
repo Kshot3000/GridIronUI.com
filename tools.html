@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Fifteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Sixteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -159,6 +159,27 @@
       <div class="result-box" id="thOut" style="display:none"></div>
     </div>
 
+    <div class="card calc" id="middle">
+      <span class="tag">New</span>
+      <h3>Middling calculator</h3>
+      <p class="hint">The line moved after your first bet — now you hold both sides at different numbers. Enter both bets and see exactly what a middle pays, and what a split costs. The labels are just for you; the math only needs stakes and prices. Read <a href="guides/line-movement.html">the line-movement guide</a> first if you haven't.</p>
+      <div class="form-row">
+        <div class="field"><label>Bet 1 — your label (optional)</label><input type="text" id="mLbl1" placeholder="Over 45.5"></div>
+        <div class="field"><label>Bet 2 — your label (optional)</label><input type="text" id="mLbl2" placeholder="Under 48.5"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Bet 1 stake ($)</label><input type="number" id="mStake1" placeholder="110" min="0" step="any"></div>
+        <div class="field"><label>Bet 2 stake ($)</label><input type="number" id="mStake2" placeholder="110" min="0" step="any"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Bet 1 price</label><input type="text" id="mOdds1" placeholder="-110"></div>
+        <div class="field"><label>Bet 2 price</label><input type="text" id="mOdds2" placeholder="-110"></div>
+        <div class="field"><label>Format</label><select id="mFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="midGo">Evaluate my middle</button>
+      <div class="result-box" id="midOut" style="display:none"></div>
+    </div>
+
     <div class="card calc" id="cashout">
       <span class="tag">Sharp money</span>
       <h3>Cash-out evaluator</h3>
@@ -246,7 +267,6 @@
   </div>
 
     <div class="card calc" id="journal-tool">
-      <span class="tag">New</span>
       <h3>Bet journal</h3>
       <p class="hint">Log every bet and settle the results — your true record, net profit, ROI, win rate, streaks and per-sport numbers on one dashboard. Stored only in this browser, with CSV export.</p>
       <a class="btn btn-gold btn-sm" href="journal.html">Open journal →</a>
@@ -261,7 +281,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.64.0"></script>
-<script src="js/betmath.js?v=1.63.0"></script>
-<script src="js/tools.js?v=1.63.0"></script>
+<script src="js/betmath.js?v=1.65.0"></script>
+<script src="js/tools.js?v=1.65.0"></script>
 </body>
 </html>

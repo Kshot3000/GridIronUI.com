@@ -188,6 +188,29 @@ var M = {
     return r;
   },
 
+  /* ---- middling: you hold both sides of the same market at different
+         numbers (the line moved after your first bet). s1/d1 = first bet,
+         s2/d2 = the other side. Outcomes:
+           both win  — the final lands BETWEEN your two numbers: win1 + win2
+           split1    — the final lands on bet 1's side: win1 - s2
+           split2    — the final lands on bet 2's side: win2 - s1
+         Pushes (final lands exactly on a number) are a book-graded refund,
+         not a win — they are deliberately NOT in this math; see the card's
+         fine print. Throws on nonsense input. */
+  middle: function(s1, d1, s2, d2){
+    s1=Number(s1); d1=Number(d1); s2=Number(s2); d2=Number(d2);
+    if(!(s1>0) || !(s2>0)) throw new Error("Both stakes must be greater than 0");
+    if(!(d1>1) || !(d2>1)) throw new Error("Both prices must be decimal odds greater than 1");
+    var w1 = round(s1*(d1-1),2), w2 = round(s2*(d2-1),2);
+    var both = round(w1+w2,2);
+    var sp1 = round(w1-s2,2), sp2 = round(w2-s1,2);
+    return {
+      win1: w1, win2: w2, totalRisked: round(s1+s2,2),
+      bothWin: both, splitBet1: sp1, splitBet2: sp2,
+      worstCase: Math.min(sp1, sp2)
+    };
+  },
+
   /* ---- ticket hedge planner: one leg left on a live ticket.
          stake A: original stake. ticketPays T: full ticket payout INCLUDING
          the stake. hedgeDec d: decimal price on the OTHER side of the

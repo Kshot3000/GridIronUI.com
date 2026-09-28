@@ -99,6 +99,9 @@ node tests/test-predictions-kalshi-dom.js  # Kalshi row wiring in shipped predic
 node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific cadence promises, loop refresh rule, snapshot shape, markets.js cache key)
 node tests/test-ev.js        # expected-value math (fair price -> zero EV, +EV/-EV cases, break-even, garbage-in throws)
 node tests/test-ev-dom.js    # EV calculator wiring in shipped tools.js (verdicts, dollar/edge math, formats, default stake, errors)
+node tests/test-middle.js      # middling math (both-win payout, split outcomes, worst case, garbage-in throws)
+node tests/test-middle-dom.js  # middling calculator wiring in shipped tools.js (math, verdicts, formats, label XSS, errors)
+node tests/test-middle-static.js  # middle card wiring in tools.html (New tag, Sixteen counts, v1.65.0 cache keys)
 ```
 
 ### Team identity directory

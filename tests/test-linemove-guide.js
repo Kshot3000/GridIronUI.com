@@ -53,8 +53,8 @@ ok("honesty: RLM section admits splits aren't shown here",
 const index = read("index.html");
 ok("index hero counts 6 guides",
   /<b>6<\/b><span>in-depth guides<\/span>/.test(index));
-ok("index hero counts 15 tools",
-  /<b>15<\/b><span>betting tools<\/span>/.test(index));
+ok("index hero counts 16 tools",
+  /<b>16<\/b><span>betting tools<\/span>/.test(index));
 ok("index links the new guide", index.indexOf('href="guides/line-movement.html"') !== -1);
 ok("index moves the New tag to the new guide",
   /guides\/line-movement\.html[\s\S]{0,400}?<span class="tag">New<\/span>/.test(index));

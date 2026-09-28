@@ -285,6 +285,37 @@ $("thGo").addEventListener("click", function(){
   }catch(e){ err("thOut", e.message); }
 });
 
+/* 10c — middling calculator: both sides of the same market at different numbers */
+function midMoney(v){
+  var neg = v < 0;
+  return (neg ? "\u2212" : "+") + "$" + Math.abs(v).toFixed(2);
+}
+$("midGo").addEventListener("click", function(){
+  if(isEmpty("mStake1")||isEmpty("mOdds1")||isEmpty("mStake2")||isEmpty("mOdds2")){ note("midOut", "Enter both stakes and both prices above, then hit Evaluate my middle. "+EXAMPLE); return; }
+  try{
+    var s1 = num("mStake1"), s2 = num("mStake2");
+    var d1 = toDecimal(val("mOdds1"), val("mFmt")), d2 = toDecimal(val("mOdds2"), val("mFmt"));
+    var l1 = val("mLbl1") || "Bet 1", l2 = val("mLbl2") || "Bet 2";
+    var r = BetMath.middle(s1, d1, s2, d2);
+    var row = function(icon, title, sub, v){
+      var col = v >= 0 ? "#7fe8a0" : "#ff9aa3";
+      return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)">'+
+        '<div><b>'+icon+' '+title+'</b><div style="color:var(--muted);font-size:.82rem">'+sub+'</div></div>'+
+        '<b class="num" style="font-size:1.25rem;color:'+col+'">'+midMoney(v)+'</b></div>';
+    };
+    var verdict = r.worstCase >= 0
+      ? '<p style="margin:12px 0 0"><b style="color:#7fe8a0">Free middle.</b> <span style="color:var(--muted);font-size:.9rem">Even the worst split pays '+midMoney(r.worstCase)+' — both prices were better than fair, so the split can\u2019t lose. Take it and hope the final lands between your numbers.</span></p>'
+      : '<p style="margin:12px 0 0"><b style="color:#ffc46b">Know your price.</b> <span style="color:var(--muted);font-size:.9rem">A middle pays '+midMoney(r.bothWin)+', but a missed window costs up to <b class="num" style="color:#ff9aa3">$'+Math.abs(r.worstCase).toFixed(2)+'</b> — the vig on the split. The middle has to land often enough to cover that tax, which is why middles usually only make sense when the line moved <em>after</em> your first bet.</span></p>';
+    var fine = '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Honest fine print: pushes aren\u2019t in this table — if the final lands exactly on one of your numbers, most books refund that straight bet, which softens the worst case above. The wider the gap between your two numbers, the more often finals land in it, but the market prices that in. Confirm the second-side price is live before you bet it; stale lines misfire. You risk <b class="num" style="color:var(--text)">$'+r.totalRisked.toFixed(2)+'</b> in full.</p>';
+    show("midOut",
+      '<div style="font-size:.85rem;color:var(--muted);margin-bottom:6px">'+GIU.esc(l1)+' <b class="num" style="color:var(--text)">$'+s1.toLocaleString("en-US")+'</b> @ <b class="num" style="color:var(--text)">'+GIU.esc(val("mOdds1"))+'</b> · '+GIU.esc(l2)+' <b class="num" style="color:var(--text)">$'+s2.toLocaleString("en-US")+'</b> @ <b class="num" style="color:var(--text)">'+GIU.esc(val("mOdds2"))+'</b></div>'+
+      row("\uD83C\uDFC6", "Final lands in the middle — both bets win", "The number you\u2019re dreaming about.", r.bothWin)+
+      row("\u25AA\uFE0F", "Final favors "+GIU.esc(l1), GIU.esc(l1)+" wins, "+GIU.esc(l2)+" loses.", r.splitBet1)+
+      row("\u25AA\uFE0F", "Final favors "+GIU.esc(l2), GIU.esc(l2)+" wins, "+GIU.esc(l1)+" loses.", r.splitBet2)+
+      verdict + fine);
+  }catch(e){ err("midOut", e.message); }
+});
+
 /* 10b — cash-out evaluator: is the book's mid-game offer a fair price? */
 function coMoney(v){
   var neg = v < 0;
