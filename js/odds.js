@@ -41,6 +41,22 @@ var autoTimer = null;
    quota-smart auto-refresh (ticks only burn API quota when lines move). */
 var renderSeq = 0, boardHasGames = false, lastUpdated = null, nearBySport = {};
 
+/* ---- line-move alerts (v1.40.0) ----
+   The visitor picks a threshold (1 / 1.5 / 2 points); every re-pull
+   compares this pull's consensus spread/total against the previous
+   pull's (alertBase, per sport, session-local) and fires a toast for
+   each threshold crossing. The baseline is REPLACED after each pull, so
+   an alert always means "moved since your last look" — never a re-fire.
+   Pure candidate math is OL.moveAlerts / OL.alertBaseline; toasts show
+   in-page always, and a browser Notification fires only when the tab is
+   hidden (permission granted). Everything is local: alerts can't work
+   while the tab is closed, and the note on the control says so. */
+var alertThrKey = "giu_odds_alert_thr";
+var alertThr = 0;                 /* 0 = off; persisted across sessions */
+var alertBase = {};               /* sport -> {eventId: {sp, tot}} */
+try{ alertThr = Number(localStorage.getItem(alertThrKey)) || 0; }catch(e){ alertThr = 0; }
+if(!(alertThr === 1 || alertThr === 1.5 || alertThr === 2)) alertThr = 0;
+
 /* ---- bet slip state (local only, never leaves the browser) ---- */
 var Slip = window.OddsSlip;
 var slip = [];
@@ -177,6 +193,11 @@ function render(opts){
     setSnap(now);
     setOpens(opens);
     setHist(hist);
+    /* Line-move alerts: compare this pull's consensus against the last
+       pull's baseline, toast every threshold crossing, then re-baseline —
+       all after the board is on screen so an alert hiccup never blocks
+       lines. Zero API quota: it reuses the events just pulled. */
+    maybeAlerts(events, mySeq);
     /* keep slip prices honest against the fresh board */
     if(slip.length){ Slip.reprice(slip, now); saveSlip(); }
     refreshPickMarks();
@@ -350,6 +371,84 @@ function renderMovers(movers){
     '<div class="game-meta"><span>Since this browser first saw each game — where the money is pushing. '+
     'Tap a row to jump to the game.</span></div></div></div>'+
     '<div class="movers">'+rows+'</div></section>';
+}
+
+/* ---- line-move alerts (v1.40.0) ----
+   maybeAlerts runs after every successful pull. The first pull with
+   alerts on only seeds the baseline (nothing moved yet — honest by
+   default); later pulls toast each threshold crossing, then re-baseline
+   so the same move never fires twice. */
+function maybeAlerts(events, mySeq){
+  if(mySeq !== renderSeq) return; /* stale sport response — discard */
+  if(!(alertThr > 0)) return;
+  var fresh = OL.alertBaseline(events);
+  var base = alertBase[sport];
+  if(base){
+    var hits = OL.moveAlerts(events, base, alertThr, Date.now());
+    hits.forEach(fireAlert);
+  }
+  alertBase[sport] = fresh;
+}
+function alertMoveText(a){
+  var kind = a.kind === "spread" ? "Spread" : "Total";
+  var from = a.kind === "spread" ? OL.fmtPt(a.from) : String(a.from);
+  var to = a.kind === "spread" ? OL.fmtPt(a.to) : String(a.to);
+  var d = Math.round(a.delta*10)/10;
+  var arrow = a.delta > 0 ? "▲" : "▼";
+  var cls = a.delta > 0 ? "mv-up" : "mv-dn";
+  return { kind: kind, body: kind + " " + from + " → " + to +
+           ' <span class="' + cls + '">' + arrow + " " +
+           GIU.esc((d > 0 ? "+" : "") + d) + "</span>" };
+}
+/* Toast stack (max 3, newest first) with tap-to-jump game links and a
+   dismiss button; duplicate toast for the same game+kind is never
+   stacked twice. Browser Notification only when the tab is hidden and
+   permission was granted — a visible tab gets the toast, not the buzz. */
+function fireAlert(a){
+  var t = alertMoveText(a);
+  var body = t.body;
+  var toast = document.createElement("div");
+  toast.className = "alert-toast";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("data-alert", a.id + "|" + a.kind);
+  toast.innerHTML = '<span aria-hidden="true">🔔</span><span><b>Line move</b> — ' +
+    '<a href="#' + GIU.esc(a.anchor) + '">' + GIU.esc(a.title) + "</a>: " + body + "</span>" +
+    '<button class="alert-x" aria-label="Dismiss alert">×</button>';
+  var box = $("alertToasts");
+  if(box){
+    var kids = box.querySelectorAll ? box.querySelectorAll(".alert-toast") : [];
+    for(var i = 0; i < kids.length; i++){
+      if(kids[i].getAttribute("data-alert") === a.id + "|" + a.kind) return;
+    }
+    box.insertBefore(toast, box.firstChild);
+    while(box.children && box.children.length > 3)
+      box.removeChild(box.lastChild);
+  }
+  notifyAlert(a, t);
+}
+function notifyAlert(a, t){
+  try{
+    if(document.hidden !== true) return;
+    if(!("Notification" in window)) return;
+    if(window.Notification.permission !== "granted") return;
+    new window.Notification("GridIronUI line move", {
+      body: a.title + ": " + t.kind + " " +
+            (a.kind === "spread" ? OL.fmtPt(a.from) : a.from) + " → " +
+            (a.kind === "spread" ? OL.fmtPt(a.to) : a.to),
+      tag: "giu-alert-" + a.id + "-" + a.kind
+    });
+  }catch(e){}
+}
+/* Dismiss buttons on the alert toasts (delegated, survives re-renders). */
+function wireAlertToasts(){
+  var box = $("alertToasts");
+  if(!box || box._alertWired) return;
+  box._alertWired = true;
+  box.addEventListener("click", function(e){
+    var x = e.target && e.target.closest ? e.target.closest(".alert-x") : null;
+    if(x && x.parentNode && x.parentNode.parentNode === box)
+      box.removeChild(x.parentNode);
+  });
 }
 
 function renderGame(ev, prev, now, opens, hist, dir, league){
@@ -701,6 +800,31 @@ $("autoRef").addEventListener("change", function(){
     setStatus("");
   }
 });
+/* line-move alerts: threshold select (persisted). requestPermission is
+   asked on this explicit gesture; a denial still leaves the in-page
+   toasts working — only the hidden-tab browser ping needs permission. */
+(function initAlerts(){
+  var sel = $("alertThr");
+  if(!sel) return;
+  sel.value = alertThr > 0 ? String(alertThr) : "0";
+  wireAlertToasts();
+  sel.addEventListener("change", function(){
+    var v = Number(sel.value) || 0;
+    alertThr = (v === 1 || v === 1.5 || v === 2) ? v : 0;
+    try{ localStorage.setItem(alertThrKey, String(alertThr)); }catch(e){}
+    if(alertThr > 0){
+      alertBase = {}; /* re-baseline from the next pull — no stale moves */
+      try{
+        if("Notification" in window && window.Notification &&
+           window.Notification.permission === "default"){
+          var p = window.Notification.requestPermission();
+          if(p && p.catch) p.catch(function(){});
+        }
+      }catch(e){}
+      render({silent:true}); /* seed the baseline on this pull, alert from the next */
+    }
+  });
+})();
 /* slip: toggle legs from the board (delegated, survives re-renders) */
 $("oddsBoard").addEventListener("click", function(e){
   var b = e.target && e.target.closest ? e.target.closest(".pick-btn") : null;

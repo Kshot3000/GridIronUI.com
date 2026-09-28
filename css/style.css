@@ -533,6 +533,18 @@ td.best .pick-btn.picked{box-shadow:inset 0 0 0 2px var(--gold)}
 .slip-shared{background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.45);border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:.82rem;color:var(--muted);line-height:1.5}
 .slip-shared b{color:var(--gold-soft)}
 .slip-shared-bad{background:rgba(255,92,92,.08);border-color:rgba(255,92,92,.45)}
+/* v1.40.0 — line-move alert toasts (empty container takes no space) */
+.alert-toasts{display:flex;flex-direction:column;gap:8px;margin:0}
+.alert-toasts:empty{display:none}
+.alert-toast{display:flex;gap:10px;align-items:center;background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.45);border-left:3px solid var(--gold);border-radius:10px;padding:9px 12px;font-size:.86rem;color:var(--text);line-height:1.45;animation:alertIn .22s ease-out}
+.alert-toast b{color:var(--gold-soft)}
+.alert-toast a{font-weight:600}
+.alert-toast .mv-up{color:var(--green)}
+.alert-toast .mv-dn{color:var(--red)}
+.alert-x{margin-left:auto;background:none;border:1px solid transparent;border-radius:6px;color:var(--faint);font-size:1.05rem;line-height:1;padding:2px 8px;cursor:pointer;flex:none}
+.alert-x:hover,.alert-x:focus-visible{color:var(--text);border-color:var(--gold-glow);outline:none}
+@keyframes alertIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.alert-toast{animation:none}}
 
 /* ---------- responsive ---------- */
 @media(max-width:1020px){

@@ -183,6 +183,61 @@ var L = {
       })
       .slice(0, Math.max(0, n));
   },
+  /* ---- line-move alerts (pure candidate computation) ----
+     Compares this pull's consensus spread/total against a caller-kept
+     baseline {eventId: {sp, tot}} and returns one record per threshold
+     crossing: {id, title, anchor, kind:"spread"|"total", from, to, delta}.
+     Skips: alerts off (threshold not > 0), games with no baseline yet
+     (first look — nothing has "moved"), games already started, missing
+     or non-finite consensus. Spread uses the away-side consensus point,
+     totals use the Over consensus point — same reference the steam strip
+     and sparklines use. Pure. */
+  moveAlerts: function(events, baseline, threshold, tsNow){
+    var out = [];
+    threshold = Number(threshold);
+    if(!(threshold > 0)) return out;
+    tsNow = (tsNow === undefined) ? Date.now() : tsNow;
+    (events||[]).forEach(function(ev){
+      if(!ev || ev.id === undefined || ev.id === null) return;
+      var ct = Date.parse(ev.commence_time || "");
+      if(isFinite(ct) && ct <= tsNow) return; /* started: the move already happened */
+      var b = (baseline||{})[ev.id];
+      if(!b) return;
+      var cons = L.consensus(ev.bookmakers||[], ev);
+      var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
+      var title = ev.away_team + " @ " + ev.home_team;
+      var sp = (cons.spread.a && cons.spread.a.pt != null) ? cons.spread.a.pt : null;
+      var tot = (cons.total.o && cons.total.o.pt != null) ? cons.total.o.pt : null;
+      if(sp != null && b.sp != null && isFinite(b.sp)){
+        var d = sp - b.sp;
+        if(Math.abs(d) >= threshold)
+          out.push({ id: ev.id, title: title, anchor: anchor, kind: "spread",
+                     from: b.sp, to: sp, delta: d });
+      }
+      if(tot != null && b.tot != null && isFinite(b.tot)){
+        var d2 = tot - b.tot;
+        if(Math.abs(d2) >= threshold)
+          out.push({ id: ev.id, title: title, anchor: anchor, kind: "total",
+                     from: b.tot, to: tot, delta: d2 });
+      }
+    });
+    return out;
+  },
+  /* Baseline snapshot for alerts: {eventId: {sp, tot}} from this pull's
+     consensus — caller's baseline is REPLACED with this after each pull,
+     so an alert means "moved since your last look", never a re-fire of
+     an old move. Pure. */
+  alertBaseline: function(events){
+    var base = {};
+    (events||[]).forEach(function(ev){
+      if(!ev || ev.id === undefined || ev.id === null) return;
+      var cons = L.consensus(ev.bookmakers||[], ev);
+      var sp = (cons.spread.a && cons.spread.a.pt != null) ? cons.spread.a.pt : null;
+      var tot = (cons.total.o && cons.total.o.pt != null) ? cons.total.o.pt : null;
+      if(sp != null || tot != null) base[ev.id] = { sp: sp, tot: tot };
+    });
+    return base;
+  },
   /* ---- per-game line-movement history (sparkline charts) ----
      hist: {eventId: [[t, spreadAwayPt, totalOverPt], ...]}, oldest first,
      tracked in this browser only — the raw material for the movement chart
