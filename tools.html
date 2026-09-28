@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Calculators — Odds, Parlay, Kelly, Vig, Hedge | GridIronUI</title>
-<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, dutching calculator, bankroll simulator. All math runs in your browser.">
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, dutching calculator, teaser calculator, bankroll simulator. All math runs in your browser.">
 <meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
 <meta property="og:url" content="https://gridironui.xyz/tools.html">
 <link rel="canonical" href="https://gridironui.xyz/tools.html">
@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Eleven tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Twelve tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -157,6 +157,34 @@
       <div class="result-box" id="duOut" style="display:none"></div>
     </div>
 
+    <div class="card calc" id="teaser">
+      <span class="tag">Sharp money</span>
+      <h3>Teaser calculator</h3>
+      <p class="hint">Buy points on every leg of a parlay — the classic NFL 6-pointer. Enter each leg's line and the side you're teasing, and the calculator shows the teased lines, which key numbers each leg crosses, and whether it's a <b>Wong leg</b> (crossing both 3 and 7 — the only teaser construction with real research behind it).</p>
+      <div id="tzLegRows"></div>
+      <button class="btn btn-ghost btn-sm" id="tzAddLeg" style="margin-bottom:12px">+ Add leg</button>
+      <div class="form-row">
+        <div class="field"><label>Teaser points</label>
+          <select id="tzPts">
+            <option value="4">4 points</option>
+            <option value="4.5">4.5 points</option>
+            <option value="5">5 points</option>
+            <option value="6" selected>6 points (classic NFL)</option>
+            <option value="6.5">6.5 points</option>
+            <option value="7">7 points</option>
+            <option value="10">10 points (3-team)</option>
+            <option value="13">13 points (4-team)</option>
+          </select>
+        </div>
+        <div class="field"><label>Book's offered price (American)</label><input type="text" id="tzPrice" placeholder="-120" value="-120"></div>
+      </div>
+      <div class="field"><label>If a leg lands exactly on the teased line</label>
+        <select id="tzPush"><option value="push" selected>Ties push — leg voids, teaser re-grades short</option><option value="lose">Ties lose — any push kills the ticket</option></select>
+      </div>
+      <button class="btn btn-gold btn-sm" id="tzGo">Grade my teaser</button>
+      <div class="result-box" id="tzOut" style="display:none"></div>
+    </div>
+
     <div class="card calc" id="bankroll">
       <span class="tag">Sharp money</span>
       <h3>Bankroll risk simulator</h3>
@@ -194,7 +222,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.42.0"></script>
-<script src="js/betmath.js"></script>
-<script src="js/tools.js"></script>
+<script src="js/betmath.js?v=1.51.0"></script>
+<script src="js/tools.js?v=1.51.0"></script>
 </body>
 </html>

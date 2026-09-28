@@ -235,6 +235,86 @@ var M = {
     };
   },
 
+  /* ---- teaser: the classic points-buying parlay ----
+         legs = [{ line, kind:"spread"|"total", side, name? }]
+           spread fav:  teased = line + points   (-7.5 + 6 -> -1.5)
+           spread dog:  teased = line + points   (+1.5 + 6 -> +7.5)
+           total over:  teased = line - points   (47.5 - 6 -> 41.5)
+           total under: teased = line + points   (47.5 + 6 -> 53.5)
+         NFL key numbers: spreads [3,4,6,7,10,14,17], totals [37,41,44,47,51].
+         crossed = key numbers strictly inside the interval the line moves
+         through; touched = key numbers an endpoint lands exactly on (a push
+         risk under "ties push" books). A Wong leg (spreads only) crosses BOTH
+         3 and 7 — the classic 6-pt Wong ranges are favorites -7.5..-8.5 and
+         underdogs +1.5..+2.5. A dead leg crosses nothing: all cost, no value.
+         price = the book's offered American odds (standard 2-team 6-pt is
+         about -120). perLegBreakevenPct = implied(price)^(1/n) * 100, the win
+         rate every leg must clear (ties aside). pushRule "push": a pushed leg
+         voids and the teaser re-grades short; "lose": any push kills it.
+         Returns per-leg teased lines, crossed/touched key numbers, Wong/dead
+         flags, and the combined breakeven math. */
+  teaser: function(legs, points, americanPrice, pushRule){
+    var SPREAD_KEYS = [3,4,6,7,10,14,17], TOTAL_KEYS = [37,41,44,47,51];
+    function inInterval(keys, lo, hi){
+      return keys.filter(function(k){ return k > lo + 1e-9 && k < hi - 1e-9; });
+    }
+    function onEndpoint(keys, v){
+      return keys.filter(function(k){ return Math.abs(k - v) < 1e-9; });
+    }
+    if(!Array.isArray(legs) || legs.length < 2) throw new Error("Teasers need at least 2 legs");
+    var pts = Number(points);
+    if(!(pts > 0)) throw new Error("Teaser points must be greater than 0.");
+    var price = Number(americanPrice);
+    if(!isFinite(price) || price === 0) throw new Error("Enter the book's offered price as American odds (e.g. -120).");
+    if(pushRule !== "push" && pushRule !== "lose") throw new Error("Push rule must be \"push\" or \"lose\".");
+    var out = legs.map(function(leg, i){
+      var L = leg.line;
+      if(typeof L === "string"){ if(!L.trim()) throw new Error("Leg "+(i+1)+": enter a line like -7.5."); L = Number(L.trim()); }
+      if(!isFinite(L)) throw new Error("Leg "+(i+1)+": enter a numeric line like -7.5.");
+      var kind = leg.kind, side = leg.side;
+      var teased;
+      if(kind === "spread"){
+        if(side !== "fav" && side !== "dog") throw new Error("Leg "+(i+1)+": pick favorite or underdog.");
+        teased = round(L + pts, 2);
+      }else if(kind === "total"){
+        if(side !== "over" && side !== "under") throw new Error("Leg "+(i+1)+": pick over or under.");
+        teased = round(L + (side === "under" ? pts : -pts), 2);
+      }else{
+        throw new Error("Leg "+(i+1)+": pick spread or total.");
+      }
+      var keys = kind === "spread" ? SPREAD_KEYS : TOTAL_KEYS, crossed, touched;
+      if(kind === "spread"){
+        var aLo = Math.min(Math.abs(L), Math.abs(teased)), aHi = Math.max(Math.abs(L), Math.abs(teased));
+        crossed = inInterval(keys, aLo, aHi);
+        touched = onEndpoint(keys, Math.abs(L)).concat(onEndpoint(keys, Math.abs(teased)));
+      }else{
+        var tLo = Math.min(L, teased), tHi = Math.max(L, teased);
+        crossed = inInterval(keys, tLo, tHi);
+        touched = onEndpoint(keys, L).concat(onEndpoint(keys, teased));
+      }
+      touched = touched.filter(function(k, j){ return touched.indexOf(k) === j; });
+      var wong = kind === "spread" && crossed.indexOf(3) !== -1 && crossed.indexOf(7) !== -1;
+      return {
+        name: leg.name || ("Leg "+(i+1)),
+        line: round(L, 2), kind: kind, side: side,
+        teased: teased, crossed: crossed, touched: touched,
+        wong: wong, dead: crossed.length === 0
+      };
+    });
+    var dec = M.americanToDecimal(price);
+    var implied = 1/dec;
+    var nWong = out.filter(function(l){ return l.wong; }).length;
+    var nDead = out.filter(function(l){ return l.dead; }).length;
+    var nSpread = out.filter(function(l){ return l.kind === "spread"; }).length;
+    return {
+      points: pts, legs: out, nLegs: out.length,
+      price: price, decimal: round(dec, 4), impliedPct: round(implied*100, 2),
+      perLegBreakevenPct: round(Math.pow(implied, 1/out.length)*100, 2),
+      pushRule: pushRule, nWong: nWong, nDead: nDead,
+      allWong: nSpread === out.length && nWong === out.length
+    };
+  },
+
   /* ---- deterministic PRNG (mulberry32) for seeded, reproducible simulations ---- */
   mulberry32: function(seed){
     var a = (Number(seed)>>>0) || 1;

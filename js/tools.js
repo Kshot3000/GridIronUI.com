@@ -312,6 +312,87 @@ $("duGo").addEventListener("click", function(){
   }catch(e){ err("duOut", e.message); }
 });
 
+/* 12 — teaser calculator: buy points, cross key numbers, find the Wong legs */
+var tzLegN = 0;
+function tzLegs(){
+  var legs = [];
+  for(var i=1;i<=tzLegN;i++){
+    var el = $("tzLeg"+i);
+    if(el && el.value.trim()){
+      var sw = $("tzSide"+i).value.split("|");
+      legs.push({ name: (($("tzName"+i)||{}).value||"").trim() || ("Leg "+i),
+                  line: el.value.trim(), kind: sw[0], side: sw[1] });
+    }
+  }
+  return legs;
+}
+function tzAddLeg(){
+  tzLegN++;
+  var wrap = document.createElement("div");
+  wrap.style.marginBottom = "10px";
+  wrap.innerHTML = '<div class="field" style="margin-bottom:8px"><label>Leg '+tzLegN+' — team or total (optional)</label><input type="text" id="tzName'+tzLegN+'" placeholder="Chiefs -7.5"></div>'+
+    '<div class="form-row"><div><label>Line</label><input type="text" id="tzLeg'+tzLegN+'" placeholder="-7.5"></div>'+
+    '<div><label>You\u2019re teasing</label><select id="tzSide'+tzLegN+'"><option value="spread|fav">Spread \u2014 favorite</option><option value="spread|dog">Spread \u2014 underdog</option><option value="total|over">Total \u2014 over</option><option value="total|under">Total \u2014 under</option></select></div></div>';
+  $("tzLegRows").appendChild(wrap);
+}
+tzAddLeg(); tzAddLeg();
+$("tzAddLeg").addEventListener("click", tzAddLeg);
+$("tzGo").addEventListener("click", function(){
+  try{
+    var legs = tzLegs();
+    if(!legs.length){ note("tzOut", "Add at least two legs\u2019 lines above, then hit Grade my teaser. "+EXAMPLE); return; }
+    var priceStr = val("tzPrice");
+    if(!/^[+-]?\d+(\.\d+)?$/.test(priceStr)) throw new Error("Enter the book\u2019s offered price as American odds (e.g. -120).");
+    var r = BetMath.teaser(legs, parseFloat(val("tzPts")), parseFloat(priceStr), val("tzPush"));
+    function tzLine(l){
+      var v = l.line;
+      var s = (l.kind === "spread" && v > 0 ? "+" : "") + v;
+      var t = (l.kind === "spread" && l.teased > 0 ? "+" : "") + l.teased;
+      return s + " \u2192 " + t;
+    }
+    function tzSide(l){
+      return l.kind === "spread" ? (l.side === "fav" ? "fav" : "dog") : l.side;
+    }
+    function tzBadge(l){
+      if(l.wong) return '<b style="color:#7fe8a0">\uD83D\uDCD0 WONG</b>';
+      if(l.dead) return '<b style="color:#ff9aa3">\uD83D\uDC80 no key numbers</b>';
+      return '<span style="color:var(--muted)">'+l.crossed.length+' key number'+(l.crossed.length === 1 ? '' : 's')+'</span>';
+    }
+    var html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.95rem">'+
+      '<tr style="color:var(--muted);text-align:left"><th style="padding:6px">Leg</th><th style="padding:6px">Teased line</th><th style="padding:6px">Key #s crossed</th><th style="padding:6px">Read</th></tr>';
+    r.legs.forEach(function(l){
+      var keys = l.crossed.length ? l.crossed.join(", ") : "\u2014";
+      var touch = l.touched.length ? ' <span style="color:#ffc46b" title="Lands exactly on a key number \u2014 a push risk">\u26A0\uFE0F lands on '+l.touched.join(", ")+'</span>' : "";
+      html += '<tr style="border-top:1px solid rgba(255,255,255,.08)">'+
+        '<td style="padding:8px 6px;font-weight:700">'+GIU.esc(l.name)+' <span style="color:var(--muted);font-weight:400">('+tzSide(l)+')</span></td>'+
+        '<td class="num" style="padding:8px 6px">'+tzLine(l)+'</td>'+
+        '<td class="num" style="padding:8px 6px">'+keys+touch+'</td>'+
+        '<td style="padding:8px 6px">'+tzBadge(l)+'</td></tr>';
+    });
+    html += '</table></div>';
+    var priceLabel = (r.price > 0 ? "+" : "") + r.price;
+    html += '<p style="margin:12px 0 0;font-size:.9rem">The math: <b class="num" style="color:var(--text)">'+r.nLegs+' legs \u00B7 '+r.points+' pts \u00B7 '+priceLabel+'</b> — every leg has to win <b class="num gold">'+r.perLegBreakevenPct.toFixed(2)+'%</b> of the time for this teaser to break even (implied '+r.impliedPct.toFixed(2)+'%, pushes aside).</p>';
+    var verdict;
+    if(r.allWong){
+      verdict = '<p style="margin:12px 0 0;font-size:.9rem"><b class="num" style="color:#7fe8a0">\uD83D\uDCD0 Textbook Wong teaser.</b> <span style="color:var(--muted)">Every spread crosses both key numbers (3 and 7) — the only teaser construction with real research behind it. Your book knows this too: most shade Wong-range lines off the key numbers or charge -130 or worse, so confirm the line and the price are both live before you bet.</span></p>';
+    }else if(r.nWong > 0){
+      verdict = '<p style="margin:12px 0 0;font-size:.9rem"><b class="num" style="color:#ffc46b">'+r.nWong+' of '+r.nLegs+' Wong legs.</b> <span style="color:var(--muted)">The Wong legs carry the ticket \u2014 the rest are paying teaser juice without crossing both key numbers. A teaser is only as sharp as its weakest leg.</span></p>';
+    }else if(r.nLegs === r.legs.filter(function(l){ return l.kind === "total"; }).length){
+      verdict = '<p style="margin:12px 0 0;font-size:.9rem"><b class="num" style="color:var(--text)">Totals teaser.</b> <span style="color:var(--muted)">No Wong math on totals \u2014 value lives in crossing the total key numbers (37, 41, 44, 47, 51). Legs crossing nothing are dead weight.</span></p>';
+    }else{
+      verdict = '<p style="margin:12px 0 0;font-size:.9rem"><b class="num" style="color:#ff9aa3">No Wong legs.</b> <span style="color:var(--muted)">None of your spreads cross both 3 and 7, so you\u2019re paying teaser juice for what is effectively parlay math with extra steps. The sharp teaser legs live at favorites -7.5 to -8.5 and underdogs +1.5 to +2.5.</span></p>';
+    }
+    html += verdict;
+    if(r.pushRule === "push"){
+      html += '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Ties push at your book: a leg landing exactly on the teased line voids and the teaser re-grades at the shorter-leg price \u2014 the \u26A0\uFE0F \u201Clands on\u201D flags above are the spots to watch.</p>';
+    }else{
+      html += '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Ties lose at your book: any leg landing exactly on the teased line kills the whole ticket \u2014 the \u26A0\uFE0F \u201Clands on\u201D flags above are the danger spots. Know your book\u2019s rule before you bet.</p>';
+    }
+    html += '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Honest fine print: teasers feel safe because the spreads are short \u2014 that comfort is what you\u2019re buying, at -120 or worse. The book\u2019s margin is baked into the price, and a teaser never turns -EV legs into +EV ones.</p>';
+    show("tzOut", html);
+  }catch(e){ err("tzOut", e.message); }
+});
+
 /* ================= bankroll risk simulator (Monte Carlo) ================= */
 function mcMoney(v){
   var a = Math.abs(v);
