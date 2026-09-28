@@ -48,6 +48,8 @@ node tests/test-odds-slip.js  # bet-slip math tests
 node tests/test-odds-slip-dom.js  # bet-slip DOM wiring tests
 node tests/test-odds-slip-share.js  # bet-slip share-link codec (base64url round-trip, hostile-payload guards)
 node tests/test-odds-slip-share-dom.js  # share-link wiring in shipped odds.js (hash load + honesty banner, copy link, bad-link handling)
+node tests/test-slip-journal.js  # slip→journal mapper: leg→bet mapping, sport/market labels, stake split, captured prices, invalid-leg skips
+node tests/test-slip-journal-dom.js  # slip→journal wiring in shipped odds.js (journal writes, dedup, empty-slip guidance, skip reporting)
 node tests/test-odds-slip-identity.js  # bet-slip GameDay identity (logo + team-color chips on slip legs)
 node tests/test-dfs.js        # DFS optimizer tests
 node tests/test-dfs-exposure.js  # DFS exposure summary tests

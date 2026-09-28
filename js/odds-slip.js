@@ -103,6 +103,46 @@ var S = {
     var c = S.combined(legs);
     return c > 1 ? 1 / c : null;
   },
+  /* ---- journal export: map slip legs to bet-journal bet objects.
+     Each leg becomes a single pending bet: event = game + book (so the
+     journal shows WHERE the price was shopped), price = the captured
+     American price (the line the slip locked), stake = total slip stake
+     split evenly across legs (rounded to cents). Legs with no valid
+     price are reported in skipped, never invented.
+     Honesty notes: the journal tracks single bets, so a parlay slip
+     exported here is NOT a parlay — it's logged leg-by-leg, which is
+     only an accurate record if each leg was actually bet singly.
+     toAmerican is a (decimal)->integer-American converter, passed in so
+     this module stays free of the BetMath dependency (tests pass their own).
+     dateStr is the local YYYY-MM-DD to stamp on the bets.
+     Returns { bets:[...], skipped:<n> }. */
+  journalBets: function(legs, stake, sportLabel, dateStr, toAmerican){
+    legs = Array.isArray(legs) ? legs : [];
+    var n = legs.length, bets = [], skipped = 0;
+    var MKT = { h2h:"Moneyline", spreads:"Spread", totals:"Total" };
+    var per = n ? Math.round((Number(stake) || 0) / n * 100) / 100 : 0;
+    var label = (sportLabel == null || String(sportLabel).trim() === "") ? "Other" : String(sportLabel);
+    for(var i = 0; i < n; i++){
+      var l = legs[i] || {};
+      var dec = Number(l.captured != null ? l.captured : l.price);
+      var am = null;
+      try{
+        if(isFinite(dec) && dec >= 1.01) am = Math.round(Number(toAmerican(dec)));
+      }catch(e){ am = null; }
+      if(am === null || !isFinite(am) || am === 0){ skipped++; continue; }
+      bets.push({
+        date: dateStr,
+        sport: label,
+        event: String(l.game || "Unknown game") + (l.bookTitle ? " (" + String(l.bookTitle) + ")" : ""),
+        market: MKT[l.market] || "Other",
+        pick: (l.side ? String(l.side) : "?") + (l.label ? " " + String(l.label) : ""),
+        price: am,
+        stake: per,
+        result: "pending"
+      });
+    }
+    return { bets:bets, skipped:skipped };
+  },
   /* groups of legs sharing one game (2+ legs) — books treat same-game legs
      as correlated, so an independence-assuming parlay price won't hold there.
      Returns [{game, sides:[...]}]; empty when every leg is its own game. */

@@ -759,6 +759,8 @@ function renderSlip(){
     '<input type="number" id="slipStake" min="0" step="1" value="'+stakeVal+'" inputmode="numeric"></div>'+
     '<div class="slip-totals" id="slipTotals">'+totalsHtml(Slip.payout(slip, stakeVal))+'</div>'+
     '<button class="btn btn-ghost btn-sm" id="slipShare" style="width:100%;justify-content:center;margin-top:8px" aria-label="Copy a share link for this slip">🔗 Share this slip</button>'+
+    '<button class="btn btn-ghost btn-sm" id="slipJournal" style="width:100%;justify-content:center;margin-top:8px" aria-label="Log each slip leg as a pending bet in your bet journal" title="Each leg is logged as a single bet with the slip stake split evenly. If this slip is a parlay, log it as one Parlay entry on the journal page instead.">📓 Send to journal</button>'+
+    '<p class="slip-note" id="slipJournalNote" role="status" style="display:none"></p>'+
     '<button class="btn btn-ghost btn-sm" id="slipClear" style="width:100%;justify-content:center;margin-top:8px">Clear slip</button>'+
     '<p class="slip-note">Practice slip — research only, not a wager with any book. Prices refresh from the live board above; ▲▼ marks a leg whose line moved.</p>';
 }
@@ -812,6 +814,81 @@ function shareSlip(){
   });
 }
 
+/* ---- slip -> bet journal ----
+   Logs every slip leg as a pending single bet in the journal's localStorage
+   (the journal page owns that key; same-origin so this works cross-page).
+   Legs map through Slip.journalBets (captured American price, stake split
+   evenly); each candidate is validated with BetMath.journalValid and
+   de-duplicated against what's already logged, so a second click can't
+   double-log. The status line says exactly what happened. */
+var JRN_BETS = "giu.journal.v1";
+function sportJournalLabel(key){
+  for(var i = 0; i < SPORTS.length; i++) if(SPORTS[i][0] === key) return SPORTS[i][1];
+  return "Other";
+}
+function loadJournalBets(){
+  try{ var b = JSON.parse(localStorage.getItem(JRN_BETS)); return Array.isArray(b) ? b : []; }
+  catch(e){ return []; }
+}
+function saveJournalBets(bets){
+  try{ localStorage.setItem(JRN_BETS, JSON.stringify(bets)); }catch(e){}
+}
+function journalToday(){
+  var d = new Date();
+  function p2(n){ return (n < 10 ? "0" : "") + n; }
+  return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
+}
+function journalDup(existing, b){
+  for(var i = 0; i < existing.length; i++){
+    var e = existing[i] || {};
+    if(String(e.date) === String(b.date) && String(e.sport) === String(b.sport) &&
+       String(e.event) === String(b.event) && String(e.market) === String(b.market) &&
+       String(e.pick) === String(b.pick) && Number(e.price) === Number(b.price) &&
+       Number(e.stake) === Number(b.stake)) return true;
+  }
+  return false;
+}
+function journalNote(msg){
+  var n = $("slipJournalNote");
+  if(!n) return;
+  n.style.display = msg ? "block" : "none";
+  n.textContent = msg || "";
+}
+function journalNoteHtml(html){
+  var n = $("slipJournalNote");
+  if(!n) return;
+  n.style.display = html ? "block" : "none";
+  n.innerHTML = html || "";
+}
+function exportSlipToJournal(){
+  if(!slip.length){ journalNote("Your slip is empty — add picks from the board first."); return; }
+  var BM = window.BetMath;
+  if(!BM || !BM.journalValid || !BM.decimalToAmerican){
+    journalNote("Journal export is unavailable (bet-math library failed to load).");
+    return;
+  }
+  var res = Slip.journalBets(slip, stakeVal, sportJournalLabel(sport), journalToday(),
+    function(d){ return BM.decimalToAmerican(d); });
+  var existing = loadJournalBets();
+  var nextId = existing.reduce(function(m, b){ return Math.max(m, Number(b.id) || 0); }, 0) + 1;
+  var added = 0, dup = 0, bad = res.skipped;
+  res.bets.forEach(function(b){
+    if(BM.journalValid(b)){ bad++; return; }
+    if(journalDup(existing, b)){ dup++; return; }
+    b.id = nextId++;
+    existing.push(b);
+    added++;
+  });
+  saveJournalBets(existing);
+  var per = slip.length ? Math.round((Number(stakeVal) || 0) / slip.length * 100) / 100 : 0;
+  var parts = [];
+  if(added) parts.push(added + " bet" + (added > 1 ? "s" : "") + " added to your journal");
+  if(dup) parts.push(dup + " already logged");
+  if(bad) parts.push(bad + " skipped");
+  var msg = parts.length ? parts.join(" · ") + "." : "Nothing new to add.";
+  if(added) msg += " Stake split evenly ($" + per.toFixed(2) + " each) — adjust in the journal if needed.";
+  journalNoteHtml(GIU.esc(msg) + ' <a href="journal.html">Open your journal &rarr;</a>');
+}
 /* ---- shared-slip deep links ----
    Opening odds.html#slip=<payload> loads a friend's slip once: legs +
    stake decode into the local slip, the capture timestamp drives an
@@ -929,6 +1006,10 @@ $("slipPanel").addEventListener("click", function(e){
   }
   if(e.target && e.target.id === "slipShare"){
     shareSlip();
+    return;
+  }
+  if(e.target && e.target.id === "slipJournal"){
+    exportSlipToJournal();
     return;
   }
   if(e.target && e.target.id === "slipClear"){
