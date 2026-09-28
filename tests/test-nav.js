@@ -32,7 +32,7 @@ function makeEl(id){
 let focused = null;
 const els = {};
 ["site-header","site-footer","navToggle","mainNav","feedPill","feedTxt",
- "ticker","tickerTrack","headlines","hlText","copyPrl","prlAddr"].forEach(id => els[id] = makeEl(id));
+ "ticker","tickerTrack","headlines","hlText","copyBtc","btcAddr"].forEach(id => els[id] = makeEl(id));
 
 const docHandlers = {};
 const sandbox = {

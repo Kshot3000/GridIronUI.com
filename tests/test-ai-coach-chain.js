@@ -241,7 +241,7 @@ ok("js: provider status always updated", coachJs.indexOf("providerStatus(")!==-1
 
 /* footer branding untouched */
 ok("footer: @kshot9000", siteJs.indexOf("x.com/kshot9000")!==-1);
-ok("footer: Pearl address", siteJs.indexOf("prl1p62v09vuzyd8kdz9l23jaf3kph4wwx6jqcmhkkhg8lhr2qlxky8psu3zw9d")!==-1);
+ok("footer: BTC donation address", siteJs.indexOf("3GnR7TWBXAB3pPztBWpNF4LMNEX5yX8vZK")!==-1);
 ok("footer: 21+", siteJs.indexOf("21+")!==-1);
 ok("footer: 1-800-GAMBLER", siteJs.indexOf("1-800-GAMBLER")!==-1);
 

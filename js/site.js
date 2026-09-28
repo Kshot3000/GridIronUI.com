@@ -59,9 +59,9 @@ var footerHtml =
    '<div><h4>GridIronUI</h4>'+
      '<p style="font-size:.88rem;color:var(--muted)">The one-stop shop for sports betting knowledge — guides, tools, live odds, prediction markets, scores, news and weather, all in one place.</p>'+
      '<p style="margin-top:12px"><a href="https://x.com/kshot9000" target="_blank" rel="noopener" style="font-weight:700">𝕏 @kshot9000</a></p>'+
-     '<div class="donate-box"><b style="color:var(--gold-soft)">Tip the build (PRL)</b>'+
-       '<code id="prlAddr">prl1p62v09vuzyd8kdz9l23jaf3kph4wwx6jqcmhkkhg8lhr2qlxky8psu3zw9d</code>'+
-       '<button class="copy-btn" id="copyPrl">Copy address</button></div>'+
+     '<div class="donate-box"><b style="color:var(--gold-soft)">Tip the build (BTC)</b>'+
+       '<code id="btcAddr">3GnR7TWBXAB3pPztBWpNF4LMNEX5yX8vZK</code>'+
+       '<button class="copy-btn" id="copyBtc">Copy address</button></div>'+
    '</div>'+
    '<div><h4>Learn</h4><ul>'+
      '<li><a href="'+P("guides/betting-101.html")+'">Betting 101</a></li>'+
@@ -227,9 +227,9 @@ function mount(){
       }
     });
   }
-  var c = document.getElementById("copyPrl");
+  var c = document.getElementById("copyBtc");
   if(c) c.addEventListener("click", function(){
-    var txt = document.getElementById("prlAddr").textContent;
+    var txt = document.getElementById("btcAddr").textContent;
     if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ c.textContent="Copied ✓"; setTimeout(function(){c.textContent="Copy address";},1600); });
   });
   startTicker();
