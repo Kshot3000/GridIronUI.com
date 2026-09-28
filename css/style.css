@@ -257,6 +257,13 @@ td.flash{animation:flash 1.2s ease-out}
  background:rgba(46,204,113,.08)}
 @media(prefers-reduced-motion:reduce){.arb{transition:none}}
 
+/* v1.50.0 — injury report badges on NFL odds-board game cards. A quiet
+   one-liner under the market check: each team's reportable injuries
+   (out / doubtful / questionable), linked to the full injury wire. */
+.inj-check{margin:-8px 0 14px;font-size:.84rem;color:var(--muted)}
+.inj-check b{color:var(--text)}
+.inj-check a{margin-left:8px;font-size:.82rem;white-space:nowrap}
+
 /* v1.38.0 — market check: Polymarket's live moneyline vs what the best book
    prices imply, on NFL odds-board game cards. A quiet one-liner next to the
    consensus line; the gap chip only appears when the market and the books

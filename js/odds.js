@@ -6,6 +6,7 @@
 var OL = window.OddsLogic;
 var WX = window.OddsWx;
 var PMK = window.OddsPm;
+var INJX = window.OddsInj;
 var $ = function(id){ return document.getElementById(id); };
 /* ---- line-movement window (pure, exported for tests) ----
    Lines move most around live games and just before kickoff: a game is
@@ -215,6 +216,11 @@ function render(opts){
        book prices imply. One CORS-open gamma fetch (zero Odds-API quota);
        a hiccup leaves the lines off, never the board. */
     maybePmCheck(events, mySeq);
+    /* NFL tab bonus, after the board is on screen: injury-report badges —
+       key injuries from ESPN's injuries feed on each game card. One
+       CORS-open fetch per board render (zero Odds-API quota); a hiccup
+       leaves the badges off, never the board. */
+    maybeInjBadges(events, mySeq);
   }).catch(function(e){
     if(mySeq !== renderSeq) return; /* stale sport response — discard */
     if(silent){
@@ -312,6 +318,41 @@ function maybePmCheck(events, mySeq){
         });
       });
   }).catch(function(){ /* check stays off; the board already rendered fine */ });
+}
+
+/* ---- injury report: key injuries on each NFL game card (NFL tab) ----
+   Injuries move lines — bettors shopping a price want to know a team is
+   down two starters. One CORS-open ESPN fetch per board render (zero
+   Odds-API quota), teams resolved through the site's team directory so an
+   odds-API name like "Kansas City Chiefs" finds the ESPN injury entry.
+   Quiet by default: unmatched teams, unreportable statuses, and a failed
+   fetch all leave the card clean — no badge beats a wrong badge. */
+var injP = null;
+function maybeInjBadges(events, mySeq){
+  if(sport !== "americanfootball_nfl" || !INJX || !events || !events.length) return;
+  if(!injP){
+    injP = GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries")
+      .then(function(d){ return INJX.indexByName(d); })
+      .catch(function(){ return null; });
+  }
+  Promise.all([injP, GIU.teamDir()]).then(function(r){
+    if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return; /* board moved on */
+    var idx = r[0], dir = r[1] || {};
+    if(!idx) return; /* feed hiccup — badges stay off */
+    events.forEach(function(ev){
+      var ta = GIU.teamFind(dir, "nfl", ev.away_team),
+          tb = GIU.teamFind(dir, "nfl", ev.home_team);
+      var ea = ta && ta.displayName && idx[String(ta.displayName).toLowerCase().trim()],
+          eb = tb && tb.displayName && idx[String(tb.displayName).toLowerCase().trim()];
+      var lineA = ea ? INJX.cardLine(ta, ea) : null,
+          lineB = eb ? INJX.cardLine(tb, eb) : null;
+      if(!lineA && !lineB) return; /* nothing reportable — silent */
+      var slot = document.querySelector('[data-injcheck="'+ev.id+'"]');
+      if(!slot) return;
+      slot.innerHTML = INJX.badgeHtml(lineA, lineB, GIU.esc);
+      slot.hidden = false;
+    });
+  }).catch(function(){ /* badges stay off; the board already rendered fine */ });
 }
 
 /* Sure bets: cross-book arbitrage found in this pull. Every outcome is
@@ -607,10 +648,15 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
      the gamma fetch resolves. Hidden until then: no badge beats a wrong one. */
   var pmSlot = (sport === "americanfootball_nfl")
     ? '<div class="game-meta pm-check" data-pmcheck="'+GIU.esc(ev.id)+'" hidden></div>' : "";
+  /* Injury-report slot (NFL tab only): key injuries from ESPN's injuries
+     feed — injuries move lines, so each game card names each team's
+     reportable injuries. Filled after the board renders; hidden until then. */
+  var injSlot = (sport === "americanfootball_nfl")
+    ? '<div class="game-meta inj-check" data-injcheck="'+GIU.esc(ev.id)+'" hidden></div>' : "";
   return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
-    arbFlagHtml()+consLineHtml()+pmSlot+histHtml()+wxSlot+bestCard+
+    arbFlagHtml()+consLineHtml()+pmSlot+injSlot+histHtml()+wxSlot+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' spread</th><th>'+GIU.esc(OL.shortName(h))+' spread</th>'+
     '<th>Over</th><th>Under</th>'+

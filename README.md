@@ -36,6 +36,8 @@ node tests/test-tickethedge-dom.js  # ticket hedge wiring in shipped tools.js (t
 node tests/test-dutching.js   # dutching stake-split math (equal returns, arb vs locked-loss verdicts, error paths)
 node tests/test-dutching-dom.js  # dutching wiring in shipped tools.js (named selections, table values, verdicts, empty/bad-input states)
 node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph set + layering, hero-pulse cache key
+node tests/test-odds-inj.js   # injury-badge pure logic (severity ranks, per-team counts, card lines, badge HTML)
+node tests/test-odds-inj-dom.js  # injury-badge wiring in shipped odds.js (hidden slots, live injection, quiet cases, feed failure)
 node tests/test-odds.js       # odds logic tests
 node tests/test-odds-identity.js  # odds sport->identity-league mapping + identity header resolution
 node tests/test-odds-slip.js  # bet-slip math tests
