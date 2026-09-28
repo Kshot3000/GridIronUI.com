@@ -22,6 +22,7 @@ var NAV = [
   ["DFS Lab","dfs.html"],
   ["AI Coach","ai-coach.html"],
   ["Tools","tools.html"],
+  ["Journal","journal.html"],
   ["Guides","guides/betting-101.html"],
   ["Links","links.html"]
 ];

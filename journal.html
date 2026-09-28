@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bet Journal — Track Your Bets, Record, ROI | GridIronUI</title>
+<meta name="description" content="Log every bet, settle the results, and see your true record: net profit, ROI, win rate, streaks and per-sport numbers. Runs entirely in your browser — your bets never leave your device.">
+<meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
+<meta property="og:url" content="https://gridironui.xyz/journal.html">
+<link rel="canonical" href="https://gridironui.xyz/journal.html">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=1.53.0">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+</head>
+<body>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero sport-mlb"><div class="wrap hero-inner">
+  <a class="back-link" href="tools.html">← Betting tools</a>
+  <span class="kicker">Your record, honestly</span>
+  <h1>Bet journal</h1>
+  <p class="lede">Log every bet and settle the results — record, net profit, ROI, win rate, streaks and per-sport numbers, all computed from exactly what you logged. A journal can't turn -EV into +EV, but it stops you from lying to yourself.</p>
+</div></section>
+
+<div class="wrap">
+  <div class="card" style="margin-top:34px">
+    <span class="tag">New bet</span>
+    <h3>Log a bet</h3>
+    <div class="form-row">
+      <div class="field"><label for="jDate">Date</label><input type="date" id="jDate"></div>
+      <div class="field"><label for="jSport">Sport</label><select id="jSport">
+        <option>NFL</option><option>NBA</option><option>MLB</option><option>NHL</option>
+        <option>NCAAF</option><option>NCAAM</option><option>EPL</option><option>Soccer</option>
+        <option>MMA</option><option>Tennis</option><option>Other</option>
+      </select></div>
+      <div class="field"><label for="jMarket">Market</label><select id="jMarket">
+        <option>Spread</option><option>Moneyline</option><option>Total</option>
+        <option>Parlay</option><option>Teaser</option><option>Prop</option>
+        <option>Future</option><option>Live</option>
+      </select></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label for="jEvent">Event</label><input type="text" id="jEvent" placeholder="Bears @ Packers"></div>
+      <div class="field"><label for="jPick">Your pick</label><input type="text" id="jPick" placeholder="Bears +3"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label for="jPrice">Price (American)</label><input type="text" id="jPrice" placeholder="-110"></div>
+      <div class="field"><label for="jStake">Stake ($)</label><input type="number" id="jStake" placeholder="50" min="0" step="any"></div>
+      <div class="field"><label for="jUnit">1 unit = ($)</label><input type="number" id="jUnit" value="100" min="1" step="any"></div>
+    </div>
+    <button class="btn btn-gold btn-sm" id="jAdd">Log bet</button>
+    <div class="result-box" id="jErr" style="display:none" role="alert"></div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <span class="tag">Dashboard</span>
+    <h3>Your record</h3>
+    <div class="hero-stats" id="jSummary" role="status" aria-label="Betting record summary"></div>
+    <div id="jPerSport" style="margin-top:18px"></div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <span class="tag">Ledger</span>
+    <h3>All bets <span class="hint" id="jCount"></span></h3>
+    <div class="form-row" style="max-width:560px">
+      <div class="field"><label for="jFilterSport">Sport</label><select id="jFilterSport"><option value="all">All sports</option></select></div>
+      <div class="field"><label for="jFilterResult">Result</label><select id="jFilterResult">
+        <option value="all">All results</option><option value="pending">Pending</option>
+        <option value="win">Wins</option><option value="loss">Losses</option><option value="push">Pushes</option>
+      </select></div>
+    </div>
+    <div class="jr-table-wrap">
+      <table class="gd-stats" aria-label="Logged bets">
+        <thead><tr><th style="text-align:left">Date</th><th style="text-align:left">Bet</th>
+        <th>Price</th><th>Stake</th><th>Result</th><th>P/L</th><th></th></tr></thead>
+        <tbody id="jBetsBody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" id="jExport">⬇ Export CSV</button>
+      <button class="btn btn-ghost btn-sm" id="jClear">🗑 Clear journal</button>
+    </div>
+  </div>
+
+  <div class="notice" style="margin:34px 0">
+    <strong>Private by design:</strong> your journal lives in this browser's localStorage — GridIronUI has no servers, no accounts, nothing is sent anywhere. Export CSV regularly to back it up, and remember that clearing browser data clears the journal. If betting stops being fun, <a href="responsible-gambling.html">help is free and confidential</a>.
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js?v=1.53.0"></script>
+<script src="js/betmath.js?v=1.53.0"></script>
+<script src="js/journal.js?v=1.53.0"></script>
+</body>
+</html>

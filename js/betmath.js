@@ -393,7 +393,98 @@ var M = {
       ends: ends, curves: curves
     };
   },
-  round: round
+  round: round,
+
+  /* ============================================================
+     v1.53.0 — bet journal. Pure record-keeping math for journal.html:
+     every settled bet reduces to a profit number; pending/push bets
+     risk nothing and win nothing. Journal never invents data — it
+     summarizes exactly what the bettor logged.
+     A bet: {id, date:"YYYY-MM-DD", sport, event, market, pick,
+             price (American number or string), stake (dollars),
+             result: "pending"|"win"|"loss"|"push"}
+     ============================================================ */
+  journalValid: function(b){
+    if(!b) return "Missing bet.";
+    if(!b.event || !String(b.event).trim()) return "Event is required.";
+    if(!b.sport || !String(b.sport).trim()) return "Sport is required.";
+    var price = Number(b.price);
+    if(!/^[+-]?\d+$/.test(String(b.price).trim())) return "Price must be a whole American number (e.g. -110 or +150).";
+    if(Math.abs(price) < 100 || price === -100) return "American prices can't sit between -100 and +100 (even money is +100).";
+    var stake = Number(b.stake);
+    if(!(stake > 0) || !isFinite(stake)) return "Stake must be more than $0.";
+    return null;
+  },
+  journalProfit: function(b){
+    /* Dollars won/lost on a settled bet; 0 for pending or push.
+       Returns NaN for bad inputs so callers can refuse to summarize. */
+    if(!b || b.result === "pending" || b.result === "push") return 0;
+    if(!/^[+-]?\d+$/.test(String(b.price).trim())) return NaN; /* americanToDecimal throws on garbage */
+    var dec = M.americanToDecimal(Number(b.price));
+    var stake = Number(b.stake);
+    if(!(dec > 1) || !(stake > 0) || !isFinite(dec) || !isFinite(stake)) return NaN;
+    if(b.result === "win") return round(stake * (dec - 1), 2);
+    if(b.result === "loss") return round(-stake, 2);
+    return 0;
+  },
+  journalCSV: function(bets){
+    /* Machine-readable export: header + one row per bet, RFC-4180 quoting. */
+    var cell = function(v){
+      v = (v === undefined || v === null) ? "" : String(v);
+      return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    };
+    var rows = [["date","sport","event","market","pick","price","stake","result","profit_usd"]];
+    (bets || []).forEach(function(b){
+      rows.push([b.date, b.sport, b.event, b.market, b.pick, b.price, b.stake, b.result, M.journalProfit(b)]);
+    });
+    return rows.map(function(r){ return r.map(cell).join(","); }).join("\n");
+  },
+  journalStats: function(bets, unitSize){
+    /* One honest dashboard: record, net, ROI, win rate, streak, per-sport.
+       unitSize: dollars per unit (defaults to 100). */
+    bets = (bets || []).slice();
+    unitSize = Number(unitSize) > 0 ? Number(unitSize) : 100;
+    bets.sort(function(a, b){
+      var d = String(a.date || "").localeCompare(String(b.date || ""));
+      return d || (Number(a.id) || 0) - (Number(b.id) || 0);
+    });
+    var s = { n: bets.length, pending: 0, wins: 0, losses: 0, pushes: 0,
+              staked: 0, profit: 0, roi: 0, winRate: 0, streak: "—",
+              units: 0, unitSize: unitSize, perSport: {} };
+    var streakDir = null, streakLen = 0;
+    bets.forEach(function(b){
+      b.profit = M.journalProfit(b);
+      if(b.result === "pending"){ s.pending++; return; }
+      var key = String(b.sport || "Other");
+      if(!s.perSport[key]) s.perSport[key] = { n: 0, w: 0, l: 0, p: 0, staked: 0, profit: 0 };
+      var ps = s.perSport[key];
+      if(b.result === "push"){
+        s.pushes++; ps.p++;
+        return; /* pushes risk nothing — they don't extend or break streaks */
+      }
+      if(b.result === "win"){
+        s.wins++; ps.w++;
+        if(streakDir === "W") streakLen++; else { streakDir = "W"; streakLen = 1; }
+      } else if(b.result === "loss"){
+        s.losses++; ps.l++;
+        if(streakDir === "L") streakLen++; else { streakDir = "L"; streakLen = 1; }
+      } else { return; }
+      s.staked = round(s.staked + Number(b.stake), 2);
+      s.profit = round(s.profit + b.profit, 2);
+      ps.n++; ps.staked = round(ps.staked + Number(b.stake), 2);
+      ps.profit = round(ps.profit + b.profit, 2);
+    });
+    s.units = round(s.profit / unitSize, 2);
+    s.roi = s.staked > 0 ? round(100 * s.profit / s.staked, 2) : 0;
+    var decided = s.wins + s.losses;
+    s.winRate = decided > 0 ? round(100 * s.wins / decided, 2) : 0;
+    s.streak = streakDir ? streakDir + streakLen : "—";
+    Object.keys(s.perSport).forEach(function(k){
+      var ps = s.perSport[k];
+      ps.roi = ps.staked > 0 ? round(100 * ps.profit / ps.staked, 2) : 0;
+    });
+    return s;
+  }
 };
 
 if(typeof module !== "undefined" && module.exports){ module.exports = M; }

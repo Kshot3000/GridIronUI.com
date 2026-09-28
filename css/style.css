@@ -746,3 +746,18 @@ tr.row-inj-out td:first-child{box-shadow:inset 3px 0 0 var(--red)}
 .inj-banner.idle{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.10);border-left-color:var(--faint)}
 .inj-banner b{color:var(--text)}
 .inj-banner a{white-space:nowrap}
+
+/* ============================================================
+   v1.53.0 — bet journal (journal.html).
+   .jr-pos/.jr-neg color profit/loss figures in the felt-green /
+   book-red accents used elsewhere on the site. .res-chip is the
+   settled-result chip, following .tag pill language. .jrow-btn
+   keeps the compact settle/delete buttons readable in tables.
+   ============================================================ */
+.jr-pos{color:#7dedaa;font-weight:700;font-variant-numeric:tabular-nums}
+.jr-neg{color:#ff9aa3;font-weight:700;font-variant-numeric:tabular-nums}
+.res-chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line-soft);color:var(--muted)}
+.res-chip.pos{background:rgba(23,201,100,.12);color:#7dedaa;border-color:rgba(23,201,100,.35)}
+.res-chip.neg{background:rgba(240,68,82,.12);color:#ff9aa3;border-color:rgba(240,68,82,.4)}
+.jr-table-wrap{overflow-x:auto}

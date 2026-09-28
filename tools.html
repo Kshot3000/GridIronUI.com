@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Calculators — Odds, Parlay, Kelly, Vig, Hedge | GridIronUI</title>
-<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, dutching calculator, teaser calculator, bankroll simulator. All math runs in your browser.">
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, dutching calculator, teaser calculator, bankroll simulator, plus a bet journal to track your record and ROI. All math runs in your browser.">
 <meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
 <meta property="og:url" content="https://gridironui.xyz/tools.html">
 <link rel="canonical" href="https://gridironui.xyz/tools.html">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1.31.0">
+<link rel="stylesheet" href="css/style.css?v=1.53.0">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Twelve tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Thirteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -74,7 +74,6 @@
     </div>
 
     <div class="card calc" id="roundrobin">
-      <span class="tag">New</span>
       <h3>Round-robin calculator</h3>
       <p class="hint">Build every smaller parlay from your legs automatically — pick your "by 2s", "by 3s", and see the cost of one leg losing. <a href="glossary.html">Glossary</a> has the plain-English version.</p>
       <div id="rrLegRows"></div>
@@ -215,14 +214,23 @@
 
   </div>
 
+    <div class="card calc" id="journal-tool">
+      <span class="tag">New</span>
+      <h3>Bet journal</h3>
+      <p class="hint">Log every bet and settle the results — your true record, net profit, ROI, win rate, streaks and per-sport numbers on one dashboard. Stored only in this browser, with CSV export.</p>
+      <a class="btn btn-gold btn-sm" href="journal.html">Open journal →</a>
+    </div>
+
+  </div>
+
   <div class="notice green" style="margin:34px 0">
     <strong>How to use these like a sharp:</strong> convert every price you consider into implied probability, strip the vig to find the market's true opinion, and only bet when your own number disagrees with it. The calculators do the arithmetic — the edge is still yours to find. Learn the concepts in <a href="guides/betting-101.html">Betting 101</a> and <a href="guides/advanced.html">Advanced strategy</a>.
   </div>
 </div>
 
 <div id="site-footer"></div>
-<script src="js/site.js?v=1.42.0"></script>
-<script src="js/betmath.js?v=1.51.0"></script>
+<script src="js/site.js?v=1.53.0"></script>
+<script src="js/betmath.js?v=1.53.0"></script>
 <script src="js/tools.js?v=1.51.0"></script>
 </body>
 </html>
