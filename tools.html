@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Calculators — Odds, Parlay, Kelly, Vig, Hedge | GridIronUI</title>
-<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, bankroll simulator. All math runs in your browser.">
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, bankroll simulator. All math runs in your browser.">
 <meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
 <meta property="og:url" content="https://gridironui.xyz/tools.html">
 <link rel="canonical" href="https://gridironui.xyz/tools.html">
@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Nine tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Ten tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -127,6 +127,23 @@
       <div class="field"><label>My stake on side A ($) — optional</label><input type="number" id="hStake" placeholder="100" min="0" step="any"></div>
       <button class="btn btn-gold btn-sm" id="hGo">Check for arb</button>
       <div class="result-box" id="hOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="tickethedge">
+      <span class="tag">Sharp money</span>
+      <h3>Ticket hedge planner</h3>
+      <p class="hint">One leg left on a live ticket? Enter your original stake, what the ticket pays <em>in full</em> (stake included), and the price on the other side of the remaining leg — then lock equal profit, free-roll, or size your own plan.</p>
+      <div class="form-row">
+        <div class="field"><label>Original stake ($)</label><input type="number" id="thStake" placeholder="100" min="0" step="any"></div>
+        <div class="field"><label>Ticket pays in full ($), stake included</label><input type="number" id="thPays" placeholder="2400" min="0" step="any"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Hedge price — other side of the last leg</label><input type="text" id="thHedge" placeholder="-110"></div>
+        <div class="field"><label>Format</label><select id="thFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <div class="field"><label>Hedge stake ($) — optional, for your own plan</label><input type="number" id="thCustom" placeholder="500" min="0" step="any"></div>
+      <button class="btn btn-gold btn-sm" id="thGo">Plan my hedge</button>
+      <div class="result-box" id="thOut" style="display:none"></div>
     </div>
 
     <div class="card calc" id="bankroll">

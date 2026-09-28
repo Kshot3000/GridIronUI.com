@@ -31,6 +31,8 @@ python3 -m http.server 8080   # serve locally
 node tests/test-betmath.js    # bet math tests
 node tests/test-roundrobin.js   # round-robin combinations + payout/scenario math
 node tests/test-roundrobin-dom.js  # round-robin wiring in shipped tools.js (leg rows, size boxes, results, empty/bad-input states)
+node tests/test-tickethedge.js   # ticket hedge planner math (equal lock, free-roll, custom outcomes, error paths)
+node tests/test-tickethedge-dom.js  # ticket hedge wiring in shipped tools.js (three plans, custom stake, empty/bad-input states)
 node tests/test-odds.js       # odds logic tests
 node tests/test-odds-identity.js  # odds sport->identity-league mapping + identity header resolution
 node tests/test-odds-slip.js  # bet-slip math tests

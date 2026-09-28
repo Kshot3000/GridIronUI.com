@@ -163,6 +163,42 @@ var M = {
     return r;
   },
 
+  /* ---- ticket hedge planner: one leg left on a live ticket.
+         stake A: original stake. ticketPays T: full ticket payout INCLUDING
+         the stake. hedgeDec d: decimal price on the OTHER side of the
+         remaining leg. Returns two named plans plus an outcomes() helper
+         for a custom hedge stake:
+           equal lock: S = T/d -> profit T-A-S no matter who wins.
+           free-roll:  S = A/(d-1) -> a miss returns exactly the stake (net 0),
+                       a hit keeps T-A-S. */
+  ticketHedge: function(stake, ticketPays, hedgeDec){
+    var A=Number(stake), T=Number(ticketPays), d=Number(hedgeDec);
+    if(!(A>0)) throw new Error("Original stake must be greater than 0");
+    if(!(T>A)) throw new Error("Ticket payout must exceed the original stake");
+    if(!(d>1)) throw new Error("Hedge odds must be decimal > 1");
+    var sEq = T/d, pEq = T-A-sEq;
+    var sFr = A/(d-1), pFrHit = T-A-sFr;
+    return {
+      stake: A, ticketPays: T, hedgeDec: round(d,4),
+      rideProfit: round(T-A,2),            /* let-it-ride upside if leg hits */
+      equalStake: round(sEq,2),
+      equalProfit: round(pEq,2),           /* guaranteed either way */
+      insuranceCost: round((T-A)-pEq,2),    /* profit given up vs riding */
+      freeStake: round(sFr,2),
+      freeProfitHit: round(pFrHit,2),
+      freeProfitMiss: 0,                   /* hedge win returns stake exactly */
+      outcomes: function(hedgeStake){
+        var hs=Number(hedgeStake);
+        if(!(hs>0)) throw new Error("Hedge stake must be greater than 0");
+        return {
+          stake: round(hs,2),
+          profitHit: round(T-A-hs,2),
+          profitMiss: round(hs*d-A-hs,2)
+        };
+      }
+    };
+  },
+
   /* ---- deterministic PRNG (mulberry32) for seeded, reproducible simulations ---- */
   mulberry32: function(seed){
     var a = (Number(seed)>>>0) || 1;

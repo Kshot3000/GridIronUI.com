@@ -215,6 +215,49 @@ $("hGo").addEventListener("click", function(){
   }catch(e){ err("hOut", e.message); }
 });
 
+/* 10 — ticket hedge planner: one leg left, lock profit or free-roll */
+function thMoney(v){
+  var neg = v < 0;
+  return '<b class="num" style="color:'+(neg?"#ff9aa3":"#7fe8a0")+'">'+(neg?"−":"+")+'$'+Math.abs(v).toFixed(2)+'</b>';
+}
+$("thGo").addEventListener("click", function(){
+  if(isEmpty("thStake")||isEmpty("thPays")||isEmpty("thHedge")){
+    note("thOut", "Enter your stake, the ticket's full payout, and the hedge price above, then hit Plan my hedge. "+EXAMPLE); return;
+  }
+  try{
+    var A = num("thStake"), T = num("thPays"), d = toDecimal(val("thHedge"), val("thFmt"));
+    var r = BetMath.ticketHedge(A, T, d);
+    var customRaw = val("thCustom"), hasCustom = customRaw !== "";
+    var html = '<div class="grid grid-3" style="gap:10px">';
+    /* equal lock */
+    var lockLine = r.equalProfit >= 0
+      ? 'Profit <b class="num" style="color:#7fe8a0">$'+r.equalProfit.toFixed(2)+'</b> either way — leg hits or misses, that money is yours.'
+      : 'This guarantees a <b class="num" style="color:#ff9aa3">loss of $'+Math.abs(r.equalProfit).toFixed(2)+'</b> — the hedge price is too short to lock in profit. Let it ride or free-roll instead.';
+    html += '<div><label>🔒 Equal lock</label><div class="big num" style="font-size:1.4rem">$'+r.equalStake.toFixed(2)+'</div>'+
+      '<div style="color:var(--muted);font-size:.9rem">hedge stake</div><p style="margin:8px 0 0;font-size:.9rem">'+lockLine+'</p></div>';
+    /* free-roll */
+    html += '<div><label>🆓 Free-roll</label><div class="big num" style="font-size:1.4rem">$'+r.freeStake.toFixed(2)+'</div>'+
+      '<div style="color:var(--muted);font-size:.9rem">hedge stake</div><p style="margin:8px 0 0;font-size:.9rem">Leg hits: '+thMoney(r.freeProfitHit)+
+      ' profit. Leg misses: the hedge hands your <b class="num">$'+r.stake.toFixed(2)+'</b> stake back — you risk nothing, for free.</p></div>';
+    /* custom */
+    if(hasCustom){
+      var c = r.outcomes(parseFloat(customRaw));
+      html += '<div><label>🎯 Your stake</label><div class="big num" style="font-size:1.4rem">$'+c.stake.toFixed(2)+'</div>'+
+        '<div style="color:var(--muted);font-size:.9rem">hedge stake</div><p style="margin:8px 0 0;font-size:.9rem">Leg hits: '+thMoney(c.profitHit)+
+        ' · leg misses: '+thMoney(c.profitMiss)+'.</p></div>';
+    } else {
+      html += '<div><label>🎯 Your stake</label><div class="big num" style="font-size:1.4rem;color:var(--faint)">—</div>'+
+        '<div style="color:var(--muted);font-size:.9rem">hedge stake</div><p style="margin:8px 0 0;font-size:.9rem">Type a hedge stake above to size your own plan — the math fills in here.</p></div>';
+    }
+    html += '</div>';
+    html += '<p style="margin:12px 0 0;color:var(--muted);font-size:.9rem">Let it ride instead: leg hits → '+thMoney(r.rideProfit)+
+      ' · leg misses → <b class="num" style="color:#ff9aa3">−$'+r.stake.toFixed(2)+'</b>. The equal lock costs you <b class="num gold">$'+
+      r.insuranceCost.toFixed(2)+'</b> of that upside — that is the price of certainty.</p>';
+    html += '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Honest fine print: the hedge price already carries the book\u2019s margin, so a locked profit is always smaller than the ticket\u2019s paper value — hedging pays the vig twice. Lines move fast, so confirm the hedge price is live before you size it, and know that books notice habitual hedgers. A hedge turns variance into certainty; it never turns a -EV ticket into a +EV one.</p>';
+    show("thOut", html);
+  }catch(e){ err("thOut", e.message); }
+});
+
 /* ================= bankroll risk simulator (Monte Carlo) ================= */
 function mcMoney(v){
   var a = Math.abs(v);
