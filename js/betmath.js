@@ -61,6 +61,21 @@ var M = {
     return { profit: round(total-s, 2), total: round(total, 2) };
   },
 
+  /* ---- expected value ----
+     EV per $1 staked given YOUR win probability p (0..1, exclusive) and
+     decimal odds d: EV = p*d - 1. edgePct is the EV as a percentage of
+     stake; breakEven is the win rate the book's price demands. Positive EV
+     means the price beats your number — it says nothing about how good
+     your number is. Throws on nonsense input; callers must not invent a
+     probability. */
+  expectedValue: function(winProb, decimalOdds){
+    var p = Number(winProb), d = Number(decimalOdds);
+    if(!(p > 0 && p < 1)) throw new Error("Win probability must be between 0 and 1 (exclusive)");
+    if(!(d > 1)) throw new Error("Decimal odds must be greater than 1");
+    var ev = p*d - 1;
+    return { evPerStake: ev, edgePct: ev*100, breakEven: 1/d };
+  },
+
   /* ---- parlay: array of decimal odds -> combined decimal ---- */
   parlayDecimal: function(legs){
     if(!legs.length) throw new Error("Need at least one leg");

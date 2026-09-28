@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Fourteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Fifteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -98,6 +98,20 @@
       <div class="field" style="display:none"><select id="kFmt"><option value="decimal" selected>Decimal</option></select></div>
       <button class="btn btn-gold btn-sm" id="kGo">Calculate stake</button>
       <div class="result-box" id="kOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="ev">
+      <span class="tag">Sharp money</span>
+      <h3>Expected value calculator</h3>
+      <p class="hint">The one number sharps actually bet on. Enter <em>your</em> estimated win probability — from your model, or from the <a href="odds.html">odds board</a>'s no-vig fair line — and the best price you can get. Dollars of expected profit per bet, your edge, and the verdict: does the price beat break-even?</p>
+      <div class="form-row">
+        <div class="field"><label>Your estimated win probability (%)</label><input type="number" id="evProb" placeholder="55" min="0" max="100" step="any"></div>
+        <div class="field"><label>Best price you can get</label><input type="text" id="evOdds" placeholder="+120"></div>
+        <div class="field"><label>Format</label><select id="evFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <div class="field"><label>Stake ($) — optional</label><input type="number" id="evStake" placeholder="100" min="0" step="any"></div>
+      <button class="btn btn-gold btn-sm" id="evGo">Calculate EV</button>
+      <div class="result-box" id="evOut" style="display:none"></div>
     </div>
 
     <div class="card calc" id="vig">
@@ -247,7 +261,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.59.0"></script>
-<script src="js/betmath.js?v=1.61.0"></script>
-<script src="js/tools.js?v=1.56.0"></script>
+<script src="js/betmath.js?v=1.63.0"></script>
+<script src="js/tools.js?v=1.63.0"></script>
 </body>
 </html>

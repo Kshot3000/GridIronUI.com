@@ -96,6 +96,8 @@ node tests/test-odds-pm.js     # market-check logic (Polymarket live moneylines,
 node tests/test-odds-pm-dom.js # market-check wiring in shipped odds.js (hidden slot, live-price reveal, pinned silence, no NBA fetches)
 node tests/test-predictions-kalshi-dom.js  # Kalshi row wiring in shipped predictions.js (NFL snapshot fetch, matched-game row, gap chip, snapshot-failure degrade)
 node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific cadence promises, loop refresh rule, snapshot shape, markets.js cache key)
+node tests/test-ev.js        # expected-value math (fair price -> zero EV, +EV/-EV cases, break-even, garbage-in throws)
+node tests/test-ev-dom.js    # EV calculator wiring in shipped tools.js (verdicts, dollar/edge math, formats, default stake, errors)
 ```
 
 ### Team identity directory

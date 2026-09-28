@@ -180,7 +180,34 @@ $("kGo").addEventListener("click", function(){
   }catch(e){ err("kOut", e.message); }
 });
 
-/* 6 — vig remover */
+/* 6 — expected value: the one number sharps actually bet on */
+$("evGo").addEventListener("click", function(){
+  if(isEmpty("evProb")||isEmpty("evOdds")){ note("evOut", "Enter your estimated win probability and the best price, then hit Calculate EV. "+EXAMPLE); return; }
+  try{
+    var p = parseFloat(val("evProb"));
+    if(!(p>0 && p<100)) throw new Error("Win probability must be between 0 and 100 (exclusive of 0/100).");
+    var d = toDecimal(val("evOdds"), val("evFmt"));
+    var stake = isEmpty("evStake") ? 100 : num("evStake");
+    if(!(stake>0)) throw new Error("Enter a stake greater than 0.");
+    var r = BetMath.expectedValue(p/100, d);
+    var ev$ = r.evPerStake*stake;
+    var good = r.evPerStake >= 0;
+    var col = good ? "#7fe8a0" : "#ff9aa3";
+    var sign = function(x){ return (x>=0?"+":"\u2212")+"$"+Math.abs(x).toFixed(2); };
+    show("evOut",
+      '<div style="font-size:.85rem;color:var(--muted);margin-bottom:10px">Win <b class="num" style="color:var(--text)">'+p+'%</b> @ <b class="num" style="color:var(--text)">'+GIU.esc(val("evOdds"))+'</b> · stake <b class="num" style="color:var(--text)">$'+stake.toLocaleString("en-US")+'</b></div>'+
+      '<div class="grid grid-3" style="gap:10px">'+
+      '<div><label>Expected profit per bet</label><div class="big num" style="font-size:1.5rem;color:'+col+'">'+sign(ev$)+'</div></div>'+
+      '<div><label>Edge</label><div class="big num" style="font-size:1.5rem;color:'+col+'">'+(r.edgePct>=0?"+":"\u2212")+Math.abs(r.edgePct).toFixed(2)+'%</div></div>'+
+      '<div><label>Break-even win rate</label><div class="big num" style="font-size:1.5rem">'+(r.breakEven*100).toFixed(2)+'%</div></div></div>'+
+      '<p style="margin:12px 0 0;color:var(--muted);font-size:.85rem">'+(good?
+        '<b style="color:'+col+'">+EV — the price beats your number.</b> Size the stake with the <a href="#kelly">Kelly calculator</a> above; a real edge still loses on oversized bets.':
+        '<b style="color:'+col+'">\u2212EV at your number — pass, or shop for a better price.</b> The book needs you to win '+(r.breakEven*100).toFixed(1)+'% just to break even; your estimate is '+p+'%.')+
+      ' This is only as honest as your probability — a made-up 60% manufactures a made-up edge. When you have no model of your own, take the number from the <a href="odds.html">odds board</a>\u2019s no-vig fair line.</p>');
+  }catch(e){ err("evOut", e.message); }
+});
+
+/* 7 — vig remover */
 $("vGo").addEventListener("click", function(){
   if(isEmpty("vA1")||isEmpty("vA2")){ note("vOut", "Enter both sides of the market above, then hit Remove the vig. "+EXAMPLE); return; }
   try{
@@ -194,7 +221,7 @@ $("vGo").addEventListener("click", function(){
       '<p style="margin:10px 0 0;color:var(--muted);font-size:.9rem">Bookmaker hold on this market: <b class="num" style="color:var(--gold-soft)">'+nv.hold+'%</b>. If another book beats the fair price, you\'re getting value.</p>');
   }catch(e){ err("vOut", e.message); }
 });
-/* 7 — hedge & arbitrage */
+/* 8 — hedge & arbitrage */
 $("hGo").addEventListener("click", function(){
   if(isEmpty("hA")||isEmpty("hB")){ note("hOut", "Enter odds for both sides above, then hit Check for arb. "+EXAMPLE); return; }
   try{
