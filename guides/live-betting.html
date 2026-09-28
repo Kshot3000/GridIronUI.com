@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Betting Strategy — The In-Play Playbook | GridIronUI</title>
+<meta name="description" content="How to bet live without donating: the live vig tax, win-probability anchoring, hedging and middling in-play, the latency and tilt traps — with worked examples and honest caveats.">
+<meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
+<meta property="og:url" content="https://gridironui.xyz/guides/live-betting.html">
+<link rel="canonical" href="https://gridironui.xyz/guides/live-betting.html">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=1.59.0">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+</head>
+<body>
+<script>window.GIU_BASE="..";</script>
+<div id="site-header"></div>
+
+<section class="page-hero sport-nfl"><div class="wrap hero-inner">
+  <a class="back-link" href="../index.html">← Home</a>
+  <span class="kicker">Guide · Strategy</span>
+  <h1>The live-betting playbook</h1>
+  <p class="lede">Live betting is the fastest-growing way to lose money in sports — and, used with a plan, one of the sharpest tools in the box. The difference is made entirely <i>before</i> the game starts.</p>
+</div></section>
+
+<div class="wrap"><div class="article">
+  <div class="toc"><b>On this page</b><ol>
+    <li><a href="#speed">Live is a speed game — and you're losing it</a></li>
+    <li><a href="#tax">The live tax: wider margins in-play</a></li>
+    <li><a href="#anchor">Win probability is the only anchor</a></li>
+    <li><a href="#hedge-live">Honest playbook I: hedge a pregame position</a></li>
+    <li><a href="#middle-live">Honest playbook II: middle the move</a></li>
+    <li><a href="#situational">Honest playbook III: situational spots, eyes open</a></li>
+    <li><a href="#traps">The four traps</a></li>
+    <li><a href="#rules">Rules that keep you alive</a></li>
+  </ol></div>
+
+  <h2 id="speed">Live is a speed game — and you're losing it</h2>
+  <p>Pregame, you get hours to compare prices across books, run the numbers, and decide. Live, you get seconds — and you're not the fastest actor in the market. The book's pricing model updates on <i>every play</i>, instantly. Your stream lags 5–30 seconds behind reality. Markets suspend on touchdowns, turnovers and injuries, then reopen at the new, correct price.</p>
+  <p>This means the most common live-betting instinct — "I just watched that happen, I should bet on what it means" — is usually betting on the past. The price you see already includes the play you just watched. If your edge depends on reacting faster than the book's model, you don't have an edge. Live value comes from <i>positions you planned in advance</i>, not reactions.</p>
+
+  <h2 id="tax">The live tax: wider margins in-play</h2>
+  <p>Books charge more for the privilege of betting mid-game. Where a pregame spread sits at −110/−110 (4.76% hold), the same game live is routinely −115/−115 or worse — and live moneylines and totals carry the fattest margins of all.</p>
+  <div class="formula">Hold = implied(home) + implied(away) − 100%</div>
+  <div class="example"><b>Worked example.</b> Live spread −115/−115: each side implies 115/215 = <b>53.49%</b>. Total = 106.98%, so the hold is <b>6.98%</b> — nearly 50% more margin than the pregame 4.76%. You need to be that much more right just to break even. Run any live two-sided price through the <a href="../tools.html#vig">vig remover</a> and compare it with the pregame number: the gap is the tax you're paying for speed.</div>
+  <p>Practical takeaway: the wider the margin, the bigger your disagreement with the price has to be before a live bet makes sense. Small hunches don't clear a 7% tax.</p>
+
+  <h2 id="anchor">Win probability is the only anchor</h2>
+  <p>A live price is "good" only relative to the true chance of the outcome. The book's live number <i>is</i> a win-probability model — your job is to disagree with it for a reason, the same discipline as pregame betting, except the clock is running.</p>
+  <div class="example"><b>Worked example.</b> Your team trails by 10 in the third quarter; the book offers them live at +240 (implied 100/340 = <b>29.4%</b>). Your read of the matchup — their offense moves the ball, the opponent sits on leads — says the true comeback chance is 35%. EV per $1 = (0.35 × 2.40) − (0.65 × 1.00) = 0.84 − 0.65 = <b>+$0.19</b>. That's a bet. If your honest estimate is 28%, it's a pass, no matter how exciting the comeback would feel.</div>
+  <p>Our <a href="../scores.html">scores page</a> charts ESPN's in-game win probability for live and final games — useful for calibrating your sense of how leads actually hold (and collapse), but remember it's descriptive: it shows what the model thought <i>during</i> the game, not a prediction you can bet into.</p>
+
+  <h2 id="hedge-live">Honest playbook I: hedge a pregame position</h2>
+  <p>The cleanest live bet there is: you already hold a good pregame position, and the live market lets you convert variance into locked profit. This is the one live strategy that doesn't require you to out-predict anyone — the value was captured pregame; live is just the exit.</p>
+  <div class="example"><b>Worked example.</b> You bet $50 pregame on a team to win their conference final at +600 (pays $350 total). They reach the final, and the opponent is −150 live. Hedge $210 on the opponent: your team wins → $350 − $210 = <b>$140 profit</b>; the opponent wins → $210/1.50 = <b>$140 profit</b>. You've locked $140 either way out of a $50 ticket.</div>
+  <p>Size the hedge with the <a href="../tools.html#hedge">hedge calculator</a> (or the <a href="../tools.html#tickethedge">ticket-hedge planner</a> for parlays and futures), and if the book flashes a cash-out offer instead, check it against the <a href="../tools.html#cashout">cash-out evaluator</a> — the offer is almost always below what hedging it yourself would pay.</p>
+
+  <h2 id="middle-live">Honest playbook II: middle the move</h2>
+  <p>When a live line swings far from the pregame number, you can hold both sides at different numbers and win twice if the final lands between them.</p>
+  <div class="example"><b>Worked example.</b> You bet the favorite −3 pregame. They fall behind early and the live spread moves to underdog +10.5 — you take it. If the favorite comes back to win by 4–10 points, <b>both</b> bets cash. Any other result costs you only the juice on one side.</div>
+  <p>Honest caveat: you're paying the book's margin twice (see <a href="#tax">the live tax</a>), so the middle window has to be wide enough to justify it. Forcing middles on small moves is just donating the vig two times over.</p>
+
+  <h2 id="situational">Honest playbook III: situational spots, eyes open</h2>
+  <p>Some end-game situations are genuinely mispriced often enough to watch: college basketball foul-fests inflating late totals, NFL prevent defenses conceding yardage, a <a href="../weather.html">wind picking up</a> in the fourth quarter of an outdoor game. The key phrase is <i>eyes open</i> — the books model all of this too.</p>
+  <p>Where the public goes, value usually isn't: recreational money floods live <i>overs</i> (watching points is fun), which means books shade live totals upward — and the contrarian side of an over-shaded total is where the math occasionally lives. Never bet a "situational edge" you can't state as a number: "fouling adds ~6 points" is a thesis; "they look gassed" is a feeling.</p>
+
+  <h2 id="traps">The four traps</h2>
+  <p><b>1. Latency — betting the past.</b> Your stream is behind the market. If a bet feels obvious based on what you just watched, the price already reflects it — or the market is suspended while the book decides what it means. The only thing worse than a stale price is betting into one.</p>
+  <p><b>2. Tilt-chasing.</b> Live betting is engineered for impulse: every timeout, every commercial break, every drive is a new market. The product is designed to keep you clicking. If you find yourself betting to get even, or betting the next market because the last one lost, close the app — that's not strategy, that's the business model working as intended.</p>
+  <p><b>3. Cash-out offers.</b> The book's mid-game cash-out is priced in the book's favor — always. It's a convenience product with a margin baked in. Check every offer with the <a href="../tools.html#cashout">cash-out evaluator</a> before tapping accept; hedging it yourself is usually cheaper.</p>
+  <p><b>4. Momentum narratives.</b> "They've got all the momentum" is a story told <i>after</i> the price moved. If the live number already reflects the run, you're not betting on momentum — you're buying the top. Narratives feel like analysis; only the number matters.</p>
+
+  <h2 id="rules">Rules that keep you alive</h2>
+  <ul>
+    <li><b>Half units for live.</b> In-play decisions are made under time pressure with wider margins — size them at half your pregame unit, maximum. See the <a href="bankroll.html">bankroll guide</a> for why unit discipline is the whole game.</li>
+    <li><b>Write the plan before kickoff.</b> "I'll take the favorite live if they fall behind by 10+" or "I'll hedge my future if they reach the final" — decided calmly, executed mechanically. No plan, no live bets.</li>
+    <li><b>One live position per game.</b> Correlated live bets stack risk invisibly; a single position keeps the math honest.</li>
+    <li><b>Set a session stop-loss.</b> Decide the maximum you'll lose on live betting in a day <i>before</i> the first game — and treat hitting it as the session ending, not a challenge.</li>
+    <li><b>Log every live bet with Market set to "Live" in the <a href="../journal.html">bet journal</a>.</b> After a month, filter your record: most bettors discover their in-play ROI is dramatically worse than their pregame ROI. That's the most valuable number on this entire site — it's <i>yours</i>.</li>
+    <li><b>Never bet to get even.</b> The fastest way to turn a bad day into a bad month is live betting. The games tomorrow don't care about today's losses.</li>
+  </ul>
+
+  <hr class="divider">
+  <p><b>Next:</b> <a href="advanced.html">Thinking like a sharp →</a> — expected value, closing line value, and the concepts behind every play in this guide.</p>
+</div></div>
+
+<div id="site-footer"></div>
+<script src="../js/site.js?v=1.59.0"></script>
+</body>
+</html>
