@@ -99,13 +99,19 @@ function load(key, my, silent){
   clearLive(); /* tab switches and silent refreshes always reschedule */
   if(!silent) skel();
   seriesFor(key).then(function(sid){
-    return Promise.all([
+    var reqs = [
       GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20"),
       GIU.teamDir()
-    ]);
+    ];
+    /* NFL only: Kalshi's snapshot covers NFL game-winner markets. Fetched
+       alongside everything else; a slow or failed snapshot resolves to null
+       and simply means no Kalshi rows — the Polymarket cards never wait. */
+    if(key === "nfl") reqs.push(GIU.fetchJSON("data/kalshi-nfl.json").catch(function(){ return null; }));
+    return Promise.all(reqs);
   }).then(function(x){
     if(my !== tabSeq) return; /* user moved to another league meanwhile */
     var d = x[0], dir = x[1];
+    var snap = (key === "nfl") ? (x[2] || null) : null;
     var evs = Array.isArray(d) ? d : (d.events||[]);
     var rows = [];
     evs.forEach(function(ev){
@@ -122,6 +128,18 @@ function load(key, my, silent){
     });
     rows.sort(function(a,b){ return startOf(a.ev)-startOf(b.ev); });
     rows = rows.slice(0,10);
+    /* Kalshi cross-check (NFL only): match each Polymarket game to the
+       snapshot via the tested Disagree.matches; unmatchable games are
+       dropped, never guessed. Only 2-way rows get a row — a clean
+       side-by-side comparison. */
+    if(snap && snap.games && window.Disagree && window.Kalshi){
+      rows.forEach(function(r){
+        if(r.mls.length !== 1) return;
+        var m = window.Disagree.matches([r.ev], snap.games, dir, GIU.teamFind)[0];
+        if(m) r.km = {nameA: m.nameA, aPct: m.kalshiA, nameB: m.nameB,
+                      bPct: m.kalshiB, updatedAt: snap.updated_at, pmA: m.pmA};
+      });
+    }
     if(!rows.length){
       $("predGrid").innerHTML = '<div class="empty">No upcoming game markets with clear win probabilities for this league right now — check back closer to game day.</div>';
       liveN = 0; renderLiveStatus();
@@ -154,6 +172,7 @@ function load(key, my, silent){
         head+
         (t ? '<div class="game-meta" style="margin-bottom:12px"><span>'+t+'</span></div>' : '<div style="height:8px"></div>')+
         body+
+        ((r.km && window.Kalshi) ? window.Kalshi.predRow(r.km.nameA, r.km.aPct, r.km.nameB, r.km.bPct, r.km.updatedAt, r.km.pmA) : "")+
         '<div class="game-meta"><span>Source: Polymarket live price</span>'+(slug?'<a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">View market →</a>':"")+'</div></div>';
     }).join("");
     /* ---- live auto-refresh ----

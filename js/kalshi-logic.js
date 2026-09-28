@@ -91,6 +91,39 @@ K.stale = function(iso, hours){
   return (Date.now() - t) > (hours || 6) * 3600000;
 };
 
+/* Local HTML escaper — this module stays dependency-free in the browser. */
+function kesc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+/* Compact "Kalshi says" line for the predictions page: the snapshot's two
+   prices for one game, labeled with the snapshot time, plus the gap versus
+   the Polymarket price (pmA, whole cents) when supplied — two real-money
+   crowds in one glance. Returns "" when either side is unpriced. When the
+   snapshot is stale, returns a stale warning INSTEAD of prices: never
+   presented as fresh. All text escaped. */
+K.predRow = function(aName, aPct, bName, bPct, updatedAt, pmA){
+  if(aPct === null || aPct === undefined || bPct === null || bPct === undefined) return "";
+  aPct = Math.round(Number(aPct)); bPct = Math.round(Number(bPct));
+  if(!isFinite(aPct) || !isFinite(bPct)) return "";
+  if(K.stale(updatedAt)){
+    return '<div class="game-meta" style="margin-top:10px;border-top:1px solid var(--line-soft);padding-top:10px">'+
+      '<span class="tag green">Kalshi</span>'+
+      '<span>snapshot is stale (over 6 hours old) — prices withheld until the next refresh.</span></div>';
+  }
+  var when = K.fmtWhen(Date.parse(updatedAt || ""));
+  var delta = (pmA === null || pmA === undefined) ? null : Math.abs(Math.round(Number(pmA)) - aPct);
+  var dchip = (delta === null || !isFinite(delta)) ? "" :
+    ' <span class="tag blue" style="font-size:.62rem" title="Gap between Polymarket\u2019s and Kalshi\u2019s price for '+
+    kesc(aName)+' — two real-money crowds. A 3\u00a2+ gap means one of them may be mispriced.">\u0394'+delta+'\u00a2 vs Polymarket</span>';
+  return '<div class="game-meta" style="margin-top:10px;border-top:1px solid var(--line-soft);padding-top:10px">'+
+    '<span class="tag green">Kalshi</span>'+
+    '<span>'+kesc(aName)+' <b class="num">'+aPct+'%</b> \u00b7 '+kesc(bName)+' <b class="num">'+bPct+'%</b></span>'+dchip+
+    '<span>snapshot'+(when ? " "+when : "")+'</span></div>';
+};
+
 /* "Sun, Sep 27 · 1:00 PM" in the visitor's timezone. */
 K.fmtWhen = function(ms){
   if(ms === null || ms === undefined) return "";

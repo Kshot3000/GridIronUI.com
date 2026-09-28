@@ -27,7 +27,7 @@
 
 <div class="wrap" style="margin-top:30px">
   <div class="notice green">
-    <strong>Methodology — no black box.</strong> Each probability below is a live Polymarket price converted directly: a 62¢ contract = a 62% market-implied chance. We show the source market for every number. Markets move as money moves, so these update in real time. This page makes no picks of its own.
+    <strong>Methodology — no black box.</strong> Each probability below is a live Polymarket price converted directly: a 62¢ contract = a 62% market-implied chance. We show the source market for every number. Markets move as money moves, so these update in real time. On NFL games you'll also see Kalshi's price under the Polymarket bars — a second real-money crowd, from a server-side snapshot (Kalshi's API blocks browser requests), with the gap between the two crowds flagged. This page makes no picks of its own.
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
     <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
@@ -52,6 +52,8 @@
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.42.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
-<script src="js/predictions.js?v=1.22.0"></script>
+<script src="js/kalshi-logic.js?v=1.52.0"></script>
+<script src="js/disagree-logic.js?v=1.27.0"></script>
+<script src="js/predictions.js?v=1.52.0"></script>
 </body>
 </html>
