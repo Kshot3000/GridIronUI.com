@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Thirteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Fourteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -145,6 +145,23 @@
       <div class="result-box" id="thOut" style="display:none"></div>
     </div>
 
+    <div class="card calc" id="cashout">
+      <span class="tag">Sharp money</span>
+      <h3>Cash-out evaluator</h3>
+      <p class="hint">The book flashes a cash-out number mid-game — is it a fair price, or is the book pocketing the difference? Enter your original bet, the <em>current</em> price on the same side (check the <a href="odds.html">odds board</a> for the best one), and the book's offer. Fair value, the book's cut, and the verdict — plus what hedging the other side yourself would lock in.</p>
+      <div class="form-row">
+        <div class="field"><label>Original stake ($)</label><input type="number" id="coStake" placeholder="100" min="0" step="any"></div>
+        <div class="field"><label>Cash-out offer ($)</label><input type="number" id="coOffer" placeholder="140" min="0" step="any"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Original odds</label><input type="text" id="coOrig" placeholder="+150"></div>
+        <div class="field"><label>Current price — same side</label><input type="text" id="coNow" placeholder="-110"></div>
+        <div class="field"><label>Format</label><select id="coFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="coGo">Evaluate the offer</button>
+      <div class="result-box" id="coOut" style="display:none"></div>
+    </div>
+
     <div class="card calc" id="dutching">
       <span class="tag">Sharp money</span>
       <h3>Dutching calculator</h3>
@@ -230,7 +247,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.53.0"></script>
-<script src="js/betmath.js?v=1.53.0"></script>
-<script src="js/tools.js?v=1.51.0"></script>
+<script src="js/betmath.js?v=1.56.0"></script>
+<script src="js/tools.js?v=1.56.0"></script>
 </body>
 </html>

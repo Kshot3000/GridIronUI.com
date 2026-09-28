@@ -37,6 +37,8 @@ node tests/test-dutching.js   # dutching stake-split math (equal returns, arb vs
 node tests/test-dutching-dom.js  # dutching wiring in shipped tools.js (named selections, table values, verdicts, empty/bad-input states)
 node tests/test-teaser.js     # teaser key-number math (teased lines, crossings, Wong/dead legs, breakeven, error paths)
 node tests/test-teaser-dom.js  # teaser wiring in shipped tools.js (leg rows, badges, verdicts, push copy, empty/bad-input states)
+node tests/test-cashout.js    # cash-out evaluator math (fair value, book margin, DIY hedge equalization, verdict bands, error paths)
+node tests/test-cashout-dom.js  # cash-out wiring in shipped tools.js (verdicts, money math, format selector, empty/bad-input states)
 node tests/test-journal.js    # bet journal math (validation, profit, record/ROI/win-rate/streak/per-sport, CSV export)
 node tests/test-journal-dom.js  # journal wiring in shipped journal.js (add validation, settle/undo/delete, filters, unit size, CSV, escaping, empty states)
 node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph set + layering, hero-pulse cache key

@@ -199,6 +199,37 @@ var M = {
     };
   },
 
+  /* ---- cash-out evaluator: the book flashes a mid-game cash-out offer C on a
+         ticket you bought for stake S at decimal odds db. The same side is now
+         priced at decimal dn (shop the odds board for the best one). At fair,
+         no-vig prices the ticket is worth V = S*db/dn — the expected payout of
+         the ticket at the current market price. Hedge the other side yourself
+         at the fair two-way price d_opp = dn/(dn-1): stake H = S*db/d_opp =
+         S*db*(dn-1)/dn equalizes the payouts, locking in V either way (profit
+         V-S). The offer is only worth taking when C >= V; the book's cut of
+         the offer is (V-C)/V. */
+  cashout: function(stake, origDec, nowDec, offer){
+    var s=Number(stake), db=Number(origDec), dn=Number(nowDec), c=Number(offer);
+    if(!(s>0)) throw new Error("Original stake must be greater than 0");
+    if(!(db>1)) throw new Error("Original odds must be decimal greater than 1");
+    if(!(dn>1)) throw new Error("Current price must be decimal greater than 1");
+    if(!(c>=0)) throw new Error("Cash-out offer must be 0 or more");
+    var value = s*db/dn;                       /* fair present value of the ticket */
+    var margin = value>0 ? (value-c)/value*100 : 0; /* book's cut of the offer, % */
+    var hedgeStake = s*db*(dn-1)/dn;           /* other-side stake (fair price) to lock value */
+    return {
+      fairValue: round(value,2),
+      bookMarginPct: round(margin,2),
+      offerProfit: round(c-s,2),               /* locked profit if you take the offer */
+      rideEV: round(value-s,2),                /* expected profit if you let it ride */
+      diyHedgeStake: round(hedgeStake,2),
+      diyLockedReturn: round(value,2),         /* what the DIY hedge guarantees back */
+      diyProfit: round(value-s,2),
+      takeOffer: c >= value,
+      close: c < value && c >= value*0.97      /* within 3% of fair: judgement call */
+    };
+  },
+
   /* ---- dutching: split one stake across mutually-exclusive outcomes so the
          return is identical no matter which one wins. The classic use: several
          golfers in one tournament, multiple division winners, or one side of

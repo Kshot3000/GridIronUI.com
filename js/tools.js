@@ -258,6 +258,40 @@ $("thGo").addEventListener("click", function(){
   }catch(e){ err("thOut", e.message); }
 });
 
+/* 10b — cash-out evaluator: is the book's mid-game offer a fair price? */
+function coMoney(v){
+  var neg = v < 0;
+  return '<b class="num" style="color:'+(neg?"#ff9aa3":"#7fe8a0")+'">'+(neg?"−":"+")+'$'+Math.abs(v).toFixed(2)+'</b>';
+}
+$("coGo").addEventListener("click", function(){
+  if(isEmpty("coStake")||isEmpty("coOffer")||isEmpty("coOrig")||isEmpty("coNow")){
+    note("coOut", "Enter your stake, both prices, and the book's offer above, then hit Evaluate the offer. "+EXAMPLE); return;
+  }
+  try{
+    var s = num("coStake"), c = num("coOffer");
+    var db = toDecimal(val("coOrig"), val("coFmt")), dn = toDecimal(val("coNow"), val("coFmt"));
+    var r = BetMath.cashout(s, db, dn, c);
+    var gap = r.fairValue - c;
+    var verdict = r.takeOffer
+      ? '<span style="color:#7fe8a0"><strong>Take the cash-out.</strong></span> The offer is at or above fair value — that\u2019s rare, and it won\u2019t sit there long.'
+      : (r.close
+        ? '<span style="color:#ffd37f"><strong>Close call.</strong></span> The offer is only <b class="num">$'+gap.toFixed(2)+'</b> short of fair value — the book\u2019s cut is <b class="num">'+r.bookMarginPct.toFixed(2)+'%</b>. Take it if you want certainty; hedge the other side yourself below if you want the maximum.'
+        : '<span style="color:#ff9aa3"><strong>Decline it.</strong></span> The offer is <b class="num">$'+gap.toFixed(2)+'</b> below fair value — the book is keeping <b class="num">'+r.bookMarginPct.toFixed(2)+'%</b> of your ticket\u2019s worth. Let it ride, or hedge the other side yourself and keep the difference.');
+    var html = '<div class="grid grid-3" style="gap:10px">';
+    html += '<div><label>⚖️ Fair value</label><div class="big num" style="font-size:1.4rem">$'+r.fairValue.toFixed(2)+'</div>'+
+      '<div style="color:var(--muted);font-size:.9rem">what the ticket is really worth right now</div></div>';
+    html += '<div><label>🏦 Book\u2019s offer</label><div class="big num" style="font-size:1.4rem">$'+c.toFixed(2)+'</div>'+
+      '<div style="color:var(--muted);font-size:.9rem">'+(gap>0? '$'+gap.toFixed(2)+' below fair ('+r.bookMarginPct.toFixed(1)+'% cut)' : 'at or above fair value')+'</div></div>';
+    html += '<div><label>🛠 Hedge it yourself</label><div class="big num" style="font-size:1.4rem">$'+r.diyHedgeStake.toFixed(2)+'</div>'+
+      '<div style="color:var(--muted);font-size:.9rem">on the other side → locks in <b class="num">$'+r.diyLockedReturn.toFixed(2)+'</b> ('+coMoney(r.diyProfit)+' profit)</div></div>';
+    html += '</div>';
+    html += '<p style="margin:12px 0 0;font-size:.95rem">'+verdict+'</p>';
+    html += '<p style="margin:10px 0 0;color:var(--muted);font-size:.9rem">Let it ride instead: expected profit '+coMoney(r.rideEV)+' at current prices. The DIY hedge locks the <em>theoretical</em> fair value — real books carry margin on both sides, so shop the <a href="odds.html">best prices on the odds board</a> and expect to land a touch below it. Cash-out offers freeze and reprice constantly: confirm both numbers are live before you act, and know the offer already prices in the book\u2019s edge.</p>';
+    html += '<p style="margin:8px 0 0;color:var(--muted);font-size:.85rem">Honest fine print: fair value is computed from vig-free prices, so it is the ceiling, not a guarantee. A fair cash-out never creates edge — it only moves it from variance to certainty. If you find yourself cashing out every ticket, the problem is the original bet, not the offer.</p>';
+    show("coOut", html);
+  }catch(e){ err("coOut", e.message); }
+});
+
 /* 11 — dutching: split one stake across mutually-exclusive outcomes */
 var duLegN = 0;
 function duLegs(){
