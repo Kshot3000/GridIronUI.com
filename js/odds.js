@@ -558,8 +558,18 @@ function sameGameWarnHtml(slip){
 function renderSlip(){
   var panel = $("slipPanel"), n = slip.length;
   $("slipCount").textContent = n;
+  /* Shared-slip banner: a link from a friend, or a link that failed to
+     decode. The banner is honest about staleness — shared prices are from
+     link-creation time, and the board's re-pricing below will flag movers. */
+  var sharedHtml = "";
+  if(sharedTs === -1)
+    sharedHtml = '<div class="slip-shared slip-shared-bad" role="status">That share link didn’t decode — your slip is unchanged.</div>';
+  else if(sharedTs)
+    sharedHtml = '<div class="slip-shared" role="status">🔗 <b>Shared slip loaded.</b> These prices were captured '+
+      GIU.esc(fmtSince(sharedTs))+' (your time) — lines may have moved since. The board above re-prices each leg as it pulls, and ▲▼ flags movers.'+
+      '<button class="slip-x" id="sharedDismiss" style="float:right" aria-label="Dismiss shared-slip notice">✕</button></div>';
   if(!n){
-    panel.innerHTML = '<div class="empty" style="padding:26px 14px">Tap any price on the board to start building a slip.<br>Your slip lives in this browser only.</div>';
+    panel.innerHTML = sharedHtml + '<div class="empty" style="padding:26px 14px">Tap any price on the board to start building a slip.<br>Your slip lives in this browser only.</div>';
     return;
   }
   var rows = slip.map(function(l){
@@ -574,12 +584,14 @@ function renderSlip(){
       '<button class="slip-x" data-unslip="'+GIU.esc(l.id)+'" aria-label="Remove '+GIU.esc(l.side)+' from slip">✕</button></div>';
   }).join("");
   panel.innerHTML =
+    sharedHtml +
     '<div class="slip-head"><b>Your slip</b><span class="tag">'+n+' leg'+(n>1?"s":"")+'</span></div>'+
     '<div class="slip-legs">'+rows+'</div>'+sameGameWarnHtml(slip)+
     '<div class="field" style="margin:14px 0 8px"><label for="slipStake">Stake ($)</label>'+
     '<input type="number" id="slipStake" min="0" step="1" value="'+stakeVal+'" inputmode="numeric"></div>'+
     '<div class="slip-totals" id="slipTotals">'+totalsHtml(Slip.payout(slip, stakeVal))+'</div>'+
-    '<button class="btn btn-ghost btn-sm" id="slipClear" style="width:100%;justify-content:center;margin-top:12px">Clear slip</button>'+
+    '<button class="btn btn-ghost btn-sm" id="slipShare" style="width:100%;justify-content:center;margin-top:8px" aria-label="Copy a share link for this slip">🔗 Share this slip</button>'+
+    '<button class="btn btn-ghost btn-sm" id="slipClear" style="width:100%;justify-content:center;margin-top:8px">Clear slip</button>'+
     '<p class="slip-note">Practice slip — research only, not a wager with any book. Prices refresh from the live board above; ▲▼ marks a leg whose line moved.</p>';
 }
 function refreshPickMarks(){
@@ -590,6 +602,71 @@ function refreshPickMarks(){
     btns[i].setAttribute("aria-pressed", on ? "true" : "false");
   }
 }
+/* share this slip: copy a deep link (legs + stake encoded in the hash).
+   The link never carries the visitor's Odds-API key — that stays in their
+   own localStorage. A friend opening the link gets the legs with the
+   capture timestamp; the board re-prices them on the next pull. */
+function copyText(txt, done){
+  function legacy(){
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = txt; ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.top = "0"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      var ok = false;
+      try{ ok = document.execCommand("copy"); }catch(e){}
+      try{ document.body.removeChild(ta); }catch(e){}
+      done(!!ok);
+    }catch(e){ done(false); }
+  }
+  try{
+    if(typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){ done(true); }, legacy);
+      return;
+    }
+  }catch(e){}
+  legacy();
+}
+function shareSlip(){
+  var btn = $("slipShare");
+  var enc = Slip.encodeShare(slip, stakeVal);
+  if(!enc){ if(btn) btn.textContent = "Nothing to share yet"; return; }
+  var base = "";
+  try{ base = String(location.href).split("#")[0]; }catch(e){}
+  copyText(base + "#slip=" + enc, function(done){
+    var b2 = $("slipShare");
+    if(!b2) return;
+    b2.textContent = done ? "✓ Link copied — paste it anywhere" : "Copy failed — share manually from the address bar";
+    setTimeout(function(){
+      var b3 = $("slipShare");
+      if(b3) b3.textContent = "🔗 Share this slip";
+    }, 2600);
+  });
+}
+
+/* ---- shared-slip deep links ----
+   Opening odds.html#slip=<payload> loads a friend's slip once: legs +
+   stake decode into the local slip, the capture timestamp drives an
+   honesty banner in the panel, and the hash is stripped (replaceState)
+   so a refresh doesn't re-import stale legs. A bad link shows the error
+   banner and leaves the local slip untouched. The visitor's API key is
+   never part of the link. */
+var sharedTs = 0; /* 0 = none, -1 = decode failure, >0 = capture timestamp */
+(function loadSharedSlip(){
+  var h = "";
+  try{ h = String(location.hash || ""); }catch(e){ return; }
+  if(h.indexOf("#slip=") !== 0) return;
+  var d = Slip.decodeShare(h.slice(6));
+  if(!d || !d.legs.length){ sharedTs = -1; }
+  else{
+    slip = d.legs; stakeVal = d.stake; sharedTs = d.ts;
+    saveSlip(); saveStake();
+  }
+  try{
+    if(history && history.replaceState)
+      history.replaceState(null, "", location.pathname + (location.search || ""));
+  }catch(e){}
+})();
 
 /* ---- wiring ---- */
 $("saveKey").addEventListener("click", function(){
@@ -643,12 +720,20 @@ $("oddsBoard").addEventListener("click", function(e){
     " (" + OL.dec2am(leg.price) + ") at " + leg.bookTitle + (added ? " from" : " to") + " your slip");
   renderSlip();
 });
-/* slip panel: remove legs, clear, stake math (delegated + bubbled input) */
+/* slip panel: remove legs, clear, share, stake math (delegated + bubbled input) */
 $("slipPanel").addEventListener("click", function(e){
   var x = e.target && e.target.closest ? e.target.closest("[data-unslip]") : null;
   if(x){
     Slip.remove(slip, x.getAttribute("data-unslip"));
     saveSlip(); refreshPickMarks(); renderSlip();
+    return;
+  }
+  if(e.target && e.target.id === "sharedDismiss"){
+    sharedTs = 0; renderSlip();
+    return;
+  }
+  if(e.target && e.target.id === "slipShare"){
+    shareSlip();
     return;
   }
   if(e.target && e.target.id === "slipClear"){
@@ -669,6 +754,13 @@ $("slipToggle").addEventListener("click", function(){
   else { p.setAttribute("hidden", ""); this.setAttribute("aria-expanded", "false"); }
 });
 renderSlip();
+if(sharedTs){
+  /* A shared slip should be visible, not hiding behind the closed panel. */
+  var sp = $("slipPanel");
+  if(sp) sp.removeAttribute("hidden");
+  var st2 = $("slipToggle");
+  if(st2) st2.setAttribute("aria-expanded", "true");
+}
 GIU.teamDir().then(function(d){ slipDir = d || {}; renderSlip(); });
 render();
 })();
