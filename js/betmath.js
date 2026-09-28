@@ -278,6 +278,89 @@ var M = {
     };
   },
 
+  /* ---- bonus bet (free bet): the stake never comes back — only the winnings.
+         Two honest ways to price one:
+         (1) risk-free hedge: put the bonus B on side A at decimal dA, stake S
+             of real cash on side B at decimal dB. Equalize both outcomes:
+               B*(dA-1) - S  =  S*(dB-1)   =>   S = B*(dA-1)/dB.
+             Guaranteed cash value G = S*(dB-1); conversion = G/B.
+             Longshots hedge best (the dead stake matters less); the pair of
+             prices carries the vig twice, which is why conversion lands 50-80%.
+         (2) expected value with YOUR win probability p for the side you would
+             actually play: EV = B*p*(dA-1) — the bonus is gone win or lose.
+             We never invent p: pass it, or leave it blank and skip the EV row.
+         Both are optional in the UI; at least one must be supplied there.
+         Throws on nonsense input. */
+  bonusBet: function(bonus, bonusDec, hedgeDec, winProb){
+    var B=Number(bonus), a=Number(bonusDec);
+    if(!(B>0)) throw new Error("Bonus bet amount must be greater than 0");
+    if(!(a>1)) throw new Error("Bonus bet price must be decimal greater than 1");
+    var out = { bonus: B, bonusDec: round(a,4) };
+    if(hedgeDec !== undefined && hedgeDec !== null && hedgeDec !== ""){
+      var b=Number(hedgeDec);
+      if(!(b>1)) throw new Error("Hedge price must be decimal greater than 1");
+      var s = B*(a-1)/b, g = s*(b-1);
+      out.hedgeStake = round(s,2);
+      out.guaranteed = round(g,2);
+      out.conversionPct = round(g/B*100,2);
+    }
+    if(winProb !== undefined && winProb !== null && winProb !== ""){
+      var p=Number(winProb);
+      if(!(p>0 && p<1)) throw new Error("Win probability must be between 0 and 1 (exclusive)");
+      out.ev = round(B*p*(a-1),2);
+      out.evConversionPct = round(p*(a-1)*100,2);
+    }
+    return out;
+  },
+
+  /* ---- deposit match with rollover: the book hands you B bonus dollars, but
+         you must wager B*R (the rollover multiple) before a cent can leave.
+         Every rolled-over dollar costs you the book's hold — v = expected loss
+         per $1 wagered (decimal: 0.0455 ≈ -110 both sides). True value:
+           B - B*R*v = B*(1 - R*v).
+         Break-even hold v* = 1/R: above it the promo costs you real money.
+         Typical holds: -105/-105 ≈ 2.4%, -110/-110 ≈ 4.55%, -120/-120 ≈ 9.1%.
+         Throws on nonsense input. */
+  rollover: function(bonus, multiple, holdPerWager){
+    var B=Number(bonus), R=Number(multiple), v=Number(holdPerWager);
+    if(!(B>0)) throw new Error("Bonus amount must be greater than 0");
+    if(!(R>0)) throw new Error("Rollover multiple must be greater than 0");
+    if(!(v>=0 && v<1)) throw new Error("Hold per $1 wagered must be between 0 and 100%");
+    var wagered = B*R, cost = wagered*v, value = B-cost;
+    return {
+      bonus: B, multiple: R, holdPct: round(v*100,2),
+      mustWager: round(wagered,2),
+      rolloverCost: round(cost,2),
+      trueValue: round(value,2),
+      valuePct: round(value/B*100,2),        /* bonus dollars -> real dollars */
+      breakEvenHoldPct: round(100/R,2)       /* hold that zeroes the promo out */
+    };
+  },
+
+  /* ---- profit boost: stake S of real money at boosted decimal dB instead of
+         the book's normal price d (dB > d). With YOUR win probability p the
+         boost's extra expected value is S*(dB-d)*p. When p is not supplied we
+         default to the no-vig implied probability of the UNBOOSTED price —
+         stated out loud in the UI. That assumes the base price is fair, which
+         flatters the boost slightly, so treat the extra EV as an upper bound.
+         Throws on nonsense input. */
+  profitBoost: function(stake, origDec, boostDec, winProb){
+    var S=Number(stake), d=Number(origDec), db=Number(boostDec);
+    if(!(S>0)) throw new Error("Stake must be greater than 0");
+    if(!(d>1)) throw new Error("Original price must be decimal greater than 1");
+    if(!(db>d)) throw new Error("Boosted price must beat the original price");
+    var p = (winProb === undefined || winProb === null || winProb === "")
+      ? 1/d : Number(winProb);
+    if(!(p>0 && p<1)) throw new Error("Win probability must be between 0 and 1 (exclusive)");
+    var extra = S*(db-d)*p;
+    return {
+      stake: S, origDec: round(d,4), boostDec: round(db,4), winProb: round(p,4),
+      extraEV: round(extra,2),
+      extraPer100: round(extra/S*100,2),     /* cents of value per dollar staked */
+      impliedPct: round(100/d,2)
+    };
+  },
+
   /* ---- dutching: split one stake across mutually-exclusive outcomes so the
          return is identical no matter which one wins. The classic use: several
          golfers in one tournament, multiple division winners, or one side of

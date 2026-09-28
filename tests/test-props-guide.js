@@ -57,8 +57,8 @@ ok("honesty: entertainment tax named",
 const index = read("index.html");
 ok("index hero counts 7 guides",
   /<b>7<\/b><span>in-depth guides<\/span>/.test(index));
-ok("index hero counts 16 tools",
-  /<b>16<\/b><span>betting tools<\/span>/.test(index));
+ok("index hero counts 17 tools",
+  /<b>17<\/b><span>betting tools<\/span>/.test(index));
 const cards = (index.match(/class="card" href="guides\/[a-z0-9-]+\.html"/g) || []).length;
 ok("index has 7 guide cards", cards === 7);
 ok("index links the new guide", index.indexOf('href="guides/props.html"') !== -1);

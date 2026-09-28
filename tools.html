@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Calculators — Odds, Parlay, Kelly, Vig, Hedge | GridIronUI</title>
-<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, dutching calculator, teaser calculator, bankroll simulator, plus a bet journal to track your record and ROI. All math runs in your browser.">
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, ticket hedge planner, bonus and promo value, dutching calculator, teaser calculator, bankroll simulator, plus a bet journal to track your record and ROI. All math runs in your browser.">
 <meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
 <meta property="og:url" content="https://gridironui.xyz/tools.html">
 <link rel="canonical" href="https://gridironui.xyz/tools.html">
@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Sixteen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Seventeen tools that do the sportsbook math for you — and keep your record honest. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -160,7 +160,6 @@
     </div>
 
     <div class="card calc" id="middle">
-      <span class="tag">New</span>
       <h3>Middling calculator</h3>
       <p class="hint">The line moved after your first bet — now you hold both sides at different numbers. Enter both bets and see exactly what a middle pays, and what a split costs. The labels are just for you; the math only needs stakes and prices. Read <a href="guides/line-movement.html">the line-movement guide</a> first if you haven't.</p>
       <div class="form-row">
@@ -178,6 +177,51 @@
       </div>
       <button class="btn btn-gold btn-sm" id="midGo">Evaluate my middle</button>
       <div class="result-box" id="midOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="bonus">
+      <span class="tag">New</span>
+      <h3>Bonus &amp; promo value</h3>
+      <p class="hint">Books hand out bonus bets, deposit matches and profit boosts — but a $100 bonus is never worth $100. Pick the promo type and price the offer like a sharp: what it converts to in real cash, after the fine print. Hedging a bonus bet? Shop both legs on the <a href="odds.html">odds board</a> first.</p>
+      <div class="field"><label>Promo type</label>
+        <select id="bType">
+          <option value="bonus" selected>Bonus bet (stake not returned)</option>
+          <option value="rollover">Deposit match with rollover</option>
+          <option value="boost">Profit boost</option>
+        </select>
+      </div>
+      <div id="bBonusFields">
+        <div class="form-row">
+          <div class="field"><label>Bonus bet amount ($)</label><input type="number" id="bBonus" placeholder="100" min="0" step="any"></div>
+          <div class="field"><label>Price you'd use it at</label><input type="text" id="bPrice" placeholder="+150"></div>
+          <div class="field"><label>Format</label><select id="bFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Hedge price — other side (optional)</label><input type="text" id="bHedge" placeholder="-150"></div>
+          <div class="field"><label>Your win chance % (optional)</label><input type="number" id="bProb" placeholder="40" min="1" max="99" step="any"></div>
+        </div>
+      </div>
+      <div id="bRolloverFields" style="display:none">
+        <div class="form-row">
+          <div class="field"><label>Bonus amount ($)</label><input type="number" id="rBonus" placeholder="200" min="0" step="any"></div>
+          <div class="field"><label>Rollover multiple</label><input type="number" id="rMult" placeholder="5" min="0" step="any" value="5"></div>
+          <div class="field"><label>Your hold per $1 wagered (%)</label><input type="number" id="rHold" placeholder="4.55" min="0" max="99" step="any" value="4.55"></div>
+        </div>
+        <p class="hint" style="margin-top:-4px">The hold is what the vig costs you per dollar rolled over: <span class="num">-105/-105 ≈ 2.4%</span>, <span class="num">-110/-110 ≈ 4.55%</span>, <span class="num">-120/-120 ≈ 9.1%</span>. Be honest — it assumes you bet at ordinary prices, not arbs.</p>
+      </div>
+      <div id="bBoostFields" style="display:none">
+        <div class="form-row">
+          <div class="field"><label>Stake ($, real money)</label><input type="number" id="pStake" placeholder="50" min="0" step="any"></div>
+          <div class="field"><label>Original price</label><input type="text" id="pOrig" placeholder="-110"></div>
+          <div class="field"><label>Boosted price</label><input type="text" id="pBoost" placeholder="+100"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Format</label><select id="pFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+          <div class="field"><label>Your win chance % (optional)</label><input type="number" id="pProb" placeholder="52.4" min="1" max="99" step="any"></div>
+        </div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="bGo">Price my promo</button>
+      <div class="result-box" id="bOut" style="display:none"></div>
     </div>
 
     <div class="card calc" id="cashout">
@@ -281,7 +325,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.66.0"></script>
-<script src="js/betmath.js?v=1.65.0"></script>
-<script src="js/tools.js?v=1.65.0"></script>
+<script src="js/betmath.js?v=1.67.0"></script>
+<script src="js/tools.js?v=1.67.0"></script>
 </body>
 </html>

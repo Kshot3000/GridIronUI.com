@@ -316,6 +316,89 @@ $("midGo").addEventListener("click", function(){
   }catch(e){ err("midOut", e.message); }
 });
 
+/* 10d — bonus & promo value: what a promo converts to in real cash */
+function bMoney(v){
+  var neg = v < 0;
+  return '<b class="num" style="color:'+(neg?"#ff9aa3":"#7fe8a0")+'">'+(neg?"\u2212":"+")+'$'+Math.abs(v).toFixed(2)+'</b>';
+}
+/* promo-type field groups: only the active promo's fields are visible */
+function bShowType(){
+  var t = val("bType");
+  $("bBonusFields").style.display = t === "bonus" ? "" : "none";
+  $("bRolloverFields").style.display = t === "rollover" ? "" : "none";
+  $("bBoostFields").style.display = t === "boost" ? "" : "none";
+}
+$("bType").addEventListener("change", bShowType);
+$("bGo").addEventListener("click", function(){
+  var t = val("bType");
+  try{
+    if(t === "bonus"){
+      if(isEmpty("bBonus")||isEmpty("bPrice")){ note("bOut", "Enter the bonus amount and the price you'd use it at above, then hit Price my promo. "+EXAMPLE); return; }
+      var B = num("bBonus"), dA = toDecimal(val("bPrice"), val("bFmt"));
+      var hedgeRaw = val("bHedge"), probRaw = val("bProb");
+      if(hedgeRaw === "" && probRaw === ""){
+        note("bOut", "A bonus bet can't be priced from the offer alone — add the hedge price (other side, for the risk-free conversion) or your win chance %, or both. "+EXAMPLE); return;
+      }
+      var r = BetMath.bonusBet(B, dA, hedgeRaw === "" ? "" : toDecimal(hedgeRaw, val("bFmt")), probRaw === "" ? "" : probRaw/100);
+      var row = function(icon, title, sub, v){
+        var col = v >= 0 ? "#7fe8a0" : "#ff9aa3";
+        return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)">'+
+          '<div><b>'+icon+' '+title+'</b><div style="color:var(--muted);font-size:.82rem">'+sub+'</div></div>'+
+          '<b class="num" style="font-size:1.25rem;color:'+col+'">'+bMoney(v)+'</b></div>';
+      };
+      var html = '<div class="grid grid-2" style="gap:10px">';
+      if(r.guaranteed !== undefined){
+        html += '<div><label>\u{1F6E1}\ufe0f Risk-free hedge</label><div class="big num" style="font-size:1.4rem">$'+r.guaranteed.toFixed(2)+'</div>'+
+          '<div style="color:var(--muted);font-size:.9rem">locked cash · <b class="num" style="color:var(--text)">'+r.conversionPct.toFixed(1)+'%</b> conversion</div>'+
+          '<p style="margin:8px 0 0;font-size:.9rem">Stake <b class="num">$'+r.hedgeStake.toFixed(2)+'</b> of real cash on the other side — the bonus turns into <b class="num" style="color:#7fe8a0">$'+r.guaranteed.toFixed(2)+'</b> no matter who wins. That conversion is the promo\u2019s true price tag.</p></div>';
+      }
+      if(r.ev !== undefined){
+        var evNote = r.ev >= 0
+          ? 'Worth <b class="num" style="color:#7fe8a0">$'+r.ev.toFixed(2)+'</b> on your number — <b class="num" style="color:var(--text)">'+r.evConversionPct.toFixed(1)+'%</b> of face value.'
+          : 'A <b class="num" style="color:#ff9aa3">\u2212$'+Math.abs(r.ev).toFixed(2)+'</b> proposition on your number — the bonus doesn\u2019t fix a bad price.';
+        html += '<div><label>\u{1F3AF} Your-number value</label><div class="big num" style="font-size:1.4rem">'+(r.ev >= 0 ? "" : "\u2212")+'$'+Math.abs(r.ev).toFixed(2)+'</div>'+
+          '<div style="color:var(--muted);font-size:.9rem">expected value</div>'+
+          '<p style="margin:8px 0 0;font-size:.9rem">'+evNote+'</p></div>';
+      }
+      html += '</div>';
+      html += '<p style="margin:12px 0 0;color:var(--muted);font-size:.85rem">Why longshots hedge best: the bonus stake is dead money either way, so a longer price wastes less of it — but don\u2019t force a dog you\u2019d never bet. Shop both sides on the <a href="odds.html">odds board</a> first: tighter opposing prices mean a better conversion. Bonus bets usually carry max stakes, expiry dates and market restrictions — the terms decide the real value, not the headline.</p>';
+      show("bOut", html);
+    } else if(t === "rollover"){
+      if(isEmpty("rBonus")||isEmpty("rMult")||isEmpty("rHold")){ note("bOut", "Enter the bonus amount, rollover multiple and your hold per dollar above, then hit Price my promo. "+EXAMPLE); return; }
+      var B2 = num("rBonus"), R = num("rMult"), v = num("rHold")/100;
+      var rr = BetMath.rollover(B2, R, v);
+      var verdict = rr.trueValue < 0
+        ? '<p style="margin:12px 0 0"><b style="color:#ff9aa3">This promo costs you money.</b> <span style="color:var(--muted);font-size:.9rem">The playthrough grinds away <b class="num" style="color:#ff9aa3">$'+Math.abs(rr.trueValue).toFixed(2)+'</b> more than the bonus is worth at your prices — declining is the +EV move. A smaller rollover or cheaper prices would change the answer.</span></p>'
+        : (rr.valuePct >= 70
+          ? '<p style="margin:12px 0 0"><b style="color:#7fe8a0">Genuinely valuable.</b> <span style="color:var(--muted);font-size:.9rem">It converts at <b class="num" style="color:#7fe8a0">'+rr.valuePct.toFixed(0)+'%</b> — take it, grind the rollover at the cheapest prices you can find, and bank the difference.</span></p>'
+          : '<p style="margin:12px 0 0"><b style="color:#ffc46b">Worth taking if you were betting anyway.</b> <span style="color:var(--muted);font-size:.9rem">It converts at <b class="num" style="color:#ffc46b">'+rr.valuePct.toFixed(0)+'%</b> of face value — don\u2019t force extra volume to chase it.</span></p>');
+      show("bOut",
+        '<div class="grid grid-3" style="gap:10px">'+
+        '<div><label>\u{1F4B0} True value</label><div class="big num" style="font-size:1.4rem">'+(rr.trueValue >= 0 ? "$" : "\u2212$")+Math.abs(rr.trueValue).toFixed(2)+'</div><div style="color:var(--muted);font-size:.9rem">real dollars</div></div>'+
+        '<div><label>\u{1F504} Playthrough cost</label><div class="big num" style="font-size:1.4rem">$'+rr.rolloverCost.toFixed(2)+'</div><div style="color:var(--muted);font-size:.9rem">to wager <b class="num" style="color:var(--text)">$'+rr.mustWager.toFixed(2)+'</b></div></div>'+
+        '<div><label>⚖️ Break-even hold</label><div class="big num" style="font-size:1.4rem">'+rr.breakEvenHoldPct.toFixed(1)+'%</div><div style="color:var(--muted);font-size:.9rem">hold that zeroes it</div></div>'+
+        '</div>'+verdict+
+        '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Honest fine print: the hold assumes ordinary prices. Roll the bonus through two-way markets near the no-vig fair line to keep the playthrough cheap — longshots bleed the bonus through variance, and heavy favorites often don\u2019t count toward rollover at all. Withdrawal minimums and expiry dates sit in the terms; read them before you opt in.</p>');
+    } else {
+      /* boost */
+      if(isEmpty("pStake")||isEmpty("pOrig")||isEmpty("pBoost")){ note("bOut", "Enter your stake and both prices above, then hit Price my promo. "+EXAMPLE); return; }
+      var S = num("pStake"), d = toDecimal(val("pOrig"), val("pFmt")), db = toDecimal(val("pBoost"), val("pFmt"));
+      var probRaw2 = val("pProb");
+      var rb = BetMath.profitBoost(S, d, db, probRaw2 === "" ? "" : probRaw2/100);
+      var usedDefault = probRaw2 === "";
+      show("bOut",
+        '<div class="grid grid-2" style="gap:10px">'+
+        '<div><label>⚡ Boost value</label><div class="big num" style="font-size:1.4rem">$'+rb.extraEV.toFixed(2)+'</div><div style="color:var(--muted);font-size:.9rem">extra expected profit on a <b class="num" style="color:var(--text)">$'+S.toFixed(2)+'</b> stake</div></div>'+
+        '<div><label>\u{1F4CA} Per dollar staked</label><div class="big num" style="font-size:1.4rem">'+rb.extraPer100.toFixed(1)+'\u00A2</div><div style="color:var(--muted);font-size:.9rem">of value per $1</div></div>'+
+        '</div>'+
+        '<p style="margin:12px 0 0;color:var(--muted);font-size:.9rem">'+(usedDefault
+          ? 'Win chance assumed at the book\u2019s own number — <b class="num" style="color:var(--text)">'+rb.impliedPct.toFixed(1)+'%</b> implied by the unboosted price. That flatters the boost a touch, so treat <b class="num" style="color:var(--text)">$'+rb.extraEV.toFixed(2)+'</b> as the high end of its worth.'
+          : 'Priced on your number — <b class="num" style="color:var(--text)">'+(rb.winProb*100).toFixed(1)+'%</b>. The boost is free value on a bet you\u2019d make anyway; it never turns a bet you\u2019d skip into one you\u2019d take.')+'</p>'+
+        '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Honest fine print: boosts are capped — check the max extra payout, not the max stake. A 50% boost from -110 to +135 on a $25 max is worth a few dollars, not a fortune. Boosts stack with nothing; use them on your normal bets, never as an excuse to add volume.</p>');
+    }
+  }catch(e){ err("bOut", e.message); }
+});
+
 /* 10b — cash-out evaluator: is the book's mid-game offer a fair price? */
 function coMoney(v){
   var neg = v < 0;
