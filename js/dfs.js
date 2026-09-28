@@ -259,6 +259,35 @@ function paintChipsInPlace(){
 function renderPool(){
   var c = cfg();
   injFlags = refreshInjuryFlags();
+  /* pool filters: position options follow the current roster slots */
+  var posSel = $("poolPosFilter"), se = $("poolSearch");
+  if(posSel){
+    var slots = [];
+    c.slots.forEach(function(s){ if(slots.indexOf(s)===-1) slots.push(s); });
+    var keep = posSel.value;
+    posSel.innerHTML = '<option value="ALL">All positions</option>' + slots.map(function(s){
+      return '<option value="'+s+'">'+s+'</option>';
+    }).join("");
+    posSel.value = (slots.indexOf(keep)!==-1) ? keep : "ALL";
+  }
+  var query = (se && se.value ? se.value : "").trim().toLowerCase();
+  var posF = posSel && posSel.value ? posSel.value : "ALL";
+  function rowShown(p){
+    if(posF!=="ALL" && p.pos.indexOf(posF)===-1) return false;
+    if(query && String(p.name||"").toLowerCase().indexOf(query)===-1 &&
+              String(p.team||"").toLowerCase().indexOf(query)===-1) return false;
+    return true;
+  }
+  var shown = pool.filter(rowShown);
+  /* top-3 value players in the FULL pool — stable ★ markers regardless of filtering */
+  var topIds = {};
+  pool.map(function(p){ return { p:p, v:OPT.value(p) }; })
+    .sort(function(a,b){ return b.v-a.v || b.p.proj-a.p.proj; })
+    .slice(0,3).forEach(function(x){ if(x.v>0) topIds[x.p.id]=1; });
+  var pf = $("poolFilters");
+  if(pf) pf.style.display = pool.length ? "" : "none";
+  var sc = $("poolShowCount");
+  if(sc) sc.textContent = shown.length<pool.length ? ("Showing "+shown.length+" of "+pool.length+" players") : "";
   var nl = pool.filter(function(p){ return p.locked; }).length;
   var nb = pool.filter(function(p){ return p.banned; }).length;
   $("poolCount").textContent = pool.length+" players · "+c.site+" "+c.sport+" · $"+c.cap.toLocaleString()+" cap"+
@@ -270,18 +299,27 @@ function renderPool(){
     return;
   }
   var demo = pool.some(function(p){return p.demo;});
+  if(!shown.length){
+    $("poolWrap").innerHTML = '<div class="empty">No players match the current search/position filter. Clear the search or pick "All positions".</div>';
+    renderInjBanner();
+    return;
+  }
   var html = (demo?'<div class="notice" style="margin:0 0 12px"><strong>DEMO SLATE.</strong> These are synthetic players with made-up projections, for testing the optimizer only. Not real players, not real numbers.</div>':"")+
-  '<div class="table-scroll"><table class="data"><thead><tr><th>Player</th><th>Pos</th><th>Team</th><th>Opp</th><th>Sal</th><th>Proj</th><th>Floor</th><th>Ceil</th><th>Own%</th><th>Lineup</th></tr></thead><tbody>'+
-  pool.map(function(p){
+  '<div class="table-scroll"><table class="data"><thead><tr><th>Player</th><th>Pos</th><th>Team</th><th>Opp</th><th>Sal</th><th>Proj</th><th>Floor</th><th>Ceil</th><th>Own%</th><th title="Projected points per $1,000 of salary">Value</th><th>Lineup</th></tr></thead><tbody>'+
+  shown.map(function(p){
     var fl = injFlags[p.id];
     var rowCls = p.locked ? "row-locked" : (p.banned ? "row-banned" : "");
     if(fl && fl.severity===3) rowCls += (rowCls ? " " : "")+"row-inj-out";
+    var val = OPT.value(p), isTop = !!topIds[p.id];
+    var valCell = '<td class="num'+(isTop?' top-value':'')+'" title="Projected points per $1,000 of salary'+(isTop?' — top-3 value in your pool':'')+'">'+
+      (isTop?'<span class="val-star" aria-hidden="true">★ </span>':'')+val.toFixed(2)+'</td>';
     return '<tr data-id="'+p.id+'"'+(rowCls ? ' class="'+rowCls+'"' : "")+'><td class="pname"><b>'+OPT_esc(p.name)+'</b>'+injChip(p)+'</td><td>'+p.pos.join("/")+'</td><td>'+OPT_esc(p.team)+'</td><td>'+OPT_esc(p.opp||"—")+'</td>'+
     '<td class="num">$'+p.salary.toLocaleString()+'</td>'+
     '<td><input type="number" step="any" data-k="proj" value="'+p.proj+'" style="width:70px;padding:6px"></td>'+
     '<td><input type="number" step="any" data-k="floor" value="'+p.floor+'" style="width:70px;padding:6px"></td>'+
     '<td><input type="number" step="any" data-k="ceil" value="'+p.ceil+'" style="width:70px;padding:6px"></td>'+
     '<td><input type="number" step="any" data-k="own" value="'+p.own+'" style="width:64px;padding:6px"></td>'+
+    valCell+
     '<td style="white-space:nowrap">'+
       '<button class="mini-btn'+(p.locked?" on":"")+'" data-lock="'+p.id+'" title="'+(p.locked?"Unlock ":"Lock into ")+'every lineup">🔒</button> '+
       '<button class="mini-btn'+(p.banned?" on":"")+'" data-ban="'+p.id+'" title="'+(p.banned?"Un-exclude ":"Exclude from ")+'all lineups">🚫</button> '+
@@ -452,6 +490,12 @@ function exportCSV(res){
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
 }
 
-/* init */
-loadStored(); renderPool();
+/* init — filter bar lives outside poolWrap so typing never loses focus */
+function initDfs(){
+  var se = $("poolSearch"), pf = $("poolPosFilter");
+  if(se) se.addEventListener("input", function(){ renderPool(); });
+  if(pf) pf.addEventListener("change", function(){ renderPool(); });
+  loadStored(); renderPool();
+}
+initDfs();
 })();

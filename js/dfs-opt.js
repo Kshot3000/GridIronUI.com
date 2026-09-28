@@ -31,6 +31,16 @@ function proj(lineup){ return lineup.reduce(function(s,e){ return s+e.player.pro
 function ceil(lineup){ return lineup.reduce(function(s,e){ return s+e.player.ceil; },0); }
 function floor(lineup){ return lineup.reduce(function(s,e){ return s+e.player.floor; },0); }
 
+/* projected points per $1k of salary — the standard DFS "value" readout
+   for the pool table. Guards a zero/missing salary rather than dividing
+   by it. */
+function value(p){
+  var sal = Number(p && p.salary) || 0;
+  if(sal <= 0) return 0;
+  var pr = Number(p && p.proj) || 0;
+  return pr / (sal / 1000);
+}
+
 /* hard validation: cap, legal positions, no duplicates */
 function validate(lineup, cfg){
   var errors = [], seen = {};
@@ -422,10 +432,10 @@ function buildDemoSlate(cfg){
 if(typeof module !== "undefined" && module.exports){
   module.exports = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
     greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, generate:generate,
-    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor,
+    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor, value:value,
     buildDemoSlate:buildDemoSlate };
 } else { window.DFSOpt = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
     greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, generate:generate,
-    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor,
+    insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor, value:value,
     buildDemoSlate:buildDemoSlate }; }
 })();

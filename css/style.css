@@ -465,6 +465,10 @@ tr.row-locked td{background:rgba(230,168,76,.07)}
 tr.row-locked td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
 tr.row-banned td{opacity:.42}
 tr.row-banned td:nth-child(2){text-decoration:line-through}
+/* DFS pool filters + value column */
+.pool-filters{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+td.top-value{background:rgba(240,180,41,.10);font-weight:700;color:var(--gold-soft)}
+.val-star{color:var(--gold);font-weight:800}
 
 /* ---------- misc ---------- */
 .divider{height:1px;background:var(--line-soft);margin:34px 0;border:none}

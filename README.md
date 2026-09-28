@@ -55,6 +55,8 @@ node tests/test-dfs.js        # DFS optimizer tests
 node tests/test-dfs-exposure.js  # DFS exposure summary tests
 node tests/test-dfs-injuries.js  # DFS injury cross-check logic (ESPN flatten, severity ranks, conservative name+team matching)
 node tests/test-dfs-injuries-dom.js  # injury wiring in shipped dfs.js (fetch-once, chips, banner, exclude-OUT, locked-OUT warning)
+node tests/test-dfs-value.js  # DFSOpt.value: projected points per $1k, zero-salary guard, node + browser exports
+node tests/test-dfs-filters-dom.js  # pool search + position filter + value column wiring in shipped dfs.js
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 node tests/test-kalshi.js     # Kalshi snapshot logic tests
 node tests/test-team-brand.js  # ESPN team logo/color identity tests
