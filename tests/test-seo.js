@@ -39,6 +39,14 @@ PAGES.forEach(p => {
   ok(p + " og:type", html.indexOf('<meta property="og:type" content="website">') !== -1);
   ok(p + " og:title matches <title>", html.indexOf('<meta property="og:title" content="' + title + '">') !== -1);
   ok(p + " og:description matches meta description", html.indexOf('<meta property="og:description" content="' + desc + '">') !== -1);
+  // v1.68.1: uniqueness — social crawlers take the FIRST occurrence, so a
+  // stale duplicate (index.html once carried two og:titles) silently shadows
+  // the tuned copy. Exactly one of each, on every page.
+  const count = sub => (html.split(sub).length - 1);
+  ok(p + " exactly one og:title", count('property="og:title"') === 1);
+  ok(p + " exactly one og:description", count('property="og:description"') === 1);
+  ok(p + " exactly one twitter:title", count('name="twitter:title"') === 1);
+  ok(p + " exactly one twitter:description", count('name="twitter:description"') === 1);
   ok(p + " og:image", html.indexOf('<meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">') !== -1);
   ok(p + " og:image dimensions", html.indexOf('<meta property="og:image:width" content="1200">') !== -1 &&
      html.indexOf('<meta property="og:image:height" content="630">') !== -1);
