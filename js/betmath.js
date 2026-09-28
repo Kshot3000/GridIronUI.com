@@ -60,6 +60,65 @@ var M = {
     }, 1);
   },
 
+  /* ---- combinations: all k-subsets of n indices, order-preserving ---- */
+  combinations: function(n, k){
+    n = Math.floor(n); k = Math.floor(k);
+    if(!(n > 0) || k < 1 || k > n) return [];
+    var idx = [], out = [];
+    (function pick(start){
+      if(idx.length === k){ out.push(idx.slice()); return; }
+      for(var i = start; i < n; i++){ idx.push(i); pick(i+1); idx.pop(); }
+    })(0);
+    return out;
+  },
+
+  /* ---- round robin: every k-leg parlay from a set of legs.
+         legs = array of decimal odds; sizes = array of k (2..legs.length);
+         stakePer = stake on EACH parlay.
+         Returns per-size: k, parlays, totalRisk, allWinReturn, allWinProfit,
+         worstLoserReturn/Profit (one leg loses: fewest combos survive), and the
+         richest single parlay (1-based leg numbers + its decimal). */
+  roundRobin: function(legs, sizes, stakePer){
+    if(!Array.isArray(legs) || legs.length < 2) throw new Error("Round robin needs at least 2 legs");
+    legs = legs.map(function(d){
+      d = Number(d);
+      if(!(d > 1)) throw new Error("Leg odds must be decimal > 1");
+      return d;
+    });
+    var n = legs.length;
+    sizes = (sizes || []).map(Number).filter(function(k){ return k >= 2 && k <= n; });
+    if(!sizes.length) throw new Error("Pick at least one size (by 2s, by 3s, ...).");
+    var s = Number(stakePer);
+    if(!(s > 0)) throw new Error("Stake per parlay must be greater than 0.");
+    function comboDec(combo){ return combo.reduce(function(a, i){ return a*legs[i]; }, 1); }
+    return sizes.map(function(k){
+      var combos = M.combinations(n, k), decs = [], byLeg = [];
+      for(var i = 0; i < n; i++) byLeg.push(0);
+      combos.forEach(function(combo){
+        var d = comboDec(combo);
+        decs.push({combo: combo, dec: d});
+        combo.forEach(function(i){ byLeg[i] += d; });
+      });
+      var sumAll = decs.reduce(function(a, x){ return a + x.dec; }, 0);
+      /* losing a leg kills every combo containing it; survivors = combos it is NOT in.
+         Worst loser = the leg whose combos pay the most (max byLeg -> min survivors). */
+      var maxInLeg = Math.max.apply(null, byLeg);
+      var worstSurvive = sumAll - maxInLeg;
+      var risk = s * combos.length;
+      var richest = decs.reduce(function(a, x){ return x.dec > a.dec ? x : a; }, decs[0]);
+      return {
+        k: k, parlays: combos.length,
+        totalRisk: round(risk, 2),
+        allWinReturn: round(s * sumAll, 2),
+        allWinProfit: round(s * sumAll - risk, 2),
+        worstLoserReturn: round(s * worstSurvive, 2),
+        worstLoserProfit: round(s * worstSurvive - risk, 2),
+        richestCombo: richest.combo.map(function(i){ return i + 1; }), /* 1-based leg numbers */
+        richestDec: round(richest.dec, 3)
+      };
+    });
+  },
+
   /* ---- Kelly: p = your probability 0..1, d = decimal odds, frac = 1, .5, .25 ---- */
   kelly: function(p, d, frac){
     p=Number(p); d=Number(d); frac=(frac===undefined)?1:Number(frac);

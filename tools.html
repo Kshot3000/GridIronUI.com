@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Calculators — Odds, Parlay, Kelly, Vig, Hedge | GridIronUI</title>
-<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, Kelly stake, vig remover, hedge and arbitrage finder. All math runs in your browser.">
+<meta name="description" content="Free sports betting calculators: odds converter, implied probability, payout, parlay, round robin, Kelly stake, vig remover, hedge and arbitrage finder, bankroll simulator. All math runs in your browser.">
 <meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
 <meta property="og:url" content="https://gridironui.xyz/tools.html">
 <link rel="canonical" href="https://gridironui.xyz/tools.html">
@@ -22,7 +22,7 @@
   <a class="back-link" href="index.html">← Home</a>
   <span class="kicker">Sharp tools</span>
   <h1>Betting calculators</h1>
-  <p class="lede">Seven tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
+  <p class="lede">Nine tools that do the sportsbook math for you. Everything runs locally in your browser — no data leaves your device. <span class="num">-110 = 1.91 = 10/11 = 52.38%</span>, every time.</p>
 </div></section>
 
 <div class="wrap">
@@ -71,6 +71,18 @@
       <div class="field"><label>Stake ($) — optional</label><input type="number" id="plStake" placeholder="10" min="0" step="any"></div>
       <button class="btn btn-gold btn-sm" id="plGo">Calculate parlay</button>
       <div class="result-box" id="plOut" style="display:none"></div>
+    </div>
+
+    <div class="card calc" id="roundrobin">
+      <span class="tag">New</span>
+      <h3>Round-robin calculator</h3>
+      <p class="hint">Build every smaller parlay from your legs automatically — pick your "by 2s", "by 3s", and see the cost of one leg losing. <a href="glossary.html">Glossary</a> has the plain-English version.</p>
+      <div id="rrLegRows"></div>
+      <button class="btn btn-ghost btn-sm" id="rrAddLeg" style="margin-bottom:12px">+ Add leg</button>
+      <div class="field"><label>Parlay sizes</label><div id="rrSizes" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px"></div></div>
+      <div class="field" style="margin-top:12px"><label>Stake per parlay ($)</label><input type="number" id="rrStake" placeholder="10" min="0" step="any" value="10"></div>
+      <button class="btn btn-gold btn-sm" id="rrGo">Calculate round robin</button>
+      <div class="result-box" id="rrOut" style="display:none"></div>
     </div>
 
     <div class="card calc" id="kelly">

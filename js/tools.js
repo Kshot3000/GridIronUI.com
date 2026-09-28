@@ -101,6 +101,70 @@ $("plGo").addEventListener("click", function(){
   }catch(e){ err("plOut", e.message); }
 });
 
+/* 4b — round robin */
+var rrLegN = 0;
+function rrLegs(){
+  var legs = [];
+  for(var i=1;i<=rrLegN;i++){ var el=$("rrLeg"+i); if(el && el.value.trim()) legs.push(toDecimal(el.value, $("rrLegf"+i).value)); }
+  return legs;
+}
+function rrRenderSizes(){
+  var box = $("rrSizes");
+  var prev = {};
+  var cbs = box.querySelectorAll("input[type=checkbox]");
+  for(var q=0;q<cbs.length;q++) prev[cbs[q].value] = cbs[q].checked;
+  var n = 0;
+  for(var i=1;i<=rrLegN;i++){ var el=$("rrLeg"+i); if(el && el.value.trim()) n++; }
+  var html = "";
+  for(var k=2;k<=n;k++){
+    var checked = (k in prev) ? prev[k] : (k===2);
+    html += '<label style="display:flex;align-items:center;gap:6px;font-weight:600"><input type="checkbox" id="rrk'+k+'" value="'+k+'"'+(checked?' checked':'')+'> by '+k+'s</label>';
+  }
+  box.innerHTML = html || '<span style="color:var(--muted)">Add legs above to choose sizes.</span>';
+}
+function rrAddLeg(){
+  rrLegN++;
+  var row = document.createElement("div");
+  row.className = "form-row"; row.style.marginBottom = "10px";
+  row.innerHTML = '<div><label>Leg '+rrLegN+' odds</label><input type="text" id="rrLeg'+rrLegN+'" placeholder="-110"></div>'+
+    '<div><label>Format</label><select id="rrLegf'+rrLegN+'"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>';
+  $("rrLegRows").appendChild(row);
+  var inp = $("rrLeg"+rrLegN);
+  if(inp) inp.addEventListener("input", rrRenderSizes);
+  rrRenderSizes();
+}
+rrAddLeg(); rrAddLeg(); rrAddLeg(); rrAddLeg();
+$("rrAddLeg").addEventListener("click", rrAddLeg);
+$("rrGo").addEventListener("click", function(){
+  try{
+    var legs = rrLegs();
+    if(!legs.length){ note("rrOut", "Add at least two legs' odds above, then hit Calculate round robin. The grayed-out numbers are just examples."); return; }
+    if(legs.length < 2) throw new Error("Enter at least two legs.");
+    var sizes = [];
+    for(var k=2;k<=legs.length;k++){ var cb = $("rrk"+k); if(cb && cb.checked) sizes.push(k); }
+    if(!sizes.length) throw new Error("Pick at least one parlay size (by 2s, by 3s, ...).");
+    var stake = num("rrStake");
+    if(!(stake>0)) throw new Error("Enter a stake per parlay greater than 0.");
+    var rows = BetMath.roundRobin(legs, sizes, stake);
+    function money(v){ return "$"+v.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function prof(v){ return '<b class="num" style="color:'+(v>=0?"#7fe8a0":"#ff9aa3")+'">'+(v>=0?"+":"")+money(v)+'</b>'; }
+    var html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.95rem">'+
+      '<tr style="color:var(--muted);text-align:left"><th style="padding:6px">Size</th><th style="padding:6px">Parlays</th><th style="padding:6px">Total risk</th><th style="padding:6px">All hit</th><th style="padding:6px">Worst leg loses</th><th style="padding:6px">Richest parlay</th></tr>';
+    rows.forEach(function(r){
+      html += '<tr style="border-top:1px solid rgba(255,255,255,.08)">'+
+        '<td style="padding:8px 6px;font-weight:700">by '+r.k+'s</td>'+
+        '<td class="num" style="padding:8px 6px">'+r.parlays+' × '+money(stake)+'</td>'+
+        '<td class="num" style="padding:8px 6px">'+money(r.totalRisk)+'</td>'+
+        '<td style="padding:8px 6px">'+prof(r.allWinProfit)+' <span style="color:var(--muted)">('+money(r.allWinReturn)+' back)</span></td>'+
+        '<td style="padding:8px 6px">'+prof(r.worstLoserProfit)+' <span style="color:var(--muted)">('+money(r.worstLoserReturn)+' back)</span></td>'+
+        '<td class="num" style="padding:8px 6px">legs '+r.richestCombo.join("+")+' · '+r.richestDec+'x</td></tr>';
+    });
+    html += '</table></div>'+
+      '<p style="margin:12px 0 0;color:var(--muted);font-size:.85rem">Round robins soften one loss but don\'t erase the book\'s edge — every leg still carries vig, so a round robin of -110 legs needs each leg to win about 52.38% of the time just to break even.</p>';
+    show("rrOut", html);
+  }catch(e){ err("rrOut", e.message); }
+});
+
 /* 5 — kelly */
 $("kGo").addEventListener("click", function(){
   if(isEmpty("kProb")||isEmpty("kOdds")){ note("kOut", "Enter your estimated win probability and the odds, then hit Calculate stake. "+EXAMPLE); return; }
