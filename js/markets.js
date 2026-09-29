@@ -153,11 +153,18 @@ function disagreeCard(games, snap, dir){
   var mtchs = D.matches(evs, (snap.games||[]), dir, window.GIU.teamFind);
   if(!mtchs.length) return "";
   var dis = D.disagreements(mtchs, 3);
+  /* The card compares a LIVE Polymarket price against a FROZEN Kalshi price,
+     so the snapshot's age is first-class information here: a 4c "edge"
+     against a 2h-old frozen number may be nothing at all. Name the age in
+     the note and tag the frozen side on every row. */
+  var snapAge = agoShort(snap.updated_at);
+  var snapAgeTxt = snapAge ? "refreshed "+snapAge : "rebuilt regularly";
+  var kalshiTip = GIU.esc("Kalshi price is from the server-side snapshot ("+snapAgeTxt+"), not a live feed — confirm the live price before you bet.");
   var head = '<div class="card disagree-card"><span class="tag">Cross-book edge</span>'+
     '<h3 style="margin:10px 0 4px">Where the two markets disagree</h3>'+
-    '<p class="disagree-note">Polymarket (live) and Kalshi (snapshot, rebuilt regularly) price the same '+
+    '<p class="disagree-note">Polymarket (live) and Kalshi (snapshot, '+snapAgeTxt+') price the same '+
     'game-winners. A gap of 3¢ or more means the books disagree — one of them is off, and that\'s where edge lives. '+
-    'Kalshi\'s numbers can lag the snapshot and their fee structure differs from Polymarket\'s, so confirm both '+
+    'Kalshi\'s numbers are frozen at the snapshot time and its fee structure differs from Polymarket\'s, so confirm both '+
     'prices are live before you bet.</p>';
   var body;
   if(!dis.length){
@@ -177,8 +184,8 @@ function disagreeCard(games, snap, dir){
           (tb ? window.GIU.teamLogo(tb, 26) : "") + window.GIU.teamChip(tb || {}, x.abbrB)+
         '</span>'+
         '<span class="disagree-nums"><b class="num" style="color:var(--gold-soft)">'+x.pmA+'¢</b>'+
-        '<span class="disagree-src">Polymarket</span>'+
-        '<b class="num" style="color:var(--gold-soft)">'+x.kalshiA+'¢</b><span class="disagree-src">Kalshi</span></span>'+
+        '<span class="disagree-src">Polymarket · live</span>'+
+        '<b class="num" style="color:var(--gold-soft)">'+x.kalshiA+'¢</b><span class="disagree-src" title="'+kalshiTip+'">Kalshi · snapshot</span></span>'+
         '<span class="'+cls+' num">'+(x.delta > 0 ? "▲ +" : "▼ −") + Math.abs(x.delta) + '¢</span>'+
       '</div>';
     }).join("")+'</div>';

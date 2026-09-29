@@ -1,4 +1,4 @@
-/* GridIronUI Kalshi snapshot honesty test — static checks for the v1.48.0
+/* GridIronUI Kalshi snapshot honesty test — static checks for the v1.73.0
    snapshot refresh:
    - the site makes no specific-minute refresh promises it can't keep:
      no "~15 min", "~30 min", "every 15 minutes" or "about every 30 minutes"
@@ -56,8 +56,8 @@ assert(snap.games.every(function(g){ return Array.isArray(g.markets) && g.market
 
 /* ---- cache key ---- */
 var keyMatch = marketsHtml.match(/js\/markets\.js\?v=([\d.]+)/);
-assert(keyMatch && keyMatch[1] === "1.48.0",
-  "markets.html cache key for markets.js is v1.48.0 (copy changed this release)");
+assert(keyMatch && keyMatch[1] === "1.73.0",
+  "markets.html cache key for markets.js is v1.73.0 (copy changed this release)");
 
 if(failures){ console.error(failures + " failure(s)"); process.exit(1); }
 console.log("all kalshi-snapshot checks passed");
