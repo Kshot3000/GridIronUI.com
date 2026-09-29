@@ -37,12 +37,19 @@ node tests/test-tools-labels.js   # tools label/layout: ticket-hedge label fits 
 node tests/test-live-guide.js   # live-betting guide: TOC anchors, cross-link targets, footer/index/sitemap/bet-types wiring, guide math, cache keys
 node tests/test-linemove-guide.js   # line-movement guide: TOC anchors, cross-link targets, footer/index/sitemap wiring, guide math, honesty copy, cache keys
 node tests/test-props-guide.js   # player-props guide: TOC anchors, cross-link targets, footer/index/sitemap wiring, guide math, honesty copy, cache keys
+node tests/test-bankroll-guide.js  # bankroll guide: artifact sweep, TOC anchors, cross-link targets, flat-betting + line-shopping worked examples re-derived
+node tests/test-advanced-arb.js  # advanced-guide arbitrage example: stake split re-derived against js/betmath.js hedge math, equal profit both ways
+node tests/test-glossary-terms.js  # glossary vocabulary-drift guard: Kalshi/Polymarket/prediction-market/cash-out/dutching present, no stub definitions, alphabetical order
+node tests/test-about-content.js  # about-page sitemap-in-prose: all 7 guides + all live-data pages linked, future guide files must be linked
 node tests/test-dutching.js   # dutching stake-split math (equal returns, arb vs locked-loss verdicts, error paths)
 node tests/test-dutching-dom.js  # dutching wiring in shipped tools.js (named selections, table values, verdicts, empty/bad-input states)
 node tests/test-teaser.js     # teaser key-number math (teased lines, crossings, Wong/dead legs, breakeven, error paths)
 node tests/test-teaser-dom.js  # teaser wiring in shipped tools.js (leg rows, badges, verdicts, push copy, empty/bad-input states)
 node tests/test-cashout.js    # cash-out evaluator math (fair value, book margin, DIY hedge equalization, verdict bands, error paths)
 node tests/test-cashout-dom.js  # cash-out wiring in shipped tools.js (verdicts, money math, format selector, empty/bad-input states)
+node tests/test-bonus.js      # bonus & promo value math (bonusBet, rollover, profitBoost)
+node tests/test-bonus-dom.js  # bonus & promo value DOM wiring in shipped tools.js
+node tests/test-bonus-static.js  # bonus & promo value static wiring in tools.html (cache keys)
 node tests/test-journal.js    # bet journal math (validation, profit, record/ROI/win-rate/streak/per-sport, CSV export, closing line value)
 node tests/test-journal-dom.js  # journal wiring in shipped journal.js (add validation, settle/undo/delete, filters, unit size, CSV, escaping, empty states)
 node tests/test-journal-clv-dom.js  # closing-price editor + beat-the-close chip/stat wiring in shipped journal.js
@@ -53,12 +60,15 @@ node tests/test-journal-csvimport-dom.js  # CSV import wiring in shipped journal
 node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph set + layering, hero-pulse cache key
 node tests/test-odds-inj.js   # injury-badge pure logic (severity ranks, per-team counts, card lines, badge HTML)
 node tests/test-odds-inj-dom.js  # injury-badge wiring in shipped odds.js (hidden slots, live injection, quiet cases, feed failure)
+node tests/test-injuries.js  # injuries page: severity filter + sorting in the SHIPPED js/injuries.js
 node tests/test-odds.js       # odds logic tests
 node tests/test-odds-identity.js  # odds sport->identity-league mapping + identity header resolution
 node tests/test-odds-slip.js  # bet-slip math tests
 node tests/test-odds-slip-dom.js  # bet-slip DOM wiring tests
 node tests/test-odds-slip-share.js  # bet-slip share-link codec (base64url round-trip, hostile-payload guards)
 node tests/test-odds-slip-share-dom.js  # share-link wiring in shipped odds.js (hash load + honesty banner, copy link, bad-link handling)
+node tests/test-odds-slip-value.js  # bet-slip value summary math (normalize + implied totals in js/odds-slip.js)
+node tests/test-odds-slip-value-dom.js  # slip value summary wiring in the SHIPPED js/odds.js
 node tests/test-slip-journal.js  # slip→journal mapper: leg→bet mapping, sport/market labels, stake split, captured prices, invalid-leg skips
 node tests/test-slip-journal-dom.js  # slip→journal wiring in shipped odds.js (journal writes, dedup, empty-slip guidance, skip reporting)
 node tests/test-odds-slip-identity.js  # bet-slip GameDay identity (logo + team-color chips on slip legs)
@@ -69,7 +79,9 @@ node tests/test-dfs-injuries-dom.js  # injury wiring in shipped dfs.js (fetch-on
 node tests/test-dfs-value.js  # DFSOpt.value: projected points per $1k, zero-salary guard, node + browser exports
 node tests/test-dfs-filters-dom.js  # pool search + position filter + value column wiring in shipped dfs.js
 node tests/test-dfs-dkimport.js  # DK/FD salary-CSV import: DK headers (Name/TeamAbbrev/Game Info) and FD headers (Team/Opponent/First+Last Name) auto-map, opponents derived from Game Info, ID suffixes stripped (shipped js/dfs.js)
+node tests/test-dfs-lockout.js  # DFS lock/exclude logic
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
+node tests/test-ai-coach-chain.js  # AI coach provider chain: failover order, credits-error detection, attempt recording
 node tests/test-kalshi.js     # Kalshi snapshot logic tests
 node tests/test-team-brand.js  # ESPN team logo/color identity tests
 node tests/test-teams.js     # team-directory lookup (abbr/name/normalized) + vs-header tests
@@ -82,7 +94,12 @@ node tests/test-winprob.js  # win-probability series, biggest swing, Matchup Pre
 node tests/test-winprob-dom.js  # win-prob canvas paint + scores.js paint wiring (fetch, cache reopen, pregame toggle)
 node tests/test-markets-live.js  # markets page live auto-refresh (90s Polymarket tick on likely-live games, 5-min Kalshi snapshot tick, hidden-tab skip, pause/resume, no stacking)
 node tests/test-disagree-snapshot.js  # cross-book-edge card: snapshot age named in the note, Kalshi figures tagged "snapshot" + frozen-at-snapshot tooltip (shipped js/markets.js)
+node tests/test-disagree.js  # disagree-logic unit tests: Polymarket moneyline vs Kalshi snapshot pairing, gap flags
+node tests/test-movement.js  # 7d-movement + 24h-volume rendering in the SHIPPED js files (markets/predictions)
 node tests/test-links-verified.js  # links directory honesty: "Last checked" date stamp present in the hero, parses to a real non-future non-stale date (shipped links.html)
+node tests/test-legality-watch.js  # legality page regulatory-watch section: dated enforcement news, honesty framing, cross-links (shipped legality.html)
+node tests/test-seo.js  # SEO pass: social meta on all 30 pages, JSON-LD, sitemap
+node tests/test-ads.js  # display-ad + referral slots in shipped js/site.js: slots render only once ad-unit IDs are set
 node tests/test-predictions-live.js  # predictions page live auto-refresh (90s tick on likely-live games, render-generation guard, hidden-tab skip, pause/resume, no stacking)
 node tests/test-kalshi-predrow.js  # Kalshi "two crowds" row on the predictions page (prices, gap chip, stale withhold, missing-data, XSS)
 node tests/test-news-live.js  # news wire live auto-refresh (3-min silent tick, hidden-tab skip, pause/resume, no stacking, tab-generation guard)
@@ -98,7 +115,12 @@ node tests/test-wx-rollover.js  # week-rollover fetcher in wx-shared.js (all-pos
 node tests/test-wx-rollover-dom.js  # rollover wiring in shipped weather.js (notice inserted + next-week slate rendered in the dead window, no fallback/notice when pre games exist, primary failure -> feed-failure box)
 node tests/test-scores-smartday.js  # scores smart-day (any league tab on a no-game day jumps to the next game day with an honest league-aware notice; failure/null-window stay on the empty state; Today clears notice, no re-scan)
 node tests/test-cache-keys.js  # cache-key regression guard (every js ?v= key >= the release that last changed that file)
+node tests/test-readme-testlist.js  # README test-list drift guard: every test file listed, no dead references
 node tests/test-tabs-a11y.js   # tab-list accessibility in shipped site.js (tablist/tab roles, aria-labels, roving tabindex, arrow/Home/End activation, late-added lists, pre-set role preservation)
+node tests/test-nav.js  # nav a11y: shipped site.js with stubbed DOM (skip link, aria, keyboard)
+node tests/test-header-compact.js  # header-compact regression: no display:none snap on the compact strips (layout-shift guard)
+node tests/test-backgrounds.js  # sports-imagery backgrounds: static checks for the themed hero/page backgrounds
+node tests/test-feedpill-mobile.js  # feed-pill mobile: layout doesn't overflow on small viewports
 node tests/test-arbs.js       # cross-book arbitrage logic (stake splits, moneyline/spread/total pairing, same-book exclusion, 3-way EPL)
 node tests/test-arbs-dom.js   # Sure bets strip wiring in shipped odds.js (strip render, game flags, quiet-when-empty)
 node tests/test-fairline.js    # no-vig fair moneyline math (vig removal, orientation, hold, null paths)
