@@ -96,6 +96,31 @@ var photoPagesTagged = heroBgPages.filter(function(p){
 });
 assert(photoPagesTagged.length === 0, "photo-hero pages do not also get line-art classes");
 
+/* ---- hero/content alignment (v1.71.0): the line-art motif must match the
+   page's content — an NFL-first betting hub shows football yard lines
+   behind NFL-centric pages, never a soccer pitch, hockey rink or
+   baseball diamond there. */
+var heroAlignment = {
+  "weather.html": "sport-nfl",    /* NFL game-day weather */
+  "injuries.html": "sport-nfl",   /* injury wire, NFL default tab */
+  "watch.html": "sport-nfl",      /* prediction shows, NFL-first brand */
+  "links.html": "sport-nfl"       /* US sportsbook directory */
+};
+Object.keys(heroAlignment).forEach(function(f){
+  var html = fs.readFileSync(path.join(ROOT, f), "utf8");
+  assert(html.indexOf('<section class="page-hero ' + heroAlignment[f] + '"') !== -1,
+    f + " hero uses " + heroAlignment[f] + " (content-aligned)");
+});
+var wrongMotifs = {"weather.html": ["sport-soccer"], "injuries.html": ["sport-nhl"],
+                   "watch.html": ["sport-mlb"], "links.html": ["sport-soccer"]};
+Object.keys(wrongMotifs).forEach(function(f){
+  var html = fs.readFileSync(path.join(ROOT, f), "utf8");
+  wrongMotifs[f].forEach(function(s){
+    assert(html.indexOf('<section class="page-hero ' + s + '"') === -1,
+      f + " hero is not " + s);
+  });
+});
+
 /* ---- empty states + card accent ---- */
 assert(/\.empty\s*\{[^}]*radial-gradient/.test(css), ".empty has the atmospheric glow background");
 assert(css.indexOf(".card::before") !== -1, "CSS has the card hairline accent");
