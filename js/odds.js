@@ -142,10 +142,24 @@ function autoTick(){
   }
 }
 
+/* In-place empty state for the board when no Odds API key is connected.
+   The setup card above explains the key; this fills the board's own spot so
+   the page never reads as a failed load — and repeats the honesty line that
+   no sample or stale lines are ever shown as if they were live. */
+function noKeyBoardHtml(){
+  return '<div class="empty" id="oddsNoKey" role="status">'+
+    '<div class="card-icon" aria-hidden="true" style="font-size:2rem">🔌</div>'+
+    '<h3 style="margin:6px 0 8px;color:var(--text)">Connect your key to load live lines</h3>'+
+    '<p style="max-width:580px;margin:0 auto 8px;color:var(--muted)">Paste your free Odds API key in the setup card above — live spreads, moneylines and totals from every book land right here, with best-price highlighting, consensus and no-vig fair lines.</p>'+
+    '<p style="max-width:580px;margin:0 auto 18px;font-size:.85rem">Until then this board stays empty. We never show sample or stale lines as if they were live.</p>'+
+    '<button class="btn btn-gold btn-sm" id="oddsNoKeyBtn" type="button">Connect my key ↑</button>'+
+  '</div>';
+}
+
 function render(opts){
   opts = opts || {};
   var setup = $("oddsSetup"), board = $("oddsBoard");
-  if(!key){ setup.style.display="block"; board.innerHTML=""; $("quota").textContent=""; setStatus(""); return; }
+  if(!key){ setup.style.display="block"; board.innerHTML=noKeyBoardHtml(); $("quota").textContent=""; setStatus(""); return; }
   setup.style.display="none";
   if($("keyInput").value !== key) $("keyInput").value = key;
   var mySeq = ++renderSeq;
@@ -986,6 +1000,14 @@ $("autoRef").addEventListener("change", function(){
 })();
 /* slip: toggle legs from the board (delegated, survives re-renders) */
 $("oddsBoard").addEventListener("click", function(e){
+  /* no-key empty state: jump back up to the setup card and focus the key field */
+  var nk = e.target && e.target.closest ? e.target.closest("#oddsNoKeyBtn") : null;
+  if(nk){
+    var su = $("oddsSetup"), ki = $("keyInput");
+    if(su && su.scrollIntoView) su.scrollIntoView({behavior:"smooth", block:"start"});
+    if(ki && ki.focus) setTimeout(function(){ try{ ki.focus({preventScroll:true}); }catch(x){} }, 420);
+    return;
+  }
   var b = e.target && e.target.closest ? e.target.closest(".pick-btn") : null;
   if(!b) return;
   var leg = {
