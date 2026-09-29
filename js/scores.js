@@ -16,6 +16,40 @@ function dayLabel(){
   var d = new Date(); d.setDate(d.getDate()+dayOffset);
   return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
 }
+function scoreboardUrl(leaguePath, offset){
+  var d = new Date(); d.setDate(d.getDate()+offset);
+  return "https://site.api.espn.com/apis/site/v2/sports/"+leaguePath+"/scoreboard?dates="+ymd(d);
+}
+
+/* ---- smart default day (NFL) ----
+   On a no-game day the NFL tab lands on an honest but dead "No games" board —
+   exactly the Tuesday–Wednesday window when bettors start handicapping the
+   weekend (ESPN hasn't rolled the scoreboard forward yet, and the calendar
+   has nothing until Thursday). smartDay scans forward from fromOffset, one
+   day at a time, and resolves with the first offset that has events, or null
+   when nothing has games within maxDays. Sequential so it stops at the first
+   hit; a failed or garbage payload counts as "no games that day", never as a
+   page break. Pure + exported for tests. */
+function smartDay(fetchJSON, leaguePath, fromOffset, maxDays){
+  fromOffset = fromOffset || 0;
+  maxDays = maxDays || 7;
+  var offs = [];
+  for(var i = 1; i <= maxDays; i++) offs.push(fromOffset + i);
+  var chain = Promise.resolve(null);
+  offs.forEach(function(o){
+    chain = chain.then(function(hit){
+      if(hit) return hit;
+      return fetchJSON(scoreboardUrl(leaguePath, o)).then(function(data){
+        var evs = data && data.events;
+        /* hand the payload through so the caller renders without a refetch */
+        return (evs && evs.length) ? { offset: o, events: evs } : null;
+      }, function(){ return null; });
+    });
+  });
+  return chain;
+}
+var smartTried = {};   /* per-league: smart-day scan already attempted this session */
+var smartNoticeDay = null; /* dayOffset we auto-jumped to — renders the honest notice once */
 function teamName(t){ return t.abbreviation || t.shortDisplayName || t.displayName; }
 
 /* Stat-leader labels, verified against ESPN's real scoreboard payloads
@@ -155,19 +189,66 @@ function renderLiveStatus(){
   }
 }
 
+function renderEmptyBoard(){
+  var box = $("scoreGrid");
+  box.innerHTML = '<div class="empty">No games on '+GIU.esc(dayLabel())+'. Try another day or league.</div>';
+}
+
+/* Honest jump notice: names both days so nobody mistakes next week's slate
+   for today's board. Renders once, cleared by any day navigation. */
+function smartNoticeHtml(){
+  if(smartNoticeDay === null || smartNoticeDay !== dayOffset) return "";
+  var today = new Date();
+  var todayStr = today.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  return '<div class="notice green" style="margin-bottom:18px"><strong>No NFL games today.</strong> '+
+    'Showing the next game day (<b style="color:var(--text)">'+GIU.esc(dayLabel())+
+    '</b>) instead — the <b style="color:var(--text)">Today</b> button takes you back to '+
+    GIU.esc(todayStr)+'.</div>';
+}
+
 function load(silent){
   clearLive(); /* league/day switches and silent refreshes always reschedule */
   var box = $("scoreGrid");
   if(!silent) box.innerHTML = '<div class="card"><div class="skel" style="height:110px"></div></div>'.repeat(3);
   $("dayLabel").textContent = dayLabel();
   var d = new Date(); d.setDate(d.getDate()+dayOffset);
-  var url = "https://site.api.espn.com/apis/site/v2/sports/"+LEAGUES[cur][0]+"/scoreboard?dates="+ymd(d);
+  var url = scoreboardUrl(LEAGUES[cur][0], dayOffset);
   GIU.fetchJSON(url).then(function(data){
     var evs = data.events||[];
     if(!evs.length){
-      box.innerHTML = '<div class="empty">No games on '+GIU.esc(dayLabel())+'. Try another day or league.</div>';
+      /* NFL on a no-game day at dayOffset 0 (initial load): jump to the next
+         game day instead of the dead board — the Tuesday–Wednesday handicap
+         window. Guarded to fire once per league per session, only on the
+         default day, never on silent refreshes or explicit day navigation. */
+      if(!silent && dayOffset === 0 && LEAGUES[cur][0] === "football/nfl" && !smartTried[cur]){
+        smartTried[cur] = true;
+        return smartDay(GIU.fetchJSON, LEAGUES[cur][0], 0, 7).then(function(hit){
+          if(hit && hit.offset){
+            /* jump WITHOUT a refetch: the scan already has the game-day board */
+            smartNoticeDay = hit.offset;
+            dayOffset = hit.offset;
+            $("dayLabel").textContent = dayLabel();
+            renderBoard(hit.events);
+          } else {
+            renderEmptyBoard();
+            liveN = 0; lastUpdated = Date.now(); renderLiveStatus();
+          }
+        });
+      }
+      renderEmptyBoard();
     } else {
-      box.innerHTML = evs.map(function(ev){
+      renderBoard(evs);
+    }
+  }).catch(function(){
+    box.innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond for "+LEAGUES[cur][1]+".");
+  });
+}
+
+/* Render the game-day board (plus the jump notice when one applies) and arm
+   the 60s live tick. Used by load() and directly by the smart-day jump. */
+function renderBoard(evs){
+  var box = $("scoreGrid");
+      box.innerHTML = smartNoticeHtml() + evs.map(function(ev){
       var c = ev.competitions[0], st = c.status.type;
       var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0] || c.competitors[0];
       var away = c.competitors.filter(function(t){return t.homeAway==="away";})[0] || c.competitors[1] || {};
@@ -195,7 +276,6 @@ function load(silent){
         '<div class="game-meta"><span>'+GIU.esc((c.venue||{}).fullName||"")+'</span>'+
         (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+det+'</div>';
       }).join("");
-    }
     /* ---- live auto-refresh ----
        In-progress games keep the board fresh every 60s. Ticks skip while the
        tab is hidden (nothing to see), and resume on their own when it comes
@@ -215,9 +295,6 @@ function load(silent){
     if(liveN > 0 && autoOn){
       liveTimer = setInterval(function(){ if(!isHidden()) load(true); }, LIVE_MS);
     }
-  }).catch(function(){
-    box.innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond for "+LEAGUES[cur][1]+".");
-  });
 }
 
 $("leagueTabs").innerHTML = LEAGUES.map(function(l,i){
@@ -226,19 +303,22 @@ $("leagueTabs").innerHTML = LEAGUES.map(function(l,i){
 Array.prototype.forEach.call($("leagueTabs").querySelectorAll(".tab"), function(t){
   t.addEventListener("click", function(){
     Array.prototype.forEach.call($("leagueTabs").querySelectorAll(".tab"), function(x){x.classList.remove("active");});
-    t.classList.add("active"); cur = Number(t.getAttribute("data-i")); load();
+    t.classList.add("active"); cur = Number(t.getAttribute("data-i")); smartNoticeDay = null; load();
   });
 });
 $("scoreGrid").addEventListener("click", function(e){
   var t = e.target && e.target.closest ? e.target.closest(".gd-toggle") : null;
   if(t) toggleDetails(t.getAttribute("data-ev"));
 });
-$("prevDay").addEventListener("click", function(){ dayOffset--; load(); });$("nextDay").addEventListener("click", function(){ dayOffset++; load(); });
-$("todayBtn").addEventListener("click", function(){ dayOffset=0; load(); });
+$("prevDay").addEventListener("click", function(){ smartNoticeDay = null; dayOffset--; load(); });$("nextDay").addEventListener("click", function(){ smartNoticeDay = null; dayOffset++; load(); });
+$("todayBtn").addEventListener("click", function(){ smartNoticeDay = null; dayOffset=0; load(); });
 $("pauseBtn").addEventListener("click", function(){
   autoOn = !autoOn;
   if(autoOn && liveN > 0){ load(true); }  /* resume: refresh now, timer reschedules */
   else { clearLive(); renderLiveStatus(); }
 });
+/* test seam: pure helpers exported in node, attached to GIU in the browser */
+if(typeof module !== "undefined" && module.exports){ module.exports = { smartDay: smartDay, scoreboardUrl: scoreboardUrl, ymd: ymd }; }
+else if(typeof window !== "undefined"){ window.GIU = window.GIU || {}; window.GIU.scoresSmartDay = smartDay; window.GIU.scoresBoardUrl = scoreboardUrl; }
 load();
 })();
