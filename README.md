@@ -66,6 +66,7 @@ node tests/test-dfs-injuries.js  # DFS injury cross-check logic (ESPN flatten, s
 node tests/test-dfs-injuries-dom.js  # injury wiring in shipped dfs.js (fetch-once, chips, banner, exclude-OUT, locked-OUT warning)
 node tests/test-dfs-value.js  # DFSOpt.value: projected points per $1k, zero-salary guard, node + browser exports
 node tests/test-dfs-filters-dom.js  # pool search + position filter + value column wiring in shipped dfs.js
+node tests/test-dfs-dkimport.js  # DK/FD salary-CSV import: DK headers (Name/TeamAbbrev/Game Info) and FD headers (Team/Opponent/First+Last Name) auto-map, opponents derived from Game Info, ID suffixes stripped (shipped js/dfs.js)
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 node tests/test-kalshi.js     # Kalshi snapshot logic tests
 node tests/test-team-brand.js  # ESPN team logo/color identity tests

@@ -46,9 +46,20 @@ function autoMap(head){
     }
     return -1;
   }
-  return {
-    name: take(/name|player/i, /team/i),
-    team: take(/^team$/i),
+  /* DraftKings / FanDuel salary-CSV smarts. DK's export carries both a
+     "Name + ID" column and a clean "Name" column (prefer the clean one),
+     "TeamAbbrev" instead of "Team", and "Game Info" (e.g.
+     "PHI@CHI 10/01/2026 08:15PM ET") instead of an Opp column — opponents
+     are derived from the game string at import time. FanDuel's export
+     splits names into "First Name" + "Last Name", which are recombined.
+     Detection is header-driven; nothing is guessed. */
+  var dk = isDK(H);
+  var fdNames = fdNameCols(H);
+  var nameIdx = take(/^name$/i); /* DK's clean "Name" column */
+  if(nameIdx===-1) nameIdx = take(/name|player/i, /team/i);
+  var m = {
+    name: nameIdx,
+    team: take(/^team(abbrev)?$/i),
     opp: take(/opp/i),
     pos: take(/pos/i),
     salary: take(/salary/i),
@@ -56,8 +67,53 @@ function autoMap(head){
     avg: take(/avg/i),
     floor: take(/floor/i),
     ceil: take(/ceil|max/i),
-    own: take(/own/i)
+    own: take(/own/i),
+    dk: dk,
+    fdNames: fdNames,
+    gameInfo: dk ? H.map(function(h){ return String(h).trim().toLowerCase(); }).indexOf("game info") : -1
   };
+  return m;
+}
+/* True for DraftKings salary exports: they carry a "Name + ID" column, or
+   the "Roster Position" + "Game Info" pair. Header-driven, never guessed. */
+function isDK(head){
+  var H = head.map(function(h){ return String(h).trim().toLowerCase(); });
+  return H.indexOf("name + id")!==-1 ||
+    (H.indexOf("roster position")!==-1 && H.indexOf("game info")!==-1);
+}
+/* "Jalen Hurts (81234)" -> "Jalen Hurts" (DK's "Name + ID" column). */
+function dkCleanName(s){
+  return String(s||"").replace(/\s*\(\d+\)\s*$/, "").trim();
+}
+/* "PHI@CHI 10/01/2026 08:15PM ET" + team PHI -> "CHI". Supports "@" and
+   "v"/"vs" separators; returns "" when the game string is unparseable or
+   the player's team isn't in it — never guessed. */
+function dkGameOpp(gameInfo, team){
+  var t = String(team||"").trim().toUpperCase();
+  if(!t) return "";
+  var m = String(gameInfo||"").toUpperCase().match(/([A-Z]{2,4})\s*(?:@|V(?:S\.?)?)\s*([A-Z]{2,4})/);
+  if(!m) return "";
+  if(m[1]===t) return m[2];
+  if(m[2]===t) return m[1];
+  return "";
+}
+/* FanDuel's "First Name"/"Last Name" column pair -> [i,j], else null. */
+function fdNameCols(head){
+  var H = head.map(function(h){ return String(h).trim().toLowerCase(); });
+  var a = H.indexOf("first name"), b = H.indexOf("last name");
+  return (a!==-1 && b!==-1) ? [a,b] : null;
+}
+/* Name as it should land in the pool: DK ID suffix stripped, FD first+last
+   recombined. `head` is the raw header row, `map` the (possibly user-edited)
+   column map. */
+function importName(row, head, map){
+  function col(i){ return i>=0 && i<row.length ? row[i].trim() : ""; }
+  var nm = col(map.name);
+  var hn = map.name>=0 ? String(head[map.name]).trim().toLowerCase() : "";
+  if(map.dk && hn==="name + id") nm = dkCleanName(nm);
+  if(!map.dk && map.fdNames && map.name===map.fdNames[0])
+    nm = (nm+" "+col(map.fdNames[1])).trim();
+  return nm;
 }
 var importRows = null, importHead = null, importMap = null;
 $("csvFile").addEventListener("change", function(){
@@ -77,7 +133,9 @@ $("csvFile").addEventListener("change", function(){
     html += '<p style="font-size:.82rem;color:var(--faint)">No projection column? Map "Projection" to an average-points column — the average becomes the baseline projection.</p>';
     $("mapBox").innerHTML = html;
     $("mapWrap").style.display = "block";
-    $("importInfo").textContent = importRows.length+" data rows detected.";
+    $("importInfo").textContent = importRows.length+" data rows detected."+
+      (importMap.dk ? " DraftKings salary format detected — teams, clean names and opponents (from Game Info) auto-mapped."
+       : (importMap.fdNames ? " FanDuel salary format detected — teams, opponents and full names auto-mapped." : ""));
   };
   rd.readAsText(f);
 });
@@ -93,8 +151,20 @@ $("doImport").addEventListener("click", function(){
     if(avgSel && importMap.avg>=0){ map.proj = importMap.avg; }
   }
   if(map.name===-1 || map.salary===-1){ alert("Name and Salary columns are required."); return; }
+  /* carry the salary-format detection through the user's (possibly edited) map */
+  map.dk = importMap.dk; map.fdNames = importMap.fdNames; map.gameInfo = importMap.gameInfo;
+  var added = importIntoPool(importRows, importHead, map);
+  save(); renderPool();
+  $("importInfo").textContent = "Imported "+added+" players.";
+  $("mapWrap").style.display = "none";
+  $("csvFile").value = "";
+});
+
+/* Row loop for CSV import — extracted so node tests can drive it with real
+   DraftKings / FanDuel headers. Returns the number of players added. */
+function importIntoPool(rows, head, map){
   var added = 0;
-  importRows.forEach(function(r){
+  rows.forEach(function(r){
     function col(i){ return i>=0 && i<r.length ? r[i].trim() : ""; }
     var sal = parseFloat((col(map.salary)||"").replace(/[$,]/g,""));
     if(!(sal>0)) return;
@@ -103,11 +173,15 @@ $("doImport").addEventListener("click", function(){
     var posRaw = map.pos>=0 ? col(map.pos) : (cfg().sport==="NBA"?"UTIL":"FLEX");
     var pos = posRaw.toUpperCase().split(/[\/,;\s]+/).filter(Boolean);
     if(!pos.length) pos = [cfg().sport==="NBA"?"UTIL":"FLEX"];
+    var team = (map.team>=0?col(map.team):"FA").toUpperCase()||"FA";
+    /* DraftKings exports have no Opp column: derive it from "Game Info". */
+    var opp = map.opp>=0 ? col(map.opp).toUpperCase()
+      : (map.dk && map.gameInfo>=0 ? dkGameOpp(col(map.gameInfo), team) : "");
     pool.push({
       id: pidSeq++,
-      name: col(map.name),
-      team: (map.team>=0?col(map.team):"FA").toUpperCase()||"FA",
-      opp: (map.opp>=0?col(map.opp):"").toUpperCase(),
+      name: importName(r, head, map),
+      team: team,
+      opp: opp,
       pos: pos,
       salary: Math.round(sal),
       proj: proj,
@@ -117,11 +191,8 @@ $("doImport").addEventListener("click", function(){
     });
     added++;
   });
-  save(); renderPool();
-  $("importInfo").textContent = "Imported "+added+" players.";
-  $("mapWrap").style.display = "none";
-  $("csvFile").value = "";
-});
+  return added;
+}
 
 /* ---------- manual add ---------- */
 $("addPlayer").addEventListener("click", function(){
@@ -497,5 +568,14 @@ function initDfs(){
   if(pf) pf.addEventListener("change", function(){ renderPool(); });
   loadStored(); renderPool();
 }
+/* test seam: pure import helpers for node tests (vm sandbox) */
+window.GIU = window.GIU || {};
+window.GIU.dfsImport = {
+  parseCSV: parseCSV, autoMap: autoMap, isDK: isDK,
+  dkCleanName: dkCleanName, dkGameOpp: dkGameOpp, fdNameCols: fdNameCols,
+  importName: importName, importIntoPool: importIntoPool,
+  pool: function(){ return pool; } /* read-only for tests */
+};
+
 initDfs();
 })();
