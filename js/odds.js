@@ -708,7 +708,7 @@ function totalsHtml(p){
     ? '<div><span>Implied probability</span><b class="num">'+(p.implied*100).toFixed(1)+
       '% <span style="color:var(--faint);font-weight:400">break-even</span></b></div>' : "";
   return '<div><span>Combined odds</span><b class="num">'+GIU.esc(String(p.combinedAm))+
-    ' <span style="color:var(--faint);font-weight:400">'+p.combined.toFixed(3)+' dec</span></b></div>'+imp+
+    ' <span style="color:var(--faint);font-weight:400">('+p.combined.toFixed(3)+' dec)</span></b></div>'+imp+
     '<div><span>To win</span><b class="num" style="color:var(--green)">$'+p.profit.toFixed(2)+'</b></div>'+
     '<div><span>Total payout</span><b class="num">$'+p.total.toFixed(2)+'</b></div>';
 }

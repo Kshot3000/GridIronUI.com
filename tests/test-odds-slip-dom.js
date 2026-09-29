@@ -107,6 +107,8 @@ els.oddsBoard.fire("click", { target: { closest: sel => sel === ".pick-btn" ? b1
 els.oddsBoard.fire("click", { target: { closest: sel => sel === ".pick-btn" ? b2 : null } });
 ok("count 2", String(els.slipCount.textContent) === "2");
 ok("parlay american +301", els.slipPanel.innerHTML.indexOf("+301") !== -1);
+/* v1.72.0: decimal odds parenthesized so they can't read as one long number with the american price */
+ok("decimal odds parenthesized", els.slipPanel.innerHTML.indexOf("(4.011 dec)") !== -1);
 /* v1.31.0: implied break-even probability on the totals (1/4.011 = 24.9%) */
 ok("implied probability row shown", els.slipPanel.innerHTML.indexOf("Implied probability") !== -1 &&
                                     els.slipPanel.innerHTML.indexOf("24.9%") !== -1);
