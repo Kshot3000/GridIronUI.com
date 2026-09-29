@@ -44,7 +44,7 @@ var headerHtml =
    '<a class="brand" href="'+P("index.html")+'"><span class="brand-mark">G</span>GridIron<em>UI</em></a>'+
    '<button class="nav-toggle" id="navToggle" aria-label="Menu" aria-controls="mainNav" aria-expanded="false">☰</button>'+
    '<nav class="main-nav" id="mainNav">'+navHtml+'</nav>'+
-   '<span class="feed-pill" id="feedPill" title="Live data feed status"><span class="feed-dot"></span><span id="feedTxt">FEEDS</span></span>'+
+   '<span class="feed-pill" id="feedPill" role="status" aria-live="polite" aria-label="Live data feed status: checking" title="Live data feed status"><span class="feed-dot" aria-hidden="true"></span><span id="feedTxt">FEEDS</span></span>'+
  '</div>'+
  '<div class="ticker" id="ticker" hidden><div class="ticker-track" id="tickerTrack"></div></div>'+
  '<div class="headlines" id="headlines" hidden><span class="hl-label">📰 Headlines</span><a class="hl-text" id="hlText">Loading headlines…</a></div>';
@@ -413,6 +413,9 @@ function checkFeeds(){
     var ok = rs.filter(Boolean).length;
     if(ok === rs.length){ pill.classList.add("ok"); txt.textContent = "ALL FEEDS LIVE"; }
     else { pill.classList.add("warn"); txt.textContent = "FEEDS DEGRADED ("+ok+"/"+rs.length+")"; }
+    /* the text is hidden on small screens (dot-only), so keep the accessible
+       label in sync — sighted users get the tooltip, screen readers get this */
+    pill.setAttribute("aria-label", "Live data feed status: " + txt.textContent);
     pill.title = "ESPN: "+(rs[0]?"ok":"down")+" · Polymarket: "+(rs[1]?"ok":"down")+" · Open-Meteo: "+(rs[2]?"ok":"down");
   });
 }

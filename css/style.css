@@ -602,6 +602,11 @@ td.best .pick-btn.picked{box-shadow:inset 0 0 0 2px var(--gold)}
   .ticker-track{animation-duration:40s}
   .slip{left:12px;right:12px;bottom:76px;width:auto}
   .slip-toggle{right:12px;bottom:12px}
+  /* mobile header: the feed-health pill collapses to a dot — the full text
+     ("ALL FEEDS LIVE" / "FEEDS DEGRADED (0/3)") is wide enough to push the
+     header row past 390px; the live status stays on the tooltip + aria-label */
+  .feed-pill{gap:0;padding:8px 10px}
+  .feed-pill #feedTxt{display:none}
 }
 
 /* ---------- reduced motion ---------- */

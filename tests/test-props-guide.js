@@ -84,9 +84,9 @@ ok("canonical points at custom domain",
   guide.indexOf('<link rel="canonical" href="https://gridironui.xyz/guides/props.html">') !== -1);
 ok("meta description present", /<meta name="description" content="[^"]{50,}"/.test(guide));
 ok("new guide uses current site.js key",
-  guide.indexOf("../js/site.js?v=1.66.0") !== -1);
+  guide.indexOf("../js/site.js?v=1.70.0") !== -1);
 ok("new guide uses current style.css key",
-  guide.indexOf("../css/style.css?v=1.62.0") !== -1);
+  guide.indexOf("../css/style.css?v=1.70.0") !== -1);
 ok("new guide uses photo-less sport-nfl hero pattern",
   guide.indexOf('class="page-hero sport-nfl"') !== -1);
 
