@@ -116,8 +116,10 @@ function scenarioAllPost(){
   }
   return runScenario("all-post", fetch, function(r){
     assert(calls.length >= 2, "all-post: fallback fetch issued (calls=" + calls.length + ")");
-    assert(calls[1] === BASE + "?week=4&seasontype=2",
-      "all-post: fallback URL is week=4&seasontype=2 (got " + calls[1] + ")");
+    assert(calls.indexOf(BASE + "?week=4&seasontype=2") !== -1,
+      "all-post: fallback URL week=4&seasontype=2 was fetched (calls: " + calls.join(" | ") + ")");
+    assert(calls.indexOf("https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?seasontype=3") !== -1,
+      "all-post: MLB postseason board fetched independently");
     assert(r.inserted.length === 1, "all-post: one notice inserted before #wxGrid");
     var html = r.inserted[0] && r.inserted[0]._html || "";
     assert(/Next week.s slate/.test(html) && /Week 4/.test(html),
@@ -140,8 +142,10 @@ function scenarioHasPre(){
     return Promise.resolve(primary);
   }
   return runScenario("has-pre", fetch, function(r){
-    assert(calls.filter(function(u){ return u.indexOf("scoreboard") !== -1; }).length === 1,
-      "has-pre: no fallback fetch when the board already has pre games");
+    assert(calls.filter(function(u){ return u.indexOf("football/nfl/scoreboard") !== -1; }).length === 1,
+      "has-pre: no NFL fallback fetch when the board already has pre games");
+    assert(calls.indexOf("https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?seasontype=3") !== -1,
+      "has-pre: MLB postseason board still fetched independently");
     assert(r.inserted.length === 0, "has-pre: no notice inserted");
     assert(r.cards.length === 1, "has-pre: only the pre game rendered (got " + r.cards.length + ")");
   });

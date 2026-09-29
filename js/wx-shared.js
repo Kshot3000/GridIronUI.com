@@ -190,7 +190,118 @@ function fallbackNoticeHTML(week, esc){
     'so these are the upcoming games with their forecasts. Kickoff dates are on each card.</div>';
 }
 
+/* MLB ballparks: [abbr, ballpark, city, lat, lon, roof] — roof: open |
+   dome | retractable. Coordinates geocoded and roof status verified against
+   club/ballpark references (Sept 2026). Powers the weather page's MLB
+   postseason section — October baseball is when wind and rain move totals. */
+var BALLPARKS = [
+  ["ARI","Chase Field","Phoenix, AZ",33.4452,-112.0669,"retractable"],
+  ["ATH","Sutter Health Park","West Sacramento, CA",38.5794,-121.5148,"open"],
+  ["ATL","Truist Park","Atlanta, GA",33.8905,-84.4684,"open"],
+  ["BAL","Oriole Park at Camden Yards","Baltimore, MD",39.2852,-76.6206,"open"],
+  ["BOS","Fenway Park","Boston, MA",42.3468,-71.0987,"open"],
+  ["CHC","Wrigley Field","Chicago, IL",41.9476,-87.6563,"open"],
+  ["CHW","Rate Field","Chicago, IL",41.8300,-87.6337,"open"],
+  ["CIN","Great American Ball Park","Cincinnati, OH",39.0973,-84.5067,"open"],
+  ["CLE","Progressive Field","Cleveland, OH",41.4959,-81.6852,"open"],
+  ["COL","Coors Field","Denver, CO",39.7561,-104.9941,"open"],
+  ["DET","Comerica Park","Detroit, MI",42.3391,-83.0487,"open"],
+  ["HOU","Daikin Park","Houston, TX",29.7572,-95.3553,"retractable"],
+  ["KC","Kauffman Stadium","Kansas City, MO",39.0515,-94.4805,"open"],
+  ["LAA","Angel Stadium","Anaheim, CA",33.8003,-117.8826,"open"],
+  ["LAD","Dodger Stadium","Los Angeles, CA",34.0736,-118.2400,"open"],
+  ["MIA","loanDepot park","Miami, FL",25.7781,-80.2195,"retractable"],
+  ["MIL","American Family Field","Milwaukee, WI",43.0289,-87.9722,"retractable"],
+  ["MIN","Target Field","Minneapolis, MN",44.9818,-93.2779,"open"],
+  ["NYY","Yankee Stadium","Bronx, NY",40.8296,-73.9264,"open"],
+  ["NYM","Citi Field","Queens, NY",40.7573,-73.8443,"open"],
+  ["PHI","Citizens Bank Park","Philadelphia, PA",39.9050,-75.1684,"open"],
+  ["PIT","PNC Park","Pittsburgh, PA",40.4478,-80.0071,"open"],
+  ["SD","Petco Park","San Diego, CA",32.7070,-117.1561,"open"],
+  ["SF","Oracle Park","San Francisco, CA",37.7781,-122.3909,"open"],
+  ["SEA","T-Mobile Park","Seattle, WA",47.5909,-122.3335,"retractable"],
+  ["STL","Busch Stadium","St. Louis, MO",38.6236,-90.1930,"open"],
+  ["TB","Tropicana Field","St. Petersburg, FL",27.7686,-82.6482,"dome"],
+  ["TEX","Globe Life Field","Arlington, TX",32.7459,-97.0816,"retractable"],
+  ["TOR","Rogers Centre","Toronto, ON",43.6415,-79.3892,"retractable"],
+  ["WSH","Nationals Park","Washington, DC",38.8732,-77.0075,"open"]
+];
+function ballparkFor(abbr){
+  for(var i=0;i<BALLPARKS.length;i++) if(BALLPARKS[i][0]===abbr) return BALLPARKS[i];
+  return null;
+}
+/* Resolve the true ballpark for an MLB postseason game: ESPN's per-game venue
+   names the real park, so cross-check it against the dataset (a relocated
+   game must not borrow the listed home team's forecast). Falls back to the
+   home team's park when ESPN's venue is unrecognized. Returns the
+   [abbr, ballpark, city, lat, lon, roof] tuple or null. */
+function ballparkVenueFor(ev, homeAbbr){
+  var espnV = ((ev||{}).competitions||[])[0] ? (ev.competitions[0].venue||{}) : {};
+  var vn = String(espnV.fullName||"").toLowerCase();
+  if(vn){
+    for(var i=0;i<BALLPARKS.length;i++){
+      if(vn.indexOf(BALLPARKS[i][1].toLowerCase())!==-1) return BALLPARKS[i];
+    }
+  }
+  return ballparkFor(homeAbbr);
+}
+
+/* Baseball impact model as data. Same window-max approach as the football
+   model, but baseball copy: wind direction decides (we don't model ballpark
+   orientation, so the note says to check it), and rain is a delay/postponement
+   risk — postponed games void most bets, which is the angle that matters. */
+function impactNotesBsb(w){
+  var hrs = Array.isArray(w) ? w : [w];
+  var wind = 0, gust = 0, precip = 0, temp = Infinity;
+  hrs.forEach(function(h){
+    if(h.wind > wind) wind = h.wind;
+    if(h.gust > gust) gust = h.gust;
+    if(h.precip > precip) precip = h.precip;
+    if(h.temp < temp) temp = h.temp;
+  });
+  var notes = [];
+  if(wind >= 20) notes.push({cls:"tag red", text:"Wind "+wind+" mph — direction decides: blowing out boosts HR, in from the outfield suppresses"});
+  else if(wind >= 13) notes.push({cls:"tag", text:"Wind "+wind+" mph — check direction vs. the outfield"});
+  else if(gust >= 30) notes.push({cls:"tag", text:"Gusts "+gust+" mph — fly balls get interesting"});
+  if(precip >= 60) notes.push({cls:"tag", text:"Rain "+precip+"% — delay/postponement risk (PPD voids most bets)"});
+  else if(precip >= 40) notes.push({cls:"tag", text:"Rain "+precip+"% — possible delay"});
+  if(temp <= 38) notes.push({cls:"tag blue", text:"Cold "+temp+"°F — dense air slightly suppresses carry"});
+  else if(temp >= 95) notes.push({cls:"tag", text:"Heat "+temp+"°F — ball carries a touch farther"});
+  return notes;
+}
+function impactBsb(w){
+  var notes = impactNotesBsb(w);
+  if(!notes.length) return '<span class="tag green">No major concerns</span>';
+  return notes.map(function(n){
+    return '<span class="'+n.cls+'">'+n.text+'</span>';
+  }).join(" ");
+}
+
+/* Fetch the MLB postseason scoreboard's upcoming games. ESPN's default MLB
+   board is regular-season (seasontype=2), so the postseason needs an explicit
+   seasontype=3 pull. Outside October this returns no pre games and the
+   weather page's baseball section simply stays hidden — no dead section,
+   no fake slate. Rejects only when the fetch fails; callers show their
+   feed-failure state for that. */
+function upcomingMlbPostseason(fetchJSON){
+  var URL = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?seasontype=3";
+  return fetchJSON(URL).then(function(d){
+    var evs = ((d||{}).events||[]).filter(function(ev){
+      var c = ((ev||{}).competitions||[])[0]||{};
+      var st = (c.status && c.status.type && c.status.type.state) || "";
+      return st !== "post";
+    });
+    return {events: evs};
+  });
+}
+
 W.stadiums = STADIUMS;
+W.ballparks = BALLPARKS;
+W.ballparkFor = ballparkFor;
+W.ballparkVenueFor = ballparkVenueFor;
+W.impactNotesBsb = impactNotesBsb;
+W.impactBsb = impactBsb;
+W.upcomingMlbPostseason = upcomingMlbPostseason;
 W.stadiumFor = stadiumFor;
 W.neutralFor = neutralFor;
 W.venueFor = venueFor;
@@ -205,6 +316,12 @@ if(typeof module !== "undefined" && module.exports){ module.exports = W; }
 else if(typeof window !== "undefined"){
   window.GIU = window.GIU || {};
   window.GIU.wxStadiums = STADIUMS;
+  window.GIU.wxBallparks = BALLPARKS;
+  window.GIU.wxBallparkFor = ballparkFor;
+  window.GIU.wxBallparkVenueFor = ballparkVenueFor;
+  window.GIU.wxImpactNotesBsb = impactNotesBsb;
+  window.GIU.wxImpactBsb = impactBsb;
+  window.GIU.wxUpcomingMlbPostseason = upcomingMlbPostseason;
   window.GIU.wxStadiumFor = stadiumFor;
   window.GIU.wxNeutralFor = neutralFor;
   window.GIU.wxVenueFor = venueFor;

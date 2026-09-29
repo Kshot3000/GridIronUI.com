@@ -21,10 +21,11 @@ function forecast(st, kickoffISO){
     wxCache[key]=hrs; return hrs;
   });
 }
-/* Game-window strip: one compact column per game hour (kickoff, +1h, +2h, +3h)
-   with temp, sustained wind (gusts in parens) and precip chance. */
-function windowHTML(hrs){
-  var labels = ["Kickoff","+1h","+2h","+3h"];
+/* Game-window strip: one compact column per game hour (first pitch, +1h,
+   +2h, +3h for baseball via the optional firstLabel) with temp, sustained
+   wind (gusts in parens) and precip chance. */
+function windowHTML(hrs, firstLabel){
+  var labels = [firstLabel || "Kickoff","+1h","+2h","+3h"];
   var cols = hrs.map(function(h, i){
     return '<div style="min-width:96px;flex:1">'+
       '<div style="font-size:.68rem;color:var(--faint);text-transform:uppercase;letter-spacing:.08em">'+labels[i]+'</div>'+
@@ -101,7 +102,68 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
       body.innerHTML = '<p style="color:var(--faint)">Forecast unavailable for this game.</p>';
     });
   });
+
+
 }).catch(function(){
   $("wxGrid").innerHTML = GIU.failBox("The ESPN schedule feed didn't respond, so there's nothing to attach weather to.");
 });
+
+/* ---- MLB postseason weather (October baseball) ----
+   Runs independently of the NFL fetch. Outside the postseason the
+   seasontype=3 board has no pre games and this section stays hidden —
+   no dead section, no manufactured slate. */
+(function mlbPostseason(){
+  if(!GIU.wxUpcomingMlbPostseason) return;
+  GIU.wxUpcomingMlbPostseason(GIU.fetchJSON).then(function(res){
+    var wrap = $("mlbWxWrap"), grid = $("mlbWxGrid");
+    if(!wrap || !grid) return;
+    var evs = (res.events||[]).slice(0, 12);
+    if(!evs.length) return; /* stays hidden outside October */
+    wrap.hidden = false;
+    grid.innerHTML = evs.map(function(ev){
+      var c = ev.competitions[0] || {};
+      var comps = c.competitors || [];
+      var home = comps.filter(function(t){return t.homeAway==="home";})[0];
+      var away = comps.filter(function(t){return t.homeAway==="away";})[0];
+      var bp = (home && home.team) ? GIU.wxBallparkVenueFor(ev, home.team.abbreviation) : null;
+      var when = "";
+      try{ var dt=new Date(ev.date);
+        when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+      }catch(e){}
+      return '<div class="card" data-game="'+ev.id+'" data-kick="'+ev.date+'">'+
+        '<div class="game-meta"><span>'+when+'</span><span class="tag" style="margin-left:8px">MLB postseason</span></div>'+
+        matchupHTML(away, home)+
+        (bp ? '<p style="font-size:.86rem;color:var(--muted);margin:0 0 10px">🏟️ '+GIU.esc(bp[1])+' · '+GIU.esc(bp[2])+(bp[5]==="open"?"":' · <span class="tag blue">'+bp[5]+' roof</span>')+'</p>'
+            : '<p style="color:var(--faint)">Ballpark data unavailable</p>')+
+        '<div class="wx-body" data-bp="'+(bp ? GIU.esc(bp[0]) : "")+'"><div class="skel" style="height:60px"></div></div></div>';
+    }).join("");
+    Array.prototype.forEach.call(grid.querySelectorAll("[data-game]"), function(card){
+      var evId = card.getAttribute("data-game");
+      var ev = null;
+      for(var i=0;i<evs.length;i++) if(String(evs[i].id)===evId){ ev = evs[i]; break; }
+      var body = card.querySelector(".wx-body");
+      var abbr = body ? body.getAttribute("data-bp") : "";
+      var c = ev ? (ev.competitions[0]||{}) : {};
+      var comps = c.competitors || [];
+      var home = comps.filter(function(t){return t.homeAway==="home";})[0];
+      var bp = (ev && home && home.team) ? GIU.wxBallparkVenueFor(ev, home.team.abbreviation) : (abbr ? GIU.wxBallparkFor(abbr) : null);
+      if(!bp){ body.innerHTML = '<p style="color:var(--faint)">No ballpark data.</p>'; return; }
+      if(bp[5] !== "open"){
+        body.innerHTML = '<div class="notice" style="margin:0"><strong>'+(bp[5]==="dome"?"Dome":"Retractable roof")+' — weather N/A.</strong> '+
+          GIU.esc(bp[1])+' has a '+(bp[5]==="dome"?"fixed":"retractable")+' roof, so wind and rain don\'t factor into the total'+
+          (bp[5]==="retractable" ? ' <em>if</em> it\'s closed — an open roof with wind blowing out is a very different game. Check the club\'s official gameday report before first pitch.' : '.')+'</div>';
+        return;
+      }
+      forecast(bp, card.getAttribute("data-kick")).then(function(hrs){
+        body.innerHTML = windowHTML(hrs, "1st pitch")+GIU.wxImpactBsb(hrs);
+      }).catch(function(){
+        body.innerHTML = '<p style="color:var(--faint)">Forecast unavailable for this game.</p>';
+      });
+    });
+  }).catch(function(){
+    /* Feed failed: leave the section hidden rather than showing an error
+       box for a bonus section — the NFL grid above carries the page. */
+  });
+})();
+
 })();

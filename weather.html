@@ -43,13 +43,24 @@
     <div class="card"><div class="skel" style="height:140px"></div></div>
     <div class="card"><div class="skel" style="height:140px"></div></div>
   </div>
-  <p style="font-size:.8rem;color:var(--faint);margin:24px 0">Forecasts: Open-Meteo (hourly, matched to kickoff) · Stadium coordinates: GridIronUI dataset, all 30 NFL stadiums.</p>
+  <div id="mlbWxWrap" hidden>
+    <h2 style="margin:34px 0 4px">⚾ MLB postseason weather</h2>
+    <p style="color:var(--muted);font-size:.92rem;margin:0 0 6px">First-pitch temperature, wind and precipitation for every upcoming postseason game, mapped to the actual ballpark. This section only appears during the MLB postseason.</p>
+    <div class="notice" style="margin:12px 0 0">
+      <strong>Why it matters in October: wind direction moves baseball totals.</strong> Wind blowing out boosts home runs; wind in from the outfield suppresses them — we show the direction, you check it against the park. And unlike football, rain can delay or postpone a game — a PPD voids most bets. Retractable-roof parks are marked; check whether the roof is open before first pitch.
+    </div>
+    <div class="grid grid-2" id="mlbWxGrid" style="margin-top:22px">
+      <div class="card"><div class="skel" style="height:140px"></div></div>
+      <div class="card"><div class="skel" style="height:140px"></div></div>
+    </div>
+  </div>
+  <p style="font-size:.8rem;color:var(--faint);margin:24px 0">Forecasts: Open-Meteo (hourly, matched to kickoff/first pitch) · Venue coordinates: GridIronUI dataset, all 30 NFL stadiums and all 30 MLB ballparks.</p>
 </div>
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.85.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
-<script src="js/wx-shared.js?v=1.76.0"></script>
-<script src="js/weather.js?v=1.76.0"></script>
+<script src="js/wx-shared.js?v=1.91.0"></script>
+<script src="js/weather.js?v=1.91.0"></script>
 </body>
 </html>
