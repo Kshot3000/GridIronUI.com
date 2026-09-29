@@ -39,6 +39,7 @@ node tests/test-linemove-guide.js   # line-movement guide: TOC anchors, cross-li
 node tests/test-props-guide.js   # player-props guide: TOC anchors, cross-link targets, footer/index/sitemap wiring, guide math, honesty copy, cache keys
 node tests/test-bankroll-guide.js  # bankroll guide: artifact sweep, TOC anchors, cross-link targets, flat-betting + line-shopping worked examples re-derived
 node tests/test-advanced-arb.js  # advanced-guide arbitrage example: stake split re-derived against js/betmath.js hedge math, equal profit both ways
+node tests/test-core-guides-math.js  # core guides math audit: every worked example in betting-101/bet-types/advanced re-derived against js/betmath.js, TOC anchors, parlay-tax honesty fix
 node tests/test-glossary-terms.js  # glossary vocabulary-drift guard: Kalshi/Polymarket/prediction-market/cash-out/dutching present, no stub definitions, alphabetical order
 node tests/test-about-content.js  # about-page sitemap-in-prose: all 7 guides + all live-data pages linked, future guide files must be linked
 node tests/test-dutching.js   # dutching stake-split math (equal returns, arb vs locked-loss verdicts, error paths)
