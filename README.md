@@ -96,6 +96,7 @@ node tests/test-wx-rollover.js  # week-rollover fetcher in wx-shared.js (all-pos
 node tests/test-wx-rollover-dom.js  # rollover wiring in shipped weather.js (notice inserted + next-week slate rendered in the dead window, no fallback/notice when pre games exist, primary failure -> feed-failure box)
 node tests/test-scores-smartday.js  # scores smart-day (any league tab on a no-game day jumps to the next game day with an honest league-aware notice; failure/null-window stay on the empty state; Today clears notice, no re-scan)
 node tests/test-cache-keys.js  # cache-key regression guard (every js ?v= key >= the release that last changed that file)
+node tests/test-tabs-a11y.js   # tab-list accessibility in shipped site.js (tablist/tab roles, aria-labels, roving tabindex, arrow/Home/End activation, late-added lists, pre-set role preservation)
 node tests/test-arbs.js       # cross-book arbitrage logic (stake splits, moneyline/spread/total pairing, same-book exclusion, 3-way EPL)
 node tests/test-arbs-dom.js   # Sure bets strip wiring in shipped odds.js (strip render, game flags, quiet-when-empty)
 node tests/test-fairline.js    # no-vig fair moneyline math (vig removal, orientation, hold, null paths)

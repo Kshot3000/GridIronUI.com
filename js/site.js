@@ -253,6 +253,7 @@ function mount(){
   window.GIU.initAds();
   window.GIU.initReferrals();
   if(document.body.hasAttribute("data-feedcheck")) checkFeeds();
+  enhanceTabs(document);
   /* Collapse the ticker + headline strips once scrolled: the sticky header
      shrinks to the nav row so it never swallows buttons or headings below it. */
   var hdr = document.querySelector(".site-header"), slim = false;
@@ -395,6 +396,93 @@ function initReveal(){
   }
 }
 
+/* ---------- tab-list accessibility ---------- */
+/* Every page's league/sport/mode/option switcher is a row of <button class="tab">
+   inside a <div class="tabs">. Make them real tablists for keyboard and screen
+   readers: role=tablist on the container, role=tab + aria-selected + roving
+   tabindex on the buttons, Arrow/Home/End navigation with automatic activation
+   (the same click the mouse path uses), and a live sync so pages that rebuild
+   their tab rows on selection stay correct. No visual or mouse-behavior change. */
+var TAB_LABELS = {
+  leagueTabs:"League", marketTabs:"League", predTabs:"League",
+  newsTabs:"League", injTabs:"League", sportTabs:"Sport",
+  siteTabs:"DFS site", modeTabs:"Contest mode", injSev:"Severity",
+  cSite:"DFS site", cSport:"Sport", cMode:"Contest mode"
+};
+function tabLabelFor(id){
+  if(id && TAB_LABELS[id]) return TAB_LABELS[id];
+  return "Options";
+}
+function tabButtons(list){
+  var out = [], btns = (list.querySelectorAll ? list.querySelectorAll(".tab") : []);
+  for(var i=0;i<btns.length;i++){
+    if(btns[i] && btns[i].tagName === "BUTTON") out.push(btns[i]);
+  }
+  return out;
+}
+function syncTabButtons(list){
+  var btns = tabButtons(list), i, active = -1;
+  for(i=0;i<btns.length;i++){ if(btns[i].classList.contains("active")){ active = i; break; } }
+  if(active < 0 && btns.length) active = 0;
+  for(i=0;i<btns.length;i++){
+    var on = (i === active);
+    if(!btns[i].getAttribute("role")) btns[i].setAttribute("role","tab");
+    btns[i].setAttribute("aria-selected", on ? "true" : "false");
+    btns[i].setAttribute("tabindex", on ? "0" : "-1");
+  }
+  /* a page re-rendered its buttons mid-navigation — land focus on the new
+     active tab so keyboard users aren't stranded on a detached node */
+  if(list.getAttribute && list.getAttribute("data-tab-focus") === "1"){
+    list.removeAttribute("data-tab-focus");
+    var target = btns[active] || btns[0];
+    if(target && target.focus) target.focus();
+  }
+}
+function enhanceTablist(list){
+  if(!list || list.getAttribute("data-tablist") === "1") return;
+  list.setAttribute("data-tablist","1");
+  if(!list.getAttribute("role")) list.setAttribute("role","tablist");
+  var id = list.getAttribute("id");
+  if(!list.getAttribute("aria-label")) list.setAttribute("aria-label", tabLabelFor(id));
+  syncTabButtons(list);
+  if(typeof MutationObserver !== "undefined"){
+    var mo = new MutationObserver(function(){ syncTabButtons(list); });
+    mo.observe(list, {childList:true, subtree:true, attributes:true, attributeFilter:["class"]});
+  }
+  list.addEventListener("keydown", function(e){
+    var k = e.key, btns = tabButtons(list), i, idx = -1;
+    if(!btns.length) return;
+    for(i=0;i<btns.length;i++){ if(btns[i] === e.target){ idx = i; break; } }
+    if(idx < 0) return;
+    var next = -1;
+    if(k === "ArrowRight" || k === "ArrowDown") next = (idx + 1) % btns.length;
+    else if(k === "ArrowLeft" || k === "ArrowUp") next = (idx - 1 + btns.length) % btns.length;
+    else if(k === "Home") next = 0;
+    else if(k === "End") next = btns.length - 1;
+    if(next < 0 || next === idx) return;
+    if(e.preventDefault) e.preventDefault();
+    list.setAttribute("data-tab-focus","1");
+    var t = btns[next];
+    if(t.focus) t.focus();
+    if(t.click) t.click();
+  });
+}
+function enhanceTabs(doc){
+  doc = doc || document;
+  var lists = doc.querySelectorAll ? doc.querySelectorAll(".tabs") : [], i;
+  for(i=0;i<lists.length;i++) enhanceTablist(lists[i]);
+  /* pages render their tabs after this script runs (scores.js builds
+     leagueTabs on its own) — keep watching for new tab lists */
+  if(typeof MutationObserver !== "undefined" && doc.body && !doc.body.getAttribute("data-tabs-watch")){
+    doc.body.setAttribute("data-tabs-watch","1");
+    var sweep = new MutationObserver(function(){
+      var ls = doc.querySelectorAll ? doc.querySelectorAll(".tabs:not([data-tablist])") : [], j;
+      for(j=0;j<ls.length;j++) enhanceTablist(ls[j]);
+    });
+    sweep.observe(doc.body, {childList:true, subtree:true});
+  }
+}
+
 /* ---------- feed health indicator ---------- */
 function checkFeeds(){
   var pill = document.getElementById("feedPill"), txt = document.getElementById("feedTxt");
@@ -422,6 +510,8 @@ function checkFeeds(){
 
 /* ---------- shared helpers ---------- */
 window.GIU = window.GIU || {};
+window.GIU.tabA11y = { enhance: enhanceTabs, enhanceOne: enhanceTablist,
+  sync: syncTabButtons, labelFor: tabLabelFor };
 window.GIU.el = function(tag, cls, html){
   var e = document.createElement(tag); if(cls) e.className = cls; if(html!==undefined) e.innerHTML = html; return e;
 };
