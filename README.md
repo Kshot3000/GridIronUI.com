@@ -98,6 +98,7 @@ node tests/test-disagree.js  # disagree-logic unit tests: Polymarket moneyline v
 node tests/test-movement.js  # 7d-movement + 24h-volume rendering in the SHIPPED js files (markets/predictions)
 node tests/test-links-verified.js  # links directory honesty: "Last checked" date stamp present in the hero, parses to a real non-future non-stale date (shipped links.html)
 node tests/test-legality-watch.js  # legality page regulatory-watch section: dated enforcement news, honesty framing, cross-links (shipped legality.html)
+node tests/test-partners-programs.js  # partners page prediction-market programs: Polymarket Builder tiers + Kalshi refer-a-friend mechanics, honesty framing, date stamp, legality cross-link (shipped partners.html)
 node tests/test-seo.js  # SEO pass: social meta on all 30 pages, JSON-LD, sitemap
 node tests/test-ads.js  # display-ad + referral slots in shipped js/site.js: slots render only once ad-unit IDs are set
 node tests/test-predictions-live.js  # predictions page live auto-refresh (90s tick on likely-live games, render-generation guard, hidden-tab skip, pause/resume, no stacking)
