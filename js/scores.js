@@ -21,15 +21,16 @@ function scoreboardUrl(leaguePath, offset){
   return "https://site.api.espn.com/apis/site/v2/sports/"+leaguePath+"/scoreboard?dates="+ymd(d);
 }
 
-/* ---- smart default day (NFL) ----
-   On a no-game day the NFL tab lands on an honest but dead "No games" board —
-   exactly the Tuesday–Wednesday window when bettors start handicapping the
-   weekend (ESPN hasn't rolled the scoreboard forward yet, and the calendar
-   has nothing until Thursday). smartDay scans forward from fromOffset, one
-   day at a time, and resolves with the first offset that has events, or null
-   when nothing has games within maxDays. Sequential so it stops at the first
-   hit; a failed or garbage payload counts as "no games that day", never as a
-   page break. Pure + exported for tests. */
+/* ---- smart default day (every league tab) ----
+   On a no-game day a league tab lands on an honest but dead "No games"
+   board — exactly the Tuesday–Wednesday window when bettors start
+   handicapping the weekend (NFL's calendar has nothing until Thursday,
+   college football until Thursday/Saturday, baseball/hockey between playoff
+   games, and so on). smartDay scans forward from fromOffset, one day at a
+   time, and resolves with the first offset that has events, or null when
+   nothing has games within maxDays. Sequential so it stops at the first hit;
+   a failed or garbage payload counts as "no games that day", never as a page
+   break. Pure + exported for tests. */
 function smartDay(fetchJSON, leaguePath, fromOffset, maxDays){
   fromOffset = fromOffset || 0;
   maxDays = maxDays || 7;
@@ -194,13 +195,14 @@ function renderEmptyBoard(){
   box.innerHTML = '<div class="empty">No games on '+GIU.esc(dayLabel())+'. Try another day or league.</div>';
 }
 
-/* Honest jump notice: names both days so nobody mistakes next week's slate
-   for today's board. Renders once, cleared by any day navigation. */
+/* Honest jump notice: names both the league and both days so nobody
+   mistakes next week's slate for today's board. Renders once, cleared by
+   any day navigation. */
 function smartNoticeHtml(){
   if(smartNoticeDay === null || smartNoticeDay !== dayOffset) return "";
   var today = new Date();
   var todayStr = today.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
-  return '<div class="notice green" style="margin-bottom:18px"><strong>No NFL games today.</strong> '+
+  return '<div class="notice green" style="margin-bottom:18px"><strong>No '+GIU.esc(LEAGUES[cur][1])+' games today.</strong> '+
     'Showing the next game day (<b style="color:var(--text)">'+GIU.esc(dayLabel())+
     '</b>) instead — the <b style="color:var(--text)">Today</b> button takes you back to '+
     GIU.esc(todayStr)+'.</div>';
@@ -216,11 +218,13 @@ function load(silent){
   GIU.fetchJSON(url).then(function(data){
     var evs = data.events||[];
     if(!evs.length){
-      /* NFL on a no-game day at dayOffset 0 (initial load): jump to the next
-         game day instead of the dead board — the Tuesday–Wednesday handicap
-         window. Guarded to fire once per league per session, only on the
-         default day, never on silent refreshes or explicit day navigation. */
-      if(!silent && dayOffset === 0 && LEAGUES[cur][0] === "football/nfl" && !smartTried[cur]){
+      /* Any league tab on a no-game day at dayOffset 0 (initial load): jump to
+         the next game day instead of the dead board — the Tuesday–Wednesday
+         handicap window (NFL/NCAAF have nothing until Thursday+, off-season
+         leagues like NCAAB scan empty and stay on the honest empty state).
+         Guarded to fire once per league per session, only on the default day,
+         never on silent refreshes or explicit day navigation. */
+      if(!silent && dayOffset === 0 && !smartTried[cur]){
         smartTried[cur] = true;
         return smartDay(GIU.fetchJSON, LEAGUES[cur][0], 0, 7).then(function(hit){
           if(hit && hit.offset){

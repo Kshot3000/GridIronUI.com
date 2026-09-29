@@ -1,8 +1,10 @@
 /* Tests for the scores-page smart default day (js/scores.js).
-   On a no-game day the NFL tab used to land on a dead "No games" board —
+   On a no-game day a league tab used to land on a dead "No games" board —
    exactly the Tuesday–Wednesday window when bettors start handicapping the
-   weekend. smartDay() scans forward for the next day with events; the page
-   jumps there with an honest notice instead of the dead board.
+   weekend (NFL/NCAAF have nothing until Thursday+, and midweek is dead for
+   most other leagues too). smartDay() scans forward for the next day with
+   events; the page jumps there with an honest, league-aware notice instead
+   of the dead board.
    Run: node tests/test-scores-smartday.js */
 "use strict";
 var fs = require("fs"), vm = require("vm"), path = require("path");
@@ -157,7 +159,8 @@ function loadSandbox(route){
   vm.createContext(sandbox);
   for(var i=0;i<7;i++){
     var b = makeEl("tab-"+i);
-    b.getAttribute = function(a){ return a==="data-i" ? "0" : null; };
+    b._idx = i;
+    b.getAttribute = function(a){ return a==="data-i" ? String(this._idx) : null; };
     getEl("leagueTabs")._children.push(b);
   }
   vm.runInContext(fs.readFileSync(path.join(ROOT, "js/team-brand.js"), "utf8"), sandbox, {filename: "js/team-brand.js"});
@@ -252,6 +255,50 @@ async("nextDay click does not trigger scan", function(){
     return new Promise(function(res2){ setTimeout(res2, 60); }).then(function(){
       ok("  scan ran once on load", afterJump === 8);
       ok("  nextDay added exactly one fetch", boardCalls === afterJump + 1);
+    });
+  });
+});
+
+/* F: NCAAF tab on a dead Tuesday jumps too, with a league-aware notice.
+   (Verified live 2026-09-29: the CFB board has 0 games today, Thursday has
+   games — the same dead window the NFL fix covered.) */
+async("NCAAF tab jumps with league-aware notice", function(){
+  var want3 = ymdOff(3);
+  var sb = loadSandbox(function(url){
+    var isCfb = url.indexOf("football/college-football") !== -1;
+    if(!isCfb) return Promise.resolve({events: []}); /* NFL initial load: dead week */
+    return Promise.resolve(dayParam(url) === want3 ? { events: [preGame("g1")] } : { events: [] });
+  });
+  return new Promise(function(res){ setTimeout(res, 250); }).then(function(){
+    sb.getEl("leagueTabs")._children[4]._fire("click"); /* NCAAF tab */
+    return new Promise(function(res2){ setTimeout(res2, 150); }).then(function(){
+      var html = sb.getEl("scoreGrid").innerHTML;
+      ok("  notice names the league", html.indexOf("No NCAAF games today.") !== -1);
+      ok("  notice does not say NFL", html.indexOf("No NFL games today.") === -1);
+      ok("  notice names the game day honestly",
+         html.indexOf("Showing the next game day") !== -1 && html.indexOf("Today</b> button") !== -1);
+      ok("  game day label advanced",
+         sb.getEl("dayLabel").textContent === new Date(new Date().setDate(new Date().getDate()+3))
+           .toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}));
+      ok("  cards rendered", html.indexOf("game-card") !== -1);
+    });
+  });
+});
+
+/* G: off-season league (NCAAB) scans the window, finds nothing, and stays on
+   the honest empty state — no phantom jump, no notice. */
+async("NCAAB with no games in window: honest empty state, no notice", function(){
+  var sb = loadSandbox(function(url){
+    var isNcaab = url.indexOf("mens-college-basketball") !== -1;
+    if(!isNcaab) return Promise.resolve({events: []});
+    return Promise.resolve({events: []});
+  });
+  return new Promise(function(res){ setTimeout(res, 250); }).then(function(){
+    sb.getEl("leagueTabs")._children[5]._fire("click"); /* NCAAB tab */
+    return new Promise(function(res2){ setTimeout(res2, 200); }).then(function(){
+      var html = sb.getEl("scoreGrid").innerHTML;
+      ok("  empty state", html.indexOf("No games on") !== -1);
+      ok("  no jump notice", html.indexOf("games today.") === -1);
     });
   });
 });
