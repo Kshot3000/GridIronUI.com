@@ -264,9 +264,15 @@ var espnWxP = null;
 function maybeWxBadges(events, mySeq){
   if(sport !== "americanfootball_nfl" || !WX || !events || !events.length) return;
   if(!espnWxP){
-    espnWxP = GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
-      .then(function(d){ return d.events || []; })
-      .catch(function(){ return []; });
+    /* Same rollover-safe fetch as the weather page: between the week's last
+       game and ESPN's Tuesday rollover the default board is all-post, which
+       would silently kill every badge. A venue failure still just means no
+       badges — the board already rendered fine. */
+    var espnP = GIU.wxUpcomingNfl
+      ? GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(r){ return r.events; })
+      : GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
+          .then(function(d){ return d.events || []; });
+    espnWxP = espnP.catch(function(){ return []; });
   }
   Promise.all([espnWxP, GIU.teamDir()]).then(function(r){
     if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return; /* board moved on */

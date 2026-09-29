@@ -51,12 +51,20 @@ function matchupHTML(away, home){
 GIU.wxMatchupHTML = matchupHTML;
 GIU.wxWindowHTML = windowHTML;
 
-GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard").then(function(d){
-  var evs = (d.events||[]).filter(function(ev){
-    var st = ev.competitions[0].status.type.state;
-    return st !== "post";
-  }).slice(0,16);
+/* The scoreboard fetch survives ESPN's week rollover: between the week's last
+   game and the Tuesday rollover the default board is all-post, so without
+   the fallback this page would sit empty on exactly the mornings bettors
+   start handicapping the weekend. upcomingNfl() pulls next week's slate
+   explicitly in that window; the notice names the week so nobody mistakes
+   it for this week's games. */
+GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
+  var evs = res.events.slice(0,16);
   var box = $("wxGrid");
+  if(res.isFallback && evs.length && GIU.wxFallbackNoticeHTML){
+    var note = document.createElement("div");
+    note.innerHTML = GIU.wxFallbackNoticeHTML(res.week, GIU.esc);
+    box.parentNode.insertBefore(note.firstChild, box);
+  }
   if(!evs.length){ box.innerHTML = '<div class="empty">No upcoming NFL games on the board.</div>'; return; }
   box.innerHTML = evs.map(function(ev){
     var c = ev.competitions[0];

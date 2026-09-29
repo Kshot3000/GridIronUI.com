@@ -144,6 +144,52 @@ function impact(w){
   }).join(" ");
 }
 
+/* Fetch the NFL scoreboard's upcoming games, surviving ESPN's week rollover.
+   ESPN's default scoreboard returns the "current" week, which lags reality
+   between the week's last game (late Monday) and the Tuesday rollover —
+   during that window every game is post and a naive `pre` filter yields a
+   dead page. When the default board has no pre games, we ask for the next
+   week explicitly (week.number+1, same season type) using the payload's own
+   week/season fields. fetchJSON is injected so this stays pure and testable.
+   Resolves {events, week, isFallback}. Rejects only when the primary fetch
+   fails — callers show their feed-failure state for that. A failed or empty
+   fallback resolves to an empty event list: the page's honest "no upcoming
+   games" state, not an error. */
+function upcomingNfl(fetchJSON){
+  var BASE = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard";
+  function preOf(d){
+    return ((d||{}).events||[]).filter(function(ev){
+      var c = ((ev||{}).competitions||[])[0]||{};
+      var st = (c.status && c.status.type && c.status.type.state) || "";
+      return st !== "post";
+    });
+  }
+  return fetchJSON(BASE).then(function(d){
+    var pre = preOf(d);
+    var wk = Number(((d||{}).week||{}).number), st = Number(((d||{}).season||{}).type);
+    if(pre.length || !isFinite(wk) || !isFinite(st) || wk < 1 || wk > 22){
+      return {events: pre, week: isFinite(wk) ? wk : null, isFallback: false};
+    }
+    var nextWk = wk + 1;
+    return fetchJSON(BASE+"?week="+nextWk+"&seasontype="+st).then(function(d2){
+      var pre2 = preOf(d2);
+      var wk2 = Number(((d2||{}).week||{}).number);
+      return {events: pre2, week: isFinite(wk2) ? wk2 : nextWk, isFallback: true};
+    }).catch(function(){
+      return {events: [], week: nextWk, isFallback: true};
+    });
+  });
+}
+/* Honest label for the rollover fallback: names the week we're showing so a
+   visitor never mistakes next week's slate for this week's. `esc` is injected
+   (window.GIU.esc in the browser) to keep this pure. */
+function fallbackNoticeHTML(week, esc){
+  esc = esc || function(s){ return String(s == null ? "" : s); };
+  return '<div class="notice" style="margin:0 0 14px"><strong>Next week\'s slate — Week '+
+    esc(week)+'.</strong> The league board hasn\'t flipped over from last week yet, '+
+    'so these are the upcoming games with their forecasts. Kickoff dates are on each card.</div>';
+}
+
 W.stadiums = STADIUMS;
 W.stadiumFor = stadiumFor;
 W.neutralFor = neutralFor;
@@ -152,6 +198,8 @@ W.compass = compass;
 W.sliceWindow = sliceWindow;
 W.impactNotes = impactNotes;
 W.impact = impact;
+W.upcomingNfl = upcomingNfl;
+W.fallbackNoticeHTML = fallbackNoticeHTML;
 
 if(typeof module !== "undefined" && module.exports){ module.exports = W; }
 else if(typeof window !== "undefined"){
@@ -163,5 +211,7 @@ else if(typeof window !== "undefined"){
   window.GIU.wxSliceWindow = sliceWindow;
   window.GIU.wxImpactNotes = impactNotes;
   window.GIU.wxImpact = impact;
+  window.GIU.wxUpcomingNfl = upcomingNfl;
+  window.GIU.wxFallbackNoticeHTML = fallbackNoticeHTML;
 }
 })();
