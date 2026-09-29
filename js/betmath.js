@@ -664,6 +664,86 @@ var M = {
     });
     return rows.map(function(r){ return r.map(cell).join(","); }).join("\n");
   },
+  /* Reverse of journalCSV: parse an exported (or hand-made) CSV back into
+     bet objects, ready for nextId-style id assignment by the caller.
+     Returns {bets, imported, skipped, errors[]}. Rules:
+     - RFC-4180 parsing: quoted cells may hold commas, quotes ("") and
+       newlines; BOM and CRLF are tolerated.
+     - Columns map by header name (case-insensitive), so column order is
+       free; "profit_usd" is ignored — profit is always recomputed.
+     - Required columns: sport, event, price, stake, result. Missing date
+       falls back to today (same as the log form); unknown results become
+       "pending" rather than inventing a win or a loss.
+     - Every row is re-validated by journalValid; bad rows are skipped
+       with a per-row reason instead of aborting the whole file.
+     Nothing is ever invented: a row that can't be validated doesn't ship. */
+  journalCSVImport: function(text){
+    var out = { bets: [], imported: 0, skipped: 0, errors: [] };
+    var s = String(text == null ? "" : text);
+    if(s.charCodeAt(0) === 0xFEFF) s = s.slice(1);
+    /* RFC-4180 row splitter: a tiny state machine over the raw text. */
+    function splitRows(src){
+      var rows = [], row = [], cell = "", q = false, i = 0;
+      while(i < src.length){
+        var c = src[i];
+        if(q){
+          if(c === '"'){
+            if(src[i+1] === '"'){ cell += '"'; i += 2; continue; }
+            q = false; i++; continue;
+          }
+          cell += c; i++; continue;
+        }
+        if(c === '"'){ q = true; i++; continue; }
+        if(c === ","){ row.push(cell); cell = ""; i++; continue; }
+        if(c === "\r"){ i++; continue; }
+        if(c === "\n"){ row.push(cell); rows.push(row); row = []; cell = ""; i++; continue; }
+        cell += c; i++;
+      }
+      row.push(cell); rows.push(row);
+      return rows;
+    }
+    var rows = splitRows(s).filter(function(r){
+      return r.some(function(c){ return String(c).trim() !== ""; });
+    });
+    if(!rows.length) return out; /* empty file: nothing to import, nothing to report */
+    var head = rows[0].map(function(c){ return String(c).trim().toLowerCase(); });
+    var col = {};
+    head.forEach(function(h, i){ if(!(h in col)) col[h] = i; });
+    var need = ["sport", "event", "price", "stake", "result"];
+    var missing = need.filter(function(k){ return !(k in col); });
+    if(missing.length){
+      out.skipped = rows.length - 1;
+      out.errors.push("Missing required column(s): " + missing.join(", ") +
+        ". Expected the journal's export header (date,sport,event,market,pick,price,close,stake,result,profit_usd).");
+      return out;
+    }
+    var today = (function(){ var d = new Date(); return d.toISOString().slice(0, 10); })();
+    for(var r = 1; r < rows.length; r++){
+      var cells = rows[r];
+      var n = r + 1; /* 1-based line number in the original file */
+      function val(k){ var i = col[k]; return i === undefined || i >= cells.length ? "" : String(cells[i]).trim(); }
+      var res = val("result").toLowerCase();
+      if(res !== "win" && res !== "loss" && res !== "push") res = "pending";
+      var b = {
+        date: val("date") || today,
+        sport: val("sport"),
+        event: val("event"),
+        market: ("market" in col) ? val("market") : "",
+        pick: ("pick" in col) ? val("pick") : "",
+        price: val("price"),
+        stake: val("stake"),
+        result: res
+      };
+      var close = val("close");
+      if(close !== "") b.close = close;
+      var err = M.journalValid(b);
+      if(err){ out.skipped++; out.errors.push("Row " + n + ": " + err); continue; }
+      b.price = Number(b.price); b.stake = Number(b.stake);
+      if(b.close !== undefined) b.close = Number(b.close);
+      out.bets.push(b); out.imported++;
+    }
+    return out;
+  },
   journalStats: function(bets, unitSize){
     /* One honest dashboard: record, net, ROI, win rate, streak, per-sport.
        unitSize: dollars per unit (defaults to 100). */

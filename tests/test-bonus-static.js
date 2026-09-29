@@ -1,8 +1,10 @@
-/* GridIronUI bonus & promo value static wiring test (v1.67.0).
+/* GridIronUI bonus & promo value static wiring test (v1.67.0; cache keys
+   updated v1.87.0 for the journal CSV import release).
    The 17th tool card must be fully wired in tools.html: card + ids exist,
    the "New" tag moved here (off the middling card), the lede counts
-   seventeen tools, the index hero counts 17, betmath.js/tools.js carry
-   v1.67.0 cache keys everywhere they're referenced, and the card links the
+   seventeen tools, the index hero counts 17, betmath.js carries the v1.87.0
+   cache key everywhere it's referenced (journal CSV import changed it),
+   tools.js still carries v1.67.0 (unchanged), and the card links the
    odds board.
    Run: node tests/test-bonus-static.js */
 "use strict";
@@ -36,7 +38,7 @@ ok("index hero counts 17 tools", /<b>17<\/b><span>betting tools<\/span>/.test(in
 
 [["tools.html"],["journal.html"],["odds.html"]].forEach(([f]) => {
   const h = read(f);
-  ok(f + " betmath.js key is v1.67.0", h.indexOf("betmath.js?v=1.67.0") !== -1);
+  ok(f + " betmath.js key is v1.87.0", h.indexOf("betmath.js?v=1.87.0") !== -1);
 });
 ok("tools.html tools.js key is v1.67.0", tools.indexOf("tools.js?v=1.67.0") !== -1);
 

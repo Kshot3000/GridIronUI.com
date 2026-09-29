@@ -48,6 +48,8 @@ node tests/test-journal-dom.js  # journal wiring in shipped journal.js (add vali
 node tests/test-journal-clv-dom.js  # closing-price editor + beat-the-close chip/stat wiring in shipped journal.js
 node tests/test-journal-curve.js  # bankroll curve math (cumulative settled profit, date order, pending excluded, pushes flat)
 node tests/test-journal-curve-dom.js  # bankroll-curve wiring in shipped journal.js (hide when unsettled, DPR paint, aria, caption, null-context safety)
+node tests/test-journal-csvimport.js  # journal CSV import math (export round-trip, RFC-4180 quoting, column-order freedom, bad-row skips with reasons, honest result/date defaults)
+node tests/test-journal-csvimport-dom.js  # CSV import wiring in shipped journal.js (picker open, file read, dedupe by content, fresh ids, result message)
 node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph set + layering, hero-pulse cache key
 node tests/test-odds-inj.js   # injury-badge pure logic (severity ranks, per-team counts, card lines, badge HTML)
 node tests/test-odds-inj-dom.js  # injury-badge wiring in shipped odds.js (hidden slots, live injection, quiet cases, feed failure)

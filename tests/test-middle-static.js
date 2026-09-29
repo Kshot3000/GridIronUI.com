@@ -1,9 +1,10 @@
-/* GridIronUI middling calculator static wiring test (v1.65.0, refreshed v1.67.0).
+/* GridIronUI middling calculator static wiring test (v1.65.0, refreshed v1.67.0;
+   cache keys updated v1.87.0 for the journal CSV import release).
    The 16th tool card must be fully wired in tools.html: card + ids exist,
    it links the line-movement guide, the "New" tag has moved on to the bonus
    card (v1.67.0), the lede counts seventeen tools, the index hero counts 17,
-   and betmath.js/tools.js carry v1.67.0 cache keys everywhere they're
-   referenced.
+   betmath.js carries the v1.87.0 cache key everywhere it's referenced
+   (journal CSV import changed it), and tools.js still carries v1.67.0.
    Run: node tests/test-middle-static.js */
 "use strict";
 const fs = require("fs"), path = require("path");
@@ -36,7 +37,7 @@ ok("index hero counts 17 tools", /<b>17<\/b><span>betting tools<\/span>/.test(in
 
 [["tools.html"],["journal.html"],["odds.html"]].forEach(([f]) => {
   const h = read(f);
-  ok(f + " betmath.js key is v1.67.0", h.indexOf("betmath.js?v=1.67.0") !== -1);
+  ok(f + " betmath.js key is v1.87.0", h.indexOf("betmath.js?v=1.87.0") !== -1);
 });
 ok("tools.html tools.js key is v1.67.0", tools.indexOf("tools.js?v=1.67.0") !== -1);
 

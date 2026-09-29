@@ -100,18 +100,20 @@
     </div>
     <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm" id="jExport">⬇ Export CSV</button>
+      <button class="btn btn-ghost btn-sm" id="jImport">⬆ Import CSV</button>
+      <input type="file" id="jImportFile" accept=".csv,text/csv" style="display:none" aria-label="Import journal CSV file" tabindex="-1">
       <button class="btn btn-ghost btn-sm" id="jClear">🗑 Clear journal</button>
     </div>
   </div>
 
   <div class="notice" style="margin:34px 0">
-    <strong>Private by design:</strong> your journal lives in this browser's localStorage — GridIronUI has no servers, no accounts, nothing is sent anywhere. Export CSV regularly to back it up, and remember that clearing browser data clears the journal. If betting stops being fun, <a href="responsible-gambling.html">help is free and confidential</a>.
+    <strong>Private by design:</strong> your journal lives in this browser's localStorage — GridIronUI has no servers, no accounts, nothing is sent anywhere. Export CSV regularly to back it up — the same file imports right back in — and remember that clearing browser data clears the journal. If betting stops being fun, <a href="responsible-gambling.html">help is free and confidential</a>.
   </div>
 </div>
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.85.0"></script>
-<script src="js/betmath.js?v=1.67.0"></script>
-<script src="js/journal.js?v=1.61.0"></script>
+<script src="js/betmath.js?v=1.87.0"></script>
+<script src="js/journal.js?v=1.87.0"></script>
 </body>
 </html>

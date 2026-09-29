@@ -16,16 +16,40 @@ snapshot is older than about two hours. (A scheduled GitHub Actions
 workflow is the planned long-term fix — see the goal workspace notes.)
 """
 import json, os, sys, time, urllib.request
+import urllib.error
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
 SERIES = "KXNFLGAME"  # NFL game-winner events; Kalshi currently lists winner (moneyline) markets only
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 OUT = os.path.join(ROOT, "data", "kalshi-nfl.json")
 
-def get(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "GridIronUI-snapshot/1.0"})
-    with urllib.request.urlopen(req, timeout=25) as r:
-        return json.load(r)
+def get(url, retries=4):
+    # GET with retries for transient Kalshi throttling (HTTP 429) and
+    # server-side 5xx: exponential backoff, honoring Retry-After when the
+    # API names one. Permanent failures still raise so callers decide.
+    delay = 1.0
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "GridIronUI-snapshot/1.0"})
+            with urllib.request.urlopen(req, timeout=25) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            transient = e.code == 429 or 500 <= e.code < 600
+            if not transient or attempt == retries - 1:
+                raise
+            retry_after = e.headers.get("Retry-After") if e.headers else None
+            try:
+                delay = float(retry_after) if retry_after else delay
+            except (TypeError, ValueError):
+                pass
+            time.sleep(min(delay, 30))
+            delay *= 2
+        except Exception:
+            if attempt == retries - 1:
+                raise
+            time.sleep(delay)
+            delay *= 2
+    raise RuntimeError("unreachable")
 
 def pct(s):
     try:
@@ -72,6 +96,18 @@ def main():
     except Exception as e:
         print("ERROR: could not list Kalshi events: %s" % e, file=sys.stderr)
         sys.exit(1)
+    # Carry-forward map: if a single event's market pull keeps failing after
+    # retries, reuse the previous snapshot's entry for that game (marked
+    # stale) instead of silently deleting a real game from the markets page.
+    prev_games = {}
+    if os.path.exists(OUT):
+        try:
+            with open(OUT) as f:
+                for g in json.load(f).get("games", []):
+                    if g.get("event_ticker"):
+                        prev_games[g["event_ticker"]] = g
+        except Exception as e:
+            print("WARN: could not read previous snapshot for carry-forward: %s" % e, file=sys.stderr)
     games = []
     for e in events:
         et = e.get("event_ticker")
@@ -79,6 +115,14 @@ def main():
             ms = fetch_markets(et)
         except Exception as ex:
             print("WARN: markets failed for %s: %s" % (et, ex), file=sys.stderr)
+            prev = prev_games.get(et)
+            if prev:
+                carried = dict(prev)
+                carried["stale"] = True
+                games.append(carried)
+                print("WARN: carried forward stale entry for %s from previous snapshot" % et, file=sys.stderr)
+            else:
+                print("WARN: no previous entry for %s; game dropped" % et, file=sys.stderr)
             continue
         markets = []
         for m in ms:

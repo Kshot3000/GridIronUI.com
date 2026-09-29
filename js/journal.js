@@ -322,6 +322,49 @@ function exportCSV(){
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 4000);
 }
 
+function betSig(b){
+  /* Dedup signature: an exact content match counts as the same logged bet,
+     so importing the same CSV twice can't double the journal. */
+  return [b.date, b.sport, b.event, b.market, b.pick, b.price,
+          b.close == null ? "" : b.close, b.stake, b.result].join("\u0001");
+}
+
+function importCSV(file){
+  if(!file){ showErr("Pick a CSV file to import."); return; }
+  var read = (file.text && file.text.bind(file)) || function(){
+    return new Promise(function(res, rej){
+      var fr = new FileReader();
+      fr.onload = function(){ res(String(fr.result || "")); };
+      fr.onerror = function(){ rej(new Error("read failed")); };
+      fr.readAsText(file);
+    });
+  };
+  read().then(function(text){
+    var r = BM.journalCSVImport(text);
+    var seen = {};
+    bets.forEach(function(b){ seen[betSig(b)] = 1; });
+    var added = 0, dupes = 0;
+    r.bets.forEach(function(b){
+      if(seen[betSig(b)]){ dupes++; return; }
+      b.id = nextId(bets);
+      bets.push(b);
+      seen[betSig(b)] = 1;
+      added++;
+    });
+    saveBets(bets);
+    render();
+    var parts = [];
+    if(added) parts.push("Imported " + added + " bet" + (added === 1 ? "" : "s") + ".");
+    else parts.push("No new bets imported.");
+    if(dupes) parts.push(dupes + " duplicate" + (dupes === 1 ? "" : "s") + " already in the journal — skipped.");
+    if(r.skipped) parts.push(r.skipped + " row" + (r.skipped === 1 ? "" : "s") + " skipped: " + r.errors.slice(0, 5).join(" ") +
+      (r.errors.length > 5 ? " (+" + (r.errors.length - 5) + " more)" : ""));
+    showErr(parts.join(" "));
+  }).catch(function(){
+    showErr("Couldn't read that file — try exporting a fresh CSV from the journal first.");
+  });
+}
+
 function tableClick(ev){
   var t = ev.target && ev.target.closest ? ev.target.closest("button") : null;
   if(!t) return;
@@ -367,6 +410,11 @@ function init(){
   $("jFilterResult").addEventListener("change", render);
   $("jBetsBody").addEventListener("click", tableClick);
   $("jExport").addEventListener("click", exportCSV);
+  $("jImport").addEventListener("click", function(){ showErr(""); $("jImportFile").click(); });
+  $("jImportFile").addEventListener("change", function(){
+    if(this.files && this.files[0]) importCSV(this.files[0]);
+    this.value = ""; /* allow re-picking the same file */
+  });
   $("jClear").addEventListener("click", function(){
     if(!bets.length) return;
     if(window.confirm("Delete ALL " + bets.length + " logged bets? Export CSV first if you want a backup.")){
