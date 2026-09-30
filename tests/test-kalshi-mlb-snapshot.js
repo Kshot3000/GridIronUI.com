@@ -39,8 +39,12 @@ var bad = snap.games.filter(function(g){
          !Array.isArray(g.markets) || g.markets.length !== 2 ||
          !g.markets.every(function(m){
            return m.kind === "winner" &&
-                  Number.isFinite(m.yes_bid) && m.yes_bid > 0 && m.yes_bid < 100 &&
-                  Number.isFinite(m.yes_ask) && m.yes_ask > 0 && m.yes_ask < 100 &&
+                  /* a nearly-settled market legitimately shows a 0c bid
+                     (e.g. a 7-0 5th-inning leader at 99/100) — that's a real
+                     price, not fake data; the 0/100 pinned PM moneylines
+                     stay filtered in D.pmMoneyline, never compared */
+                  Number.isFinite(m.yes_bid) && m.yes_bid >= 0 && m.yes_bid < 100 &&
+                  Number.isFinite(m.yes_ask) && m.yes_ask > 0 && m.yes_ask <= 100 &&
                   m.yes_ask >= m.yes_bid;
          });
 });

@@ -1,9 +1,12 @@
-/* GridIronUI v1.94.0 — cross-book disagreement card now covers the MLB tab
+/* GridIronUI v1.96.0 — cross-book disagreement card now covers the MLB tab
    on markets.html (Wild Card week), not just NFL. Covers:
    - Disagree.matches() with the REAL data/kalshi-mlb.json snapshot + a
-     realistic Polymarket MLB event pairs correctly on the "mlb" league key
-     (BOS/NYY Game 1: Polymarket 27/73 vs Kalshi 30/71 — a 3c gap, flagged),
+     realistic Polymarket MLB event pairs correctly on the "mlb" league key,
      including the CWS->CHW alias for CHW/HOU Game 2;
+   - v1.96.0: the PM event is driven off the snapshot itself (the snapshot
+     evolves as series progress — settled games leave the board), and the
+     same-day rule is verified end-to-end: a PM event on the snapshot game
+     day matches, a PM event on a day with no Kalshi entry is dropped;
    - the SHIPPED js/markets.js wires the MLB tab's disagreement strip to
      data/kalshi-mlb.json, passes the tab's league key into disagreeCard,
      forwards league into D.matches and teamFind, and shows league-aware
@@ -26,7 +29,9 @@ var dir = {mlb: [
   {abbr:"CHC", displayName:"Chicago Cubs",       shortDisplayName:"Cubs"},
   {abbr:"SD",  displayName:"San Diego Padres",   shortDisplayName:"Padres"},
   {abbr:"CHW", displayName:"Chicago White Sox",  shortDisplayName:"White Sox"},
-  {abbr:"HOU", displayName:"Houston Astros",     shortDisplayName:"Astros"}
+  {abbr:"HOU", displayName:"Houston Astros",     shortDisplayName:"Astros"},
+  {abbr:"PHI", displayName:"Philadelphia Phillies", shortDisplayName:"Phillies"},
+  {abbr:"ATL", displayName:"Atlanta Braves",     shortDisplayName:"Braves"}
 ]};
 function teamFind(d, league, q){
   var list = (d||{})[league] || [];
@@ -46,47 +51,87 @@ function ml(outcomes, prices, volume){
 
 /* ---- live logic against the real committed snapshot ---- */
 var snap = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
-assert(Array.isArray(snap.games) && snap.games.length >= 6,
-  "MLB snapshot holds >=6 postseason games (got "+(snap.games||[]).length+")");
-
-/* Polymarket-style event for tonight's Red Sox @ Yankees Wild Card Game 1.
-   7pm ET Sept 29 = 2026-09-29T23:00Z, so the Eastern day is Sep 29. */
-var pmG1 = {
-  title: "Red Sox vs. Yankees",
-  startTime: "2026-09-29T23:00:00Z",
-  markets: [ ml(["Red Sox","Yankees"], [0.27,0.73], 5000000) ]
-};
-var mt = D.matches([pmG1], snap.games, dir, teamFind, "mlb");
-assert(mt.length === 1, "BOS/NYY Game 1 matches one Kalshi game on league=mlb");
-/* Expected Kalshi sides, derived from the committed snapshot itself (it
-   refreshes hourly — the Game 1 market is the tickers ending in -BOS/-NYY
-   on event KXMLBGAME-26SEP292000BOSNYY). */
-function snapPrice(tickerSuffix){
-  var g = snap.games.filter(function(x){
-    return String(x.event_ticker||"").indexOf("26SEP292000BOSNYY") >= 0; })[0];
-  if(!g) return null;
-  var mm = (g.markets||[]).filter(function(x){
-    return String(x.ticker||"").slice(-4) === tickerSuffix; })[0];
+/* ---- live logic against the real committed snapshot ----
+   The snapshot evolves as the series progresses (settled games leave the
+   board), so the Polymarket event is driven off the snapshot itself: the
+   latest-dated game both of whose abbreviations resolve in the directory. */
+assert(Array.isArray(snap.games) && snap.games.length >= 1,
+  "MLB snapshot holds at least 1 postseason game (got "+(snap.games||[]).length+")");
+function fullName(ab){
+  var t = teamFind({mlb: dir.mlb}, "mlb", ab);
+  return t ? t.displayName : null;
+}
+var target = null, targetDate = "";
+snap.games.forEach(function(g){
+  var ab = D.kalshiAbbrs(g.sub_title);
+  if(!ab || !fullName(ab[0]) || !fullName(ab[1])) return;
+  var dt = D.kalshiDate(g);
+  if(!dt) return;
+  if(!target || dt > targetDate){ target = g; targetDate = dt; }
+});
+assert(target !== null, "snapshot holds a game whose teams resolve in the test directory");
+var tAb = D.kalshiAbbrs(target.sub_title), aAb = tAb[0], bAb = tAb[1];
+var aNm = fullName(aAb), bNm = fullName(bAb);
+/* Expected Kalshi sides, derived from the committed snapshot itself. */
+function snapPrice(g, ab){
+  var mm = (g.markets||[]).filter(function(x){ return D.kalshiTeamAbbr(x) === ab; })[0];
   return mm ? D.kalshiPrice(mm) : null;
 }
-var expA = snapPrice("-BOS"), expB = snapPrice("-NYY");
-assert(expA !== null && expB !== null, "snapshot Game 1 -BOS/-NYY markets priced");
+var expA = snapPrice(target, aAb), expB = snapPrice(target, bAb);
+assert(expA !== null && expB !== null,
+  "snapshot markets priced for "+aAb+"/"+bAb+" ("+target.event_ticker+")");
+/* Polymarket-style event on the same game day: 7pm ET == the ticker day. */
+function pmOn(aCents){
+  return {
+    title: aNm + " vs. " + bNm,
+    startTime: targetDate + "T23:00:00Z",
+    markets: [ ml([aNm, bNm], [aCents/100, (100-aCents)/100], 5000000) ]
+  };
+}
+var gapDir = (expA - 4 > 0) ? -4 : 4; /* keep the PM price inside 1..99 */
+var mt = D.matches([pmOn(expA + gapDir)], snap.games, dir, teamFind, "mlb");
+assert(mt.length === 1,
+  aAb+"/"+bAb+" on the snapshot game day matches one Kalshi game on league=mlb");
 if(mt.length && expA !== null){
   var m = mt[0];
-  assert(m.abbrA === "BOS" && m.abbrB === "NYY",
-    "sides resolve to BOS/NYY (got "+m.abbrA+"/"+m.abbrB+")");
-  assert(m.pmA === 27 && m.pmB === 73,
-    "Polymarket prices 27/73 (got "+m.pmA+"/"+m.pmB+")");
+  assert(m.abbrA === aAb && m.abbrB === bAb,
+    "sides resolve to "+aAb+"/"+bAb+" (got "+m.abbrA+"/"+m.abbrB+")");
+  assert(m.pmA === expA + gapDir && m.pmB === 100 - expA - gapDir,
+    "Polymarket prices carried through (got "+m.pmA+"/"+m.pmB+")");
   assert(m.kalshiA === expA && m.kalshiB === expB,
-    "Kalshi sides match the Game 1 snapshot numbers, not Game 2 (got "+m.kalshiA+"/"+m.kalshiB+", want "+expA+"/"+expB+")");
-  var delta = 27 - expA;
+    "Kalshi sides match the snapshot numbers (got "+m.kalshiA+"/"+m.kalshiB+", want "+expA+"/"+expB+")");
   var dis = D.disagreements(mt, 3);
-  if(Math.abs(delta) >= 3){
-    assert(dis.length === 1 && dis[0].delta === delta,
-      "3c+ BOS gap flagged as a disagreement (delta "+(dis[0]&&dis[0].delta)+")");
-  } else {
-    assert(dis.length === 0, "sub-3c BOS gap correctly not flagged");
+  assert(dis.length === 1 && dis[0].delta === gapDir,
+    "4c gap flagged as a disagreement (delta "+(dis[0]&&dis[0].delta)+")");
+  var mtAgree = D.matches([pmOn(expA)], snap.games, dir, teamFind, "mlb");
+  assert(D.disagreements(mtAgree, 3).length === 0,
+    "0c gap correctly not flagged");
+  /* Same-day rule: a PM event on a day with no Kalshi entry for THIS pair is
+     dropped, never borrows another game of the series. The off-day is found
+     by scanning forward from the target day, so later rounds can't collide. */
+  function pairHasGame(day){
+    return snap.games.some(function(g){
+      var ab = D.kalshiAbbrs(g.sub_title);
+      var samePair = ab && ((ab[0]===aAb && ab[1]===bAb) || (ab[0]===bAb && ab[1]===aAb));
+      return samePair && D.kalshiDate(g) === day;
+    });
   }
+  var offD = new Date(Date.parse(targetDate+"T12:00:00Z") + 86400000), offDayStr = "";
+  for(var i = 0; i < 14 && !offDayStr; i++){
+    var ds = offD.toISOString().slice(0, 10);
+    if(!pairHasGame(ds)) offDayStr = ds;
+    offD = new Date(offD.getTime() + 86400000);
+  }
+  assert(offDayStr !== "", "found an off-day with no Kalshi entry for "+aAb+"/"+bAb);
+  var offDay = {
+    title: aNm + " vs. " + bNm,
+    startTime: offDayStr + "T23:00:00Z",
+    markets: [ ml([aNm, bNm], [0.5, 0.5], 5000000) ]
+  };
+  assert(D.pmGameDay(offDay) === offDayStr,
+    "off-day event maps to "+offDayStr+" ("+D.pmGameDay(offDay)+")");
+  assert(D.matches([offDay], snap.games, dir, teamFind, "mlb").length === 0,
+    "a PM event with no same-day Kalshi entry is dropped, never guessed");
 }
 
 /* White Sox @ Astros: Kalshi lists CWS, ESPN lists CHW — the alias must

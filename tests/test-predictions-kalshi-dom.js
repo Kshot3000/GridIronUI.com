@@ -24,6 +24,13 @@ function makeEl(id){
 const els = {};
 const FUTURE = new Date(Date.now() + 6*3600*1000).toISOString();
 const FRESH_SNAP = new Date(Date.now() - 3600*1000).toISOString();
+/* The synthetic PM event starts 6h from now; its Eastern game day must
+   equal the Kalshi ticker's game day or matches() (same-day rule, v1.96.0)
+   correctly drops it. */
+const MONS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const GD = new Date(Date.parse(FUTURE) - 4*3600000);
+const TIC_DATE = String(GD.getUTCFullYear()).slice(2) + MONS[GD.getUTCMonth()] +
+  String(GD.getUTCDate()).padStart(2, "0");
 
 const pmEvent = {
   title: "Philadelphia Eagles vs. Chicago Bears",
@@ -38,10 +45,10 @@ const pmEvent = {
 const snapshot = {
   updated_at: FRESH_SNAP,
   games: [{
-    sub_title: "PHI vs CHI (Sep 28)", event_ticker: "KXNFLGAME-26SEP28PHICHI",
+    sub_title: "PHI vs CHI (game day)", event_ticker: "KXNFLGAME-"+TIC_DATE+"PHICHI",
     markets: [
-      {ticker: "KXNFLGAME-26SEP28PHICHI-PHI", kind: "winner", yes_bid: 65, yes_ask: 66},
-      {ticker: "KXNFLGAME-26SEP28PHICHI-CHI", kind: "winner", yes_bid: 34, yes_ask: 35},
+      {ticker: "KXNFLGAME-"+TIC_DATE+"PHICHI-PHI", kind: "winner", yes_bid: 65, yes_ask: 66},
+      {ticker: "KXNFLGAME-"+TIC_DATE+"PHICHI-CHI", kind: "winner", yes_bid: 34, yes_ask: 35},
     ],
   }],
 };

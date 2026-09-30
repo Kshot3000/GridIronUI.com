@@ -134,10 +134,11 @@ D.kalshiSides = function(g){
    directory (falling back to title order), Kalshi's through its own tickers.
    `league` (default "nfl") selects the team directory; callers pass "mlb"
    for the postseason snapshot. When several snapshot games share the same
-   pair — a playoff series, Game 1 vs Game 2 — the one whose game day is
-   closest to the Polymarket event's Eastern date wins; a tie or missing dates
-   falls back to the first pair match (the old behavior). Unmatchable games
-   are dropped, never guessed. */
+   pair — a playoff series, Game 1 vs Game 2 — the one whose game day equals
+   the Polymarket event's Eastern date wins. When both sides carry a game day
+   and they differ, the Kalshi entry is a DIFFERENT game of the series, not a
+   second price for this one: a Game 3 Polymarket event never borrows Game 2's
+   Kalshi price. Unmatchable games are dropped, never guessed. */
 D.matches = function(pmEvents, kalshiGames, dir, teamFind, league){
   league = league || "nfl";
   var kl = (kalshiGames||[]).map(D.kalshiSides).filter(Boolean);
@@ -166,13 +167,17 @@ D.matches = function(pmEvents, kalshiGames, dir, teamFind, league){
       if((k.abbrA === pa && k.abbrB === pb) || flip)
         cands.push({k: k, flip: flip, diff: dayDiff(day, k.date)});
     }
-    /* Prefer the nearest game day (a playoff series lists the same pair
-       several times); when no side carries a date, or dates tie, keep the
-       first pair match — the old behavior. */
+    /* Prefer the matching game day (a playoff series lists the same pair
+       several days running); a tie or missing dates falls back to the first
+       pair match — the old behavior. When both sides carry a game day and
+       they differ, the Kalshi entry is a DIFFERENT game of the series: a
+       Game 3 Polymarket event never borrows Game 2's Kalshi price — drop it,
+       never guess. */
     var best = null;
     for(var j = 0; j < cands.length; j++){
       if(!best || cands[j].diff < best.diff) best = cands[j];
     }
+    if(best && day && best.k.date && day !== best.k.date) best = null;
     if(best){
       out.push({
         abbrA: pa, abbrB: pb, nameA: t[0], nameB: t[1],

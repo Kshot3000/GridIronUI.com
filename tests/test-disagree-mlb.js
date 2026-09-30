@@ -1,9 +1,11 @@
-/* GridIronUI v1.93.0 — MLB postseason Kalshi matching in js/disagree-logic.js.
+/* GridIronUI v1.96.0 — MLB postseason Kalshi matching in js/disagree-logic.js.
    Kalshi's MLB series lists the same team pair several times (Wild Card Game
    1, Game 2, ...), so matches() takes a `league` arg (default "nfl") and,
-   when several snapshot games share a pair, picks the one whose game day is
-   closest to the Polymarket event's Eastern date — never the wrong game of
-   a series. Run: node tests/test-disagree-mlb.js */
+   when several snapshot games share a pair, picks the one whose game day
+   equals the Polymarket event's Eastern date — never the wrong game of a
+   series. v1.96.0: a PM event with no same-day Kalshi entry (e.g. Game 3,
+   when the snapshot only covers Game 2) is dropped, never borrows another
+   game's prices. Run: node tests/test-disagree-mlb.js */
 "use strict";
 var D = require("../js/disagree-logic.js");
 var failures = 0;
@@ -102,7 +104,7 @@ assert(mf.length === 1 && mf[0].kalshiA === 31 && mf[0].kalshiB === 70,
   "flipped Kalshi side order still aligns prices to the PM side order");
 
 /* ---- league selection ---- */
-var nflEv = {title:"Philadelphia Eagles vs. Chicago Bears", startTime:"2026-09-28T00:00:00Z",
+var nflEv = {title:"Philadelphia Eagles vs. Chicago Bears", startTime:"2026-09-28T17:00:00Z",
   markets:[ml(["Philadelphia Eagles","Chicago Bears"],[0.65,0.35],100)]};
 var nflSnap = [kg("KXNFLGAME-26SEP28PHICHI","PHI vs CHI (Sep 28)","PHI",65,66,"CHI",34,35)];
 var mn = D.matches([nflEv], nflSnap, dir, teamFind, "nfl");
@@ -123,6 +125,25 @@ var unknown = pmEv("Boston Red Sox vs. Los Angeles Dodgers", "2026-09-30T00:00:0
   ["Boston Red Sox","Los Angeles Dodgers"], [0.5, 0.5]);
 assert(D.matches([unknown], snapGames, dir, teamFind, "mlb").length === 0,
   "a team missing from the directory is dropped");
+
+/* ---- a series game with no same-day Kalshi entry is dropped, never guessed ---- */
+/* v1.96.0: Game 3 events (Oct 1) must not borrow Game 2's Kalshi prices */
+var g3 = pmEv("Boston Red Sox vs. New York Yankees", "2026-10-02T00:00:00Z",
+  ["Boston Red Sox","New York Yankees"], [0.48, 0.52]);
+assert(D.pmGameDay(g3) === "2026-10-01", "Game 3's startTime maps to the Oct 1 game day");
+var m3 = D.matches([g3], snapGames, dir, teamFind, "mlb");
+assert(m3.length === 0,
+  "a Game 3 event with no Oct 1 Kalshi entry is dropped — never borrows Game 2's prices");
+/* both dates present but different: g1 (Sep 29) against a Game-2-only snapshot */
+var g1only2 = pmEv("Boston Red Sox vs. New York Yankees", "2026-09-30T00:00:00Z",
+  ["Boston Red Sox","New York Yankees"], [0.30, 0.70]);
+assert(D.matches([g1only2], [snapGames[1]], dir, teamFind, "mlb").length === 0,
+  "Game 1 is not matched to a Game-2-only snapshot entry");
+/* missing dates keep the old first-pair-match fallback (nothing to compare) */
+var noDateEv = pmEv("Boston Red Sox vs. New York Yankees", "",
+  ["Boston Red Sox","New York Yankees"], [0.30, 0.70]);
+assert(D.matches([noDateEv], snapGames, dir, teamFind, "mlb").length === 1,
+  "an undated PM event still falls back to the first pair match");
 
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }
 console.log("all disagree-mlb assertions passed");
