@@ -1,7 +1,8 @@
 /* GridIronUI cross-book-edge snapshot-age test — the "Where the two markets
    disagree" card compares a LIVE Polymarket price against a FROZEN Kalshi
    snapshot price. A 4c "edge" against a 2h-old frozen number may be nothing,
-   so this guards that the shipped js/markets.js disagree card (v1.73.0):
+   so this guards that the shipped js/markets.js disagree card (v1.94.0; card
+   extended to the MLB tab this release with a league-aware signature):
    - derives the snapshot age from snap.updated_at (not a hardcoded string),
    - names that age in the card note ("snapshot, refreshed 2h ago"),
    - calls the Kalshi side what it is: frozen at the snapshot time,
@@ -18,7 +19,7 @@ function ok(name, cond){ if(cond){ pass++; } else { fail++; console.log("FAIL:",
 
 const src = fs.readFileSync(path.join(ROOT, "js", "markets.js"), "utf8");
 /* isolate disagreeCard (function declaration through its closing before the next comment block) */
-const card = (src.match(/function disagreeCard\(games, snap, dir\)\{[\s\S]*?\n\}\n/) || [""])[0];
+const card = (src.match(/function disagreeCard\(games, snap, dir[\s\S]*?\n\}\n/) || [""])[0];
 ok("disagreeCard exists in shipped markets.js", card.length > 0);
 ok("snapshot age comes from snap.updated_at",
   card.indexOf("agoShort(snap.updated_at)") !== -1);

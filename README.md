@@ -97,6 +97,7 @@ node tests/test-markets-live.js  # markets page live auto-refresh (90s Polymarke
 node tests/test-disagree-snapshot.js  # cross-book-edge card: snapshot age named in the note, Kalshi figures tagged "snapshot" + frozen-at-snapshot tooltip (shipped js/markets.js)
 node tests/test-disagree.js  # disagree-logic unit tests: Polymarket moneyline vs Kalshi snapshot pairing, gap flags
 node tests/test-disagree-mlb.js  # disagree-logic MLB series disambiguation: Game 1/Game 2 nearest-day matching, league arg, backward-compat default
+node tests/test-disagree-mlb-card.js  # cross-book-edge card on the MLB tab: real-snapshot BOS/NYY + CHW/HOU matching, league-aware shipped-card wiring in js/markets.js
 node tests/test-movement.js  # 7d-movement + 24h-volume rendering in the SHIPPED js files (markets/predictions)
 node tests/test-links-verified.js  # links directory honesty: "Last checked" date stamp present in the hero, parses to a real non-future non-stale date (shipped links.html)
 node tests/test-legality-watch.js  # legality page regulatory-watch section: dated enforcement news, honesty framing, cross-links (shipped legality.html)

@@ -56,8 +56,8 @@ assert(snap.games.every(function(g){ return Array.isArray(g.markets) && g.market
 
 /* ---- cache key ---- */
 var keyMatch = marketsHtml.match(/js\/markets\.js\?v=([\d.]+)/);
-assert(keyMatch && keyMatch[1] === "1.93.0",
-  "markets.html cache key for markets.js is v1.93.0 (MLB tab added this release)");
+assert(keyMatch && keyMatch[1] === "1.94.0",
+  "markets.html cache key for markets.js is v1.94.0 (disagreement card extended to the MLB tab this release)");
 
 if(failures){ console.error(failures + " failure(s)"); process.exit(1); }
 console.log("all kalshi-snapshot checks passed");

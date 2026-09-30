@@ -151,15 +151,17 @@ function vsFor(title, leagueKey, dir){
   return window.GIU.vsHeader(dir, leagueKey, p[0], p[1]);
 }
 
-/* Cross-book edge: Polymarket vs Kalshi on the same NFL game-winners.
+/* Cross-book edge: Polymarket vs Kalshi on the same game-winners.
    Fetched separately after the main board renders, so a snapshot hiccup
-   never blocks the live prices. Only used on the NFL tab (the Kalshi
-   snapshot is NFL-only). Returns "" when there is nothing honest to show. */
-function disagreeCard(games, snap, dir){
+   never blocks the live prices. Used on the NFL and MLB tabs (each reads
+   its own Kalshi snapshot). Returns "" when there is nothing honest to show. */
+function disagreeCard(games, snap, dir, league){
+  league = league || "nfl";
+  var leagueNoun = league === "mlb" ? "MLB postseason games" : "NFL games";
   var D = window.Disagree;
   if(!D || !snap) return "";
   var evs = games.map(function(g){ return g.ev; });
-  var mtchs = D.matches(evs, (snap.games||[]), dir, window.GIU.teamFind);
+  var mtchs = D.matches(evs, (snap.games||[]), dir, window.GIU.teamFind, league);
   if(!mtchs.length) return "";
   var dis = D.disagreements(mtchs, 3);
   /* The card compares a LIVE Polymarket price against a FROZEN Kalshi price,
@@ -178,11 +180,11 @@ function disagreeCard(games, snap, dir){
   var body;
   if(!dis.length){
     body = '<div class="disagree-agree">✓ Polymarket and Kalshi agree within 3¢ on all '+
-      mtchs.length+' matched NFL games right now.</div>';
+      mtchs.length+' matched '+leagueNoun+' right now.</div>';
   } else {
     body = '<div class="disagree-rows">'+dis.map(function(x){
-      var ta = window.GIU.teamFind(dir, "nfl", x.abbrA),
-          tb = window.GIU.teamFind(dir, "nfl", x.abbrB);
+      var ta = window.GIU.teamFind(dir, league, x.abbrA),
+          tb = window.GIU.teamFind(dir, league, x.abbrB);
       var cls = x.delta > 0 ? "mv-up" : "mv-dn";
       var who = (x.delta > 0 ? "Polymarket" : "Kalshi") + " prices " + x.abbrA +
         " higher by " + Math.abs(x.delta) + " cents";
@@ -260,15 +262,17 @@ function load(my, silent){
         body+
         '<div class="game-meta"><a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">Trade on Polymarket →</a></div></div>';
     }).join("");
-    /* ---- cross-book disagreement (NFL tab only) ----
-       The Kalshi snapshot prices the same NFL game-winners; when the two
-       books differ by 3c+ on a side, that gap is a real edge signal. This
-       fetch rides along after the main board renders — a snapshot hiccup
-       hides the strip, never the live prices. */
-    if(lkey === "nfl" && games.length && window.Disagree){
-      GIU.fetchJSON("data/kalshi-nfl.json").then(function(snap){
+    /* ---- cross-book disagreement (NFL and MLB tabs) ----
+       Each tab's Kalshi snapshot prices the same game-winners as Polymarket;
+       when the two books differ by 3c+ on a side, that gap is a real edge
+       signal. This fetch rides along after the main board renders — a
+       snapshot hiccup hides the strip, never the live prices. */
+    var kalFile = lkey === "nfl" ? "data/kalshi-nfl.json"
+                : (lkey === "mlb" ? "data/kalshi-mlb.json" : null);
+    if(kalFile && games.length && window.Disagree){
+      GIU.fetchJSON(kalFile).then(function(snap){
         if(my !== tabSeq) return; /* user moved to another tab meanwhile */
-        var html = disagreeCard(games, snap, dir);
+        var html = disagreeCard(games, snap, dir, lkey);
         if(html) box.insertAdjacentHTML("afterbegin", html);
       }).catch(function(){ /* optional strip — failure shows nothing, not junk */ });
     }
