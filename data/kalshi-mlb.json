@@ -1,39 +1,8 @@
 {
- "updated_at": "2026-09-30T20:42:49Z",
+ "updated_at": "2026-09-30T21:38:02Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
-  {
-   "event_ticker": "KXMLBGAME-26SEP301400PHIATL",
-   "title": "Game 2: Philadelphia vs Atlanta",
-   "sub_title": "PHI vs ATL (Sep 30)",
-   "markets": [
-    {
-     "ticker": "KXMLBGAME-26SEP301400PHIATL-ATL",
-     "title": "Atlanta wins",
-     "kind": "winner",
-     "team": "Atlanta",
-     "yes_bid": 54,
-     "yes_ask": 55,
-     "last": 55,
-     "volume": "5549336.85",
-     "volume_24h": "5495388.59",
-     "close_time": "2026-10-03T18:00:00Z"
-    },
-    {
-     "ticker": "KXMLBGAME-26SEP301400PHIATL-PHI",
-     "title": "Philadelphia wins",
-     "kind": "winner",
-     "team": "Philadelphia",
-     "yes_bid": 45,
-     "yes_ask": 46,
-     "last": 46,
-     "volume": "7457169.65",
-     "volume_24h": "7331279.81",
-     "close_time": "2026-10-03T18:00:00Z"
-    }
-   ]
-  },
   {
    "event_ticker": "KXMLBGAME-26SEP301700CWSHOU",
    "title": "Game 2: Chicago WS vs Houston",
@@ -44,11 +13,11 @@
      "title": "Chicago WS wins",
      "kind": "winner",
      "team": "Chicago WS",
-     "yes_bid": 41,
-     "yes_ask": 42,
-     "last": 42,
-     "volume": "524799.07",
-     "volume_24h": "515524.40",
+     "yes_bid": 71,
+     "yes_ask": 72,
+     "last": 72,
+     "volume": "2083055.13",
+     "volume_24h": "1875202.52",
      "close_time": "2026-10-03T21:00:00Z"
     },
     {
@@ -56,11 +25,11 @@
      "title": "Houston wins",
      "kind": "winner",
      "team": "Houston",
-     "yes_bid": 58,
-     "yes_ask": 59,
-     "last": 59,
-     "volume": "948695.18",
-     "volume_24h": "918947.96",
+     "yes_bid": 28,
+     "yes_ask": 29,
+     "last": 29,
+     "volume": "3214834.06",
+     "volume_24h": "2671796.70",
      "close_time": "2026-10-03T21:00:00Z"
     }
    ]
@@ -78,8 +47,8 @@
      "yes_bid": 44,
      "yes_ask": 45,
      "last": 45,
-     "volume": "273119.59",
-     "volume_24h": "244872.56",
+     "volume": "385361.43",
+     "volume_24h": "322996.94",
      "close_time": "2026-10-04T00:00:00Z"
     },
     {
@@ -89,9 +58,9 @@
      "team": "New York Y",
      "yes_bid": 55,
      "yes_ask": 56,
-     "last": 56,
-     "volume": "782793.62",
-     "volume_24h": "754324.60",
+     "last": 55,
+     "volume": "1042959.22",
+     "volume_24h": "975571.28",
      "close_time": "2026-10-04T00:00:00Z"
     }
    ]
@@ -109,8 +78,8 @@
      "yes_bid": 43,
      "yes_ask": 44,
      "last": 44,
-     "volume": "260912.95",
-     "volume_24h": "249581.31",
+     "volume": "311874.89",
+     "volume_24h": "281624.15",
      "close_time": "2026-10-04T02:00:00Z"
     },
     {
@@ -121,8 +90,8 @@
      "yes_bid": 56,
      "yes_ask": 57,
      "last": 57,
-     "volume": "703836.70",
-     "volume_24h": "661487.06",
+     "volume": "851687.22",
+     "volume_24h": "798731.68",
      "close_time": "2026-10-04T02:00:00Z"
     }
    ]
