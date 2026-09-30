@@ -25,6 +25,10 @@ function makeEl(id){
     addEventListener: (t,h) => { handlers[t] = handlers[t] || []; handlers[t].push(h); },
     fire: (t, ev) => { (handlers[t] || []).forEach(h => h(ev || {})); },
     closest: () => null,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    getBoundingClientRect: () => ({left:0, right:0, top:0, bottom:0, width:0, height:0}),
+    scrollLeft: 0,
     focus: () => { focused = id; },
     style: {},
   };

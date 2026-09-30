@@ -134,6 +134,7 @@ node tests/test-backgrounds.js  # sports-imagery backgrounds: static checks for 
 node tests/test-feedpill-mobile.js  # feed-pill mobile: layout doesn't overflow on small viewports
 node tests/test-hero-gutter.js    # hero gutter: every .hero-inner padding keeps the 22px side gutter (no edge-glued hero copy on mobile)
 node tests/test-scores-daynav.js  # scores day-nav: the ← Today → + date row wraps on phones (no page-level horizontal scroll at 390px)
+node tests/test-header-nav-scroll.js  # desktop header: the 15-link nav flexes + scrolls internally (no page-level horizontal scroll at any desktop width), active tab scrolled into view, style.css/site.js keys pinned
 node tests/test-arbs.js       # cross-book arbitrage logic (stake splits, moneyline/spread/total pairing, same-book exclusion, 3-way EPL)
 node tests/test-arbs-dom.js   # Sure bets strip wiring in shipped odds.js (strip render, game flags, quiet-when-empty)
 node tests/test-fairline.js    # no-vig fair moneyline math (vig removal, orientation, hold, null paths)

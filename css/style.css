@@ -80,7 +80,7 @@ section.block{padding:56px 0}
   border-bottom:1px solid var(--line-soft);
 }
 .header-inner{display:flex;align-items:center;gap:18px;height:66px}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:850;font-size:1.25rem;letter-spacing:-.02em;color:var(--text)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:850;font-size:1.25rem;letter-spacing:-.02em;color:var(--text);flex:none}
 .brand:hover{color:var(--text)}
 .brand-mark{
   width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;
@@ -88,15 +88,24 @@ section.block{padding:56px 0}
   font-weight:900;font-size:1.05rem;box-shadow:0 4px 18px -4px var(--gold-glow);
 }
 .brand em{font-style:normal;color:var(--gold)}
-.main-nav{display:flex;gap:2px;margin-left:auto;align-items:center}
+/* Desktop nav scrolls internally instead of forcing page-level horizontal scroll:
+   15 links (~1071px) + brand + feed pill can never fit the 1200px wrap, so every
+   desktop viewport used to get a horizontal scrollbar (caught 2026-09-30 at
+   1280px: nav right edge 1302, pill 1408-1516). The nav now takes the free space
+   between brand and pill, keeps the primary links (Home/Odds/Markets) visible,
+   and scrolls the active tab into view on load (site.js); the pill never shrinks. */
+.main-nav{display:flex;gap:2px;align-items:center;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.main-nav::-webkit-scrollbar{height:6px}
+.main-nav::-webkit-scrollbar-track{background:transparent}
+.main-nav::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 .main-nav a{
-  color:var(--muted);font-size:.86rem;font-weight:600;padding:8px 11px;border-radius:8px;white-space:nowrap;
+  color:var(--muted);font-size:.86rem;font-weight:600;padding:8px 11px;border-radius:8px;white-space:nowrap;flex:none;
 }
 .main-nav a:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .main-nav a.active{color:var(--gold);background:rgba(240,180,41,.1)}
 .feed-pill{
   display:inline-flex;align-items:center;gap:7px;font-size:.72rem;font-weight:700;letter-spacing:.08em;
-  padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:8px;white-space:nowrap;
+  padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:auto;white-space:nowrap;flex:none;
 }
 .feed-dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
 .feed-pill.ok .feed-dot{background:var(--green);box-shadow:0 0 10px var(--green-glow);animation:pulse 2s infinite}

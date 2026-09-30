@@ -241,6 +241,15 @@ function mount(){
         nav.classList.remove("open"); t.setAttribute("aria-expanded","false"); t.focus();
       }
     });
+    /* The desktop nav scrolls internally (15 links exceed the 1200px wrap):
+       keep the active tab visible without moving the page. No-op on mobile
+       (dropdown is display:none → all rects zero) and when everything fits. */
+    var act = nav.querySelector("a.active");
+    if(act){
+      var nr = nav.getBoundingClientRect(), ar = act.getBoundingClientRect();
+      if(ar.left < nr.left) nav.scrollLeft -= (nr.left - ar.left) + 10;
+      else if(ar.right > nr.right) nav.scrollLeft += (ar.right - nr.right) + 10;
+    }
   }
   var c = document.getElementById("copyBtc");
   if(c) c.addEventListener("click", function(){
