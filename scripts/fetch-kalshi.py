@@ -10,18 +10,27 @@ renders as the "Kalshi NFL" tab.
 Honesty rules: the snapshot carries its own updated_at; the page labels it as
 a snapshot and warns when it goes stale. Nothing here invents a price.
 
-Usage:  python3 scripts/fetch-kalshi.py
+Usage:  python3 scripts/fetch-kalshi.py [--series KXNFLGAME] [--out data/kalshi-nfl.json]
+        python3 scripts/fetch-kalshi.py --series KXMLBGAME --out data/kalshi-mlb.json
 Refresh cadence: improvement-loop runs refresh this on push whenever the
 snapshot is older than about two hours. (A scheduled GitHub Actions
 workflow is the planned long-term fix — see the goal workspace notes.)
 """
+import argparse
 import json, os, sys, time, urllib.request
 import urllib.error
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
-SERIES = "KXNFLGAME"  # NFL game-winner events; Kalshi currently lists winner (moneyline) markets only
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-OUT = os.path.join(ROOT, "data", "kalshi-nfl.json")
+
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(description="Snapshot a Kalshi game-winner series.")
+    # NFL game-winner events; Kalshi currently lists winner (moneyline) markets only
+    p.add_argument("--series", default="KXNFLGAME",
+                   help="Kalshi series ticker (default KXNFLGAME)")
+    p.add_argument("--out", default=os.path.join(ROOT, "data", "kalshi-nfl.json"),
+                   help="output snapshot path (default data/kalshi-nfl.json)")
+    return p.parse_args(argv)
 
 def get(url, retries=4):
     # GET with retries for transient Kalshi throttling (HTTP 429) and
@@ -58,10 +67,10 @@ def pct(s):
     except (TypeError, ValueError):
         return None
 
-def fetch_events():
+def fetch_events(series):
     evs, cursor = [], None
     while True:
-        url = BASE + "/events?status=open&limit=200&series_ticker=" + SERIES
+        url = BASE + "/events?status=open&limit=200&series_ticker=" + series
         if cursor:
             url += "&cursor=" + cursor
         d = get(url)
@@ -90,9 +99,11 @@ def team_from_title(title):
         return t[:-5].strip(), "winner"
     return t or "Team", "other"
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
+    SERIES, OUT = args.series, args.out
     try:
-        events = fetch_events()
+        events = fetch_events(SERIES)
     except Exception as e:
         print("ERROR: could not list Kalshi events: %s" % e, file=sys.stderr)
         sys.exit(1)

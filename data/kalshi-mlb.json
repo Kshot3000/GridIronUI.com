@@ -1,0 +1,193 @@
+{
+ "updated_at": "2026-09-30T01:42:13Z",
+ "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
+ "series_ticker": "KXMLBGAME",
+ "games": [
+  {
+   "event_ticker": "KXMLBGAME-26SEP292000BOSNYY",
+   "title": "Game 1: Boston vs New York Y",
+   "sub_title": "BOS vs NYY (Sep 29)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26SEP292000BOSNYY-BOS",
+     "title": "Boston wins",
+     "kind": "winner",
+     "team": "Boston",
+     "yes_bid": 29,
+     "yes_ask": 31,
+     "last": 31,
+     "volume": "4103838.89",
+     "volume_24h": "3696332.89",
+     "close_time": "2026-10-03T00:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26SEP292000BOSNYY-NYY",
+     "title": "New York Y wins",
+     "kind": "winner",
+     "team": "New York Y",
+     "yes_bid": 70,
+     "yes_ask": 71,
+     "last": 71,
+     "volume": "5137592.87",
+     "volume_24h": "4364527.95",
+     "close_time": "2026-10-03T00:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26SEP292200CHCSD",
+   "title": "Game 1: Chicago C vs San Diego",
+   "sub_title": "CHC vs SD (Sep 29)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26SEP292200CHCSD-CHC",
+     "title": "Chicago C wins",
+     "kind": "winner",
+     "team": "Chicago C",
+     "yes_bid": 43,
+     "yes_ask": 44,
+     "last": 44,
+     "volume": "732111.57",
+     "volume_24h": "579977.77",
+     "close_time": "2026-10-03T02:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26SEP292200CHCSD-SD",
+     "title": "San Diego wins",
+     "kind": "winner",
+     "team": "San Diego",
+     "yes_bid": 55,
+     "yes_ask": 56,
+     "last": 56,
+     "volume": "1097301.29",
+     "volume_24h": "945095.13",
+     "close_time": "2026-10-03T02:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26SEP301400PHIATL",
+   "title": "Game 2: Philadelphia vs Atlanta",
+   "sub_title": "PHI vs ATL (Sep 30)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26SEP301400PHIATL-ATL",
+     "title": "Atlanta wins",
+     "kind": "winner",
+     "team": "Atlanta",
+     "yes_bid": 48,
+     "yes_ask": 49,
+     "last": 49,
+     "volume": "57289.23",
+     "volume_24h": "54224.93",
+     "close_time": "2026-10-03T18:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26SEP301400PHIATL-PHI",
+     "title": "Philadelphia wins",
+     "kind": "winner",
+     "team": "Philadelphia",
+     "yes_bid": 51,
+     "yes_ask": 52,
+     "last": 51,
+     "volume": "17996.25",
+     "volume_24h": "17380.78",
+     "close_time": "2026-10-03T18:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26SEP301700CWSHOU",
+   "title": "Game 2: Chicago WS vs Houston",
+   "sub_title": "CWS vs HOU (Sep 30)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26SEP301700CWSHOU-CWS",
+     "title": "Chicago WS wins",
+     "kind": "winner",
+     "team": "Chicago WS",
+     "yes_bid": 40,
+     "yes_ask": 41,
+     "last": 41,
+     "volume": "39626.37",
+     "volume_24h": "33271.29",
+     "close_time": "2026-10-03T21:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26SEP301700CWSHOU-HOU",
+     "title": "Houston wins",
+     "kind": "winner",
+     "team": "Houston",
+     "yes_bid": 59,
+     "yes_ask": 60,
+     "last": 60,
+     "volume": "39819.97",
+     "volume_24h": "37755.61",
+     "close_time": "2026-10-03T21:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26SEP302000BOSNYY",
+   "title": "Game 2: Boston vs New York Y",
+   "sub_title": "BOS vs NYY (Sep 30)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26SEP302000BOSNYY-BOS",
+     "title": "Boston wins",
+     "kind": "winner",
+     "team": "Boston",
+     "yes_bid": 46,
+     "yes_ask": 47,
+     "last": 47,
+     "volume": "33569.44",
+     "volume_24h": "12813.22",
+     "close_time": "2026-10-04T00:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26SEP302000BOSNYY-NYY",
+     "title": "New York Y wins",
+     "kind": "winner",
+     "team": "New York Y",
+     "yes_bid": 52,
+     "yes_ask": 53,
+     "last": 52,
+     "volume": "36155.23",
+     "volume_24h": "19067.73",
+     "close_time": "2026-10-04T00:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26SEP302200CHCSD",
+   "title": "Game 2: Chicago C vs San Diego",
+   "sub_title": "CHC vs SD (Sep 30)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26SEP302200CHCSD-CHC",
+     "title": "Chicago C wins",
+     "kind": "winner",
+     "team": "Chicago C",
+     "yes_bid": 43,
+     "yes_ask": 44,
+     "last": 44,
+     "volume": "16656.65",
+     "volume_24h": "7872.44",
+     "close_time": "2026-10-04T02:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26SEP302200CHCSD-SD",
+     "title": "San Diego wins",
+     "kind": "winner",
+     "team": "San Diego",
+     "yes_bid": 56,
+     "yes_ask": 57,
+     "last": 57,
+     "volume": "196101.92",
+     "volume_24h": "193434.97",
+     "close_time": "2026-10-04T02:00:00Z"
+    }
+   ]
+  }
+ ]
+}

@@ -96,6 +96,7 @@ node tests/test-winprob-dom.js  # win-prob canvas paint + scores.js paint wiring
 node tests/test-markets-live.js  # markets page live auto-refresh (90s Polymarket tick on likely-live games, 5-min Kalshi snapshot tick, hidden-tab skip, pause/resume, no stacking)
 node tests/test-disagree-snapshot.js  # cross-book-edge card: snapshot age named in the note, Kalshi figures tagged "snapshot" + frozen-at-snapshot tooltip (shipped js/markets.js)
 node tests/test-disagree.js  # disagree-logic unit tests: Polymarket moneyline vs Kalshi snapshot pairing, gap flags
+node tests/test-disagree-mlb.js  # disagree-logic MLB series disambiguation: Game 1/Game 2 nearest-day matching, league arg, backward-compat default
 node tests/test-movement.js  # 7d-movement + 24h-volume rendering in the SHIPPED js files (markets/predictions)
 node tests/test-links-verified.js  # links directory honesty: "Last checked" date stamp present in the hero, parses to a real non-future non-stale date (shipped links.html)
 node tests/test-legality-watch.js  # legality page regulatory-watch section: dated enforcement news, honesty framing, cross-links (shipped legality.html)
@@ -137,6 +138,7 @@ node tests/test-odds-pm.js     # market-check logic (Polymarket live moneylines,
 node tests/test-odds-pm-dom.js # market-check wiring in shipped odds.js (hidden slot, live-price reveal, pinned silence, no NBA fetches)
 node tests/test-predictions-kalshi-dom.js  # Kalshi row wiring in shipped predictions.js (NFL snapshot fetch, matched-game row, gap chip, snapshot-failure degrade)
 node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific cadence promises, loop refresh rule, snapshot shape, markets.js cache key)
+node tests/test-kalshi-mlb-snapshot.js # Kalshi MLB postseason snapshot honesty (KXMLBGAME series, 2-winner-markets shape, fetcher --series/--out args, markets + predictions wiring)
 node tests/test-ev.js        # expected-value math (fair price -> zero EV, +EV/-EV cases, break-even, garbage-in throws)
 node tests/test-ev-dom.js    # EV calculator wiring in shipped tools.js (verdicts, dollar/edge math, formats, default stake, errors)
 node tests/test-middle.js      # middling math (both-win payout, split outcomes, worst case, garbage-in throws)
@@ -154,15 +156,16 @@ Team colors/logos are stable, so this is refreshed rarely:
 python3 scripts/fetch-teams.py    # writes data/teams.json (NFL/NBA/MLB/NHL/EPL)
 ```
 
-### Kalshi NFL snapshot
+### Kalshi NFL + MLB snapshots
 
 Kalshi's public API rejects browser cross-origin requests, so the Markets
-page's "Kalshi · NFL" tab renders a server-side snapshot instead of a live
-feed. Refresh it on every push — loop runs do this when the snapshot is
-older than about two hours:
+page's "Kalshi · NFL" and "Kalshi · MLB" (postseason) tabs render server-side
+snapshots instead of a live feed. Refresh both on every push — loop runs do
+this when a snapshot is older than about two hours:
 
 ```bash
-python3 scripts/fetch-kalshi.py   # writes data/kalshi-nfl.json (timestamped)
+python3 scripts/fetch-kalshi.py                                    # writes data/kalshi-nfl.json (timestamped)
+python3 scripts/fetch-kalshi.py --series KXMLBGAME --out data/kalshi-mlb.json  # writes data/kalshi-mlb.json
 ```
 
 The page labels the tab as a snapshot, shows when it was captured, and warns

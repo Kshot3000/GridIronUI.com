@@ -6,6 +6,9 @@
 var $ = function(id){ return document.getElementById(id); };
 var LEAGUES = [["NFL","nfl"],["NBA","nba"],["MLB","mlb"],["NHL","nhl"],["EPL","epl"]];
 var curKey = "nfl";
+/* Kalshi snapshot file per league: NFL game-winners + MLB postseason
+   game-winners, both rebuilt server-side by scripts/fetch-kalshi.py. */
+var SNAP = {nfl: "data/kalshi-nfl.json", mlb: "data/kalshi-mlb.json"};
 /* Render generation: every tab click bumps tabSeq, and each async callback
    only touches the DOM if its generation is still current. Without this, a
    slow response for one league can overwrite another league's cards the user
@@ -103,15 +106,16 @@ function load(key, my, silent){
       GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20"),
       GIU.teamDir()
     ];
-    /* NFL only: Kalshi's snapshot covers NFL game-winner markets. Fetched
-       alongside everything else; a slow or failed snapshot resolves to null
-       and simply means no Kalshi rows — the Polymarket cards never wait. */
-    if(key === "nfl") reqs.push(GIU.fetchJSON("data/kalshi-nfl.json").catch(function(){ return null; }));
+    /* Kalshi snapshots cover NFL and MLB postseason game-winner markets.
+       Fetched alongside everything else; a slow or failed snapshot resolves
+       to null and simply means no Kalshi rows — the Polymarket cards never
+       wait. */
+    if(SNAP[key]) reqs.push(GIU.fetchJSON(SNAP[key]).catch(function(){ return null; }));
     return Promise.all(reqs);
   }).then(function(x){
     if(my !== tabSeq) return; /* user moved to another league meanwhile */
     var d = x[0], dir = x[1];
-    var snap = (key === "nfl") ? (x[2] || null) : null;
+    var snap = SNAP[key] ? (x[2] || null) : null;
     var evs = Array.isArray(d) ? d : (d.events||[]);
     var rows = [];
     evs.forEach(function(ev){
@@ -128,14 +132,14 @@ function load(key, my, silent){
     });
     rows.sort(function(a,b){ return startOf(a.ev)-startOf(b.ev); });
     rows = rows.slice(0,10);
-    /* Kalshi cross-check (NFL only): match each Polymarket game to the
-       snapshot via the tested Disagree.matches; unmatchable games are
+    /* Kalshi cross-check (NFL + MLB postseason): match each Polymarket game
+       to the snapshot via the tested Disagree.matches; unmatchable games are
        dropped, never guessed. Only 2-way rows get a row — a clean
        side-by-side comparison. */
     if(snap && snap.games && window.Disagree && window.Kalshi){
       rows.forEach(function(r){
         if(r.mls.length !== 1) return;
-        var m = window.Disagree.matches([r.ev], snap.games, dir, GIU.teamFind)[0];
+        var m = window.Disagree.matches([r.ev], snap.games, dir, GIU.teamFind, key)[0];
         if(m) r.km = {nameA: m.nameA, aPct: m.kalshiA, nameB: m.nameB,
                       bPct: m.kalshiB, updatedAt: snap.updated_at, pmA: m.pmA};
       });
