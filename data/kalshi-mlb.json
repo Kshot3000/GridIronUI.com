@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-09-30T10:44:31Z",
+ "updated_at": "2026-09-30T12:43:36Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -16,8 +16,8 @@
      "yes_bid": 49,
      "yes_ask": 50,
      "last": 50,
-     "volume": "194359.05",
-     "volume_24h": "188525.49",
+     "volume": "238542.52",
+     "volume_24h": "231336.03",
      "close_time": "2026-10-03T18:00:00Z"
     },
     {
@@ -28,8 +28,8 @@
      "yes_bid": 51,
      "yes_ask": 52,
      "last": 52,
-     "volume": "220539.89",
-     "volume_24h": "218856.14",
+     "volume": "282548.58",
+     "volume_24h": "281162.27",
      "close_time": "2026-10-03T18:00:00Z"
     }
    ]
@@ -47,8 +47,8 @@
      "yes_bid": 41,
      "yes_ask": 42,
      "last": 42,
-     "volume": "139133.76",
-     "volume_24h": "137031.39",
+     "volume": "159558.68",
+     "volume_24h": "157447.00",
      "close_time": "2026-10-03T21:00:00Z"
     },
     {
@@ -59,8 +59,8 @@
      "yes_bid": 58,
      "yes_ask": 59,
      "last": 59,
-     "volume": "86010.28",
-     "volume_24h": "82403.49",
+     "volume": "103094.24",
+     "volume_24h": "97935.80",
      "close_time": "2026-10-03T21:00:00Z"
     }
    ]
@@ -78,8 +78,8 @@
      "yes_bid": 44,
      "yes_ask": 45,
      "last": 45,
-     "volume": "135278.22",
-     "volume_24h": "112968.34",
+     "volume": "141854.20",
+     "volume_24h": "120529.13",
      "close_time": "2026-10-04T00:00:00Z"
     },
     {
@@ -90,8 +90,8 @@
      "yes_bid": 55,
      "yes_ask": 56,
      "last": 56,
-     "volume": "272819.00",
-     "volume_24h": "246977.73",
+     "volume": "293504.59",
+     "volume_24h": "267535.78",
      "close_time": "2026-10-04T00:00:00Z"
     }
    ]
@@ -109,8 +109,8 @@
      "yes_bid": 43,
      "yes_ask": 44,
      "last": 44,
-     "volume": "75819.43",
-     "volume_24h": "66638.32",
+     "volume": "80507.16",
+     "volume_24h": "71498.62",
      "close_time": "2026-10-04T02:00:00Z"
     },
     {
@@ -121,8 +121,8 @@
      "yes_bid": 56,
      "yes_ask": 57,
      "last": 57,
-     "volume": "304024.14",
-     "volume_24h": "293342.36",
+     "volume": "318732.79",
+     "volume_24h": "306381.84",
      "close_time": "2026-10-04T02:00:00Z"
     }
    ]

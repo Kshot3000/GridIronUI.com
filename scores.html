@@ -21,7 +21,7 @@
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=1.102.0">
+<link rel="stylesheet" href="css/style.css?v=1.103.0">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body data-feedcheck>
@@ -41,11 +41,11 @@
 <div class="wrap" style="margin-top:30px">
   <div class="section-head">
     <div class="tabs" id="leagueTabs" style="margin:0"></div>
-    <div style="display:flex;gap:8px;align-items:center">
+    <div class="day-nav">
       <button class="btn btn-ghost btn-sm" id="prevDay">←</button>
       <button class="btn btn-ghost btn-sm" id="todayBtn">Today</button>
       <button class="btn btn-ghost btn-sm" id="nextDay">→</button>
-      <span id="dayLabel" style="font-size:.85rem;color:var(--muted);min-width:180px"></span>
+      <span id="dayLabel"></span>
       <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
       <button class="btn btn-ghost btn-sm" id="pauseBtn" style="display:none" aria-pressed="false">⏸ Pause live</button>
     </div>

@@ -61,6 +61,18 @@ section.block{padding:56px 0}
 .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
 .section-head h2{margin:0}
 
+/* ---------- scores day-nav (v1.103.0) ----------
+   The day-navigation row (← Today → + date label + live status) was a
+   no-wrap flex row; on phones the 180px-min-width date label pushed the
+   whole page 13px past 390px (page-level horizontal scroll, found by
+   headless QA). The row now wraps, and on ≤640px the label takes its own
+   full-width line below the buttons. Desktop layout unchanged. */
+.day-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.day-nav #dayLabel{font-size:.85rem;color:var(--muted);min-width:180px}
+@media(max-width:640px){
+  .day-nav #dayLabel{flex:1 1 100%;min-width:0}
+}
+
 /* ---------- header ---------- */
 .site-header{
   position:sticky;top:0;z-index:60;

@@ -78,7 +78,7 @@ ok("meta description present", /<meta name="description" content="[^"]{50,}"/.te
 ok("new guide uses current site.js key",
   guide.indexOf("../js/site.js?v=1.99.0") !== -1);
 ok("new guide uses current style.css key",
-  guide.indexOf("../css/style.css?v=1.102.0") !== -1);
+  guide.indexOf("../css/style.css?v=1.103.0") !== -1);
 ok("footer branding via site.js (donation/21+/helpline live in footer)",
   guide.indexOf('id="site-footer"') !== -1);
 
