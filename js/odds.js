@@ -342,8 +342,7 @@ function maybePmCheck(events, mySeq){
   if(sport !== "americanfootball_nfl" || !PMK || !events || !events.length) return;
   Promise.all([pmSeriesId(), GIU.teamDir()]).then(function(r){
     if(mySeq !== renderSeq || sport !== "americanfootball_nfl" || !r[0]) return;
-    return GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+r[0]+
-      "&active=true&closed=false&limit=20").catch(function(){ return []; })
+    return GIU.fetchJSON(GIU.pmEventsUrl(r[0])).catch(function(){ return []; })
       .then(function(d){
         if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return; /* board moved on */
         var pmEvents = Array.isArray(d) ? d : (d.events||[]);

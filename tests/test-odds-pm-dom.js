@@ -129,6 +129,7 @@ var sandbox = {
   alert: function(){},
   GIU: {
     fetchJSON: fetchJSONStub,
+    pmEventsUrl: function(sid, limit){ return "https://gamma-api.polymarket.com/events?series_id="+encodeURIComponent(sid)+"&active=true&closed=false&limit="+(limit||30)+"&order=startTime&ascending=true"; },
     teamDir: function(){ return Promise.resolve(DIR); },
     teamFind: teamFindStub,
     vsHeader: function(){ return ""; },

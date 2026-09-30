@@ -97,6 +97,7 @@ var sandbox = {
   window: {},
   GIU: {
     fetchJSON: fetchStub,
+    pmEventsUrl: function(sid, limit){ return "https://gamma-api.polymarket.com/events?series_id="+encodeURIComponent(sid)+"&active=true&closed=false&limit="+(limit||30)+"&order=startTime&ascending=true"; },
     teamDir: function(){ return Promise.resolve({}); },
     vsHeader: function(){ return ""; },
     esc: function(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); },

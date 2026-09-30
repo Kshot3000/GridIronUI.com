@@ -526,6 +526,20 @@ window.GIU.fetchJSON = function(url, ms){
     }).then(res).catch(rej);
   });
 };
+/* Polymarket game-event feed URL. Orders by TRUE game time (startTime),
+   soonest first — never by startDate, which is the event's CREATION date,
+   not the game date (an Oct 4 NFL game created Aug 25 carries
+   startDate=2026-08-25). Polymarket's series list events oldest-created
+   first by default; querying without this ordering returns stale preseason
+   events whose markets are all closed, so every Polymarket tab silently
+   renders empty — exactly what happened to the NFL tab for the first
+   three weeks of the 2026 regular season (found 2026-09-30). */
+window.GIU.pmEventsUrl = function(seriesId, limit){
+  return "https://gamma-api.polymarket.com/events?series_id="+
+    encodeURIComponent(seriesId)+
+    "&active=true&closed=false&limit="+(limit||30)+
+    "&order=startTime&ascending=true";
+};
 window.GIU.esc = function(s){
   return String(s==null?"":s).replace(/[&<>"']/g, function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});
 };

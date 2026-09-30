@@ -76,7 +76,7 @@ ok("canonical points at custom domain",
   guide.indexOf('<link rel="canonical" href="https://gridironui.xyz/guides/line-movement.html">') !== -1);
 ok("meta description present", /<meta name="description" content="[^"]{50,}"/.test(guide));
 ok("new guide uses current site.js key",
-  guide.indexOf("../js/site.js?v=1.85.0") !== -1);
+  guide.indexOf("../js/site.js?v=1.99.0") !== -1);
 ok("new guide uses current style.css key",
   guide.indexOf("../css/style.css?v=1.70.0") !== -1);
 ok("footer branding via site.js (donation/21+/helpline live in footer)",

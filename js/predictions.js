@@ -103,7 +103,7 @@ function load(key, my, silent){
   if(!silent) skel();
   seriesFor(key).then(function(sid){
     var reqs = [
-      GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20"),
+      GIU.fetchJSON(GIU.pmEventsUrl(sid)),
       GIU.teamDir()
     ];
     /* Kalshi snapshots cover NFL and MLB postseason game-winner markets.

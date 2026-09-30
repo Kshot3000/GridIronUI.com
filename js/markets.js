@@ -215,7 +215,7 @@ function load(my, silent){
   var lname = LEAGUES[cur][0], lkey = LEAGUES[cur][1];
   seriesFor(lkey).then(function(sid){
     return Promise.all([
-      GIU.fetchJSON("https://gamma-api.polymarket.com/events?series_id="+sid+"&active=true&closed=false&limit=20"),
+      GIU.fetchJSON(GIU.pmEventsUrl(sid)),
       GIU.teamDir()
     ]);
   }).then(function(x){

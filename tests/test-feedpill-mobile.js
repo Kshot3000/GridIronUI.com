@@ -1,4 +1,4 @@
-/* GridIronUI feed-pill mobile test (v1.85.0).
+/* GridIronUI feed-pill mobile test (v1.99.0).
    Regression guard for the mobile header-overflow bug: the feed-health pill
    in the sticky header rendered its full text ("ALL FEEDS LIVE" /
    "FEEDS DEGRADED (0/3)") with white-space:nowrap, pushing .header-inner
@@ -55,7 +55,7 @@ ok("feed dot is aria-hidden", /class="feed-dot"[^>]*aria-hidden="true"/.test(sit
 ok("checkFeeds sets aria-label from status text",
    /pill\.setAttribute\("aria-label",\s*"Live data feed status: "\s*\+\s*txt\.textContent\)/.test(site));
 
-/* 5. every shipped page carries the current keys (style.css 1.70.0, site.js 1.85.0 —
+/* 5. every shipped page carries the current keys (style.css 1.70.0, site.js 1.99.0 —
    bumped when the tab-list accessibility enhancement landed in site.js) */
 function htmlFiles(dir, out){
   out = out || [];
@@ -73,9 +73,9 @@ htmlFiles(ROOT).forEach(function(h){
   const cssKeys = [...src.matchAll(/style\.css\?v=([0-9.]+)/g)].map(x => x[1]);
   const jsKeys = [...src.matchAll(/js\/site\.js\?v=([0-9.]+)/g)].map(x => x[1]);
   if(cssKeys.some(k => k !== "1.70.0")) bad.push(path.relative(ROOT, h) + " css=" + cssKeys.join(","));
-  if(jsKeys.some(k => k !== "1.85.0")) bad.push(path.relative(ROOT, h) + " site.js=" + jsKeys.join(","));
+  if(jsKeys.some(k => k !== "1.99.0")) bad.push(path.relative(ROOT, h) + " site.js=" + jsKeys.join(","));
 });
-ok("all pages pin style.css at 1.70.0 + site.js at 1.85.0", bad.length === 0, bad.slice(0, 5).join(" | "));
+ok("all pages pin style.css at 1.70.0 + site.js at 1.99.0", bad.length === 0, bad.slice(0, 5).join(" | "));
 
 if(fails){ console.error(fails + " FAILURES"); process.exit(1); }
 console.log("feed-pill mobile test green");
