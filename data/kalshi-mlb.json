@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-09-30T19:40:52Z",
+ "updated_at": "2026-09-30T20:42:49Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -13,11 +13,11 @@
      "title": "Atlanta wins",
      "kind": "winner",
      "team": "Atlanta",
-     "yes_bid": 56,
-     "yes_ask": 57,
-     "last": 57,
-     "volume": "3301803.20",
-     "volume_24h": "3290193.54",
+     "yes_bid": 54,
+     "yes_ask": 55,
+     "last": 55,
+     "volume": "5549336.85",
+     "volume_24h": "5495388.59",
      "close_time": "2026-10-03T18:00:00Z"
     },
     {
@@ -25,11 +25,11 @@
      "title": "Philadelphia wins",
      "kind": "winner",
      "team": "Philadelphia",
-     "yes_bid": 43,
-     "yes_ask": 45,
-     "last": 43,
-     "volume": "4332813.63",
-     "volume_24h": "4324343.53",
+     "yes_bid": 45,
+     "yes_ask": 46,
+     "last": 46,
+     "volume": "7457169.65",
+     "volume_24h": "7331279.81",
      "close_time": "2026-10-03T18:00:00Z"
     }
    ]
@@ -47,8 +47,8 @@
      "yes_bid": 41,
      "yes_ask": 42,
      "last": 42,
-     "volume": "380508.95",
-     "volume_24h": "375265.96",
+     "volume": "524799.07",
+     "volume_24h": "515524.40",
      "close_time": "2026-10-03T21:00:00Z"
     },
     {
@@ -59,8 +59,8 @@
      "yes_bid": 58,
      "yes_ask": 59,
      "last": 59,
-     "volume": "465716.74",
-     "volume_24h": "456827.20",
+     "volume": "948695.18",
+     "volume_24h": "918947.96",
      "close_time": "2026-10-03T21:00:00Z"
     }
    ]
@@ -78,8 +78,8 @@
      "yes_bid": 44,
      "yes_ask": 45,
      "last": 45,
-     "volume": "257365.28",
-     "volume_24h": "229628.91",
+     "volume": "273119.59",
+     "volume_24h": "244872.56",
      "close_time": "2026-10-04T00:00:00Z"
     },
     {
@@ -90,8 +90,8 @@
      "yes_bid": 55,
      "yes_ask": 56,
      "last": 56,
-     "volume": "648082.19",
-     "volume_24h": "621570.41",
+     "volume": "782793.62",
+     "volume_24h": "754324.60",
      "close_time": "2026-10-04T00:00:00Z"
     }
    ]
@@ -109,8 +109,8 @@
      "yes_bid": 43,
      "yes_ask": 44,
      "last": 44,
-     "volume": "247459.76",
-     "volume_24h": "237170.00",
+     "volume": "260912.95",
+     "volume_24h": "249581.31",
      "close_time": "2026-10-04T02:00:00Z"
     },
     {
@@ -121,8 +121,8 @@
      "yes_bid": 56,
      "yes_ask": 57,
      "last": 57,
-     "volume": "654000.73",
-     "volume_24h": "614405.52",
+     "volume": "703836.70",
+     "volume_24h": "661487.06",
      "close_time": "2026-10-04T02:00:00Z"
     }
    ]
