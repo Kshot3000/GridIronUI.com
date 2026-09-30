@@ -34,7 +34,7 @@ function parseCSV(text){
   if(cur!==""||row.length){ row.push(cur); rows.push(row); }
   return rows.filter(function(r){ return r.length>1 || (r.length===1&&r[0].trim()!==""); });
 }
-var FIELDS = [["name","Name"],["team","Team"],["opp","Opp"],["pos","Position"],["salary","Salary"],["proj","Projection"],["floor","Floor"],["ceil","Ceiling"],["own","Ownership %"]];
+var FIELDS = [["name","Name"],["team","Team"],["opp","Opp"],["pos","Position"],["salary","Salary"],["proj","Projection"],["floor","Floor"],["ceil","Ceiling"],["own","Ownership %"],["siteId","ID (DraftKings / FanDuel)"]];
 function detect(head, re){ for(var i=0;i<head.length;i++) if(re.test(head[i])) return i; return -1; }
 function autoMap(head){
   var H = head.map(function(h){ return String(h).trim(); });
@@ -57,6 +57,12 @@ function autoMap(head){
   var fdNames = fdNameCols(H);
   var nameIdx = take(/^name$/i); /* DK's clean "Name" column */
   if(nameIdx===-1) nameIdx = take(/name|player/i, /team/i);
+  /* Site player ID, kept so the export can write the sites' bulk-uploader
+     cell formats. DK ships a dedicated "ID" column (falling back to the
+     "(ID)" suffix on "Name + ID"); FD ships "Id". Header-driven, never
+     guessed — -1 means no ID source was found. */
+  var idCol = take(/^id$/i);
+  var nameIdCol = dk ? H.map(function(h){ return String(h).trim().toLowerCase(); }).indexOf("name + id") : -1;
   var m = {
     name: nameIdx,
     team: take(/^team(abbrev)?$/i),
@@ -68,8 +74,10 @@ function autoMap(head){
     floor: take(/floor/i),
     ceil: take(/ceil|max/i),
     own: take(/own/i),
+    siteId: idCol,
     dk: dk,
     fdNames: fdNames,
+    nameIdCol: nameIdCol,
     gameInfo: dk ? H.map(function(h){ return String(h).trim().toLowerCase(); }).indexOf("game info") : -1
   };
   return m;
@@ -115,6 +123,19 @@ function importName(row, head, map){
     nm = (nm+" "+col(map.fdNames[1])).trim();
   return nm;
 }
+/* Site player ID for a row — stored so the export can write the sites'
+   bulk-uploader cell formats. DK prefers its dedicated "ID" column and falls
+   back to the "(ID)" suffix on "Name + ID"; FD / generic CSVs use the mapped
+   ID column. Returns "" when there is no ID source — never guessed. */
+function importSiteId(row, map){
+  function col(i){ return i>=0 && i<row.length ? row[i].trim() : ""; }
+  var v = (map.siteId>=0) ? col(map.siteId) : "";
+  if(!v && map.dk && map.nameIdCol>=0){
+    var m = col(map.nameIdCol).match(/\((\d+)\)\s*$/);
+    if(m) v = m[1];
+  }
+  return v;
+}
 var importRows = null, importHead = null, importMap = null;
 $("csvFile").addEventListener("change", function(){
   var f = this.files[0]; if(!f) return;
@@ -151,11 +172,17 @@ $("doImport").addEventListener("click", function(){
     if(avgSel && importMap.avg>=0){ map.proj = importMap.avg; }
   }
   if(map.name===-1 || map.salary===-1){ alert("Name and Salary columns are required."); return; }
-  /* carry the salary-format detection through the user's (possibly edited) map */
+  /* carry the salary-format detection through the user's (possibly edited) map;
+     the user's own column picks (incl. the ID column) are respected */
   map.dk = importMap.dk; map.fdNames = importMap.fdNames; map.gameInfo = importMap.gameInfo;
+  map.nameIdCol = importMap.nameIdCol;
+  var poolBefore = pool.length;
   var added = importIntoPool(importRows, importHead, map);
+  var withId = 0, i;
+  for(i = poolBefore; i < pool.length; i++) if(pool[i].siteId) withId++;
   save(); renderPool();
-  $("importInfo").textContent = "Imported "+added+" players.";
+  $("importInfo").textContent = "Imported "+added+" players"+
+    (withId ? " ("+withId+" with site IDs for the uploader-ready export)." : ".");
   $("mapWrap").style.display = "none";
   $("csvFile").value = "";
 });
@@ -187,7 +214,8 @@ function importIntoPool(rows, head, map){
       proj: proj,
       floor: map.floor>=0&&parseFloat(col(map.floor))>=0?parseFloat(col(map.floor)):Math.round(proj*0.55*10)/10,
       ceil: map.ceil>=0&&parseFloat(col(map.ceil))>=0?parseFloat(col(map.ceil)):Math.round(proj*1.6*10)/10,
-      own: map.own>=0&&parseFloat(col(map.own))>=0?parseFloat(col(map.own)):5
+      own: map.own>=0&&parseFloat(col(map.own))>=0?parseFloat(col(map.own)):5,
+      siteId: importSiteId(r, map)
     });
     added++;
   });
@@ -205,8 +233,9 @@ $("addPlayer").addEventListener("click", function(){
     pos:pos.length?pos:["FLEX"], salary:Math.round(sal), proj:proj,
     floor: $("mFloor").value!==""?parseFloat($("mFloor").value):Math.round(proj*0.55*10)/10,
     ceil: $("mCeil").value!==""?parseFloat($("mCeil").value):Math.round(proj*1.6*10)/10,
-    own: $("mOwn").value!==""?parseFloat($("mOwn").value):5 });
-  ["mName","mTeam","mOpp","mPos","mSalary","mProj","mFloor","mCeil","mOwn"].forEach(function(id){ $(id).value=""; });
+    own: $("mOwn").value!==""?parseFloat($("mOwn").value):5,
+    siteId: ($("mId").value||"").trim() });
+  ["mName","mTeam","mOpp","mPos","mSalary","mProj","mFloor","mCeil","mOwn","mId"].forEach(function(id){ $(id).value=""; });
   save(); renderPool();
 });
 
@@ -545,15 +574,37 @@ function renderResults(res, ms, wanted, extra){
   $("exportWrap").style.display = "block";
   $("exportBtn").onclick = function(){ exportCSV(res); };
 }
-function exportCSV(res){
+/* Bulk-uploader cell format per site. DraftKings' uploader matches on the
+   "Name (ID)" cell shape (the exact cell shape of its own entries files —
+   corroborated by community tooling with live-accepted uploads); FanDuel's
+   bulk upload matches on the site player ID carried by its salary export.
+   A player with no captured ID falls back to the bare name — never an
+   invented ID. Embedded quotes are CSV-escaped. */
+function uploadCell(p, site){
+  var nm = String((p && p.name) || "");
+  var id = String((p && p.siteId) || "").trim();
+  var cell = nm;
+  if(id) cell = (site === "FD") ? id : nm + " (" + id + ")";
+  return '"' + cell.replace(/"/g, '""') + '"';
+}
+/* Pure CSV builder (test seam). Header = roster positions; one row per
+   lineup; cells in the site's bulk-uploader format. */
+function buildExportCSV(res){
   var c = cfg();
+  var site = (c.site === "FanDuel") ? "FD" : "DK";
   var lines = [c.slots.join(",")];
-  res.lineups.forEach(function(lu){
+  (res.lineups || []).forEach(function(lu){
     var bySlot = {};
-    lu.forEach(function(e){ (bySlot[e.slot]=bySlot[e.slot]||[]).push(e.player.name); });
-    lines.push(c.slots.map(function(s){ return '"'+(bySlot[s].shift()||"")+'"'; }).join(","));
+    lu.forEach(function(e){ (bySlot[e.slot] = bySlot[e.slot] || []).push(e.player); });
+    lines.push(c.slots.map(function(s){
+      var p = (bySlot[s] || []).shift();
+      return p ? uploadCell(p, site) : '""';
+    }).join(","));
   });
-  var blob = new Blob([lines.join("\n")], {type:"text/csv"});
+  return lines.join("\n");
+}
+function exportCSV(res){
+  var blob = new Blob([buildExportCSV(res)], {type:"text/csv"});
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "gridironui-"+cfgKey+"-"+mode+"-lineups.csv";
@@ -573,7 +624,8 @@ window.GIU = window.GIU || {};
 window.GIU.dfsImport = {
   parseCSV: parseCSV, autoMap: autoMap, isDK: isDK,
   dkCleanName: dkCleanName, dkGameOpp: dkGameOpp, fdNameCols: fdNameCols,
-  importName: importName, importIntoPool: importIntoPool,
+  importName: importName, importSiteId: importSiteId, importIntoPool: importIntoPool,
+  uploadCell: uploadCell, buildExportCSV: buildExportCSV,
   pool: function(){ return pool; } /* read-only for tests */
 };
 

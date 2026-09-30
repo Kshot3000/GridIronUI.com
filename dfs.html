@@ -79,7 +79,10 @@
         <div class="field"><label>Floor (opt)</label><input type="number" id="mFloor" step="any"></div>
         <div class="field"><label>Ceiling (opt)</label><input type="number" id="mCeil" step="any"></div>
       </div>
-      <div class="field"><label>Ownership % (opt)</label><input type="number" id="mOwn" step="any" placeholder="15"></div>
+      <div class="form-row">
+        <div class="field"><label>Ownership % (opt)</label><input type="number" id="mOwn" step="any" placeholder="15"></div>
+        <div class="field"><label>Site ID (opt) — DK/FD player ID</label><input type="text" id="mId" placeholder="81234"></div>
+      </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" id="addPlayer">+ Add player</button>
         <button class="btn btn-ghost btn-sm" id="demoBtn">Load DEMO slate</button>
@@ -99,7 +102,7 @@
       </div>
       <button class="btn btn-gold" id="runOpt">⚙️ Generate lineups</button>
       <div class="notice" style="margin:16px 0 0;font-size:.85rem">
-        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. The <b>exposure summary</b> under your results shows each player's share of lineups, so you can spot when you're overweight on a play. The pool table has a <b>Value</b> column (projected points per $1k of salary, <span class="val-star">★</span> marks the top-3) plus a search box and position filter — handy once an imported CSV puts 100+ players in the pool. <b>No AI, no magic</b> — just math you can audit.
+        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. The <b>exposure summary</b> under your results shows each player's share of lineups, so you can spot when you're overweight on a play. The pool table has a <b>Value</b> column (projected points per $1k of salary, <span class="val-star">★</span> marks the top-3) plus a search box and position filter — handy once an imported CSV puts 100+ players in the pool. <b>No AI, no magic</b> — just math you can audit. <b>Export CSV</b> writes the sites' bulk-uploader cell format — DraftKings gets <i>Name (ID)</i> using the player IDs captured from your salary export, FanDuel gets the FD player ID — so generated lineups drop straight into the site's uploader instead of being retyped. Players with no captured ID export as plain names; always sanity-check one lineup against the site's Download Template for your contest before uploading.
       </div>
     </div>
   </div>
@@ -140,6 +143,6 @@
 <script src="js/site.js?v=1.99.0"></script>
 <script src="js/dfs-opt.js?v=1.55.0"></script>
 <script src="js/dfs-injuries.js?v=1.36.0"></script>
-<script src="js/dfs.js?v=1.74.0"></script>
+<script src="js/dfs.js?v=1.100.0"></script>
 </body>
 </html>
