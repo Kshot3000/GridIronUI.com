@@ -1,13 +1,15 @@
 /* GridIronUI odds-board weather badges — pure glue between the odds board,
    ESPN's scoreboard (for the true venue) and the shared weather core.
-   Attaches game-day weather to NFL odds-board game cards: wind moves
-   totals, so a bettor shopping a total should see "gusts 28 mph" on the
-   card itself, not buried on another page.
+   Attaches game-day weather to NFL and MLB postseason odds-board game cards:
+   wind moves totals, so a bettor shopping a total should see "gusts 28 mph"
+   on the card itself, not buried on another page.
 
    Honesty rules (no invented data):
    - the venue comes from ESPN's per-game venue cross-checked against the
      shared stadium dataset (neutral-site games resolve to the real neutral
-     venue, never the listed home team's stadium);
+     venue, never the listed home team's stadium; MLB uses the ballpark
+     dataset, which cross-checks ESPN's venue name and falls back to the
+     home team's park only when ESPN's venue is unrecognized);
    - games whose venue can't be confirmed, domes/retractable roofs, past or
      >16-days-out kickoffs, and calm forecasts all produce NO badge — quiet
      by default, exactly like the steam-watch strip;
@@ -43,25 +45,32 @@ function matchEspn(oddsEv, espnEvents, homeAbbr, awayAbbr){
   return null;
 }
 
-/* Resolve the odds-board NFL events to forecastable games:
-   [{oddsId, kickISO, lat, lon, stadium, city}] — open-air, confirmed venue,
-   pre-game kickoff within the 16-day forecast horizon. Everything else is
-   dropped silently: no badge beats a wrong badge. */
-WX.resolveGames = function(oddsEvents, espnEvents, dir, teamFind, venueFor, nowMs){
+/* Resolve the odds-board NFL/MLB events to forecastable games:
+   [{oddsId, kickISO, lat, lon, stadium, city, league}] — open-air, confirmed
+   venue, pre-game kickoff within the 16-day forecast horizon. Everything else
+   is dropped silently: no badge beats a wrong badge.
+   league: "nfl" (default) or "mlb" — picks the team dir and which callers'
+   impact model applies downstream. The injected venueFor may return the NFL
+   {row: tuple} shape or the raw wx-shared.js ballpark tuple (ballparkVenueFor);
+   both are accepted. */
+WX.resolveGames = function(oddsEvents, espnEvents, dir, teamFind, venueFor, nowMs, league){
   nowMs = (nowMs === undefined) ? Date.now() : nowMs;
+  league = league || "nfl";
   var out = [];
   (oddsEvents||[]).forEach(function(ev){
     if(!ev || !ev.id || !ev.commence_time) return;
     var kick = Date.parse(ev.commence_time);
     if(isNaN(kick) || kick <= nowMs || kick > nowMs + FORECAST_DAYS*24*3600*1000) return;
-    var ht = teamFind(dir, "nfl", ev.home_team), at = teamFind(dir, "nfl", ev.away_team);
+    var ht = teamFind(dir, league, ev.home_team), at = teamFind(dir, league, ev.away_team);
     if(!ht || !at) return;
     var espn = matchEspn(ev, espnEvents||[], ht.abbr, at.abbr);
     if(!espn) return;
     var v = venueFor(espn, ht.abbr);
-    if(!v || !v.row || v.row[5] !== "open") return;
+    var row = (v && v.row) || v; /* venueFor: {row} shape; ballparkVenueFor: raw tuple */
+    if(!row || row[5] !== "open") return;
     out.push({ oddsId: String(ev.id), kickISO: ev.commence_time,
-               lat: v.row[3], lon: v.row[4], stadium: v.row[1], city: v.row[2] });
+               lat: row[3], lon: row[4], stadium: row[1], city: row[2],
+               league: league });
   });
   return out;
 };

@@ -260,32 +260,53 @@ function render(opts){
    forecast comes from one multi-location Open-Meteo request, and badges
    only appear when the shared impact model flags something real. Quiet by
    default, honest by construction: no venue confirmation, no badge. */
-var espnWxP = null;
+var espnWxP = null, espnMlbWxP = null;
 function maybeWxBadges(events, mySeq){
-  if(sport !== "americanfootball_nfl" || !WX || !events || !events.length) return;
-  if(!espnWxP){
+  var isMlb = (sport === "baseball_mlb");
+  if((!isMlb && sport !== "americanfootball_nfl") || !WX || !events || !events.length) return;
+  var espnP, venueResolver;
+  if(isMlb){
+    /* October baseball: MLB postseason board (seasontype=3) cross-checked
+       against the shared ballpark dataset — October wind and rain move
+       totals, so Wild Card bettors should see it on the card itself. */
+    if(!espnMlbWxP){
+      espnMlbWxP = (GIU.wxUpcomingMlbPostseason
+        ? GIU.wxUpcomingMlbPostseason(GIU.fetchJSON)
+        : Promise.resolve({events:[]}))
+        .then(function(r){ return r.events; })
+        .catch(function(){ return []; });
+    }
+    espnP = espnMlbWxP;
+    venueResolver = GIU.wxBallparkVenueFor;
+  } else {
+    if(!espnWxP){
     /* Same rollover-safe fetch as the weather page: between the week's last
        game and ESPN's Tuesday rollover the default board is all-post, which
        would silently kill every badge. A venue failure still just means no
        badges — the board already rendered fine. */
-    var espnP = GIU.wxUpcomingNfl
+    var nflP = GIU.wxUpcomingNfl
       ? GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(r){ return r.events; })
       : GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
           .then(function(d){ return d.events || []; });
-    espnWxP = espnP.catch(function(){ return []; });
+    espnWxP = nflP.catch(function(){ return []; });
+    }
+    espnP = espnWxP;
+    venueResolver = GIU.wxVenueFor;
   }
-  Promise.all([espnWxP, GIU.teamDir()]).then(function(r){
-    if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return; /* board moved on */
-    var games = WX.resolveGames(events, r[0], r[1], GIU.teamFind, GIU.wxVenueFor, Date.now());
+  Promise.all([espnP, GIU.teamDir()]).then(function(r){
+    if(mySeq !== renderSeq || (sport !== "americanfootball_nfl" && sport !== "baseball_mlb")) return; /* board moved on */
+    var games = WX.resolveGames(events, r[0], r[1], GIU.teamFind,
+      venueResolver, Date.now(), isMlb ? "mlb" : "nfl");
     if(!games.length) return;
     var url = WX.wxUrl(games);
     if(!url) return;
     return GIU.fetchJSON(url).then(function(d){
-      if(mySeq !== renderSeq || sport !== "americanfootball_nfl") return;
+      if(mySeq !== renderSeq || (sport !== "americanfootball_nfl" && sport !== "baseball_mlb")) return;
       var arr = Array.isArray(d) ? d : [d];
+      var notesFn = isMlb ? GIU.wxImpactNotesBsb : GIU.wxImpactNotes;
       games.forEach(function(g, i){
         var hourly = (arr[i] && arr[i].hourly) || {time:[]};
-        var notes = GIU.wxImpactNotes(GIU.wxSliceWindow({hourly:hourly}, g.kickISO));
+        var notes = notesFn(GIU.wxSliceWindow({hourly:hourly}, g.kickISO));
         if(!notes.length) return; /* calm day — nothing to say */
         var slot = document.querySelector('[data-wxbadge="'+g.oddsId+'"]');
         if(!slot) return;
@@ -670,10 +691,10 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
   }
 
   var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
-  /* Weather badge slot (NFL tab only): filled after the board renders, once
-     the venue is confirmed against ESPN and the forecast is in. Hidden
-     until then — no badge is better than a placeholder. */
-  var wxSlot = (sport === "americanfootball_nfl")
+  /* Weather badge slot (NFL + MLB postseason cards): filled after the board
+     renders, once the venue is confirmed against ESPN and the forecast is in.
+     Hidden until then — no badge is better than a placeholder. */
+  var wxSlot = (sport === "americanfootball_nfl" || sport === "baseball_mlb")
     ? '<div class="wx-badge" data-wxbadge="'+GIU.esc(ev.id)+'" hidden></div>' : "";
   /* Market-check slot (NFL tab only): Polymarket's live moneyline price vs
      what the best book prices imply — filled after the board renders, once

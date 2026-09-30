@@ -1,13 +1,14 @@
-/* Verifies the game-day weather badge wiring in the SHIPPED js/odds.js.
+/* Verifies the MLB game-day weather badge wiring in the SHIPPED js/odds.js.
    Loads the real odds-logic.js, wx-shared.js, odds-wx.js and odds.js in a vm
    sandbox with stubbed DOM/fetch, then asserts:
-   - NFL board render leaves a hidden [data-wxbadge] slot on each game card;
-   - after the ESPN + Open-Meteo fetches resolve, a gusty game-day forecast
-     injects a badge naming the real stadium with the wind note;
-   - a calm forecast leaves the slot hidden (quiet by default);
-   - the Open-Meteo request is one multi-location call, after the board;
-   - switching to a weather-free tab (NBA) fires no weather fetches at all;
-   - an ESPN/venue failure never breaks the board (badges stay off). */
+   - the MLB board render leaves a hidden [data-wxbadge] slot on each card;
+   - the ESPN cross-check hits the MLB postseason board (seasontype=3);
+   - a calm October forecast leaves the slot hidden and empty (quiet default);
+   - after re-render with a gusty forecast, the badge names Yankee Stadium
+     and carries the baseball wind note;
+   - the ESPN postseason fetch is session-cached across re-renders;
+   - the forecast is one multi-location call with the ballpark's coords;
+   - the badge links to the full forecast page. */
 "use strict";
 var fs = require("fs"), vm = require("vm"), path = require("path");
 var ROOT = path.join(__dirname, "..");
@@ -49,28 +50,24 @@ var localStorageStub = {
   removeItem: function(k){ delete store[k]; }
 };
 
-function bkFixture(){
+function mlbBk(){
   return { key:"draftkings", title:"DraftKings", markets:[
     {key:"spreads", outcomes:[
-      {name:"Chicago Bears", price:1.91, point:-3},
-      {name:"Green Bay Packers", price:1.91, point:3}]},
+      {name:"New York Yankees", price:1.91, point:-1.5},
+      {name:"Boston Red Sox", price:1.91, point:1.5}]},
     {key:"totals", outcomes:[
-      {name:"Over", price:1.91, point:44.5},
-      {name:"Under", price:1.91, point:44.5}]},
+      {name:"Over", price:1.91, point:8.5},
+      {name:"Under", price:1.91, point:8.5}]},
     {key:"h2h", outcomes:[
-      {name:"Chicago Bears", price:1.65},
-      {name:"Green Bay Packers", price:2.30}]}
+      {name:"New York Yankees", price:1.65},
+      {name:"Boston Red Sox", price:2.30}]}
   ]};
 }
 var KICK = new Date(Date.now() + 2*864e5);
 var KICK_ISO = KICK.toISOString();
-function nflEvents(){
-  return [{ id:"wx-ev-1", home_team:"Chicago Bears", away_team:"Green Bay Packers",
-            commence_time:KICK_ISO, bookmakers:[bkFixture()] }];
-}
-function nbaEvents(){
-  return [{ id:"wx-ev-nba", home_team:"Chicago Bulls", away_team:"Boston Celtics",
-            commence_time:KICK_ISO, bookmakers:[bkFixture()] }];
+function mlbEvents(){
+  return [{ id:"wx-mlb-1", home_team:"New York Yankees", away_team:"Boston Red Sox",
+            commence_time:KICK_ISO, bookmakers:[mlbBk()] }];
 }
 /* controllable odds-API fetch (bare fetch in odds.js) */
 var oddsDeferreds = [];
@@ -91,9 +88,9 @@ function fetchJSONStub(url){
   else rec.resolve({});
   return rec.promise;
 }
-var DIR = { nfl: [
-  {abbr:"CHI", displayName:"Chicago Bears", shortDisplayName:"Bears"},
-  {abbr:"GB", displayName:"Green Bay Packers", shortDisplayName:"Packers"}
+var DIR = { mlb: [
+  {abbr:"NYY", displayName:"New York Yankees", shortDisplayName:"Yankees"},
+  {abbr:"BOS", displayName:"Boston Red Sox", shortDisplayName:"Red Sox"}
 ]};
 function teamFindStub(d, league, q){
   var list = (d[league]||[]), ql = String(q).toLowerCase();
@@ -149,21 +146,27 @@ sandbox.window.OddsSlip = sandbox.OddsSlip;
 vm.createContext(sandbox);
 
 var tabNFL = makeEl("tab-nfl"); tabNFL.setAttribute("data-sport","americanfootball_nfl");
-var tabNBA = makeEl("tab-nba"); tabNBA.setAttribute("data-sport","basketball_nba");
-getEl("sportTabs")._children = [tabNFL, tabNBA];
+var tabMLB = makeEl("tab-mlb"); tabMLB.setAttribute("data-sport","baseball_mlb");
+getEl("sportTabs")._children = [tabNFL, tabMLB];
 
 ["js/odds-logic.js","js/wx-shared.js","js/odds-wx.js","js/odds.js"].forEach(function(f){
   vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, {filename: f});
 });
 var G = sandbox.window.GIU;
+assert(typeof G.wxUpcomingMlbPostseason === "function",
+       "wx-shared.js exposes wxUpcomingMlbPostseason");
+assert(typeof G.wxBallparkVenueFor === "function",
+       "wx-shared.js exposes wxBallparkVenueFor");
+assert(typeof G.wxImpactNotesBsb === "function",
+       "wx-shared.js exposes wxImpactNotesBsb");
 
 function settle(fn){ setTimeout(fn, 60); }
-function espnPayload(){
-  return { events: [{ id:"espn-1", date:KICK_ISO,
-    competitions:[{ venue:{fullName:"Soldier Field"},
+function espnMlbPayload(){
+  return { events: [{ id:"espn-mlb-1", date:KICK_ISO,
+    competitions:[{ venue:{fullName:"Yankee Stadium"},
       competitors:[
-        {homeAway:"home", team:{abbreviation:"CHI"}},
-        {homeAway:"away", team:{abbreviation:"GB"}}]}]}] };
+        {homeAway:"home", team:{abbreviation:"NYY"}},
+        {homeAway:"away", team:{abbreviation:"BOS"}}]}]}] };
 }
 function wxPayload(gust, wind){
   var base = new Date(KICK_ISO); base.setUTCMinutes(0,0,0);
@@ -173,8 +176,7 @@ function wxPayload(gust, wind){
   return [{ hourly: {
     time: times,
     temperature_2m: rep(58), precipitation_probability: rep(5),
-    wind_speed_10m: rep(wind === undefined ? 18 : wind),
-    wind_gusts_10m: rep(gust),
+    wind_speed_10m: rep(wind), wind_gusts_10m: rep(gust),
     wind_direction_10m: rep(320)
   }}];
 }
@@ -182,78 +184,64 @@ function apiResponse(events){
   return { status:200, ok:true, headers:{get:function(){ return "499"; }},
            json:function(){ return Promise.resolve(events); } };
 }
+function espnCalls(){ return jsonCalls.filter(function(u){
+  return u.indexOf("site.api.espn.com") !== -1; }); }
+function wxCalls(){ return jsonCalls.filter(function(u){
+  return u.indexOf("api.open-meteo.com") !== -1; }); }
 
 settle(function(){
   assert(oddsDeferreds.length === 1, "initial NFL load fires one odds API fetch");
-  oddsDeferreds[0].resolve(apiResponse(nflEvents()));
+  tabMLB._fire("click"); /* switch to the MLB tab */
   settle(function(){
-    var html = getEl("oddsBoard").innerHTML;
-    assert(html.indexOf("Chicago Bears") !== -1, "NFL board renders the game");
-    assert(html.indexOf('data-wxbadge="wx-ev-1"') !== -1,
-           "game card carries a hidden weather-badge slot");
-    assert(html.indexOf('data-wxbadge="wx-ev-1" hidden') !== -1 ||
-           /data-wxbadge="wx-ev-1"[^>]*hidden/.test(html),
-           "badge slot starts hidden");
-    assert(jsonCalls.some(function(u){ return u.indexOf("site.api.espn.com") !== -1; }),
-           "venue cross-check fetches the ESPN scoreboard after the board renders");
-
-    espnRec.resolve(espnPayload());
+    assert(oddsDeferreds.length === 2, "MLB tab re-pulls the odds API");
+    oddsDeferreds[1].resolve(apiResponse(mlbEvents()));
     settle(function(){
-      assert(wxRec !== null, "one Open-Meteo fetch follows the venue resolution");
-      var wu = jsonCalls.filter(function(u){ return u.indexOf("api.open-meteo.com") !== -1; });
-      assert(wu.length === 1 && wu[0].indexOf("latitude=41.8623") !== -1 &&
-             wu[0].indexOf("longitude=-87.6167") !== -1,
-             "forecast is one multi-location call with Soldier Field coords");
-      wxRec.resolve(wxPayload(33)); /* gust front */
+      var html = getEl("oddsBoard").innerHTML;
+      assert(html.indexOf("New York Yankees") !== -1, "MLB board renders the game");
+      assert(/data-wxbadge="wx-mlb-1"[^>]*hidden/.test(html) ||
+             html.indexOf('data-wxbadge="wx-mlb-1" hidden') !== -1,
+             "MLB game card carries a hidden weather-badge slot");
+      var ec = espnCalls();
+      assert(ec.length === 1 && ec[0].indexOf("baseball/mlb/scoreboard") !== -1 &&
+             ec[0].indexOf("seasontype=3") !== -1,
+             "venue cross-check hits the MLB postseason board: "+(ec[0]||"none"));
+
+      espnRec.resolve(espnMlbPayload());
       settle(function(){
-        var slot = slotFor("wx-ev-1");
-        assert(slot.hidden === false, "gusty forecast reveals the badge");
-        assert(slot.innerHTML.indexOf("Soldier Field") !== -1,
-               "badge names the real stadium: "+slot.innerHTML.slice(0,80));
-        assert(slot.innerHTML.indexOf("Gusts 33 mph") !== -1,
-               "badge carries the wind impact note");
-        assert(slot.innerHTML.indexOf("weather.html") !== -1,
-               "badge links to the full forecast page");
-
-        /* calm day: slot stays hidden */
-        resetSlots();
-        tabNBA._fire("click"); /* switch sport */
+        var wc = wxCalls();
+        assert(wc.length === 1 && wc[0].indexOf("latitude=40.8296") !== -1 &&
+               wc[0].indexOf("longitude=-73.9264") !== -1,
+               "forecast is one multi-location call with Yankee Stadium coords");
+        wxRec.resolve(wxPayload(8, 5)); /* genuinely calm October day */
         settle(function(){
-          var nbaCalls = oddsDeferreds.length;
-          assert(nbaCalls === 2, "NBA tab re-pulls the odds API");
-          oddsDeferreds[1].resolve(apiResponse(nbaEvents()));
-          settle(function(){
-            var nbaHtml = getEl("oddsBoard").innerHTML;
-            assert(nbaHtml.indexOf("data-wxbadge") === -1,
-                   "non-NFL cards get no badge slot at all");
-            var wxCount = jsonCalls.filter(function(u){
-              return u.indexOf("api.open-meteo.com") !== -1; }).length;
-            assert(wxCount === 1, "switching to NBA fires no weather fetches");
+          var slot = slotFor("wx-mlb-1");
+          assert(slot.hidden === true && slot.innerHTML === "",
+                 "calm forecast leaves the MLB badge hidden and empty");
 
-            tabNFL._fire("click"); /* back to NFL */
+          /* re-render with a gusty forecast: the badge must appear */
+          resetSlots();
+          tabMLB._fire("click");
+          settle(function(){
+            assert(oddsDeferreds.length === 3, "MLB re-click re-pulls the odds API");
+            oddsDeferreds[2].resolve(apiResponse(mlbEvents()));
             settle(function(){
-              oddsDeferreds[2].resolve(apiResponse(nflEvents()));
+              assert(espnCalls().length === 1,
+                     "ESPN postseason board is session-cached across re-renders");
+              assert(wxCalls().length === 2 && wxRec !== null,
+                     "re-render re-forecasts (fresh weather, one call)");
+              wxRec.resolve(wxPayload(33, 24)); /* gust front over the Bronx */
               settle(function(){
-                resetSlots();
-                /* espnWxP is session-cached; only Open-Meteo fires again */
-                settle(function(){
-                  /* espnWxP is session-cached; only Open-Meteo fires again */
-                  settle(function(){
-                    var cands = jsonCalls.filter(function(u){
-                      return u.indexOf("api.open-meteo.com") !== -1; });
-                    assert(cands.length === 2, "NFL re-render re-forecasts (fresh weather)");
-                    assert(wxRec !== null, "second forecast request is in flight");
-                    wxRec.resolve(wxPayload(8, 5)); /* genuinely calm */
-                    settle(function(){
-                      var s2 = slotFor("wx-ev-1");
-                      assert(s2.hidden === true && s2.innerHTML === "",
-                             "calm forecast leaves the badge hidden and empty");
-                      console.log(failures ? ("\n"+failures+" FAILURES")
-                                           : "\nALL ODDS-WX DOM TESTS PASS");
-                      process.exit(failures ? 1 : 0);
-                    });
-                  });
-                });
+                var s2 = slotFor("wx-mlb-1");
+                assert(s2.hidden === false, "gusty forecast reveals the MLB badge");
+                assert(s2.innerHTML.indexOf("Yankee Stadium") !== -1,
+                       "badge names the real ballpark: "+s2.innerHTML.slice(0,90));
+                assert(s2.innerHTML.indexOf("direction decides") !== -1,
+                       "badge carries the baseball wind note (not football copy)");
+                assert(s2.innerHTML.indexOf("weather.html") !== -1,
+                       "badge links to the full forecast page");
+                console.log(failures ? ("\n"+failures+" FAILURES")
+                                     : "\nALL ODDS-WX-MLB DOM TESTS PASS");
+                process.exit(failures ? 1 : 0);
               });
             });
           });
