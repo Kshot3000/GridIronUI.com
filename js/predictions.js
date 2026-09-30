@@ -137,9 +137,13 @@ function load(key, my, silent){
        dropped, never guessed. Only 2-way rows get a row — a clean
        side-by-side comparison. */
     if(snap && snap.games && window.Disagree && window.Kalshi){
+      /* Settled games never cross-check: a finished game has no live
+         Polymarket price to compare against, and its 99c side is a result,
+         not a prediction. */
+      var klGames = snap.games.filter(function(g){ return !window.Kalshi.settled(g); });
       rows.forEach(function(r){
         if(r.mls.length !== 1) return;
-        var m = window.Disagree.matches([r.ev], snap.games, dir, GIU.teamFind, key)[0];
+        var m = window.Disagree.matches([r.ev], klGames, dir, GIU.teamFind, key)[0];
         if(m) r.km = {nameA: m.nameA, aPct: m.kalshiA, nameB: m.nameB,
                       bPct: m.kalshiB, updatedAt: snap.updated_at, pmA: m.pmA};
       });

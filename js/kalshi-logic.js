@@ -61,8 +61,27 @@ K.gameTime = function(g){
   return t;
 };
 
+/* A game is settled when the market has decided the outcome: two or more
+   priced winner markets, every one at an extreme (<=1c or >=99c), with at
+   least one at >=99c. Kalshi keeps finished games in its "open" listing
+   until settlement finalizes (close_time stays in the future), so price is
+   the only honest signal — close_time cannot be trusted for this. A live
+   game only reaches 1c/99c in its final seconds, so this is the outcome,
+   not a prediction. */
+K.settled = function(g){
+  var px = [];
+  ((g && g.markets) || []).forEach(function(m){
+    if(m && m.kind !== "other"){ var p = K.price(m); if(p !== null) px.push(p); }
+  });
+  if(px.length < 2) return false;
+  var hi = Math.max.apply(null, px), lo = Math.min.apply(null, px);
+  return hi >= 99 && lo <= 1 && px.every(function(p){ return p <= 1 || p >= 99; });
+};
+
 /* Normalize the snapshot into priced games, soonest first. Games without two
-   priced teams are dropped (stale/settled listings), never fabricated. */
+   priced teams are dropped (stale/settled listings), never fabricated.
+   Settled games (see K.settled) sort last so finished results never crowd
+   out live markets. */
 K.games = function(snap){
   var out = [];
   ((snap && snap.games) || []).forEach(function(g){
@@ -73,10 +92,11 @@ K.games = function(snap){
     teams.sort(function(a, b){ return b.price - a.price; });
     out.push({
       title: g.title, sub: g.sub_title, ticker: g.event_ticker,
-      close: K.gameTime(g), teams: teams
+      close: K.gameTime(g), teams: teams, settled: K.settled(g)
     });
   });
   out.sort(function(a, b){
+    if(!!a.settled !== !!b.settled) return a.settled ? 1 : -1; /* settled last */
     var x = a.close === null ? Infinity : a.close, y = b.close === null ? Infinity : b.close;
     return x - y;
   });

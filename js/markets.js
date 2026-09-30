@@ -322,6 +322,19 @@ function kalshiCard(g, dir, cfg){
     ab = [window.Disagree.normAbbr(ab[0]), window.Disagree.normAbbr(ab[1])];
   var head = (ab && window.GIU.vsHeader(dir, cfg.dirKey, ab[0], ab[1])) ||
     '<h3 style="margin:10px 0 4px">'+GIU.esc(g.title)+'</h3>';
+  var meta = g.sub ? '<div class="game-meta" style="margin-bottom:12px"><span>'+GIU.esc(g.sub)+'</span></div>' : '<div style="height:8px"></div>';
+  if(g.settled){
+    /* Settled game (Kalshi keeps finished games in its "open" listing until
+       settlement finalizes): show the RESULT honestly, never as a live
+       prediction — no probability bars, no book line. */
+    var win = (g.teams && g.teams[0]) || null;
+    var vol = win && win.vol ? GIU.esc(win.vol) : "";
+    return '<div class="card"><span class="tag">Settled</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+head+meta+
+      '<div style="margin:4px 0 12px"><span style="font-size:1.05rem">'+GIU.esc(win ? win.name : "Game")+'</span> '+
+      '<span class="tag green">won · final</span></div>'+
+      '<div style="font-size:.8rem;color:var(--faint);margin-bottom:8px">This game is over — the price reflects the final result, not a prediction. '+(vol ? vol : "")+'</div>'+
+      '<div class="game-meta"><a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi →</a></div></div>';
+  }
   var rows = g.teams.map(function(t){
     var book = t.book
       ? ' · book <b class="num" style="color:var(--text)">'+t.book.bid+'¢/'+t.book.ask+'¢</b> '+
@@ -334,8 +347,7 @@ function kalshiCard(g, dir, cfg){
   }).join("");
   return '<div class="card"><span class="tag green">Kalshi</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+
     '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+
-    head+
-    (g.sub ? '<div class="game-meta" style="margin-bottom:12px"><span>'+GIU.esc(g.sub)+'</span></div>' : '<div style="height:8px"></div>')+
+    head+meta+
     rows+
     '<div class="game-meta"><a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi →</a></div></div>';
 }

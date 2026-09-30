@@ -142,6 +142,7 @@ node tests/test-odds-pm-dom.js # market-check wiring in shipped odds.js (hidden 
 node tests/test-predictions-kalshi-dom.js  # Kalshi row wiring in shipped predictions.js (NFL snapshot fetch, matched-game row, gap chip, snapshot-failure degrade)
 node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific cadence promises, loop refresh rule, snapshot shape, markets.js cache key)
 node tests/test-kalshi-mlb-snapshot.js # Kalshi MLB postseason snapshot honesty (KXMLBGAME series, 2-winner-markets shape, fetcher --series/--out args, markets + predictions wiring)
+node tests/test-kalshi-settled.js # settled-game detection in js/kalshi-logic.js (99c/1c signature, settled games flagged + sorted last)
 node tests/test-ev.js        # expected-value math (fair price -> zero EV, +EV/-EV cases, break-even, garbage-in throws)
 node tests/test-ev-dom.js    # EV calculator wiring in shipped tools.js (verdicts, dollar/edge math, formats, default stake, errors)
 node tests/test-middle.js      # middling math (both-win payout, split outcomes, worst case, garbage-in throws)
