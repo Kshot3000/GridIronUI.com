@@ -56,8 +56,8 @@ htmlFiles(ROOT).forEach(function(html){
     checked++;
     var short = path.relative(ROOT, html);
     if(!key){
-      /* unkeyed scripts are the old convention (injuries.js, kalshi-logic.js,
-         betmath.js, tools.js) — noted, not failed */
+      /* unkeyed scripts are the old convention (kalshi-logic.js, betmath.js,
+         tools.js) — noted, not failed */
       console.log("note ", short+" loads "+jsName+" with no cache key (last changed "+changedIn+")");
       continue;
     }

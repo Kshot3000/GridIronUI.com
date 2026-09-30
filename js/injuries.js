@@ -15,9 +15,11 @@ var DIRKEY = {"football/nfl":"nfl","basketball/nba":"nba","baseball/mlb":"mlb",
 var tdir = {};
 GIU.teamDir().then(function(d){ tdir = d||{}; if(data.length) render($("injSearch").value||""); });
 /* Severity ranking for betting relevance: Out > Doubtful > Questionable > everything else.
-   Statuses are ESPN free text, verified live 2026-09-27: NFL uses Out / Injured Reserve /
+   Statuses are ESPN free text, verified live 2026-09-29: NFL uses Out / Injured Reserve /
    Doubtful / Questionable; NBA "Day-To-Day"; MLB/NHL use IL forms ("15-Day-IL", "60-Day-IL");
-   plus non-injury statuses (Active, Suspension, Bereavement, Paternity) which sort last. */
+   plus non-injury statuses (Active, Suspension, Bereavement, Paternity) which sort last.
+   Note: "Active" entries are dropped at load (see isHealthy) — they are healthy
+   players, not injuries. */
 function sevRank(s){
   s = String(s||"");
   if(/out|injured reserve|\bil\b|injured list/i.test(s)) return 3;
@@ -27,6 +29,16 @@ function sevRank(s){
 }
 var SEVS = [["all","All"],["out","Out"],["doubtful","Doubtful"],["questionable","Questionable"]];
 var sevF = -1; /* filter rank: -1 = all */
+/* ESPN's injuries endpoint lists healthy players as "Active" with fantasy-news
+   blurbs (e.g. "Brissett put together one of his signature stat lines…") — they
+   are not injuries, and on 2026-09-29 they were 632 of 800 NFL entries (79%),
+   burying the real designations on the default view. The board drops them at
+   load, so "All" means all remaining designations. Non-injury ABSENCES
+   (Suspension, Paternity, Bereavement) are kept — a missing starter moves
+   lines whether the reason is an injury or not. */
+function isHealthy(status){
+  return /^\s*active\s*$/i.test(String(status||""));
+}
 var SEV_RANK = {all:-1, out:3, doubtful:2, questionable:1};
 function teamWeight(t){
   var w = 0;
@@ -78,7 +90,11 @@ function load(){
   var box = $("injGrid");
   box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
   GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+LEAGUES[cur][0]+"/injuries").then(function(d){
-    data = (d.injuries||[]).filter(function(t){ return (t.injuries||[]).length; });
+    data = (d.injuries||[]).map(function(t){
+      /* Healthy players are not injuries — drop them before anything else. */
+      t.injuries = (t.injuries||[]).filter(function(i){ return !isHealthy(i.status); });
+      return t;
+    }).filter(function(t){ return (t.injuries||[]).length; });
     /* Bettors care about the worst news first: teams with the most severe
        injuries top the grid, and each card lists its worst cases first. */
     data.sort(function(a,b){ return teamWeight(b)-teamWeight(a); });

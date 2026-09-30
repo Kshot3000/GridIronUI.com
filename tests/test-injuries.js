@@ -1,7 +1,9 @@
 /* Verifies the injury severity filter + severity sorting in the SHIPPED js/injuries.js.
    Stubs the DOM, loads the real injuries.js, feeds canned ESPN-shaped data, and
    asserts that teams sort worst-injuries-first, players sort worst-first within a
-   team, and the All/Out/Doubtful/Questionable filter chips filter correctly. */
+   team, the All/Out/Doubtful/Questionable filter chips filter correctly, and that
+   "Active" (healthy, not injured) entries are dropped at load while non-injury
+   absences like Suspension are kept. */
 "use strict";
 var fs = require("fs"), vm = require("vm"), path = require("path");
 var ROOT = path.join(__dirname, ".."); /* test the repo this file is checked out in */
@@ -39,7 +41,8 @@ function inj(name, status, date){
 var teams = [
   { id: "12", displayName: "Kansas City Chiefs", injuries: [
     inj("Player A", "Questionable"), inj("Player B", "Out"),
-    inj("Player C", "Active"), inj("Player D", "Questionable")
+    inj("Player C", "Active"), inj("Player D", "Questionable"),
+    inj("Player I", "Suspension")
   ]},
   { id: "20", displayName: "New York Jets", injuries: [
     inj("Player E", "Doubtful"), inj("Player F", "Out"), inj("Player G", "Out")
@@ -89,45 +92,53 @@ function clickSev(k){
 setTimeout(function(){
   var html = getEl("injGrid").innerHTML;
 
-  /* 1. teams sort worst-first: Jets (2 out + 1 doubtful) before Chiefs (1 out, 2 questionable) */
-  assert(html.indexOf("New York Jets")!==-1 && html.indexOf("Kansas City Chiefs")!==-1, "all three teams rendered");
+  /* 1. Active (healthy) entries are dropped at load: Player C gone, Active-only Dolphins team gone */
+  assert(html.indexOf("Player C")===-1, "Active Player C dropped at load");
+  assert(html.indexOf("Miami Dolphins")===-1, "Active-only Dolphins team dropped at load");
+  assert(html.indexOf("New York Jets")!==-1 && html.indexOf("Kansas City Chiefs")!==-1, "Jets and Chiefs rendered");
+
+  /* 2. teams sort worst-first: Jets (2 out + 1 doubtful) before Chiefs (1 out, 2 questionable) */
   assert(html.indexOf("New York Jets") < html.indexOf("Kansas City Chiefs"), "Jets (worse injuries) sort before Chiefs");
-  assert(html.indexOf("Kansas City Chiefs") < html.indexOf("Miami Dolphins"), "Chiefs sort before Dolphins (no severity)");
 
-  /* 2. players sort worst-first within a team: B(Out) before A(Questionable) before C(Active) */
+  /* 3. players sort worst-first within a team: B(Out) before A(Questionable) */
   assert(html.indexOf("Player B") < html.indexOf("Player A"), "Out player sorts before Questionable player");
-  assert(html.indexOf("Player A") < html.indexOf("Player C"), "Questionable player sorts before Active player");
 
-  /* 3. team header shows severity counts */
+  /* 4. team header shows severity counts over the filtered entries */
   assert(/2 out/.test(html), "Jets card shows '2 out'");
-  assert(/2 questionable/.test(html), "Chiefs card shows questionable count");
+  assert(/2 questionable/.test(html), "Chiefs card shows '2 questionable'");
+  assert(/4 reported/.test(html), "Chiefs card shows '4 reported' (suspension kept, Active dropped)");
 
-  /* 4. Out filter: only out players shown; Dolphins (no out) drops out */
+  /* 5. non-injury absences are kept: a suspended starter still moves lines */
+  assert(html.indexOf("Player I")!==-1, "Suspension entry kept under All");
+
+  /* 6. Out filter: only out players shown */
   clickSev("out");
   var h2 = getEl("injGrid").innerHTML;
   assert(h2.indexOf("Player B")!==-1, "Out filter keeps Player B");
   assert(h2.indexOf("Player F")!==-1 && h2.indexOf("Player G")!==-1, "Out filter keeps Jets out players");
   assert(h2.indexOf("Player A")===-1, "Out filter hides Questionable Player A");
+  assert(h2.indexOf("Player I")===-1, "Out filter hides Suspension Player I");
   assert(h2.indexOf("Miami Dolphins")===-1, "Out filter hides team with no out injuries");
 
-  /* 5. Questionable filter: only questionable players */
+  /* 7. Questionable filter: only questionable players */
   clickSev("questionable");
   var h3 = getEl("injGrid").innerHTML;
   assert(h3.indexOf("Player A")!==-1 && h3.indexOf("Player D")!==-1, "Questionable filter keeps A and D");
   assert(h3.indexOf("Player B")===-1, "Questionable filter hides Out Player B");
   assert(h3.indexOf("Player H")===-1, "Questionable filter hides Active Player H");
 
-  /* 6. Doubtful filter */
+  /* 8. Doubtful filter */
   clickSev("doubtful");
   var h4 = getEl("injGrid").innerHTML;
   assert(h4.indexOf("Player E")!==-1 && h4.indexOf("Player B")===-1, "Doubtful filter keeps only Player E");
 
-  /* 7. All resets */
+  /* 9. All resets to every non-Active entry — Active never comes back */
   clickSev("all");
   var h5 = getEl("injGrid").innerHTML;
-  assert(h5.indexOf("Player C")!==-1 && h5.indexOf("Miami Dolphins")!==-1, "All filter restores everything");
+  assert(h5.indexOf("Player A")!==-1 && h5.indexOf("Player I")!==-1, "All restores designations incl. suspension");
+  assert(h5.indexOf("Player C")===-1 && h5.indexOf("Miami Dolphins")===-1, "All still excludes Active entries");
 
-  /* 8. search still works combined with filter */
+  /* 10. search still works combined with filter */
   getEl("injSearch").value = "Player F";
   getEl("injSearch")._fire("input");
   setTimeout(function(){
