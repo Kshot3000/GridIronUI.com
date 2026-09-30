@@ -118,6 +118,7 @@ node tests/test-wx-rollover-dom.js  # rollover wiring in shipped weather.js (not
 node tests/test-wx-ballparks.js  # MLB ballpark dataset (30 geocoded parks, roof enum, ballparkFor, ESPN-venue cross-check in ballparkVenueFor)
 node tests/test-wx-bsb-impact.js  # baseball weather impact model (wind-direction framing, rain delay/PPD risk, cold/heat carry notes)
 node tests/test-wx-mlb-postseason.js  # MLB postseason fetcher (seasontype=3 board, pre/in kept, post dropped, empty/failure semantics)
+node tests/test-watch-outlets.js  # Watch page outlet/playlist ids pinned to verified channel ids (CBS Sports rebrand catch 2026-09-29)
 node tests/test-scores-smartday.js  # scores smart-day (any league tab on a no-game day jumps to the next game day with an honest league-aware notice; failure/null-window stay on the empty state; Today clears notice, no re-scan)
 node tests/test-cache-keys.js  # cache-key regression guard (every js ?v= key >= the release that last changed that file)
 node tests/test-readme-testlist.js  # README test-list drift guard: every test file listed, no dead references
