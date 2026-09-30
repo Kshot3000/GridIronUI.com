@@ -70,7 +70,7 @@ ok("meta description present", /<meta name="description" content="[^"]{50,}"/.te
 ok("new guide uses current site.js key",
   guide.indexOf("../js/site.js?v=1.99.0") !== -1);
 ok("new guide uses current style.css key",
-  guide.indexOf("../css/style.css?v=1.70.0") !== -1);
+  guide.indexOf("../css/style.css?v=1.102.0") !== -1);
 
 console.log(pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

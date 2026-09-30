@@ -156,7 +156,10 @@ section.block{padding:56px 0}
   background:linear-gradient(180deg,rgba(10,13,19,.55) 0%,rgba(10,13,19,.82) 62%,var(--bg) 100%),
              linear-gradient(100deg,rgba(10,13,19,.75),transparent 65%);
 }
-.hero-inner{position:relative;z-index:2;padding:88px 0 64px}
+/* hero-inner sits on .wrap (which supplies the 22px side gutter): the padding
+   shorthand MUST keep the horizontal gutter, or hero copy touches the screen
+   edges on mobile (regression caught 2026-09-30 at 390px). */
+.hero-inner{position:relative;z-index:2;padding:88px 22px 64px}
 .hero h1{max-width:16ch}
 .hero h1 .accent{color:var(--gold)}
 .hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
@@ -178,7 +181,7 @@ section.block{padding:56px 0}
 
 /* page hero (interior) */
 .page-hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line-soft)}
-.page-hero .hero-inner{padding:64px 0 46px}
+.page-hero .hero-inner{padding:64px 22px 46px}
 
 /* ---------- cards / grids ---------- */
 .grid{display:grid;gap:18px}
@@ -596,7 +599,7 @@ td.best .pick-btn.picked{box-shadow:inset 0 0 0 2px var(--gold)}
 @media(max-width:640px){
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
   .form-row{grid-template-columns:1fr}
-  .hero-inner{padding:64px 0 48px}
+  .hero-inner{padding:64px 22px 48px}
   section.block{padding:40px 0}
   .footer-grid{grid-template-columns:1fr}
   .ticker-track{animation-duration:40s}
