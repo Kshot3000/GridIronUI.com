@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-09-30T21:38:02Z",
+ "updated_at": "2026-09-30T22:43:12Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -13,11 +13,11 @@
      "title": "Chicago WS wins",
      "kind": "winner",
      "team": "Chicago WS",
-     "yes_bid": 71,
-     "yes_ask": 72,
-     "last": 72,
-     "volume": "2083055.13",
-     "volume_24h": "1875202.52",
+     "yes_bid": 56,
+     "yes_ask": 57,
+     "last": 57,
+     "volume": "3154885.15",
+     "volume_24h": "3111603.77",
      "close_time": "2026-10-03T21:00:00Z"
     },
     {
@@ -25,11 +25,11 @@
      "title": "Houston wins",
      "kind": "winner",
      "team": "Houston",
-     "yes_bid": 28,
-     "yes_ask": 29,
-     "last": 29,
-     "volume": "3214834.06",
-     "volume_24h": "2671796.70",
+     "yes_bid": 43,
+     "yes_ask": 44,
+     "last": 44,
+     "volume": "5348402.36",
+     "volume_24h": "5262538.23",
      "close_time": "2026-10-03T21:00:00Z"
     }
    ]
@@ -47,8 +47,8 @@
      "yes_bid": 44,
      "yes_ask": 45,
      "last": 45,
-     "volume": "385361.43",
-     "volume_24h": "322996.94",
+     "volume": "555774.86",
+     "volume_24h": "517096.43",
      "close_time": "2026-10-04T00:00:00Z"
     },
     {
@@ -58,9 +58,9 @@
      "team": "New York Y",
      "yes_bid": 55,
      "yes_ask": 56,
-     "last": 55,
-     "volume": "1042959.22",
-     "volume_24h": "975571.28",
+     "last": 56,
+     "volume": "1363456.33",
+     "volume_24h": "1323792.69",
      "close_time": "2026-10-04T00:00:00Z"
     }
    ]
@@ -78,8 +78,8 @@
      "yes_bid": 43,
      "yes_ask": 44,
      "last": 44,
-     "volume": "311874.89",
-     "volume_24h": "281624.15",
+     "volume": "376698.50",
+     "volume_24h": "362301.10",
      "close_time": "2026-10-04T02:00:00Z"
     },
     {
@@ -90,9 +90,40 @@
      "yes_bid": 56,
      "yes_ask": 57,
      "last": 57,
-     "volume": "851687.22",
-     "volume_24h": "798731.68",
+     "volume": "965583.13",
+     "volume_24h": "918022.48",
      "close_time": "2026-10-04T02:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT011400PHIATL",
+   "title": "Game 3: Philadelphia vs Atlanta",
+   "sub_title": "PHI vs ATL (Oct 1)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT011400PHIATL-ATL",
+     "title": "Atlanta wins",
+     "kind": "winner",
+     "team": "Atlanta",
+     "yes_bid": 50,
+     "yes_ask": 51,
+     "last": 51,
+     "volume": "4205.82",
+     "volume_24h": "3035.72",
+     "close_time": "2026-10-04T18:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT011400PHIATL-PHI",
+     "title": "Philadelphia wins",
+     "kind": "winner",
+     "team": "Philadelphia",
+     "yes_bid": 49,
+     "yes_ask": 51,
+     "last": 51,
+     "volume": "4720.64",
+     "volume_24h": "4263.79",
+     "close_time": "2026-10-04T18:00:00Z"
     }
    ]
   }
