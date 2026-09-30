@@ -146,20 +146,56 @@ function autoTick(){
    The setup card above explains the key; this fills the board's own spot so
    the page never reads as a failed load — and repeats the honesty line that
    no sample or stale lines are ever shown as if they were live. */
-function noKeyBoardHtml(){
+function noKeyBoardHtml(withMarket){
+  var tail = withMarket
+    ? '<p style="max-width:580px;margin:0 auto 18px;font-size:.85rem">Add your key above and the sportsbook lines land here, next to the market prices. The market line needs no key and stays free.</p>'
+    : '<p style="max-width:580px;margin:0 auto 18px;font-size:.85rem">Until then this board stays empty. We never show sample or stale lines as if they were live.</p>';
   return '<div class="empty" id="oddsNoKey" role="status">'+
     '<div class="card-icon" aria-hidden="true" style="font-size:2rem">🔌</div>'+
     '<h3 style="margin:6px 0 8px;color:var(--text)">Connect your key to load live lines</h3>'+
     '<p style="max-width:580px;margin:0 auto 8px;color:var(--muted)">Paste your free Odds API key in the setup card above — live spreads, moneylines and totals from every book land right here, with best-price highlighting, consensus and no-vig fair lines.</p>'+
-    '<p style="max-width:580px;margin:0 auto 18px;font-size:.85rem">Until then this board stays empty. We never show sample or stale lines as if they were live.</p>'+
+    tail+
     '<button class="btn btn-gold btn-sm" id="oddsNoKeyBtn" type="button">Connect my key ↑</button>'+
   '</div>';
+}
+
+/* No-key "market line": for the sports with a server-side Kalshi snapshot
+   (NFL, MLB), the board shows real prediction-market prices even without an
+   Odds API key — every visitor sees genuine numbers instead of a dead board.
+   The setup card above still pitches the key for sportsbook lines; nothing
+   here is ever presented as a book line. Stale snapshots withhold prices
+   (same honesty rule as the predictions page); a failed fetch degrades to
+   the plain no-key state. */
+var MARKET_SNAP = {
+  americanfootball_nfl: "kalshi-nfl",
+  baseball_mlb: "kalshi-mlb"
+};
+function renderMarketFallback(){
+  var board = $("oddsBoard");
+  var snap = MARKET_SNAP[sport];
+  if(!snap || !window.Kalshi || !window.OddsLogic){
+    board.innerHTML = noKeyBoardHtml();
+    return;
+  }
+  board.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--faint)">Loading market prices…</p>';
+  var seq = ++renderSeq; /* tab switches re-enter render(); the generation guard
+                            discards a stale sport's late fetch, same as the key path */
+  GIU.fetchJSON("data/"+snap+".json", 12000).then(function(d){
+    if(seq !== renderSeq || key) return; /* tab switched or key added mid-flight */
+    var games = window.Kalshi.games(d).filter(function(g){ return !g.settled; });
+    var html = window.OddsLogic.marketSectionHtml(games, d && d.updated_at,
+                                                  window.Kalshi.stale(d && d.updated_at));
+    board.innerHTML = html + noKeyBoardHtml(!!html);
+  }).catch(function(){
+    if(seq !== renderSeq || key) return;
+    board.innerHTML = noKeyBoardHtml();
+  });
 }
 
 function render(opts){
   opts = opts || {};
   var setup = $("oddsSetup"), board = $("oddsBoard");
-  if(!key){ setup.style.display="block"; board.innerHTML=noKeyBoardHtml(); $("quota").textContent=""; setStatus(""); return; }
+  if(!key){ setup.style.display="block"; $("quota").textContent=""; setStatus(""); renderMarketFallback(); return; }
   setup.style.display="none";
   if($("keyInput").value !== key) $("keyInput").value = key;
   var mySeq = ++renderSeq;

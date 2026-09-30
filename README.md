@@ -150,6 +150,7 @@ node tests/test-ev-dom.js    # EV calculator wiring in shipped tools.js (verdict
 node tests/test-middle.js      # middling math (both-win payout, split outcomes, worst case, garbage-in throws)
 node tests/test-middle-dom.js  # middling calculator wiring in shipped tools.js (math, verdicts, formats, label XSS, errors)
 node tests/test-middle-static.js  # middle card wiring in tools.html (New tag, Sixteen counts, v1.65.0 cache keys)
+node tests/test-odds-market-fallback.js # no-key "market line" on the odds board: Kalshi cents -> American moneyline, snapshot-labeled section HTML, stale-snapshot price withholding, settled-game exclusion, odds.html wiring
 ```
 
 ### Team identity directory

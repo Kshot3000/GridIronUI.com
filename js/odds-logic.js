@@ -7,6 +7,90 @@ var L = {
     d = Number(d);
     return d >= 2 ? "+"+Math.round((d-1)*100) : Math.round(-100/(d-1));
   },
+  /* Kalshi prediction-market cents -> American moneyline, for the odds board's
+     no-key "market line" fallback. p is whole cents (1..99); 50c is even money.
+     A cent price implies prob p/100, i.e. decimal odds 100/p — the same
+     dec2am path the board's fair lines use. Returns "+144" / "-133" style, or
+     null when there's nothing priceable (settled extremes are filtered out
+     before this is ever called; this guard is belt-and-suspenders). */
+  centsToAm: function(p){
+    p = Number(p);
+    if(!isFinite(p) || p <= 0 || p >= 100) return null;
+    return String(L.dec2am(100/p));
+  },
+  /* ---------- no-key "market line" fallback (odds board) ----------
+     Pure HTML builders for the Kalshi snapshot section the odds board shows
+     when the visitor hasn't connected an Odds API key. `games` are normalized
+     via Kalshi.games() with settled games already filtered out by the caller;
+     `updatedAt` is the snapshot's ISO timestamp; `isStale` comes from
+     Kalshi.stale() so this module never owns the staleness rule. Every price
+     is a real snapshot number, never invented; every string escaped. Returns
+     "" when there is nothing priceable to show (caller then renders the
+     plain no-key state). */
+  mkEsc: function(s){
+    return String(s == null ? "" : s).replace(/[&<>\"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; });
+  },
+  mkWhen: function(ms){
+    if(ms === null || ms === undefined || !isFinite(ms)) return "";
+    try{
+      var d = new Date(ms);
+      return d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+
+        " · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+    }catch(e){ return ""; }
+  },
+  marketTeamRow: function(t){
+    var am = L.centsToAm(t.price);
+    if(am === null) return "";
+    var book = t.book ? "book "+t.book.bid+"\u2013"+t.book.ask+"\u00a2" : "";
+    var vol = t.vol ? '<span style="color:var(--faint);font-weight:400"> · '+L.mkEsc(t.vol)+"</span>" : "";
+    return '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line-soft)">'+
+      '<div style="min-width:0"><strong style="color:var(--text)">'+L.mkEsc(t.name)+"</strong>"+vol+"</div>"+
+      '<div style="display:flex;align-items:baseline;gap:12px;white-space:nowrap">'+
+        '<span class="num" style="color:var(--muted);font-size:.82rem" title="Midpoint of the Kalshi bid/ask book">'+t.price+"\u00a2"+
+          (book ? ' <span style="color:var(--faint);font-size:.72rem">('+L.mkEsc(book)+")</span>" : "")+"</span>"+
+        '<span class="num" style="font-weight:800;color:var(--gold);font-size:1.02rem;min-width:58px;text-align:right">'+L.mkEsc(am)+"</span>"+
+      "</div></div>";
+  },
+  marketGameCard: function(g, when){
+    var rows = (g.teams||[]).map(L.marketTeamRow).join("");
+    if(!rows) return "";
+    /* The date line uses Kalshi's own sub_title ("PIT vs CLE (Oct 1)") — NOT
+       the market close_time, which Kalshi sets days after kickoff (in-play
+       trading window), so formatting it as the game time would mislead. */
+    var t = g.sub ? L.mkEsc(g.sub) : "";
+    return '<div class="card game-card">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">'+
+        '<h3 style="margin:0;font-size:1rem">'+L.mkEsc(g.title)+'</h3><span class="tag green">Kalshi</span></div>'+
+      '<div class="game-meta" style="margin-bottom:4px">'+
+        (t ? "<span>"+t+"</span>" : "")+
+        (when ? "<span>snapshot "+L.mkEsc(when)+"</span>" : "")+"</div>"+
+      rows+
+      '<p style="margin:10px 0 0;font-size:.75rem;color:var(--faint)">A '+L.mkEsc(String((g.teams[0]||{}).price||""))+
+        "\u00a2 contract pays $1 if that team wins — the price is the market's implied chance.</p>"+
+    "</div>";
+  },
+  marketSectionHtml: function(games, updatedAt, isStale){
+    games = (games||[]).filter(function(g){ return g && g.teams && g.teams.length >= 2; });
+    if(!games.length) return "";
+    var when = L.mkWhen(Date.parse(updatedAt || ""));
+    if(isStale){
+      return '<div class="notice" style="margin-bottom:18px"><span class="tag green">Kalshi</span> '+
+        "<strong>Snapshot is stale</strong> (over 6 hours old) — prices withheld until the next refresh. "+
+        "Add your free Odds API key above for live sportsbook lines.</div>";
+    }
+    var cards = games.map(function(g){ return L.marketGameCard(g, when); }).join("");
+    if(!cards) return "";
+    return '<div style="margin-bottom:26px">'+
+      '<div class="section-head" style="margin-bottom:10px"><div>'+
+        '<span class="kicker">Market line · no key needed</span><h2>Real prices, right now</h2></div>'+
+        '<a class="btn btn-ghost btn-sm" href="markets.html">Full prediction markets →</a></div>'+
+      '<p style="max-width:760px;color:var(--muted);font-size:.9rem;margin:0 0 14px">Live <strong style="color:var(--text)">Kalshi</strong> '+
+        "prediction-market prices — real money on both sides — from our server snapshot"+
+        (when ? ", updated "+L.mkEsc(when) : "")+
+        ". Add your free Odds API key above to stack sportsbook lines against the market.</p>"+
+      '<div class="grid grid-2">'+cards+"</div></div>";
+  },
   fmtPt: function(p){ return (p>0?"+":"")+p; },
   shortName: function(name){ return String(name).split(" ").pop(); },
   /* Odds API sport keys -> teams.json identity-league keys. College leagues
