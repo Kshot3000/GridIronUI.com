@@ -51,6 +51,39 @@ assert(HS.kickoffIn("", NOW) === null, "kickoffIn: empty date -> null");
 assert(HS.kickoffIn(new Date(NOW + 1440*MIN).toISOString(), NOW) === "Kickoff in 1d 0h",
   "kickoffIn: exactly 24h -> day format");
 
+/* ---- kickoffIn noun arg (v1.129.1 sport-aware countdown) ---- */
+assert(HS.kickoffIn(new Date(NOW + 90*MIN).toISOString(), NOW, "First pitch") === "First pitch in 1h 30m",
+  "kickoffIn: noun arg replaces the leading noun");
+assert(HS.kickoffIn(new Date(NOW + 45*MIN).toISOString(), NOW, "Tip-off") === "Tip-off in 45m",
+  "kickoffIn: noun arg works in the minutes format");
+assert(HS.kickoffIn(new Date(NOW + 3*1440*MIN).toISOString(), NOW, "Puck drop") === "Puck drop in 3d 0h",
+  "kickoffIn: noun arg works in the day format");
+assert(HS.kickoffIn(new Date(NOW + 90*MIN).toISOString(), NOW, undefined) === "Kickoff in 1h 30m",
+  "kickoffIn: undefined noun keeps the Kickoff default");
+assert(HS.kickoffIn(new Date(NOW + 90*MIN).toISOString(), NOW, "") === "Kickoff in 1h 30m",
+  "kickoffIn: empty noun keeps the Kickoff default");
+assert(HS.kickoffIn("not-a-date", NOW, "First pitch") === null,
+  "kickoffIn: garbage date still -> null with a noun");
+
+/* ---- gameNoun (v1.129.1 sport-aware countdown) ---- */
+assert(HS.gameNoun("NFL") === "Kickoff", "gameNoun: NFL -> Kickoff");
+assert(HS.gameNoun("MLB") === "First pitch", "gameNoun: MLB -> First pitch");
+assert(HS.gameNoun("NBA") === "Tip-off", "gameNoun: NBA -> Tip-off");
+assert(HS.gameNoun("NHL") === "Puck drop", "gameNoun: NHL -> Puck drop");
+assert(HS.gameNoun("mlb") === "First pitch", "gameNoun: case-insensitive (mlb)");
+assert(HS.gameNoun("Mlb") === "First pitch", "gameNoun: case-insensitive (Mlb)");
+assert(HS.gameNoun("EPL") === "Kick-off", "gameNoun: EPL -> Kick-off");
+assert(HS.gameNoun("CFB") === "Kickoff", "gameNoun: unknown league -> Kickoff");
+assert(HS.gameNoun("") === "Kickoff", "gameNoun: empty -> Kickoff");
+assert(HS.gameNoun(null) === "Kickoff", "gameNoun: null -> Kickoff");
+assert(HS.gameNoun(undefined) === "Kickoff", "gameNoun: undefined -> Kickoff");
+assert(HS.gameNoun(42) === "Kickoff", "gameNoun: non-string -> Kickoff");
+/* The shipped leagues each get a real noun, never the default by accident. */
+HS.LEAGUES.forEach(function(pair){
+  assert(typeof HS.gameNoun(pair[1]) === "string" && HS.gameNoun(pair[1]).length > 0,
+    "gameNoun: shipped league label has a noun ("+pair[1]+")");
+});
+
 /* ---- nearestPre ---- */
 function mkrow(id, state, dateIso){
   return {id: id, league: "NFL", state: state, date: dateIso,
@@ -77,6 +110,8 @@ assert(HS.nearestPre([], NOW) === null, "nearestPre: empty rows -> null");
 var html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 assert(html.indexOf("js/home-strip.js?v=1.129.1") !== -1, "index.html pins home-strip.js?v=1.129.1");
 assert(html.indexOf("data-kickoff") !== -1, "index.html renders the countdown slot");
+assert(html.indexOf('data-league="') !== -1, "index.html tags the countdown slot with its league");
+assert(html.indexOf("HS.gameNoun(") !== -1, "index.html passes the league through the noun for the ticker");
 assert(html.indexOf("setInterval(tickCd, 60000)") !== -1, "index.html arms the 60s countdown tick");
 assert(html.indexOf("\uD83D\uDCFA") !== -1, "index.html renders the TV chip");
 
