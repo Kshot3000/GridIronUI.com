@@ -3,7 +3,18 @@
    now resolves to "Paramount Plus - YouTube"), so a label that points at the wrong
    channel is a quiet honesty bug: the playlist playing under "CBS Sports" would be
    Paramount Plus uploads. This test pins every channel/playlist id on the page to
-   the ids verified live on 2026-09-29 (channel page <title> + working embeds playlist).
+   the ids verified live on 2026-10-01 (channel page <title> + working embeds playlist
+   + @handle canonicalization where available).
+   Re-verification 2026-10-01 found real drift since the 2026-09-29 pin:
+   - ESPN's two channels swapped display names: UCiWLfSweyRNmLpgEHekhoAg is now
+     titled "ESPN" (also what youtube.com/@ESPN canonicalizes to; First Take /
+     30 for 30 content) while UCiio0ydw439X13KyZgMIcHw is now titled
+     "NFL on ESPN" (Get Up / NFL Live / NFL Countdown content). The channel IDs
+     never moved — the labels did — so watch.html points each label at its
+     correct channel again.
+   - FOX Sports rebranded its channel to "NFL on FOX" (title "NFL on FOX -
+     YouTube"; canonical handle now @NFLonFOX). Label updated to the channel's
+     own name; foxsports.com link retained.
    Run: node tests/test-watch-outlets.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -15,16 +26,14 @@ function ok(name, cond, extra){
 }
 var html = fs.readFileSync(path.join(ROOT, "watch.html"), "utf8");
 
-/* Label -> verified channel id (UC form). The CBS Sports id was re-verified
-   2026-09-29: youtube.com/@CBSSports canonicalizes to it and the channel
-   <title> is "CBS Sports - YouTube"; the old id now serves Paramount Plus. */
+/* Label -> verified channel id (UC form). Verified 2026-10-01 as above. */
 var OUTLETS = {
-  "ESPN":          "UCiio0ydw439X13KyZgMIcHw",
-  "FOX Sports":    "UCvQrivswRDGK0lZ_AcUHp8g",
+  "ESPN":          "UCiWLfSweyRNmLpgEHekhoAg",
+  "NFL on FOX":    "UCvQrivswRDGK0lZ_AcUHp8g",
   "CBS Sports":    "UCja8sZ2T4ylIqjggA1Zuukg",
   "NBC Sports":    "UCqZQlzSHbVJrwrn5XvzrzcA",
   "NFL":           "UCDVYQ4Zhbm3S2dlz7P1GBDg",
-  "NFL on ESPN":   "UCiWLfSweyRNmLpgEHekhoAg",
+  "NFL on ESPN":   "UCiio0ydw439X13KyZgMIcHw",
   "Action Network": "UCvv0ade-LVRA2fp9C5-C6hQ",
   "WagerTalk TV":  "UCNLTjT8_c2gyVNDIKf2YwEw"
 };
