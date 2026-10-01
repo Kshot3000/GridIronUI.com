@@ -217,6 +217,48 @@ function seatLocked(cfg, pool, lockedIds){
   return locked;
 }
 
+/* open slot occurrences after locks: indices into cfg.slots not yet consumed,
+   matching the first-fit convention greedy() uses when it removes locked slots.
+   Pure; shared by seatBringBack and the node tests. */
+function openSlotIndices(cfg, locked){
+  var consumed = {};
+  locked.forEach(function(e){ consumed[e.slot]=(consumed[e.slot]||0)+1; });
+  var idxs = [];
+  cfg.slots.forEach(function(s,i){
+    if(consumed[s]>0) consumed[s]--; else idxs.push(i);
+  });
+  return idxs;
+}
+
+/* game-stack bring-back (NFL GPP): seat one opposing-team pass catcher
+   (RB/WR/TE from qb.opp) into the first fitting open slot, after the QB +
+   mates are already locked. Exposure-aware like the stack mates — the least-
+   exposed opponent with the best ceiling wins — so multi-lineup sets spread
+   bring-back exposure instead of pinning one player. Returns {slot,player}
+   or null when no opponent pass catcher can seat (QB rotation moves on).
+   Pure; never invents a player — null means "not this QB". */
+function seatBringBack(cfg, locked, pool, qb, exposures){
+  exposures = exposures||{};
+  if(!qb || !qb.opp) return null;
+  var lockedIds = {};
+  locked.forEach(function(e){ lockedIds[e.player.id]=1; });
+  var cands = pool.filter(function(p){
+    return !lockedIds[p.id] && p.team===qb.opp &&
+           p.pos.some(function(x){ return ["RB","WR","TE"].indexOf(x)!==-1; });
+  }).sort(function(a,b){
+    var ea = exposures[a.id]||0, eb = exposures[b.id]||0;
+    return (ea-eb) || (b.ceil-a.ceil) || (b.proj-a.proj);
+  });
+  var open = openSlotIndices(cfg, locked);
+  for(var c=0;c<cands.length;c++){
+    for(var o=0;o<open.length;o++){
+      if(eligible(cands[c], cfg.slots[open[o]], cfg))
+        return { slot: cfg.slots[open[o]], player: cands[c] };
+    }
+  }
+  return null;
+}
+
 function generate(cfgKey, pool, mode, opts){
   opts = opts||{};
   var cfg = CONFIGS[cfgKey];
@@ -245,6 +287,17 @@ function generate(cfgKey, pool, mode, opts){
      own — piling on more forced mates would squeeze the remaining cap */
   var needStack = (mode==="gpp" && cfg.sport==="NFL");
   var userHasStack = needStack && hasStack(userSeated);
+  /* game-stack bring-back (NFL GPP only): every QB stack also seats one
+     opposing-team pass catcher. Needs opponent info on at least one QB —
+     checked up front for an actionable message instead of silent misses. */
+  var wantBringBack = needStack && !!opts.bringBack;
+  if(wantBringBack){
+    var qbsWithOpp = pool.filter(function(p){
+      return p.pos.indexOf("QB")!==-1 && p.opp && !exclIds[p.id];
+    });
+    if(!qbsWithOpp.length)
+      return fail("Bring-back stacks need opponent info — re-import your DraftKings/FanDuel salary CSV (opponents are auto-detected from Game Info) or add an Opp for each QB, then regenerate.");
+  }
   var numWanted = Math.min(opts.numLineups|| (mode==="cash"?3:20), mode==="cash"?3:20);
   var maxExp = opts.maxExposure!=null?opts.maxExposure:(mode==="cash"?1:0.6);
   /* a cap below 1/numWanted can never accept even one lineup — relax it openly
@@ -259,6 +312,12 @@ function generate(cfgKey, pool, mode, opts){
   var levels = [];
   [minUnique, minUnique-1, 1].forEach(function(l){ if(l>=1 && levels.indexOf(l)===-1) levels.push(l); });
   var qbIdx = 0, banIdx = 0, prevIds = [], finalLevel = minUnique;
+  /* bring-back diagnostics: seat misses (no opponent pass catcher could be
+     seated for a QB) vs cap misses (a bring-back seated but the lineup could
+     not be completed — salary cap, exposure or uniqueness). Used for the
+     honest zero-lineup error below. */
+  var bbSeatMisses = 0, bbCapMisses = 0;
+  function bbCapMiss(){ if(wantBringBack) bbCapMisses++; }
   levels.forEach(function(level){
     if(lineups.length >= numWanted) return;
     finalLevel = level;
@@ -312,26 +371,40 @@ function generate(cfgKey, pool, mode, opts){
         if(!lids[e.player.id]){ locked.push(e); lids[e.player.id]=1; }
       });
     }
+    if(wantBringBack){
+      /* the stack QB is seated by now — user-locked or rotated. One
+         opposing-team pass catcher joins every stack; a QB whose opponent
+         can't seat one is skipped and the rotation moves on. */
+      var qbEntry = locked.filter(function(e){ return e.slot==="QB"; })[0];
+      var bb = qbEntry ? seatBringBack(cfg, locked, effPool, qbEntry.player, exposures) : null;
+      if(!bb){ bbSeatMisses++; continue; }
+      locked.push(bb); lids[bb.player.id]=1;
+    }
     var lu = greedy(cfg, effPool, mode, opts, locked);
-    if(!lu) continue;
+    if(!lu){ bbCapMiss(); continue; }
     lu = hillClimb(cfg, lu, effPool, mode, opts, lids);
     var v = validate(lu, cfg);
-    if(!v.ok) continue;
-    if(needStack && !hasStack(lu)) continue;
+    if(!v.ok){ bbCapMiss(); continue; }
+    if(needStack && !hasStack(lu)){ bbCapMiss(); continue; }
     /* uniqueness */
     var dup = lineups.some(function(o){ return diffCount(o,lu) < level; });
-    if(dup) continue;
+    if(dup){ bbCapMiss(); continue; }
     /* exposure — locked players exempt */
     var maxAfter = 0;
     lu.forEach(function(e){
       if(!userLids[e.player.id]) maxAfter = Math.max(maxAfter, ((exposures[e.player.id]||0)+1)/numWanted);
     });
-    if(maxAfter > maxExp + 1e-9) continue;
+    if(maxAfter > maxExp + 1e-9){ bbCapMiss(); continue; }
     lu.forEach(function(e){ exposures[e.player.id]=(exposures[e.player.id]||0)+1; });
     lineups.push(lu);
     prevIds = lu.map(function(e){ return e.player.id; });
   }
   });
+  if(wantBringBack && !lineups.length && (bbSeatMisses>0 || bbCapMisses>0)){
+    if(bbCapMisses===0)
+      return fail("No QB stack could seat a bring-back — the pool needs an opposing-team RB/WR/TE with an open eligible slot for at least one stacked game. Add opponent pass-catchers, or turn the bring-back off and regenerate.");
+    return fail("Couldn't finish any lineups with the bring-back on — with 4 locked stack players the salary cap, exposure cap or uniqueness rule may be impossible to satisfy. Add cheaper players, raise Max exposure, or turn the bring-back off and regenerate.");
+  }
   return { lineups: lineups, exposures: exposures, config: cfg, relaxed: finalLevel < minUnique,
            capRelaxed: capRelaxed, askedExp: askedExp, effExp: maxExp };
 }
@@ -431,11 +504,11 @@ function buildDemoSlate(cfg){
 
 if(typeof module !== "undefined" && module.exports){
   module.exports = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
-    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, generate:generate,
+    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, openSlotIndices:openSlotIndices, seatBringBack:seatBringBack, generate:generate,
     insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor, value:value,
     buildDemoSlate:buildDemoSlate };
 } else { window.DFSOpt = { CONFIGS:CONFIGS, eligible:eligible, validate:validate, scoreLineup:scoreLineup,
-    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, generate:generate,
+    greedy:greedy, hillClimb:hillClimb, hasStack:hasStack, buildStackCore:buildStackCore, seatLocked:seatLocked, openSlotIndices:openSlotIndices, seatBringBack:seatBringBack, generate:generate,
     insights:insights, exposureSummary:exposureSummary, salary:salary, proj:proj, ceil:ceil, floor:floor, value:value,
     buildDemoSlate:buildDemoSlate }; }
 })();

@@ -86,6 +86,7 @@ node tests/test-dfs-dkimport.js  # DK/FD salary-CSV import: DK headers (Name/Tea
 node tests/test-dfs-export.js  # uploader-ready DFS export: site IDs preserved at import (DK "ID" col / "Name + ID" suffix fallback, FD "Id"), Export CSV writes DK "Name (ID)" / FD player-ID cells with quote escaping and no-ID fallback (shipped js/dfs.js)
 node tests/test-dfs-lockout.js  # DFS lock/exclude logic
 node tests/test-dfs-wx.js     # DFS game-conditions weather cross-check: pool teams -> NFL scoreboard, 16-day horizon, roof splitting, multi-location Open-Meteo URL, DFS angle copy, panel honesty, shipped dfs.html/dfs.js wiring pins
+node tests/test-dfs-bringback.js  # DFS GPP game-stack bring-back (NFL only): opposing-team pass-catcher seated with every QB stack, exposure-aware pick, opp-missing/opponent-less/cap-broken error paths, cash/NBA ignore the flag, shipped wiring pins
 node tests/test-ai-coach.js   # AI coach directive/context/validation tests
 node tests/test-ai-coach-chain.js  # AI coach provider chain: failover order, credits-error detection, attempt recording
 node tests/test-ai-coach-keyrow.js  # AI coach Gemini-key row: password input width:100% keeps its size=20 min-content from forcing a 411px mobile viewport

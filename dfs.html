@@ -108,9 +108,17 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
         <div class="field"><label>Min unique players between lineups</label><input type="number" id="minUni" value="3" min="1" max="9"></div>
         <div class="field"><label>Cash volatility penalty</label><input type="number" id="volPen" value="0.5" min="0" max="2" step="0.1"></div>
       </div>
+      <div class="form-row" id="bringBackRow" style="display:none">
+        <div class="field" style="margin:0">
+          <label style="display:flex;gap:9px;align-items:flex-start;cursor:pointer;font-weight:400">
+            <input type="checkbox" id="bringBack" style="margin-top:5px;flex:none">
+            <span><b style="color:var(--text)">Game-stack bring-back</b> <span style="color:var(--faint)">(NFL tournaments)</span> — seat one opposing-team pass-catcher with every QB stack, so a shootout pays on both sides.</span>
+          </label>
+        </div>
+      </div>
       <button class="btn btn-gold" id="runOpt">⚙️ Generate lineups</button>
       <div class="notice" style="margin:16px 0 0;font-size:.85rem">
-        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. The <b>exposure summary</b> under your results shows each player's share of lineups, so you can spot when you're overweight on a play. A <b>🌬️ game-conditions strip</b> shows real stadium forecasts (wind, rain, roof status) for the NFL games your pool plays in — wind moves totals and the passing game, so check it before you lock pass-catchers and kickers. The pool table has a <b>Value</b> column (projected points per $1k of salary, <span class="val-star">★</span> marks the top-3) plus a search box, position filter and clickable column sorting — handy once an imported CSV puts 100+ players in the pool. <b>No AI, no magic</b> — just math you can audit. <b>Export CSV</b> writes the sites' bulk-uploader cell format — DraftKings gets <i>Name (ID)</i> using the player IDs captured from your salary export, FanDuel gets the FD player ID — so generated lineups drop straight into the site's uploader instead of being retyped. Players with no captured ID export as plain names; always sanity-check one lineup against the site's Download Template for your contest before uploading.
+        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. The optional <b>game-stack bring-back</b> (NFL tournaments) seats one opposing-team pass-catcher alongside every QB stack — shootout upside on both sides. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. The <b>exposure summary</b> under your results shows each player's share of lineups, so you can spot when you're overweight on a play. A <b>🌬️ game-conditions strip</b> shows real stadium forecasts (wind, rain, roof status) for the NFL games your pool plays in — wind moves totals and the passing game, so check it before you lock pass-catchers and kickers. The pool table has a <b>Value</b> column (projected points per $1k of salary, <span class="val-star">★</span> marks the top-3) plus a search box, position filter and clickable column sorting — handy once an imported CSV puts 100+ players in the pool. <b>No AI, no magic</b> — just math you can audit. <b>Export CSV</b> writes the sites' bulk-uploader cell format — DraftKings gets <i>Name (ID)</i> using the player IDs captured from your salary export, FanDuel gets the FD player ID — so generated lineups drop straight into the site's uploader instead of being retyped. Players with no captured ID export as plain names; always sanity-check one lineup against the site's Download Template for your contest before uploading.
       </div>
     </div>
   </div>
@@ -151,9 +159,9 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/dfs-opt.js?v=1.55.0"></script>
+<script src="js/dfs-opt.js?v=1.132.0"></script>
 <script src="js/dfs-injuries.js?v=1.36.0"></script>
 <script src="js/dfs-wx.js?v=1.123.0"></script>
-<script src="js/dfs.js?v=1.123.0"></script>
+<script src="js/dfs.js?v=1.132.0"></script>
 </body>
 </html>

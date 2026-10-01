@@ -609,8 +609,15 @@ tabWire("sportTabs","data-v",function(v){ sport=v; setCfg(); });
 tabWire("modeTabs","data-v",function(v){ mode=v;
   $("numLineups").max = mode==="cash"?3:20;
   if(Number($("numLineups").value) > Number($("numLineups").max)) $("numLineups").value = $("numLineups").max;
+  syncBringBackRow();
 });
-function setCfg(){ cfgKey = site+"_"+sport; poolSort = { col:null, dir:1 }; loadStored(); renderPool(); }
+/* game-stack bring-back only applies to NFL tournaments — the option row
+   stays out of the way for cash games and NBA. */
+function syncBringBackRow(){
+  var row = $("bringBackRow");
+  if(row) row.style.display = (mode==="gpp" && sport==="NFL") ? "" : "none";
+}
+function setCfg(){ cfgKey = site+"_"+sport; poolSort = { col:null, dir:1 }; loadStored(); renderPool(); syncBringBackRow(); }
 
 /* ---------- optimize ---------- */
 $("runOpt").addEventListener("click", function(){
@@ -626,21 +633,23 @@ $("runOpt").addEventListener("click", function(){
       minUni = Number($("minUni").value)||3,
       lockIds = pool.filter(function(p){ return p.locked; }).map(function(p){ return p.id; });
   var t0 = performance.now();
+  var bringBackOn = !!($("bringBack") && $("bringBack").checked && mode==="gpp" && sport==="NFL");
   var res = OPT.generate(cfgKey, pool, mode, {
     numLineups: n,
     maxExposure: maxExp,
     minUnique: minUni,
     volPenalty: Number($("volPen").value)||0.5,
+    bringBack: bringBackOn,
     locked: lockIds,
     excluded: pool.filter(function(p){ return p.banned; }).map(function(p){ return p.id; })
   });
   var ms = Math.round(performance.now()-t0);
-  renderResults(res, ms, n, {locked:lockIds, maxExp:maxExp, minUnique:minUni});
+  renderResults(res, ms, n, {locked:lockIds, maxExp:maxExp, minUnique:minUni, bringBack:bringBackOn});
 });
 function renderResults(res, ms, wanted, extra){
   var c = cfg(), box = $("results"), x = extra||{};
   if(res.error){
-    box.innerHTML = '<div class="notice red"><strong>Can\'t build with these locks.</strong> '+OPT_esc(res.error)+' Adjust locks or the pool and try again.</div>';
+    box.innerHTML = '<div class="notice red"><strong>Can\'t build lineups.</strong> '+OPT_esc(res.error)+' Adjust locks or the pool and try again.</div>';
     return;
   }
   if(!res.lineups.length){
@@ -692,7 +701,7 @@ function renderResults(res, ms, wanted, extra){
       '<div class="table-scroll"><table class="data"><caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">Player exposure across generated lineups</caption>'+
       '<thead><tr><th>Player</th><th>Team</th><th>Lineups</th><th>Share</th></tr></thead><tbody>'+body+'</tbody></table></div></details>';
   }
-  box.innerHTML = note + note2 + '<p style="color:var(--faint);font-size:.85rem">'+got+' of '+wanted+' requested lineups · optimized in '+ms+'ms · all lineups hard-validated (cap, positions, no duplicates'+(mode==="gpp"&&c.sport==="NFL"?", QB stacks":"")+').</p>' +
+  box.innerHTML = note + note2 + '<p style="color:var(--faint);font-size:.85rem">'+got+' of '+wanted+' requested lineups · optimized in '+ms+'ms · all lineups hard-validated (cap, positions, no duplicates'+(mode==="gpp"&&c.sport==="NFL"?", QB stacks"+(x.bringBack?", bring-backs":""):"")+').</p>' +
   expHtml +
   res.lineups.map(function(lu, i){
     var totS = OPT.salary(lu), totP = OPT.proj(lu), totC = OPT.ceil(lu);

@@ -167,7 +167,7 @@ var dfsHtml = fs.readFileSync(path.join(__dirname, "../dfs.html"), "utf8");
 assert(/id="wxPanel"/.test(dfsHtml), "dfs.html carries the #wxPanel container");
 assert(dfsHtml.indexOf('js/wx-shared.js?v=1.91.0') !== -1, "dfs.html includes wx-shared (venue truth + impact model)");
 assert(dfsHtml.indexOf('js/dfs-wx.js?v=1.123.0') !== -1, "dfs.html pins dfs-wx.js?v=1.123.0");
-assert(dfsHtml.indexOf('js/dfs.js?v=1.123.0') !== -1, "dfs.html pins dfs.js?v=1.123.0");
+assert(dfsHtml.indexOf('js/dfs.js?v=1.132.0') !== -1, "dfs.html pins dfs.js?v=1.132.0");
 assert(/<script src="js\/wx-shared\.js[^>]*>[\s\S]*<script src="js\/dfs-wx\.js/.test(dfsHtml),
        "wx-shared loads before dfs-wx");
 var dfsJs = fs.readFileSync(path.join(__dirname, "../js/dfs.js"), "utf8");
