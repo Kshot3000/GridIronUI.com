@@ -39,7 +39,7 @@ var L = {
         " · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
     }catch(e){ return ""; }
   },
-  marketTeamRow: function(t){
+  marketTeamRow: function(t, badge){
     var am = L.centsToAm(t.price);
     if(am === null) return "";
     var book = t.book ? "book "+t.book.bid+"\u2013"+t.book.ask+"\u00a2" : "";
@@ -48,12 +48,21 @@ var L = {
       '<div style="min-width:0"><strong style="color:var(--text)">'+L.mkEsc(t.name)+"</strong>"+vol+"</div>"+
       '<div style="display:flex;align-items:baseline;gap:12px;white-space:nowrap">'+
         '<span class="num" style="color:var(--muted);font-size:.82rem" title="Midpoint of the Kalshi bid/ask book">'+t.price+"\u00a2"+
-          (book ? ' <span style="color:var(--faint);font-size:.72rem">('+L.mkEsc(book)+")</span>" : "")+"</span>"+
+          (book ? ' <span style="color:var(--faint);font-size:.72rem">('+L.mkEsc(book)+")</span>" : "")+(badge||"")+"</span>"+
         '<span class="num" style="font-weight:800;color:var(--gold);font-size:1.02rem;min-width:58px;text-align:right">'+L.mkEsc(am)+"</span>"+
       "</div></div>";
   },
-  marketGameCard: function(g, when){
-    var rows = (g.teams||[]).map(L.marketTeamRow).join("");
+  marketGameCard: function(g, when, moveMap, prevAt){
+    /* moveMap is an optional {teamName: delta} for this game, from the
+       snapshot's baked snapshot-to-snapshot diff (K.diffMoves contract).
+       kalshi-logic.js loads after this module on odds.html, so the badge
+       builder is resolved at call time, never at load time. */
+    var badgeFor = function(team){
+      if(typeof window !== "undefined" && window.Kalshi && window.Kalshi.moveBadge && moveMap)
+        return window.Kalshi.moveBadge(moveMap[team], team, prevAt);
+      return "";
+    };
+    var rows = (g.teams||[]).map(function(t){ return L.marketTeamRow(t, badgeFor(t.name)); }).join("");
     if(!rows) return "";
     /* The date line uses Kalshi's own sub_title ("PIT vs CLE (Oct 1)") — NOT
        the market close_time, which Kalshi sets days after kickoff (in-play
@@ -70,7 +79,7 @@ var L = {
         "\u00a2 contract pays $1 if that team wins — the price is the market's implied chance.</p>"+
     "</div>";
   },
-  marketSectionHtml: function(games, updatedAt, isStale){
+  marketSectionHtml: function(games, updatedAt, isStale, moves, prevAt){
     games = (games||[]).filter(function(g){ return g && g.teams && g.teams.length >= 2; });
     if(!games.length) return "";
     var when = L.mkWhen(Date.parse(updatedAt || ""));
@@ -79,7 +88,15 @@ var L = {
         "<strong>Snapshot is stale</strong> (over 6 hours old) — prices withheld until the next refresh. "+
         "Add your free Odds API key above for live sportsbook lines.</div>";
     }
-    var cards = games.map(function(g){ return L.marketGameCard(g, when); }).join("");
+    /* Snapshot-to-snapshot moves ride along when the caller passes the
+       snapshot's baked diff (odds.js does); without it the cards render
+       exactly as before — the section degrades, never breaks. */
+    var moveMap = {};
+    (moves || []).forEach(function(mv){
+      if(!mv || !mv.event_ticker) return;
+      (moveMap[mv.event_ticker] = moveMap[mv.event_ticker] || {})[mv.team] = mv.delta;
+    });
+    var cards = games.map(function(g){ return L.marketGameCard(g, when, moveMap[g.ticker], prevAt); }).join("");
     if(!cards) return "";
     return '<div style="margin-bottom:26px">'+
       '<div class="section-head" style="margin-bottom:10px"><div>'+

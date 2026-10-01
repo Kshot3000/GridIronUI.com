@@ -184,7 +184,8 @@ function renderMarketFallback(){
     if(seq !== renderSeq || key) return; /* tab switched or key added mid-flight */
     var games = window.Kalshi.games(d).filter(function(g){ return !g.settled; });
     var html = window.OddsLogic.marketSectionHtml(games, d && d.updated_at,
-                                                  window.Kalshi.stale(d && d.updated_at));
+                                                  window.Kalshi.stale(d && d.updated_at),
+                                                  d && d.moves, d && d.prev_at);
     board.innerHTML = html + noKeyBoardHtml(!!html);
   }).catch(function(){
     if(seq !== renderSeq || key) return;

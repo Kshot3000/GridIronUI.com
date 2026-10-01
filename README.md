@@ -159,6 +159,7 @@ node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific
 node tests/test-kalshi-mlb-snapshot.js # Kalshi MLB postseason snapshot honesty (KXMLBGAME series, 2-winner-markets shape, fetcher --series/--out args, markets + predictions wiring)
 node tests/test-kalshi-settled.js # settled-game detection in js/kalshi-logic.js (99c/1c signature, settled games flagged + sorted last)
 node tests/test-kalshi-showall.js # Kalshi tab "Show all N games" pagination (first page of 12, expand/collapse, state survives silent refresh, no toggle under a page)
+node tests/test-kalshi-moves.js # Kalshi "what moved" badges (K.diffMoves spec: 2c bar, settled exclusion, new-game tags; K.moveBadge HTML; OL badge rendering; baked snapshot shape; shipped wiring pins)
 node tests/test-pm-events.js # Polymarket events feed ordering: GIU.pmEventsUrl orders by true game time (startTime) not creation date (startDate), all three consumers wired via the shared builder
 node tests/test-ev.js        # expected-value math (fair price -> zero EV, +EV/-EV cases, break-even, garbage-in throws)
 node tests/test-ev-dom.js    # EV calculator wiring in shipped tools.js (verdicts, dollar/edge math, formats, default stake, errors)

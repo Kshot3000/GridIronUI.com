@@ -328,7 +328,7 @@ function kalshiAbbrs(g){
   var m = String((g&&g.sub)||"").match(/^([A-Z]{2,3})\s+vs\s+([A-Z]{2,3})\b/);
   return m ? [m[1], m[2]] : null;
 }
-function kalshiCard(g, dir, cfg){
+function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt){
   var ab = kalshiAbbrs(g);
   /* Kalshi's abbreviations don't always match ESPN's (CWS vs CHW) — run them
      through the shared alias map so the header keeps full team identity. */
@@ -337,6 +337,18 @@ function kalshiCard(g, dir, cfg){
   var head = (ab && window.GIU.vsHeader(dir, cfg.dirKey, ab[0], ab[1])) ||
     '<h3 style="margin:10px 0 4px">'+GIU.esc(g.title)+'</h3>';
   var meta = g.sub ? '<div class="game-meta" style="margin-bottom:12px"><span>'+GIU.esc(g.sub)+'</span></div>' : '<div style="height:8px"></div>';
+  /* Snapshot-to-snapshot price moves, baked into the file by the fetch
+     script (see K.diffMoves): a badge on the team whose price moved 2c+
+     since the previous snapshot. moveBadge returns "" for anything below
+     the bar, so the row stays clean when nothing moved. */
+  var badgeFor = function(team){
+    if(window.Kalshi && window.Kalshi.moveBadge && moveMap)
+      return window.Kalshi.moveBadge(moveMap[team], team, prevAt);
+    return "";
+  };
+  var newTag = isNew
+    ? ' <span class="tag gold" title="This game wasn\'t in the previous Kalshi snapshot — a new market on the board.">new market</span>'
+    : "";
   if(g.settled){
     /* Settled game (Kalshi keeps finished games in its "open" listing until
        settlement finalizes): show the RESULT honestly, never as a live
@@ -355,12 +367,12 @@ function kalshiCard(g, dir, cfg){
         '<span class="tag '+t.book.cls+'" title="Live bid/ask spread from Kalshi\'s order book at snapshot time — the gap between the best buy and sell price.">'+t.book.spread+'¢ spread · '+t.book.lbl+'</span>'
       : "";
     return '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:var(--faint);margin-bottom:5px">Yes — '+GIU.esc(t.name)+'</div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:4px"><span>'+GIU.esc(t.name)+' wins</span><b class="num" style="color:var(--gold-soft)">'+t.price+'¢</b></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:4px"><span>'+GIU.esc(t.name)+' wins</span><b class="num" style="color:var(--gold-soft)">'+t.price+'¢'+badgeFor(t.name)+'</b></div>'+
       '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:6px" role="img" aria-label="'+GIU.esc(t.name)+' priced at '+t.price+' cents"><div style="height:100%;width:'+t.price+'%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'+
       '<div style="font-size:.76rem;color:var(--faint)">'+(t.vol ? GIU.esc(t.vol) : "No volume reported")+book+'</div></div>';
   }).join("");
   return '<div class="card"><span class="tag green">Kalshi</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+
-    '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+
+    '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+newTag+
     head+meta+
     rows+
     '<div class="game-meta"><a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi →</a></div></div>';
@@ -395,7 +407,20 @@ function loadKalshi(my, silent, league){
       : "";
     var showAll = !!kalshiShowAll[league];
     var shown = showAll ? games : games.slice(0, KALSHI_PAGE);
-    box.innerHTML = stale + shown.map(function(g){ return kalshiCard(g, dir, cfg); }).join("") +
+    /* "What moved" wiring: the fetch script bakes a snapshot-to-snapshot
+       diff into the file (K.diffMoves contract). Index it by event ticker
+       so each card can badge the teams whose price moved 2c+ since the
+       previous snapshot — and tag games that weren't listed before. */
+    var moveMap = {}, newSet = {};
+    (snap.moves || []).forEach(function(mv){
+      if(!mv || !mv.event_ticker) return;
+      (moveMap[mv.event_ticker] = moveMap[mv.event_ticker] || {})[mv.team] = mv.delta;
+    });
+    (snap.new_games || []).forEach(function(et){ if(et) newSet[et] = 1; });
+    var prevAt = snap.prev_at || null;
+    box.innerHTML = stale + shown.map(function(g){
+      return kalshiCard(g, dir, cfg, moveMap[g.ticker], !!newSet[g.ticker], prevAt);
+    }).join("") +
       (games.length > KALSHI_PAGE
         ? '<div style="margin:8px 0 34px;text-align:center"><button class="btn btn-ghost" id="kalshiShowAll" aria-expanded="'+showAll+'">'+
           (showAll ? "Show fewer games" : "Show all "+games.length+" games")+'</button></div>'

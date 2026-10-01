@@ -118,6 +118,88 @@ function kesc(s){
   });
 }
 
+/* Snapshot-to-snapshot price-move diff — the executable contract for the
+   "what moved" badges. scripts/fetch-kalshi.py implements this same
+   algorithm in Python when it rebuilds the snapshot and bakes the result
+   into the file as {prev_at, moves, new_games}; this function is the
+   node-testable spec of that contract (the page itself never calls it —
+   it renders the baked data).
+
+   Returns {prev_at, moves, new_games}:
+   - moves: [{event_ticker, team, delta, prev, now}] for winner markets whose
+     Yes price moved at least `minDelta` cents (default 2) between snapshots.
+     Prices use K.price (midpoint of bid/ask, else last trade).
+   - new_games: [event_ticker] for games in the current snapshot that were
+     not in the previous one.
+   - prev_at: the previous snapshot's updated_at, or null when there is no
+     baseline (first snapshot — then moves and new_games are empty, because
+     "new" is meaningless without a baseline).
+   Settled games are excluded on both sides: a finished game's 99c/1c prices
+   are a result, not a prediction, and would manufacture fake giant moves.
+   Carried-forward stale entries (fetch script couldn't re-pull a game) keep
+   their old prices, so they diff to zero and earn no badge — honestly quiet.
+   Non-winner ("other") markets are ignored. */
+K.diffMoves = function(prevSnap, curSnap, minDelta){
+  minDelta = (minDelta === undefined || minDelta === null) ? 2 : minDelta;
+  var out = {prev_at: null, moves: [], new_games: []};
+  var prevGames = {}, prevOk = false;
+  ((prevSnap && prevSnap.games) || []).forEach(function(g){
+    if(g && g.event_ticker){ prevGames[g.event_ticker] = g; prevOk = true; }
+  });
+  if(prevSnap && prevSnap.updated_at && prevOk) out.prev_at = prevSnap.updated_at;
+  var seen = {};
+  ((curSnap && curSnap.games) || []).forEach(function(g){
+    var et = g && g.event_ticker;
+    if(!et || seen[et]) return;
+    seen[et] = 1;
+    var pg = prevGames[et];
+    if(!pg){
+      if(out.prev_at && !K.settled(g)) out.new_games.push(et);
+      return;
+    }
+    if(K.settled(g) || K.settled(pg)) return; /* finished — not a move */
+    var was = {};
+    (pg.markets || []).forEach(function(m){
+      if(m && m.kind !== "other" && m.team){
+        var p = K.price(m);
+        if(p !== null) was[m.team] = p;
+      }
+    });
+    (g.markets || []).forEach(function(m){
+      if(!m || m.kind === "other" || !m.team) return;
+      var now = K.price(m), before = was[m.team];
+      if(now === null || before === undefined || before === null) return;
+      var d = now - before;
+      if(Math.abs(d) >= minDelta)
+        out.moves.push({event_ticker: et, team: m.team, delta: d, prev: before, now: now});
+    });
+  });
+  return out;
+};
+
+/* Move badge HTML for one team: "▲ +3¢" / "▼ −2¢" in the shared mv-up/mv-dn
+   classes, with a title naming the baseline snapshot. Returns "" for moves
+   below the 2¢ bar or garbage input — the caller decides nothing, the badge
+   simply doesn't render. All text escaped. */
+K.moveBadge = function(delta, team, prevAt){
+  var d = Number(delta);
+  if(!isFinite(d) || Math.abs(d) < 2) return "";
+  var ad = Math.abs(Math.round(d));
+  var cls = d > 0 ? "mv-up" : "mv-dn";
+  var glyph = d > 0 ? "\u25b2 +" : "\u25bc \u2212";
+  var when = "";
+  if(prevAt){
+    var w = K.fmtWhen(Date.parse(prevAt));
+    when = w ? " since the " + w + " snapshot" : " since the previous snapshot";
+  } else {
+    when = " since the previous snapshot";
+  }
+  var lean = d > 0 ? "toward" : "away from";
+  var tip = "Moved " + ad + "\u00a2" + when +
+    " \u2014 the Kalshi crowd is leaning " + lean + " " + String(team == null ? "" : team) + ".";
+  return ' <span class="' + cls + '" title="' + kesc(tip) + '">' + glyph + ad + "\u00a2</span>";
+};
+
 /* Compact "Kalshi says" line for the predictions page: the snapshot's two
    prices for one game, labeled with the snapshot time, plus the gap versus
    the Polymarket price (pmA, whole cents) when supplied — two real-money

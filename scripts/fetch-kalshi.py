@@ -10,6 +10,18 @@ renders as the "Kalshi NFL" tab.
 Honesty rules: the snapshot carries its own updated_at; the page labels it as
 a snapshot and warns when it goes stale. Nothing here invents a price.
 
+The snapshot also carries a snapshot-to-snapshot diff so the pages can show
+"what moved" badges without keeping history client-side:
+  prev_at   — the previous snapshot's updated_at (null on the first snapshot)
+  moves     — [{event_ticker, team, delta, prev, now}] for winner markets
+              whose Yes price moved >= 2 cents between snapshots
+  new_games — [event_ticker] for games absent from the previous snapshot
+The diff algorithm mirrors K.diffMoves in js/kalshi-logic.js (the JS module
+is the node-testable spec; this function must stay in lockstep with it):
+price = midpoint of yes_bid/yes_ask (JS Math.round semantics), else last;
+settled games are excluded on both sides (a finished game's 99c/1c prices
+are a result, not a move); |delta| < 2c is noise and earns no badge.
+
 Usage:  python3 scripts/fetch-kalshi.py [--series KXNFLGAME] [--out data/kalshi-nfl.json]
         python3 scripts/fetch-kalshi.py --series KXMLBGAME --out data/kalshi-mlb.json
 Refresh cadence: improvement-loop runs refresh this on push whenever the
@@ -17,7 +29,7 @@ snapshot is older than about two hours. (A scheduled GitHub Actions
 workflow is the planned long-term fix — see the goal workspace notes.)
 """
 import argparse
-import json, os, sys, time, urllib.request
+import json, math, os, sys, time, urllib.request
 import urllib.error
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
@@ -99,6 +111,66 @@ def team_from_title(title):
         return t[:-5].strip(), "winner"
     return t or "Team", "other"
 
+def js_price(bid, ask, last):
+    """Mirror of K.price in js/kalshi-logic.js: midpoint of the bid/ask book
+    (integer cents) with JS Math.round semantics, else the last trade."""
+    if bid is not None and ask is not None and bid >= 0 and ask >= bid:
+        return int(math.floor((bid + ask) / 2.0 + 0.5))
+    if last is not None:
+        return int(math.floor(last + 0.5))
+    return None
+
+def settled(markets):
+    """Mirror of K.settled: >=2 priced winner markets, every one at an
+    extreme (<=1c or >=99c), at least one >=99c."""
+    px = [js_price(m.get("yes_bid"), m.get("yes_ask"), m.get("last"))
+          for m in (markets or []) if m.get("kind") != "other"]
+    px = [p for p in px if p is not None]
+    if len(px) < 2:
+        return False
+    return (max(px) >= 99 and min(px) <= 1
+            and all(p <= 1 or p >= 99 for p in px))
+
+def diff_moves(prev_games, prev_at, games, min_delta=2):
+    """Mirror of K.diffMoves in js/kalshi-logic.js. Returns
+    (moves, new_games): moves is [{event_ticker, team, delta, prev, now}],
+    new_games is [event_ticker]. Empty baseline -> ([], []) — without a
+    previous snapshot "new" is meaningless and every game would badge."""
+    moves, new_games = [], []
+    if not prev_at or not prev_games:
+        return moves, new_games
+    seen = set()
+    for g in games:
+        et = (g or {}).get("event_ticker")
+        if not et or et in seen:
+            continue
+        seen.add(et)
+        pg = prev_games.get(et)
+        if pg is None:
+            if not settled(g.get("markets")):
+                new_games.append(et)
+            continue
+        if settled(g.get("markets")) or settled(pg.get("markets")):
+            continue  # finished game — a result, not a move
+        was = {}
+        for m in pg.get("markets") or []:
+            if m.get("kind") != "other" and m.get("team"):
+                p = js_price(m.get("yes_bid"), m.get("yes_ask"), m.get("last"))
+                if p is not None:
+                    was[m["team"]] = p
+        for m in g.get("markets") or []:
+            if m.get("kind") == "other" or not m.get("team"):
+                continue
+            now = js_price(m.get("yes_bid"), m.get("yes_ask"), m.get("last"))
+            before = was.get(m["team"])
+            if now is None or before is None:
+                continue
+            d = now - before
+            if abs(d) >= min_delta:
+                moves.append({"event_ticker": et, "team": m["team"],
+                              "delta": d, "prev": before, "now": now})
+    return moves, new_games
+
 def main(argv=None):
     args = parse_args(argv)
     SERIES, OUT = args.series, args.out
@@ -110,11 +182,16 @@ def main(argv=None):
     # Carry-forward map: if a single event's market pull keeps failing after
     # retries, reuse the previous snapshot's entry for that game (marked
     # stale) instead of silently deleting a real game from the markets page.
-    prev_games = {}
+    # The previous snapshot also feeds the "what moved" diff (moves/new_games
+    # baked into the new file); no previous file -> no baseline -> no badges.
+    prev_games, prev_at = {}, None
     if os.path.exists(OUT):
         try:
             with open(OUT) as f:
-                for g in json.load(f).get("games", []):
+                prev_snap = json.load(f)
+                if isinstance(prev_snap.get("updated_at"), str) and prev_snap["updated_at"]:
+                    prev_at = prev_snap["updated_at"]
+                for g in prev_snap.get("games", []):
                     if g.get("event_ticker"):
                         prev_games[g["event_ticker"]] = g
         except Exception as e:
@@ -164,13 +241,18 @@ def main(argv=None):
         "series_ticker": SERIES,
         "games": games,
     }
+    moves, new_games = diff_moves(prev_games, prev_at, games)
+    snap["prev_at"] = prev_at
+    snap["moves"] = moves
+    snap["new_games"] = new_games
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     tmp = OUT + ".tmp"
     with open(tmp, "w") as f:
         json.dump(snap, f, indent=1)
     os.replace(tmp, OUT)
     n_mk = sum(len(g["markets"]) for g in games)
-    print("wrote %s: %d games, %d markets" % (OUT, len(games), n_mk))
+    print("wrote %s: %d games, %d markets, %d moves, %d new games (prev %s)"
+          % (OUT, len(games), n_mk, len(moves), len(new_games), prev_at or "none"))
 
 if __name__ == "__main__":
     main()
