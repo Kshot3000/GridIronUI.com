@@ -178,7 +178,7 @@ runCase({
       /* ---------- shipped wiring pins ---------- */
       const html = fs.readFileSync(path.join(ROOT, "predictions.html"), "utf8");
       ok("predictions.html has the #predSpot slot", html.indexOf('id="predSpot"') > -1);
-      ok("predictions.js cache key bumped to v1.129.0", html.indexOf("js/predictions.js?v=1.129.0") > -1);
+      ok("predictions.js cache key bumped to v1.135.0", html.indexOf("js/predictions.js?v=1.135.0") > -1);
       ok("home-strip.js included for kickoffIn reuse", html.indexOf("js/home-strip.js?v=1.129.1") > -1);
       ok("home-strip.js loads before predictions.js",
          html.indexOf("js/home-strip.js") < html.indexOf("js/predictions.js"));

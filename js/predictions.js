@@ -178,6 +178,11 @@ function load(key, my, silent){
   my = (my===undefined) ? tabSeq : my;
   clearLive(); /* tab switches and silent refreshes always reschedule */
   if(!silent) skel();
+  /* The snapshot fetch starts now, alongside the Polymarket lookup, so a
+     Polymarket failure doesn't cost the Kalshi-only fallback an extra
+     round-trip. Resolves null when the league has no snapshot or it fails —
+     the live cards never wait on it. */
+  var snapP = SNAP[key] ? GIU.fetchJSON(SNAP[key]).catch(function(){ return null; }) : null;
   seriesFor(key).then(function(sid){
     var reqs = [
       GIU.fetchJSON(GIU.pmEventsUrl(sid)),
@@ -187,12 +192,12 @@ function load(key, my, silent){
        Fetched alongside everything else; a slow or failed snapshot resolves
        to null and simply means no Kalshi rows — the Polymarket cards never
        wait. */
-    if(SNAP[key]) reqs.push(GIU.fetchJSON(SNAP[key]).catch(function(){ return null; }));
+    if(snapP) reqs.push(snapP);
     return Promise.all(reqs);
   }).then(function(x){
     if(my !== tabSeq) return; /* user moved to another league meanwhile */
     var d = x[0], dir = x[1];
-    var snap = SNAP[key] ? (x[2] || null) : null;
+    var snap = snapP ? (x[2] || null) : null;
     var evs = Array.isArray(d) ? d : (d.events||[]);
     var rows = [];
     evs.forEach(function(ev){
@@ -286,8 +291,30 @@ function load(key, my, silent){
     }
   }).catch(function(){
     if(my !== tabSeq) return; /* user moved to another league meanwhile */
-    $("predGrid").innerHTML = GIU.failBox("Polymarket's API didn't respond, so there are no implied probabilities to show.");
-    liveN = 0; renderLiveStatus();
+    /* Polymarket failed — but the page may still have a real second crowd:
+       the server-side Kalshi snapshot (NFL/MLB). Honestly labeled,
+       timestamped Kalshi-only cards beat a blank page; when even that isn't
+       honest (missing/stale snapshot), the failure box shows as before. */
+    var done = function(snap){
+      if(my !== tabSeq) return;
+      var html = null;
+      try{ html = window.PredFallback ? window.PredFallback.render(snap) : null; }
+      catch(e){ html = null; }
+      var ps = $("predSpot");
+      if(ps) ps.innerHTML = "";
+      if(html){
+        $("predGrid").innerHTML = html;
+        /* Fallback mode: one silent retry on the normal refresh beat so the
+           page heals itself when Polymarket comes back — cleared by
+           clearLive like every other timer. */
+        liveTimer = setTimeout(function(){ load(key, tabSeq, true); }, PM_MS);
+      } else {
+        $("predGrid").innerHTML = GIU.failBox("Polymarket's API didn't respond, so there are no implied probabilities to show.");
+      }
+      liveN = 0; renderLiveStatus();
+    };
+    if(snapP) snapP.then(done, function(){ done(null); });
+    else done(null);
   });
 }
 $("pauseBtn").addEventListener("click", function(){
