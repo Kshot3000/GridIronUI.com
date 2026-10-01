@@ -603,7 +603,7 @@ function diffCount(a,b){
 }
 
 function coachGenerate(mode, opts){
-  /* opts: {numLineups, locked:[{slot,player}], lockedIds, excludeIds, stackNote} */
+  /* opts: {numLineups, locked:[{slot,player}], lockedIds, excludeIds, stackNote, bringBack} */
   var key = cfgKey(), c = cfg();
   var eff = pool.filter(function(p){ return !opts.excludeIds[p.id]; });
   /* locked players must remain eligible even under exposure caps */
@@ -621,6 +621,22 @@ function coachGenerate(mode, opts){
   if(globalMax < 1/numWanted - 1e-9){ globalMax = 1/numWanted; capRelaxed = true; }
   var lineups=[], exposures={}, prevIds=[], banIdx=0, qbIdx=0, attempts=0;
   var minUnique = mode==="cash"?2:3;
+  /* game-stack bring-back (NFL GPP only — same semantics as the DFS Lab's
+     "Game-stack bring-back" option): one opposing-team pass catcher seats
+     with every QB stack. Needs opponent info on at least one QB — checked
+     up front for an actionable message instead of silent misses. */
+  var needBringBack = (mode==="gpp" && c.sport==="NFL" && !!opts.bringBack);
+  var bbSeatMisses = 0, bbCapMisses = 0;
+  function bbCapMiss(){ if(needBringBack) bbCapMisses++; }
+  if(needBringBack){
+    var qbsOpp = pool.filter(function(p){
+      return p.pos.indexOf("QB")!==-1 && p.opp && !opts.excludeIds[p.id];
+    });
+    if(!qbsOpp.length)
+      return { lineups:[], exposures:exposures, relaxed:true,
+               capRelaxed:capRelaxed, askedCap:askedCap, effCap:globalMax,
+               error:"Bring-back stacks need opponent info — re-import your DraftKings/FanDuel salary CSV (opponents are auto-detected from Game Info) or add an Opp for each QB in the DFS Lab, then ask me to build again." };
+  }
 
   while(lineups.length<numWanted && attempts<numWanted*24){
     attempts++;
@@ -663,22 +679,41 @@ function coachGenerate(mode, opts){
         if(!lidsG[e.player.id]){ lockedG.push(e); lidsG[e.player.id]=1; }
       });
     }
+    if(needBringBack){
+      /* the stack QB is seated by now — user-locked or rotated. One
+         opposing-team pass catcher joins every stack (OPT.seatBringBack,
+         the same pure picker the DFS Lab uses); a QB whose opponent can't
+         seat one is skipped and the rotation moves on. */
+      var qbEntry = lockedG.filter(function(e){ return e.slot==="QB"; })[0];
+      var bb = qbEntry ? OPT.seatBringBack(c, lockedG, ep, qbEntry.player, exposures) : null;
+      if(!bb){ bbSeatMisses++; continue; }
+      lockedG.push(bb); lidsG[bb.player.id]=1;
+    }
     var lu = OPT.greedy(c, ep, mode, {volPenalty:0.5}, lockedG);
-    if(!lu) continue;
+    if(!lu){ bbCapMiss(); continue; }
     lu = OPT.hillClimb(c, lu, ep, mode, {volPenalty:0.5}, lidsG);
-    if(!OPT.validate(lu,c).ok) continue;
-    if(mode==="gpp" && c.sport==="NFL" && !OPT.hasStack(lu)) continue;
-    if(lineups.some(function(o){ return diffCount(o,lu)<minUnique; })) continue;
+    if(!OPT.validate(lu,c).ok){ bbCapMiss(); continue; }
+    if(mode==="gpp" && c.sport==="NFL" && !OPT.hasStack(lu)){ bbCapMiss(); continue; }
+    if(lineups.some(function(o){ return diffCount(o,lu)<minUnique; })){ bbCapMiss(); continue; }
     var over=false;
     lu.forEach(function(e){
       if(opts.lockedIds[e.player.id]) return; /* locks exempt from exposure caps */
       var cap = idCaps[e.player.id]!=null?idCaps[e.player.id]:globalMax;
       if(((exposures[e.player.id]||0)+1)/numWanted > cap+1e-9) over=true;
     });
-    if(over) continue;
+    if(over){ bbCapMiss(); continue; }
     lu.forEach(function(e){ exposures[e.player.id]=(exposures[e.player.id]||0)+1; });
     lineups.push(lu);
     prevIds = lu.map(function(e){ return e.player.id; });
+  }
+  /* honest zero-lineup errors — seat misses vs cap/exposure/uniqueness binds
+     get their own actionable message, mirroring the DFS Lab's wording. */
+  if(needBringBack && !lineups.length && (bbSeatMisses>0 || bbCapMisses>0)){
+    var msg = bbCapMisses===0
+      ? "No QB stack could seat a bring-back — the pool needs an opposing-team RB/WR/TE with an open eligible slot for at least one stacked game. Add opponent pass-catchers, or ask me to rebuild without the bring-back."
+      : "Couldn't finish any lineups with the bring-back on — with 4 locked stack players the salary cap, exposure cap or uniqueness rule may be impossible to satisfy. Add cheaper players, raise Max exposure, or ask me to rebuild without it.";
+    return { lineups:[], exposures:exposures, relaxed:true,
+             capRelaxed:capRelaxed, askedCap:askedCap, effCap:globalMax, error:msg };
   }
   return { lineups:lineups, exposures:exposures, relaxed: lineups.length<numWanted,
            capRelaxed:capRelaxed, askedCap:askedCap, effCap:globalMax };
@@ -776,10 +811,12 @@ function executeDirectives(text, hostEl, userText){
       seat.errors = seat.errors.concat(ls.errors);
       seat.locked = seat.locked.concat(ls.locked);
       ls.locked.forEach(function(l){ seat.lockedIds[l.player.id]=1; });
+      var bbOn = !!d.bring_back && mode==="gpp" && c.sport==="NFL";
       var note = document.createElement("div");
       note.className = "action-note";
       var desc = "⚙️ Building "+(d.num_lineups||1)+" "+(mode==="cash"?"cash":"tournament")+" lineup(s)"+
         ((d.stacks||[]).length ? " · stack: "+d.stacks.map(function(s){return esc(String(s.team).toUpperCase());}).join(", ") : "")+
+        (bbOn ? " · bring-backs" : "")+
         (seat.locked.length ? " · locks: "+seat.locked.map(function(l){return esc(l.player.name);}).join(", ") : "")+
         ((d.excludes||[]).length ? " · excluding "+(d.excludes||[]).length+" player(s)" : "")+
         (d.max_exposure!=null ? " · max exposure "+d.max_exposure+"%" : "");
@@ -788,14 +825,16 @@ function executeDirectives(text, hostEl, userText){
       var res = coachGenerate(mode, {
         numLineups: d.num_lineups||1,
         locked: seat.locked, lockedIds: seat.lockedIds, excludeIds: excludeIds,
-        maxExposure: d.max_exposure
+        maxExposure: d.max_exposure, bringBack: bbOn
       });
       if(!res.lineups.length){
         var ne = document.createElement("div");
         ne.className = "action-note err";
-        ne.textContent = "⚙️ The optimizer couldn't fit a valid lineup"+
-          diagnoseBuildFailure(c, excludeIds, seat.lockedIds)+
-          " — try fewer locks/excludes, raise a 0% exposure cap, or add cheaper players in the DFS Lab.";
+        ne.textContent = res.error
+          ? "⚙️ "+res.error
+          : "⚙️ The optimizer couldn't fit a valid lineup"+
+            diagnoseBuildFailure(c, excludeIds, seat.lockedIds)+
+            " — try fewer locks/excludes, raise a 0% exposure cap, or add cheaper players in the DFS Lab.";
         hostEl.appendChild(ne);
         return;
       }
