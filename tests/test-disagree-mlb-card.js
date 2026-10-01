@@ -1,8 +1,9 @@
 /* GridIronUI v1.96.0 — cross-book disagreement card now covers the MLB tab
    on markets.html (Wild Card week), not just NFL. Covers:
    - Disagree.matches() with the REAL data/kalshi-mlb.json snapshot + a
-     realistic Polymarket MLB event pairs correctly on the "mlb" league key,
-     including the CWS->CHW alias for CHW/HOU Game 2;
+     realistic Polymarket MLB event pairs correctly on the "mlb" league key;
+     the CWS->CHW alias is covered by a self-contained synthetic Kalshi
+     fixture, since the live snapshot delists decided games;
    - v1.96.0: the PM event is driven off the snapshot itself (the snapshot
      evolves as series progress — settled games leave the board), and the
      same-day rule is verified end-to-end: a PM event on the snapshot game
@@ -135,13 +136,26 @@ if(mt.length && expA !== null){
 }
 
 /* White Sox @ Astros: Kalshi lists CWS, ESPN lists CHW — the alias must
-   still match on the MLB tab. */
+   still match on the MLB tab. Self-contained synthetic Kalshi fixture (the
+   same shape as a real snapshot entry): the live snapshot delists decided
+   games, so this must never depend on CWS@HOU being on the board. */
+var synthG2 = {
+  event_ticker: "KXMLBGAME-26SEP301700CWSHOU",
+  title: "Game 2: Chicago WS vs Houston",
+  sub_title: "CWS vs HOU (Sep 30)",
+  markets: [
+    {ticker: "KXMLBGAME-26SEP301700CWSHOU-CWS", title: "Chicago WS wins",
+     kind: "winner", yes_bid: 41, yes_ask: 43, last: 42},
+    {ticker: "KXMLBGAME-26SEP301700CWSHOU-HOU", title: "Houston wins",
+     kind: "winner", yes_bid: 57, yes_ask: 59, last: 58}
+  ]
+};
 var pmG2 = {
   title: "White Sox vs. Astros",
   startTime: "2026-09-30T20:00:00Z",
   markets: [ ml(["White Sox","Astros"], [0.42,0.58], 2000000) ]
 };
-var mt2 = D.matches([pmG2], snap.games, dir, teamFind, "mlb");
+var mt2 = D.matches([pmG2], [synthG2], dir, teamFind, "mlb");
 assert(mt2.length === 1 && mt2[0].abbrA === "CHW" && mt2[0].abbrB === "HOU",
   "CHW/HOU matches through the CWS alias on league=mlb");
 
