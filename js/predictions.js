@@ -137,7 +137,7 @@ function cardInner(r, dir, key){
     head+
     (t ? '<div class="game-meta" style="margin-bottom:12px"><span>'+t+'</span></div>' : '<div style="height:8px"></div>')+
     body+
-    ((r.km && window.Kalshi) ? window.Kalshi.predRow(r.km.nameA, r.km.aPct, r.km.nameB, r.km.bPct, r.km.updatedAt, r.km.pmA) : "")+
+    ((r.km && window.Kalshi) ? window.Kalshi.predRow(r.km.nameA, r.km.aPct, r.km.nameB, r.km.bPct, r.km.updatedAt, r.km.pmA, r.km) : "")+
     '<div class="game-meta"><span>Source: Polymarket live price</span>'+(slug?'<a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">View market →</a>':"")+'</div>';
 }
 function fmtT(iso){
@@ -218,11 +218,22 @@ function load(key, my, silent){
          Polymarket price to compare against, and its 99c side is a result,
          not a prediction. */
       var klGames = snap.games.filter(function(g){ return !window.Kalshi.settled(g); });
+      /* "What moved" wiring (v1.129.0): the fetch script bakes a
+         snapshot-to-snapshot diff into the file (K.diffMoves contract).
+         K.moveIndex turns it into an exact event-ticker + team-abbr lookup
+         so each Kalshi row can badge sides whose price moved 2c+ since the
+         previous snapshot — the same treatment the markets page cards got.
+         A team that can't be joined exactly gets no badge, never a guess. */
+      var mi = window.Kalshi.moveIndex(snap, window.Disagree.kalshiTeamAbbr);
       rows.forEach(function(r){
         if(r.mls.length !== 1) return;
         var m = window.Disagree.matches([r.ev], klGames, dir, GIU.teamFind, key)[0];
-        if(m) r.km = {nameA: m.nameA, aPct: m.kalshiA, nameB: m.nameB,
-                      bPct: m.kalshiB, updatedAt: snap.updated_at, pmA: m.pmA};
+        if(m){
+          var gm = m.kalshiTicker ? (mi.byGame[m.kalshiTicker] || {}) : {};
+          r.km = {nameA: m.nameA, aPct: m.kalshiA, nameB: m.nameB,
+                  bPct: m.kalshiB, updatedAt: snap.updated_at, pmA: m.pmA,
+                  dA: gm[m.abbrA], dB: gm[m.abbrB], prevAt: mi.prevAt};
+        }
       });
     }
     if(!rows.length){

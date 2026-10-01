@@ -200,13 +200,47 @@ K.moveBadge = function(delta, team, prevAt){
   return ' <span class="' + cls + '" title="' + kesc(tip) + '">' + glyph + ad + "\u00a2</span>";
 };
 
+/* Index the baked snapshot-to-snapshot moves by event ticker + team abbr.
+   `abbrOf(market)` maps a snapshot market to its ESPN-space abbreviation —
+   callers pass D.kalshiTeamAbbr. Exact team-name joins only: a move whose
+   `team` doesn't match any winner market in its own game earns nothing,
+   never a guess. Returns {byGame: {ticker: {abbr: delta}}, prevAt}.
+   The page itself uses this to badge the predictions rows; markets.js does
+   its own equivalent indexing by team name where the raw game is in hand. */
+K.moveIndex = function(snap, abbrOf){
+  var out = {byGame: {}, prevAt: (snap && snap.prev_at) || null};
+  var games = {};
+  ((snap && snap.games) || []).forEach(function(g){
+    if(g && g.event_ticker) games[g.event_ticker] = g;
+  });
+  ((snap && snap.moves) || []).forEach(function(mv){
+    if(!mv || !mv.event_ticker) return;
+    var g = games[mv.event_ticker];
+    if(!g) return;
+    var ab = null;
+    ((g.markets) || []).forEach(function(mk){
+      if(mk && mk.team === mv.team && mk.kind !== "other" &&
+         typeof abbrOf === "function"){
+        var a = abbrOf(mk);
+        if(a) ab = a;
+      }
+    });
+    if(!ab) return;
+    (out.byGame[mv.event_ticker] = out.byGame[mv.event_ticker] || {})[ab] = Number(mv.delta);
+  });
+  return out;
+};
+
 /* Compact "Kalshi says" line for the predictions page: the snapshot's two
    prices for one game, labeled with the snapshot time, plus the gap versus
    the Polymarket price (pmA, whole cents) when supplied — two real-money
    crowds in one glance. Returns "" when either side is unpriced. When the
    snapshot is stale, returns a stale warning INSTEAD of prices: never
-   presented as fresh. All text escaped. */
-K.predRow = function(aName, aPct, bName, bPct, updatedAt, pmA){
+   presented as fresh. The optional 7th argument, moves = {dA, dB, prevAt},
+   badges each side with K.moveBadge when its price moved 2c+ since the
+   previous snapshot — the same "what moved" treatment the markets page
+   cards got. All text escaped. */
+K.predRow = function(aName, aPct, bName, bPct, updatedAt, pmA, moves){
   if(aPct === null || aPct === undefined || bPct === null || bPct === undefined) return "";
   aPct = Math.round(Number(aPct)); bPct = Math.round(Number(bPct));
   if(!isFinite(aPct) || !isFinite(bPct)) return "";
@@ -220,9 +254,12 @@ K.predRow = function(aName, aPct, bName, bPct, updatedAt, pmA){
   var dchip = (delta === null || !isFinite(delta)) ? "" :
     ' <span class="tag blue" style="font-size:.62rem" title="Gap between Polymarket\u2019s and Kalshi\u2019s price for '+
     kesc(aName)+' — two real-money crowds. A 3\u00a2+ gap means one of them may be mispriced.">\u0394'+delta+'\u00a2 vs Polymarket</span>';
+  moves = moves || {};
+  var bA = K.moveBadge(moves.dA, aName, moves.prevAt);
+  var bB = K.moveBadge(moves.dB, bName, moves.prevAt);
   return '<div class="game-meta" style="margin-top:10px;border-top:1px solid var(--line-soft);padding-top:10px">'+
     '<span class="tag green">Kalshi</span>'+
-    '<span>'+kesc(aName)+' <b class="num">'+aPct+'%</b> \u00b7 '+kesc(bName)+' <b class="num">'+bPct+'%</b></span>'+dchip+
+    '<span>'+kesc(aName)+' <b class="num">'+aPct+'%</b>'+bA+' \u00b7 '+kesc(bName)+' <b class="num">'+bPct+'%</b>'+bB+'</span>'+dchip+
     '<span>snapshot'+(when ? " "+when : "")+'</span></div>';
 };
 

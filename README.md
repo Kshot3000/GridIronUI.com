@@ -155,6 +155,7 @@ node tests/test-odds-alerts-dom.js # alert wiring in shipped odds.js (seed-quiet
 node tests/test-odds-pm.js     # market-check logic (Polymarket live moneylines, no-vig fair probs, 5-pt gap flag, pinned-market exclusion)
 node tests/test-odds-pm-dom.js # market-check wiring in shipped odds.js (hidden slot, live-price reveal, pinned silence, no NBA fetches)
 node tests/test-predictions-kalshi-dom.js  # Kalshi row wiring in shipped predictions.js (NFL snapshot fetch, matched-game row, gap chip, snapshot-failure degrade)
+node tests/test-predictions-moves.js # predictions-page Kalshi "what moved" badges (D.matches kalshiTicker, K.moveIndex exact joins, K.predRow badge rendering, shipped wiring pins)
 node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific cadence promises, loop refresh rule, snapshot shape, markets.js cache key)
 node tests/test-kalshi-mlb-snapshot.js # Kalshi MLB postseason snapshot honesty (KXMLBGAME series, 2-winner-markets shape, fetcher --series/--out args, markets + predictions wiring)
 node tests/test-kalshi-settled.js # settled-game detection in js/kalshi-logic.js (99c/1c signature, settled games flagged + sorted last)

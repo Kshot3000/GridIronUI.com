@@ -125,7 +125,10 @@ D.kalshiSides = function(g){
   });
   if(px[ab[0]] === undefined || px[ab[1]] === undefined) return null;
   return {abbrA: ab[0], abbrB: ab[1], priceA: px[ab[0]], priceB: px[ab[1]],
-          date: D.kalshiDate(g)};
+          date: D.kalshiDate(g), et: (g && g.event_ticker) || null};
+          /* et rides along so callers can join per-game data (e.g. the baked
+             snapshot-to-snapshot moves) by exact event ticker — never by
+             fuzzy team-name matching. */
 };
 
 /* Match Polymarket events to Kalshi snapshot games by unordered abbreviation
@@ -189,7 +192,10 @@ D.matches = function(pmEvents, kalshiGames, dir, teamFind, league){
         abbrA: pa, abbrB: pb, nameA: t[0], nameB: t[1],
         pmA: pmA, pmB: pmB,
         kalshiA: best.flip ? best.k.priceB : best.k.priceA,
-        kalshiB: best.flip ? best.k.priceA : best.k.priceB
+        kalshiB: best.flip ? best.k.priceA : best.k.priceB,
+        /* The matched snapshot game's exact event ticker — lets the caller
+           attach per-game data (baked price moves) with an exact join. */
+        kalshiTicker: (best.k && best.k.et) || null
       });
     }
   });
