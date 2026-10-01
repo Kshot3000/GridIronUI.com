@@ -226,8 +226,8 @@ function arrowFor(ctx, col){
 (function(){
   var html = fs.readFileSync(path.join(ROOT, "dfs.html"), "utf8");
   var m = html.match(/js\/dfs\.js\?v=([\d.]+)/);
-  assert(m && m[1] === "1.118.0",
-         "dfs.html pins js/dfs.js?v=1.118.0 (the release changing it)");
+  assert(m && m[1] === "1.123.0",
+         "dfs.html pins js/dfs.js?v=1.123.0 (the release changing it)");
 })();
 
 if(failures){ console.error(failures + " FAILURE(S)"); process.exit(1); }

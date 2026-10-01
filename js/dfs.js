@@ -445,12 +445,14 @@ function renderPool(){
   if(!pool.length){
     $("poolWrap").innerHTML = '<div class="empty">Pool is empty. Import a CSV, add players manually, or load the DEMO slate to try the optimizer.</div>';
     renderInjBanner();
+    refreshWxPanel();
     return;
   }
   var demo = pool.some(function(p){return p.demo;});
   if(!shown.length){
     $("poolWrap").innerHTML = '<div class="empty">No players match the current search/position filter. Clear the search or pick "All positions".</div>';
     renderInjBanner();
+    refreshWxPanel();
     return;
   }
   var html = (demo?'<div class="notice" style="margin:0 0 12px"><strong>DEMO SLATE.</strong> These are synthetic players with made-up projections, for testing the optimizer only. Not real players, not real numbers.</div>':"")+
@@ -523,6 +525,73 @@ function renderPool(){
   });
   renderInjBanner();
   maybeInjuryFetch();
+  refreshWxPanel();
+}
+
+/* ---------- game-conditions (weather) panel ----------
+   Real stadium forecasts for the NFL games the pool plays in — wind moves
+   totals and the passing game, so this is a genuine lineup-building input.
+   The panel is quiet by design: non-NFL sports, empty pools and demo slates
+   hide it, and a feed failure never fakes a forecast. One ESPN fetch + one
+   multi-location Open-Meteo fetch per team-set per page load. */
+var WXG = (typeof window !== "undefined" && window.DFSWx) || null;
+var wxState = { key: null, state: "idle" };
+function wxDeps(){
+  return { venueFor: GIU.wxVenueFor,
+           sliceWindow: GIU.wxSliceWindow,
+           impactNotes: GIU.wxImpactNotes };
+}
+function wxPanelKey(){
+  var teams = pool.map(function(p){ return WXG.normTeam(p.team); })
+    .filter(function(t){ return t; }).sort();
+  return cfgKey + "|" + teams.join(",");
+}
+function refreshWxPanel(){
+  var panel = $("wxPanel");
+  if(!panel) return;
+  var need = WXG && GIU.wxUpcomingNfl && cfg().sport === "NFL" &&
+             pool.length && !pool.every(function(p){ return p.demo; });
+  if(!need){
+    panel.style.display = "none"; panel.innerHTML = "";
+    wxState = { key: null, state: "idle" };
+    return;
+  }
+  var key = wxPanelKey();
+  if(wxState.key === key && wxState.state !== "idle") return; /* same pool — panel stands */
+  wxState = { key: key, state: "loading" };
+  panel.style.display = "";
+  panel.innerHTML = '<div class="notice" style="margin:26px 0 0">🌬️ <b>Game conditions</b> <span>· checking stadium forecasts…</span></div>';
+  GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(r){
+    if(wxState.key !== key) return; /* pool changed mid-flight */
+    var plan = WXG.poolGames(pool, "NFL", (r && r.events) || [], Date.now(), wxDeps());
+    if(plan.skip || !plan.games.length){ panel.style.display = "none"; wxState.state = "ready"; return; }
+    var split = WXG.splitRoofed(plan.games);
+    var url = WXG.wxUrl(split.fetch);
+    var rows = WXG.roofRows(split.roofed);
+    function done(){
+      rows.sort(function(a, b){ return a.game.kickMs - b.game.kickMs; });
+      panel.innerHTML = WXG.panelHtml(rows, GIU.esc);
+      wxState.state = "ready";
+    }
+    if(!url){ done(); return; }
+    GIU.fetchJSON(url).then(function(d){
+      if(wxState.key !== key) return;
+      var arr = Array.isArray(d) ? d : [d];
+      rows = rows.concat(WXG.withWx(split.fetch, arr, wxDeps()));
+      done();
+    }).catch(function(){
+      if(wxState.key !== key) return;
+      /* forecasts failed — roofed rows are still real; open-air games simply
+         don't get a forecast rather than a fake one */
+      if(rows.length) done();
+      else panel.style.display = "none";
+      wxState.state = "ready";
+    });
+  }).catch(function(){
+    if(wxState.key !== key) return;
+    panel.style.display = "none";
+    wxState = { key: key, state: "ready" };
+  });
 }
 
 /* ---------- config tabs ---------- */
