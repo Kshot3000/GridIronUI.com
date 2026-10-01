@@ -143,7 +143,7 @@
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
-<script src="js/home-strip.js?v=1.33.0"></script>
+<script src="js/home-strip.js?v=1.120.0"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -155,16 +155,36 @@
     return GIU.fetchJSON(HS.scoreUrl(l[0])).then(function(d){ return HS.collect(l[1], d); })
       .catch(function(){ return []; });
   });
+  /* Kalshi NFL snapshot: real-money crowd prices for the NFL strip rows.
+     Resolves null on any failure — the strip renders fine without prices. */
+  jobs.push(GIU.fetchJSON("data/kalshi-nfl.json").catch(function(){ return null; }));
   Promise.all(jobs).then(function(parts){
-    var rows = HS.top([].concat.apply([], parts));
+    var snap = parts.pop();
+    var rows = HS.withKalshi(HS.top([].concat.apply([], parts)), snap, Date.now());
     if(!rows.length){ $("homeGames").innerHTML = '<div class="empty">No games on the board right now.</div>'; return; }
     $("homeGames").innerHTML = rows.map(function(r){
       var badge = r.state==="in" ? '<span class="live-badge"><i></i>Live</span>'
         : '<span class="tag">'+GIU.esc(r.shortDetail||"Scheduled")+'</span>';
+      /* Crowd prices from the Kalshi snapshot, when the game matched and the
+         snapshot is fresh — favorite in gold, the same language as the
+         predictions page. Never rendered for unmatched or stale rows. */
+      var kp = "";
+      if(r.kp){
+        var k = r.kp;
+        var side = function(abbr, pct, fav){
+          return GIU.esc(abbr)+" "+(fav
+            ? '<b class="num" style="color:var(--gold-soft)">'+pct+'%</b>'
+            : '<span class="num" style="color:var(--muted)">'+pct+'%</span>');
+        };
+        kp = '<div class="game-meta" style="margin-top:8px;border-top:1px solid var(--line-soft);padding-top:8px">'+
+          '<span class="tag green" title="Real-money crowd prices from Kalshi\u2019s NFL game-winner markets (server-side snapshot) \u2014 information, not a pick.">Kalshi</span>'+
+          '<span>'+side(k.aAbbr, k.aPct, k.aPct >= k.hPct)+' · '+side(k.hAbbr, k.hPct, k.hPct > k.aPct)+'</span>'+
+          '<span>snapshot '+GIU.esc(HS.snapWhen(k.updatedAt))+'</span></div>';
+      }
       return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center">'+
         '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+'</div>'+
         GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
-        '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div></div>';
+        '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div>'+kp+'</div>';
     }).join("");
   }).catch(function(){ $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feeds didn't respond."); });
 

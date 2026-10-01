@@ -57,8 +57,132 @@ function rankRows(a, b){
 function top(rows, n){
   return (rows||[]).slice().sort(rankRows).slice(0, n == null ? 6 : n);
 }
+/* ---- Kalshi crowd prices on the strip (v1.120.0) ----
+   The server-side Kalshi NFL snapshot (data/kalshi-nfl.json) is CORS-safe,
+   so NFL strip rows can carry the real-money crowd's win probability next
+   to the matchup — information, not a pick. Matching is by unordered team
+   abbreviation pair, the same honest approach as the markets page's
+   cross-book comparison: unmatchable rows stay unannotated, never guessed,
+   and a stale snapshot annotates nothing rather than posing as a live
+   read. */
+
+/* Kalshi tickers use JAC (Jaguars) / WAS (Commanders); ESPN uses JAX / WSH. */
+var KALSHI_ALIAS = {JAC: "JAX", WAS: "WSH"};
+function normKalshiAbbr(a){
+  a = String(a == null ? "" : a).toUpperCase();
+  return KALSHI_ALIAS[a] || a;
+}
+
+/* The abbreviation pair for one snapshot game, normalized to ESPN form and
+   sorted — or null when the snapshot doesn't carry a clean pair. Tries the
+   short sub_title first ("PIT vs CLE (Oct 1)"), then the full title's first
+   tokens ("PIT Steelers vs CLE Browns"), then the event ticker's tail
+   ("KXNFLGAME-26OCT01PITCLE"). */
+function kalshiPair(g){
+  g = g || {};
+  var m = String(g.sub_title || "").match(/^\s*([A-Za-z]{2,3})\s+vs\.?\s+([A-Za-z]{2,3})\b/);
+  if(!m){
+    var p = String(g.title || "").split(/\s+vs\.?\s+/);
+    if(p.length === 2){
+      var t0 = p[0].trim().split(/\s+/)[0], t1 = p[1].trim().split(/\s+/)[0];
+      if(/^[A-Za-z]{2,3}$/.test(t0 || "") && /^[A-Za-z]{2,3}$/.test(t1 || "")) m = [null, t0, t1];
+    }
+  }
+  if(!m){
+    var tk = String(g.event_ticker || "").match(/([A-Za-z]{3})([A-Za-z]{3})$/);
+    if(tk) m = [null, tk[1], tk[2]];
+  }
+  if(!m) return null;
+  return [normKalshiAbbr(m[1]), normKalshiAbbr(m[2])].sort();
+}
+
+/* Yes price in whole cents: bid/ask midpoint, last trade when the book is
+   empty, null when nothing is priced. Same semantics as Kalshi.price and
+   D.kalshiPrice, duplicated so this module stays dependency-free. */
+function kalshiPrice(m){
+  m = m || {};
+  function num(v){
+    if(v === null || v === undefined || v === "") return NaN;
+    v = Number(v);
+    return isFinite(v) ? v : NaN;
+  }
+  var b = num(m.yes_bid), a = num(m.yes_ask);
+  if(isFinite(b) && isFinite(a) && b >= 0 && a >= b) return Math.round((b + a) / 2);
+  var l = num(m.last);
+  return isFinite(l) ? Math.round(l) : null;
+}
+
+/* Team abbreviation from the market ticker suffix ("...-CLE" -> "CLE"),
+   normalized to ESPN form. */
+function kalshiSideAbbr(m){
+  var t = String((m && m.ticker) || "").match(/-([A-Za-z]{2,3})$/);
+  return t ? normKalshiAbbr(t[1]) : null;
+}
+
+/* Snapshot freshness: the loop rebuilds these hourly, so anything older
+   than maxAgeH hours (default 6 — the same bar the Kalshi board uses) is
+   withheld rather than presented as a live read. Unparseable stamp = stale. */
+function snapStale(iso, nowMs, maxAgeH){
+  var t = Date.parse(iso || "");
+  if(!isFinite(t)) return true;
+  var now = isFinite(nowMs) ? nowMs : Date.now();
+  return (now - t) > (maxAgeH || 6) * 3600000;
+}
+
+/* Annotate strip rows with the snapshot's crowd prices. Returns NEW row
+   objects (input rows are never mutated). Rows that can't be matched, games
+   with an unpriced side, non-NFL rows, and stale or malformed snapshots come
+   back without a kp — the strip renders exactly as before. */
+function withKalshi(rows, snap, nowMs){
+  rows = Array.isArray(rows) ? rows : [];
+  var games = snap && Array.isArray(snap.games) ? snap.games : null;
+  if(!games || snapStale(snap.updated_at, nowMs)) return rows.slice();
+  var byPair = {};
+  games.forEach(function(g){
+    var pair = kalshiPair(g);
+    if(!pair) return;
+    var key = pair.join("|");
+    if(byPair[key]) return; /* first listing wins; snapshots don't duplicate */
+    var sides = {};
+    ((g && g.markets) || []).forEach(function(m){
+      var ab = kalshiSideAbbr(m), px = kalshiPrice(m);
+      if(ab && px !== null && sides[ab] === undefined) sides[ab] = px;
+    });
+    byPair[key] = sides;
+  });
+  return rows.map(function(r){
+    if(!r || r.league !== "NFL") return r;
+    var ra = r.away && r.away.team && r.away.team.abbreviation;
+    var rh = r.home && r.home.team && r.home.team.abbreviation;
+    if(!ra || !rh) return r;
+    var au = String(ra).toUpperCase(), hu = String(rh).toUpperCase();
+    var sides = byPair[[au, hu].sort().join("|")];
+    if(!sides) return r;
+    var aPct = sides[au], hPct = sides[hu];
+    if(aPct === undefined || hPct === undefined) return r;
+    var out = {};
+    for(var k in r) out[k] = r[k];
+    out.kp = {aAbbr: au, aPct: aPct, hAbbr: hu, hPct: hPct,
+              updatedAt: snap.updated_at};
+    return out;
+  });
+}
+
+/* "Thu, Oct 1 · 12:08 AM" in the visitor's timezone, for the snapshot stamp. */
+function snapWhen(iso){
+  try{
+    var d = new Date(iso);
+    if(!isFinite(d)) return "";
+    return d.toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}) +
+      " · " + d.toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit"});
+  }catch(e){ return ""; }
+}
+
 var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, collect: collect,
-           rankRows: rankRows, top: top};
+           rankRows: rankRows, top: top,
+           normKalshiAbbr: normKalshiAbbr, kalshiPair: kalshiPair,
+           kalshiPrice: kalshiPrice, kalshiSideAbbr: kalshiSideAbbr,
+           snapStale: snapStale, withKalshi: withKalshi, snapWhen: snapWhen};
 if(typeof module !== "undefined" && module.exports) module.exports = api;
 else (window.GIU = window.GIU || {}).homeStrip = api;
 })();

@@ -117,6 +117,7 @@ node tests/test-odds-spark-dom.js  # sparkline wiring in shipped odds.js (render
 node tests/test-odds-nokey.js   # no-key empty state in shipped odds.js (in-place #oddsNoKey panel + honesty line + CTA scroll/focus, no fetch burned, key-save transition to spinner)
 node tests/test-odds-honesty.js  # odds-board honesty: homepage card names the free API-key requirement + never-sample-lines line, combined-odds decimal parenthesized in shipped odds.js
 node tests/test-home-strip.js  # homepage "Today's games" strip (post-game drop, malformed-event skip, live-first + kickoff ranking, top-6 cap)
+node tests/test-home-kalshi.js  # Kalshi crowd prices on the home strip (abbreviation-pair match, JAC/WAS aliases, midpoint pricing, stale/malformed snapshots annotate nothing, no input mutation)
 node tests/test-odds-wx.js  # odds-board weather badges: venue cross-check vs ESPN (neutral-site aware, dome/retractable skip), pre-game + 16-day horizon only, multi-location forecast URL, escaped badge HTML
 node tests/test-odds-wx-dom.js  # weather badge wiring in shipped odds.js (hidden slot on NFL cards, gusty forecast reveals stadium badge, calm stays hidden, one multi-location fetch, no fetches on weather-free tabs like NBA)
 node tests/test-odds-wx-mlb.js  # odds-board weather badges for MLB postseason: league-aware resolveGames (ballpark dataset + raw-tuple venue shape, retractable/dome skip, relocated-game venue wins, blank-ESPN-venue fallback, day-mismatch guard), NFL default path byte-identical
