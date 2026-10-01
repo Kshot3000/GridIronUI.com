@@ -355,6 +355,55 @@ function paintChipsInPlace(){
   });
 }
 
+/* ---------- sortable pool-table columns ----------
+   With an imported CSV the pool often holds 100+ players; scanning it in
+   import order hides the best values. Every numeric pool column (Sal, Proj,
+   Floor, Ceil, Own%, Value) and the Player name sorts on click.
+   Pure: sortPool(rows, col, dir) returns a NEW array ordered by the column
+   spec; SORTABLE gives each column's default direction (numerics start desc,
+   name starts asc). Ties break deterministically (name, then pool id) so
+   equal rows never shuffle between clicks. sortPool never mutates its input. */
+var SORTABLE = {
+  name:  { dir:  1, get: function(p){ return String(p.name||"").toLowerCase(); } },
+  sal:   { dir: -1, get: function(p){ return Number(p.salary)||0; } },
+  proj:  { dir: -1, get: function(p){ return Number(p.proj)||0; } },
+  floor: { dir: -1, get: function(p){ return Number(p.floor)||0; } },
+  ceil:  { dir: -1, get: function(p){ return Number(p.ceil)||0; } },
+  own:   { dir: -1, get: function(p){ return Number(p.own)||0; } },
+  value: { dir: -1, get: function(p){ return OPT.value(p); } }
+};
+var poolSort = { col: null, dir: 1 }; /* null col = import order */
+function sortPool(rows, col, dir){
+  var spec = SORTABLE[col];
+  if(!spec || !dir) return rows.slice();
+  return rows.slice().sort(function(a,b){
+    var va = spec.get(a), vb = spec.get(b), d;
+    if(typeof va==="string") d = va<vb ? -1 : (va>vb ? 1 : 0);
+    else d = va - vb;
+    if(d) return d*dir;
+    var na = String(a.name||""), nb = String(b.name||"");
+    if(na!==nb) return na<nb ? -1 : 1;
+    return (a.id||0) - (b.id||0);
+  });
+}
+/* one sortable <th>: real button for free keyboard behavior, aria-sort on
+   the th, arrow glyph signals the active column (↕ invites a first click). */
+function sortTh(col, label, title){
+  var active = poolSort.col===col;
+  var aria = active ? (poolSort.dir===1 ? "ascending" : "descending") : "none";
+  var arrow = active ? (poolSort.dir===1 ? "▲" : "▼") : "↕";
+  return '<th scope="col" aria-sort="'+aria+'"'+(title ? ' title="'+title+'"' : "")+'>'+
+    '<button type="button" class="th-sort" data-sort="'+col+'" aria-label="Sort by '+label+'">'+
+    label+' <span class="sort-arrow" aria-hidden="true">'+arrow+"</span></button></th>";
+}
+
+/* header-click behavior, also the test seam: click the active column to flip
+   direction, click a new one to take its default direction */
+function toggleSort(col){
+  if(poolSort.col===col) poolSort.dir = -poolSort.dir;
+  else poolSort = { col:col, dir:SORTABLE[col].dir };
+  renderPool();
+}
 /* ---------- pool table ---------- */
 function renderPool(){
   var c = cfg();
@@ -378,7 +427,7 @@ function renderPool(){
               String(p.team||"").toLowerCase().indexOf(query)===-1) return false;
     return true;
   }
-  var shown = pool.filter(rowShown);
+  var shown = sortPool(pool.filter(rowShown), poolSort.col, poolSort.dir);
   /* top-3 value players in the FULL pool — stable ★ markers regardless of filtering */
   var topIds = {};
   pool.map(function(p){ return { p:p, v:OPT.value(p) }; })
@@ -405,7 +454,12 @@ function renderPool(){
     return;
   }
   var html = (demo?'<div class="notice" style="margin:0 0 12px"><strong>DEMO SLATE.</strong> These are synthetic players with made-up projections, for testing the optimizer only. Not real players, not real numbers.</div>':"")+
-  '<div class="table-scroll"><table class="data"><thead><tr><th>Player</th><th>Pos</th><th>Team</th><th>Opp</th><th>Sal</th><th>Proj</th><th>Floor</th><th>Ceil</th><th>Own%</th><th title="Projected points per $1,000 of salary">Value</th><th>Lineup</th></tr></thead><tbody>'+
+  '<div class="table-scroll"><table class="data"><thead><tr>'+
+    sortTh("name","Player")+'<th>Pos</th><th>Team</th><th>Opp</th>'+
+    sortTh("sal","Sal")+sortTh("proj","Proj")+sortTh("floor","Floor")+
+    sortTh("ceil","Ceil")+sortTh("own","Own%")+
+    sortTh("value","Value","Projected points per $1,000 of salary")+
+    '<th>Lineup</th></tr></thead><tbody>'+
   shown.map(function(p){
     var fl = injFlags[p.id];
     var rowCls = p.locked ? "row-locked" : (p.banned ? "row-banned" : "");
@@ -427,6 +481,17 @@ function renderPool(){
     '</td></tr>';
   }).join("")+'</tbody></table></div>';
   $("poolWrap").innerHTML = html;
+  /* sortable headers: click toggles direction, second column resets to its
+     own default; re-render rebuilds the table so hand focus back to the
+     header that was clicked (keyboard users included) */
+  Array.prototype.forEach.call($("poolWrap").querySelectorAll(".th-sort"), function(b){
+    b.addEventListener("click", function(){
+      var col = b.getAttribute("data-sort");
+      toggleSort(col);
+      var back = $("poolWrap").querySelector('.th-sort[data-sort="'+col+'"]');
+      if(back && back.focus) back.focus({preventScroll:true});
+    });
+  });
   Array.prototype.forEach.call($("poolWrap").querySelectorAll("input[data-k]"), function(inp){
     inp.addEventListener("change", function(){
       var tr = inp.closest("tr"), id = Number(tr.getAttribute("data-id"));
@@ -476,7 +541,7 @@ tabWire("modeTabs","data-v",function(v){ mode=v;
   $("numLineups").max = mode==="cash"?3:20;
   if(Number($("numLineups").value) > Number($("numLineups").max)) $("numLineups").value = $("numLineups").max;
 });
-function setCfg(){ cfgKey = site+"_"+sport; loadStored(); renderPool(); }
+function setCfg(){ cfgKey = site+"_"+sport; poolSort = { col:null, dir:1 }; loadStored(); renderPool(); }
 
 /* ---------- optimize ---------- */
 $("runOpt").addEventListener("click", function(){
@@ -626,6 +691,7 @@ window.GIU.dfsImport = {
   dkCleanName: dkCleanName, dkGameOpp: dkGameOpp, fdNameCols: fdNameCols,
   importName: importName, importSiteId: importSiteId, importIntoPool: importIntoPool,
   uploadCell: uploadCell, buildExportCSV: buildExportCSV,
+  sortPool: sortPool, sortSpec: SORTABLE, toggleSort: toggleSort,
   pool: function(){ return pool; } /* read-only for tests */
 };
 

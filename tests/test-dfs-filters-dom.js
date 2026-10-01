@@ -137,7 +137,7 @@ assert(/<option value="QB">QB<\/option>/.test(C.getEl("poolPosFilter").innerHTML
        /<option value="FLEX">FLEX<\/option>/.test(C.getEl("poolPosFilter").innerHTML) &&
        /All positions/.test(C.getEl("poolPosFilter").innerHTML),
        "position select offers the roster's slots plus All positions");
-assert(/<th[^>]*>Value<\/th>/.test(html), "pool table has a Value column header");
+assert(/<button type="button" class="th-sort" data-sort="value"[^>]*aria-label="Sort by Value">Value /.test(html), "pool table has a sortable Value column header");
 assert(rowCount(C) === 9, "all 9 seeded players render with no filter");
 assert(/2\.00</.test(html) && /5\.00</.test(html),
        "Value cells carry the right numbers (Mahomes 2.00, KC DST 5.00)");

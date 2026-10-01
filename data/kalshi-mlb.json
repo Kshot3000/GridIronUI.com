@@ -1,39 +1,8 @@
 {
- "updated_at": "2026-10-01T02:37:17Z",
+ "updated_at": "2026-10-01T03:52:14Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
-  {
-   "event_ticker": "KXMLBGAME-26SEP302000BOSNYY",
-   "title": "Game 2: Boston vs New York Y",
-   "sub_title": "BOS vs NYY (Sep 30)",
-   "markets": [
-    {
-     "ticker": "KXMLBGAME-26SEP302000BOSNYY-BOS",
-     "title": "Boston wins",
-     "kind": "winner",
-     "team": "Boston",
-     "yes_bid": 0,
-     "yes_ask": 1,
-     "last": 1,
-     "volume": "6481760.29",
-     "volume_24h": "6314842.30",
-     "close_time": "2026-10-04T00:00:00Z"
-    },
-    {
-     "ticker": "KXMLBGAME-26SEP302000BOSNYY-NYY",
-     "title": "New York Y wins",
-     "kind": "winner",
-     "team": "New York Y",
-     "yes_bid": 99,
-     "yes_ask": 100,
-     "last": 99,
-     "volume": "7400935.84",
-     "volume_24h": "7238414.59",
-     "close_time": "2026-10-04T00:00:00Z"
-    }
-   ]
-  },
   {
    "event_ticker": "KXMLBGAME-26SEP302200CHCSD",
    "title": "Game 2: Chicago C vs San Diego",
@@ -44,11 +13,11 @@
      "title": "Chicago C wins",
      "kind": "winner",
      "team": "Chicago C",
-     "yes_bid": 25,
-     "yes_ask": 26,
-     "last": 26,
-     "volume": "2633513.76",
-     "volume_24h": "2361866.88",
+     "yes_bid": 10,
+     "yes_ask": 11,
+     "last": 11,
+     "volume": "6058358.48",
+     "volume_24h": "5981225.89",
      "close_time": "2026-10-04T02:00:00Z"
     },
     {
@@ -56,11 +25,11 @@
      "title": "San Diego wins",
      "kind": "winner",
      "team": "San Diego",
-     "yes_bid": 75,
-     "yes_ask": 76,
-     "last": 76,
-     "volume": "3415690.45",
-     "volume_24h": "2937102.31",
+     "yes_bid": 89,
+     "yes_ask": 90,
+     "last": 89,
+     "volume": "5395534.04",
+     "volume_24h": "5168585.90",
      "close_time": "2026-10-04T02:00:00Z"
     }
    ]
@@ -78,8 +47,8 @@
      "yes_bid": 50,
      "yes_ask": 51,
      "last": 51,
-     "volume": "29778.17",
-     "volume_24h": "28337.38",
+     "volume": "44818.79",
+     "volume_24h": "44686.77",
      "close_time": "2026-10-04T18:00:00Z"
     },
     {
@@ -87,12 +56,74 @@
      "title": "Philadelphia wins",
      "kind": "winner",
      "team": "Philadelphia",
-     "yes_bid": 50,
-     "yes_ask": 51,
-     "last": 51,
-     "volume": "37886.58",
-     "volume_24h": "37502.23",
+     "yes_bid": 49,
+     "yes_ask": 50,
+     "last": 50,
+     "volume": "53005.51",
+     "volume_24h": "51278.41",
      "close_time": "2026-10-04T18:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT031300CWSCLE",
+   "title": "Game 1: Chicago WS vs Cleveland",
+   "sub_title": "CWS vs CLE (Oct 3)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT031300CWSCLE-CWS",
+     "title": "Chicago WS wins",
+     "kind": "winner",
+     "team": "Chicago WS",
+     "yes_bid": 40,
+     "yes_ask": 41,
+     "last": 41,
+     "volume": "209.86",
+     "volume_24h": "209.86",
+     "close_time": "2026-10-06T17:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT031300CWSCLE-CLE",
+     "title": "Cleveland wins",
+     "kind": "winner",
+     "team": "Cleveland",
+     "yes_bid": 59,
+     "yes_ask": 60,
+     "last": 62,
+     "volume": "7615.00",
+     "volume_24h": "7615.00",
+     "close_time": "2026-10-06T17:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT051700CWSCLE",
+   "title": "Game 2: Chicago WS vs Cleveland",
+   "sub_title": "CWS vs CLE (Oct 5)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT051700CWSCLE-CWS",
+     "title": "Chicago WS wins",
+     "kind": "winner",
+     "team": "Chicago WS",
+     "yes_bid": 7,
+     "yes_ask": 94,
+     "last": 0,
+     "volume": "0.00",
+     "volume_24h": "0.00",
+     "close_time": "2026-10-08T21:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT051700CWSCLE-CLE",
+     "title": "Cleveland wins",
+     "kind": "winner",
+     "team": "Cleveland",
+     "yes_bid": 8,
+     "yes_ask": 94,
+     "last": 0,
+     "volume": "0.00",
+     "volume_24h": "0.00",
+     "close_time": "2026-10-08T21:00:00Z"
     }
    ]
   }

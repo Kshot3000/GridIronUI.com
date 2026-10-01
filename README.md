@@ -79,6 +79,7 @@ node tests/test-dfs-injuries.js  # DFS injury cross-check logic (ESPN flatten, s
 node tests/test-dfs-injuries-dom.js  # injury wiring in shipped dfs.js (fetch-once, chips, banner, exclude-OUT, locked-OUT warning)
 node tests/test-dfs-value.js  # DFSOpt.value: projected points per $1k, zero-salary guard, node + browser exports
 node tests/test-dfs-filters-dom.js  # pool search + position filter + value column wiring in shipped dfs.js
+node tests/test-dfs-sort.js  # pool-table column sorting in shipped dfs.js: pure sortPool (no mutation, default directions, deterministic tie-break, zero-salary guard), sortable header buttons (aria-sort, labels, ↕/▲/▼ glyphs), toggle behavior through toggleSort, dfs.html key pin
 node tests/test-dfs-dkimport.js  # DK/FD salary-CSV import: DK headers (Name/TeamAbbrev/Game Info) and FD headers (Team/Opponent/First+Last Name) auto-map, opponents derived from Game Info, ID suffixes stripped (shipped js/dfs.js)
 node tests/test-dfs-export.js  # uploader-ready DFS export: site IDs preserved at import (DK "ID" col / "Name + ID" suffix fallback, FD "Id"), Export CSV writes DK "Name (ID)" / FD player-ID cells with quote escaping and no-ID fallback (shipped js/dfs.js)
 node tests/test-dfs-lockout.js  # DFS lock/exclude logic

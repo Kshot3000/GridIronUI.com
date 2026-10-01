@@ -19,6 +19,14 @@
 <meta property="og:url" content="https://gridironui.xyz/dfs.html">
 <link rel="canonical" href="https://gridironui.xyz/dfs.html">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<style>
+/* DFS pool-table sortable headers — page-scoped so shared style.css keeps its cache key */
+table.data th .th-sort{background:none;border:0;padding:0;margin:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+table.data th .th-sort:hover{color:var(--gold-soft);text-decoration:underline;text-underline-offset:3px}
+table.data th .th-sort:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+table.data th .th-sort .sort-arrow{font-size:.75em;color:var(--faint);display:inline-block;min-width:1em}
+table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sort="descending"] .th-sort .sort-arrow{color:var(--gold)}
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
@@ -102,14 +110,14 @@
       </div>
       <button class="btn btn-gold" id="runOpt">⚙️ Generate lineups</button>
       <div class="notice" style="margin:16px 0 0;font-size:.85rem">
-        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. The <b>exposure summary</b> under your results shows each player's share of lineups, so you can spot when you're overweight on a play. The pool table has a <b>Value</b> column (projected points per $1k of salary, <span class="val-star">★</span> marks the top-3) plus a search box and position filter — handy once an imported CSV puts 100+ players in the pool. <b>No AI, no magic</b> — just math you can audit. <b>Export CSV</b> writes the sites' bulk-uploader cell format — DraftKings gets <i>Name (ID)</i> using the player IDs captured from your salary export, FanDuel gets the FD player ID — so generated lineups drop straight into the site's uploader instead of being retyped. Players with no captured ID export as plain names; always sanity-check one lineup against the site's Download Template for your contest before uploading.
+        <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. The <b>exposure summary</b> under your results shows each player's share of lineups, so you can spot when you're overweight on a play. The pool table has a <b>Value</b> column (projected points per $1k of salary, <span class="val-star">★</span> marks the top-3) plus a search box, position filter and clickable column sorting — handy once an imported CSV puts 100+ players in the pool. <b>No AI, no magic</b> — just math you can audit. <b>Export CSV</b> writes the sites' bulk-uploader cell format — DraftKings gets <i>Name (ID)</i> using the player IDs captured from your salary export, FanDuel gets the FD player ID — so generated lineups drop straight into the site's uploader instead of being retyped. Players with no captured ID export as plain names; always sanity-check one lineup against the site's Download Template for your contest before uploading.
       </div>
     </div>
   </div>
 
   <div class="section-head" style="margin-top:30px">
     <div><span class="kicker">Your pool</span><h2 id="poolCount">0 players</h2>
-      <p style="font-size:.8rem;color:var(--faint);margin:6px 0 0">🔒 = locked into <b style="color:var(--gold-soft)">every</b> lineup · 🚫 = excluded from <b style="color:var(--gold-soft)">all</b> lineups · ✕ = remove player · <span class="val-star">★</span> = top-3 value (projected points per $1k)</p>
+      <p style="font-size:.8rem;color:var(--faint);margin:6px 0 0">🔒 = locked into <b style="color:var(--gold-soft)">every</b> lineup · 🚫 = excluded from <b style="color:var(--gold-soft)">all</b> lineups · ✕ = remove player · <span class="val-star">★</span> = top-3 value (projected points per $1k) · click a column header to sort</p>
     </div>
   </div>
   <div id="poolFilters" class="pool-filters" style="display:none">
@@ -143,6 +151,6 @@
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/dfs-opt.js?v=1.55.0"></script>
 <script src="js/dfs-injuries.js?v=1.36.0"></script>
-<script src="js/dfs.js?v=1.100.0"></script>
+<script src="js/dfs.js?v=1.118.0"></script>
 </body>
 </html>

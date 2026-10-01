@@ -8,6 +8,12 @@
    disagreeCard in the shipped js/markets.js applies it too, and that the
    shared D.matches drops decided games on the Polymarket side (a 99c/1c
    Polymarket price is a final left in the active feed, not a live number).
+   The live fixture re-pins honestly: data/kalshi-mlb.json no longer carries
+   a settled game (BOS@NYY Game 2 settled fully and left Kalshi's listing;
+   CHC@SD Game 2 sits decided-but-unsettled at 89/90), so the settlement-lag
+   case is exercised with a synthetic clone of a REAL current game priced
+   the way BOS@NYY actually sat in the 02:37Z snapshot (winner 99/100,
+   loser 0/1) — the exact price shape that manufactured the fake edge.
    Run: node tests/test-disagree-settled.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -29,29 +35,38 @@ assert(card.indexOf("window.Kalshi.settled") !== -1,
 assert(card.indexOf("(snap.games||[])") !== -1,
   "settled filter runs over snap.games");
 
-/* ---- functional: the filter semantics against the real MLB snapshot ----
-   data/kalshi-mlb.json currently carries a settled BOS@NYY Game 2
-   (NYY 99/100, BOS 0/1) next to live games. */
+/* ---- functional: the settlement-lag price shape is caught ----
+   Clone the first live MLB game and price it like the settled BOS@NYY
+   entry did: winner 99/100, loser 0/1. */
 var snap = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
-assert(Array.isArray(snap.games) && snap.games.length >= 2,
-  "MLB snapshot has games to filter (got "+(snap.games||[]).length+")");
-var klGames = (snap.games||[]).filter(function(g){ return !K.settled(g); });
-var dropped = snap.games.filter(function(g){ return K.settled(g); });
-assert(dropped.length >= 1, "at least one settled game is dropped by the filter");
-assert(klGames.length === snap.games.length - dropped.length,
-  "live games survive the filter ("+klGames.length+" kept)");
+var live = (snap.games||[]).filter(function(g){ return !K.settled(g); });
+assert(live.length >= 2, "MLB snapshot has live games to work with (got "+live.length+")");
+assert(live.every(function(g){ return !K.settled(g); }),
+  "no real live game is flagged settled (CHC@SD decided at 89/90 stays live)");
+var settledClone = JSON.parse(JSON.stringify(live[0]));
+/* keep the real event_ticker/markets: this is the genuine settlement-lag
+   price shape, only the numbers changed */
+(settledClone.markets||[]).forEach(function(m, i){
+  if(i === 0){ m.yes_bid = 99; m.yes_ask = 100; m.last = 99; }
+  else { m.yes_bid = 0; m.yes_ask = 1; m.last = 0; }
+});
+assert(K.settled(settledClone),
+  "the settlement-lag clone (99/100 vs 0/1) is flagged settled by K.settled");
+var mixed = live.concat([settledClone]);
+var klGames = mixed.filter(function(g){ return !K.settled(g); });
+assert(klGames.length === live.length && klGames.indexOf(settledClone) === -1,
+  "disagreeCard's filter drops the settled clone ("+mixed.length+" -> "+klGames.length+")");
 assert(klGames.every(function(g){ return !K.settled(g); }),
   "no settled game survives the filter");
 
 /* ---- functional: a settled game can no longer seed a bogus edge ----
-   Synthetic Polymarket event for the settled BOS@NYY game at a stale-ish
-   live price: without the filter this would match Kalshi's 99c and print a
-   giant fake disagreement. */
+   Synthetic Polymarket event for the cloned game at a stale-ish live
+   price: without the Kalshi-side filter this matches the clone's 99c and
+   prints a giant fake disagreement. The PM-side 99c/1c guard is left alone
+   here (price 25c/75c), so only the settled filter is under test. */
 var dir = {mlb: [
-  {abbr:"BOS", displayName:"Boston Red Sox",   shortDisplayName:"Red Sox"},
-  {abbr:"NYY", displayName:"New York Yankees", shortDisplayName:"Yankees"},
-  {abbr:"PHI", displayName:"Philadelphia Phillies", shortDisplayName:"Phillies"},
-  {abbr:"ATL", displayName:"Atlanta Braves",   shortDisplayName:"Braves"}
+  {abbr:"CHC", displayName:"Chicago Cubs",   shortDisplayName:"Cubs"},
+  {abbr:"SD",  displayName:"San Diego Padres", shortDisplayName:"Padres"}
 ]};
 function teamFind(d, league, q){
   var list = (d||{})[league] || [];
@@ -63,21 +78,19 @@ function teamFind(d, league, q){
       return list[j];
   return null;
 }
-var pmSettledGame = {title: "Red Sox vs. Yankees", startTime: "2026-10-01T00:00:00Z",
+var pmLag = {title: "Cubs vs. Padres", startTime: "2026-10-01T00:00:00Z",
   markets: [{sportsMarketType:"moneyline", closed:false, active:true,
-    outcomes:JSON.stringify(["Boston Red Sox","New York Yankees"]),
-    outcomePrices:JSON.stringify([0.30,0.70]), volume:5000}]};
-var mtchs = D.matches([pmSettledGame], klGames, dir, teamFind, "mlb");
-var hitSettled = mtchs.some(function(m){
-  return (m.abbrA === "BOS" && m.abbrB === "NYY") || (m.abbrA === "NYY" && m.abbrB === "BOS");
-});
-assert(!hitSettled, "settled BOS@NYY never matches — no fake edge from settlement lag");
-/* and the unfiltered path WOULD have matched (proving the filter matters) */
-var mtchsRaw = D.matches([pmSettledGame], snap.games, dir, teamFind, "mlb");
-var hitRaw = mtchsRaw.some(function(m){
-  return (m.abbrA === "BOS" && m.abbrB === "NYY") || (m.abbrA === "NYY" && m.abbrB === "BOS");
-});
-assert(hitRaw, "sanity: without the filter the settled game does match (filter is load-bearing)");
+    outcomes:JSON.stringify(["Chicago Cubs","San Diego Padres"]),
+    outcomePrices:JSON.stringify([0.25,0.75]), volume:5000}]};
+/* the pure case: the lone settled clone pairs at 99c on its own … */
+var lone = [settledClone];
+var loneMtch = D.matches([pmLag], lone, dir, teamFind, "mlb");
+assert(loneMtch.length === 1 && loneMtch[0].kalshiA >= 99,
+  "sanity: the lone settled clone pairs at 99c — the exact fake edge the filter exists to kill");
+/* … and after disagreeCard's filter there is nothing left to match */
+var loneFiltered = lone.filter(function(g){ return !K.settled(g); });
+assert(D.matches([pmLag], loneFiltered, dir, teamFind, "mlb").length === 0,
+  "filtered list has no settled game — no fake edge from settlement lag");
 
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }
 console.log("all disagree-settled assertions passed");
