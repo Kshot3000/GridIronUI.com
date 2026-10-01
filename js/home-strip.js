@@ -196,17 +196,33 @@ function broadcastNames(c){
 }
 
 /* "Kickoff in 13h 42m" for a future kickoff; null for past/unparseable —
-   the strip renders no countdown in those cases. */
-function kickoffIn(dateIso, nowMs){
+   the strip renders no countdown in those cases. The optional noun lets
+   non-football leagues read naturally ("First pitch in 3h 12m" on an MLB
+   row) — it defaults to "Kickoff" so existing callers are unaffected. */
+function kickoffIn(dateIso, nowMs, noun){
   var t = Date.parse(dateIso || "");
   if(!isFinite(t)) return null;
   var now = isFinite(nowMs) ? nowMs : Date.now();
   var d = t - now;
   if(d <= 0) return null;
+  noun = String(noun == null || noun === "" ? "Kickoff" : noun);
   var m = Math.floor(d / 60000);
-  if(m >= 24 * 60) return "Kickoff in " + Math.floor(m / 1440) + "d " + Math.floor((m % 1440) / 60) + "h";
-  if(m >= 60) return "Kickoff in " + Math.floor(m / 60) + "h " + (m % 60) + "m";
-  return "Kickoff in " + m + "m";
+  if(m >= 24 * 60) return noun + " in " + Math.floor(m / 1440) + "d " + Math.floor((m % 1440) / 60) + "h";
+  if(m >= 60) return noun + " in " + Math.floor(m / 60) + "h " + (m % 60) + "m";
+  return noun + " in " + m + "m";
+}
+
+/* The event noun for a league label ("NFL" -> "Kickoff", "MLB" ->
+   "First pitch"), case-insensitive; unknown leagues get "Kickoff".
+   Mirrors the predictions spotlight's SPOT_KICKER nouns so the countdown
+   never says "Kickoff" under a "Next first pitch" tag. */
+function gameNoun(league){
+  var l = String(league == null ? "" : league).toLowerCase();
+  if(l === "mlb") return "First pitch";
+  if(l === "nba") return "Tip-off";
+  if(l === "nhl") return "Puck drop";
+  if(l === "epl") return "Kick-off";
+  return "Kickoff";
 }
 
 /* The nearest pre-game row with a real future kickoff, or null. Skips live,
@@ -229,7 +245,7 @@ var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, collect: collect,
            kalshiPrice: kalshiPrice, kalshiSideAbbr: kalshiSideAbbr,
            snapStale: snapStale, withKalshi: withKalshi, snapWhen: snapWhen,
            broadcastNames: broadcastNames, kickoffIn: kickoffIn,
-           nearestPre: nearestPre};
+           nearestPre: nearestPre, gameNoun: gameNoun};
 if(typeof module !== "undefined" && module.exports) module.exports = api;
 else (window.GIU = window.GIU || {}).homeStrip = api;
 })();

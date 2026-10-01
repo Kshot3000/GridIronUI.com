@@ -149,7 +149,7 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/home-strip.js?v=1.124.0"></script>
+<script src="js/home-strip.js?v=1.129.1"></script>
 <script src="js/home-wx.js?v=1.126.0"></script>
 <script>
 (function(){
@@ -177,9 +177,11 @@
         : '<span class="tag">'+GIU.esc(r.shortDetail||"Scheduled")+'</span>';
       /* Where to watch, straight from the ESPN feed — only when it names one. */
       var tv = r.broadcast ? '<span class="tag tv-tag" title="Broadcast network, per ESPN">📺 '+GIU.esc(r.broadcast)+'</span>' : "";
-      /* Live countdown on the nearest upcoming game only. */
+      /* Live countdown on the nearest upcoming game only. The league rides
+         along so the countdown noun matches the sport ("First pitch in…"
+         on MLB, not "Kickoff in…"). */
       var cd = (nextPre && r.id === nextPre.id && r.date)
-        ? '<div class="kickoff-count" data-kickoff="'+GIU.esc(r.date)+'"></div>' : "";
+        ? '<div class="kickoff-count" data-kickoff="'+GIU.esc(r.date)+'" data-league="'+GIU.esc(r.league)+'"></div>' : "";
       /* Crowd prices from the Kalshi snapshot, when the game matched and the
          snapshot is fresh — favorite in gold, the same language as the
          predictions page. Never rendered for unmatched or stale rows. */
@@ -209,7 +211,8 @@
     var tickCd = function(){
       var els = document.querySelectorAll('[data-kickoff]'), i, s;
       for(i=0;i<els.length;i++){
-        s = HS.kickoffIn(els[i].getAttribute('data-kickoff'));
+        s = HS.kickoffIn(els[i].getAttribute('data-kickoff'), Date.now(),
+          HS.gameNoun(els[i].getAttribute('data-league')));
         if(s) els[i].textContent = s; else els[i].style.display = "none";
       }
     };
