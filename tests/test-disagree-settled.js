@@ -8,12 +8,14 @@
    disagreeCard in the shipped js/markets.js applies it too, and that the
    shared D.matches drops decided games on the Polymarket side (a 99c/1c
    Polymarket price is a final left in the active feed, not a live number).
-   The live fixture re-pins honestly: data/kalshi-mlb.json no longer carries
-   a settled game (BOS@NYY Game 2 settled fully and left Kalshi's listing;
-   CHC@SD Game 2 sits decided-but-unsettled at 89/90), so the settlement-lag
-   case is exercised with a synthetic clone of a REAL current game priced
-   the way BOS@NYY actually sat in the 02:37Z snapshot (winner 99/100,
-   loser 0/1) — the exact price shape that manufactured the fake edge.
+   The live fixture re-pins honestly: the snapshot listing rotates with the
+   postseason (CHC@SD Game 2 settled fully and left the listing in the
+   05:08Z snapshot; the ALDS matchups NYY@TB and CWS@CLE Game 1/2 joined),
+   so the settlement-lag case is exercised with a synthetic clone of a REAL
+   current game — the PHI vs ATL Game 3 winner-take-all, found by its
+   abbreviation pair rather than by position — priced the way a settled
+   game actually sits (winner 99/100, loser 0/1): the exact price shape that
+   manufactured the fake edge.
    Run: node tests/test-disagree-settled.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -36,18 +38,26 @@ assert(card.indexOf("(snap.games||[])") !== -1,
   "settled filter runs over snap.games");
 
 /* ---- functional: the settlement-lag price shape is caught ----
-   Clone the first live MLB game and price it like the settled BOS@NYY
-   entry did: winner 99/100, loser 0/1. */
+   Clone the PHI vs ATL Game 3 game and price it the way a settled game
+   actually sits: winner 99/100, loser 0/1. The fixture game is found by its
+   abbreviation pair (not by position) so snapshot reorderings can't
+   silently unhook the test. */
 var snap = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
 var live = (snap.games||[]).filter(function(g){ return !K.settled(g); });
 assert(live.length >= 2, "MLB snapshot has live games to work with (got "+live.length+")");
 assert(live.every(function(g){ return !K.settled(g); }),
-  "no real live game is flagged settled (CHC@SD decided at 89/90 stays live)");
-var settledClone = JSON.parse(JSON.stringify(live[0]));
+  "no real live game is flagged settled (PHI@ATL Game 3 stays live)");
+function abbrsOf(g){ return D.kalshiAbbrs((g && g.sub_title) || ""); }
+var fixture = live.filter(function(g){
+  var ab = abbrsOf(g);
+  return ab && ((ab[0]==="PHI"&&ab[1]==="ATL")||(ab[0]==="ATL"&&ab[1]==="PHI"));
+})[0];
+assert(!!fixture, "fixture game (PHI vs ATL, Oct 1) is in the current MLB snapshot");
+var settledClone = JSON.parse(JSON.stringify(fixture));
 /* keep the real event_ticker/markets: this is the genuine settlement-lag
-   price shape, only the numbers changed */
-(settledClone.markets||[]).forEach(function(m, i){
-  if(i === 0){ m.yes_bid = 99; m.yes_ask = 100; m.last = 99; }
+   price shape, only the numbers changed — the winner's book goes 99/100 */
+(settledClone.markets||[]).forEach(function(m){
+  if(D.kalshiTeamAbbr(m) === "ATL"){ m.yes_bid = 99; m.yes_ask = 100; m.last = 99; }
   else { m.yes_bid = 0; m.yes_ask = 1; m.last = 0; }
 });
 assert(K.settled(settledClone),
@@ -65,8 +75,8 @@ assert(klGames.every(function(g){ return !K.settled(g); }),
    prints a giant fake disagreement. The PM-side 99c/1c guard is left alone
    here (price 25c/75c), so only the settled filter is under test. */
 var dir = {mlb: [
-  {abbr:"CHC", displayName:"Chicago Cubs",   shortDisplayName:"Cubs"},
-  {abbr:"SD",  displayName:"San Diego Padres", shortDisplayName:"Padres"}
+  {abbr:"ATL", displayName:"Atlanta Braves",      shortDisplayName:"Braves"},
+  {abbr:"PHI", displayName:"Philadelphia Phillies", shortDisplayName:"Phillies"}
 ]};
 function teamFind(d, league, q){
   var list = (d||{})[league] || [];
@@ -78,9 +88,9 @@ function teamFind(d, league, q){
       return list[j];
   return null;
 }
-var pmLag = {title: "Cubs vs. Padres", startTime: "2026-10-01T00:00:00Z",
+var pmLag = {title: "Braves vs. Phillies", startTime: "2026-10-01T17:00:00Z",
   markets: [{sportsMarketType:"moneyline", closed:false, active:true,
-    outcomes:JSON.stringify(["Chicago Cubs","San Diego Padres"]),
+    outcomes:JSON.stringify(["Atlanta Braves","Philadelphia Phillies"]),
     outcomePrices:JSON.stringify([0.25,0.75]), volume:5000}]};
 /* the pure case: the lone settled clone pairs at 99c on its own … */
 var lone = [settledClone];
