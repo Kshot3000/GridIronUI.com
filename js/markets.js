@@ -34,6 +34,12 @@ var KALSHI_TABS = {
   mlb: {file: "data/kalshi-mlb.json", name: "MLB", dirKey: "mlb",
         empty: "No priced Kalshi MLB game markets in the current snapshot. The MLB tab tracks the postseason — check back in October."}
 };
+/* The snapshot often lists far more games than fit comfortably above the
+   fold (31 NFL games = two game weeks). Render the first page of cards and
+   offer the rest behind an honest per-league "Show all N games" toggle, so
+   later weeks are reachable instead of invisible. */
+var KALSHI_PAGE = 12;
+var kalshiShowAll = {nfl: false, mlb: false};
 
 function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
 function clearLive(){ if(liveTimer){ clearInterval(liveTimer); liveTimer = null; } }
@@ -379,7 +385,18 @@ function loadKalshi(my, silent, league){
     var stale = window.Kalshi.stale(snap.updated_at)
       ? '<div class="notice" style="margin-bottom:16px"><strong>This snapshot is stale</strong> (over 6 hours old). Treat these prices as a rough guide until the next refresh — we\'d rather say so than let you bet on cold numbers.</div>'
       : "";
-    box.innerHTML = stale + games.slice(0, 12).map(function(g){ return kalshiCard(g, dir, cfg); }).join("");
+    var showAll = !!kalshiShowAll[league];
+    var shown = showAll ? games : games.slice(0, KALSHI_PAGE);
+    box.innerHTML = stale + shown.map(function(g){ return kalshiCard(g, dir, cfg); }).join("") +
+      (games.length > KALSHI_PAGE
+        ? '<div style="margin:8px 0 34px;text-align:center"><button class="btn btn-ghost" id="kalshiShowAll" aria-expanded="'+showAll+'">'+
+          (showAll ? "Show fewer games" : "Show all "+games.length+" games")+'</button></div>'
+        : "");
+    var tgl = $("kalshiShowAll");
+    if(tgl) tgl.addEventListener("click", function(){
+      kalshiShowAll[league] = !kalshiShowAll[league];
+      loadKalshi(tabSeq, true, league); /* silent re-render keeps the toggle state */
+    });
     /* ---- live auto-refresh ----
        The snapshot file is rebuilt regularly server-side, so a
        silent 5-minute re-fetch picks up fresh prices between site pushes —

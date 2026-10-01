@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-10-01T00:37:37Z",
+ "updated_at": "2026-10-01T01:36:58Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -13,11 +13,11 @@
      "title": "Boston wins",
      "kind": "winner",
      "team": "Boston",
-     "yes_bid": 40,
-     "yes_ask": 41,
-     "last": 41,
-     "volume": "2209917.66",
-     "volume_24h": "2031536.39",
+     "yes_bid": 23,
+     "yes_ask": 25,
+     "last": 23,
+     "volume": "3668667.47",
+     "volume_24h": "3508626.96",
      "close_time": "2026-10-04T00:00:00Z"
     },
     {
@@ -25,11 +25,11 @@
      "title": "New York Y wins",
      "kind": "winner",
      "team": "New York Y",
-     "yes_bid": 59,
-     "yes_ask": 60,
-     "last": 60,
-     "volume": "3902663.83",
-     "volume_24h": "3735678.75",
+     "yes_bid": 74,
+     "yes_ask": 76,
+     "last": 76,
+     "volume": "5139134.37",
+     "volume_24h": "5044509.17",
      "close_time": "2026-10-04T00:00:00Z"
     }
    ]
@@ -47,8 +47,8 @@
      "yes_bid": 43,
      "yes_ask": 44,
      "last": 44,
-     "volume": "563876.80",
-     "volume_24h": "539178.51",
+     "volume": "758621.53",
+     "volume_24h": "690864.36",
      "close_time": "2026-10-04T02:00:00Z"
     },
     {
@@ -59,8 +59,8 @@
      "yes_bid": 56,
      "yes_ask": 57,
      "last": 57,
-     "volume": "1325470.74",
-     "volume_24h": "1251916.70",
+     "volume": "1594231.56",
+     "volume_24h": "1348646.34",
      "close_time": "2026-10-04T02:00:00Z"
     }
    ]
@@ -78,8 +78,8 @@
      "yes_bid": 49,
      "yes_ask": 50,
      "last": 50,
-     "volume": "15770.81",
-     "volume_24h": "15536.23",
+     "volume": "21788.43",
+     "volume_24h": "21346.22",
      "close_time": "2026-10-04T18:00:00Z"
     },
     {
@@ -89,9 +89,9 @@
      "team": "Philadelphia",
      "yes_bid": 50,
      "yes_ask": 51,
-     "last": 51,
-     "volume": "23747.17",
-     "volume_24h": "19462.87",
+     "last": 50,
+     "volume": "28881.80",
+     "volume_24h": "28465.99",
      "close_time": "2026-10-04T18:00:00Z"
     }
    ]
