@@ -120,6 +120,7 @@ node tests/test-odds-honesty.js  # odds-board honesty: homepage card names the f
 node tests/test-home-strip.js  # homepage "Today's games" strip (post-game drop, malformed-event skip, live-first + kickoff ranking, top-6 cap)
 node tests/test-home-kalshi.js  # Kalshi crowd prices on the home strip (abbreviation-pair match, JAC/WAS aliases, midpoint pricing, stale/malformed snapshots annotate nothing, no input mutation)
 node tests/test-home-strip-kickoff.js  # home strip watch info (ESPN broadcast network chip, live nearest-kickoff countdown, kickoffIn formatting/boundaries, shipped wiring pins)
+node tests/test-predictions-spotlight.js  # predictions "Next game" spotlight (league-aware kicker, home-strip kickoffIn countdown, 60s tick, featured game excluded from grid, past-games quiet, Kalshi row rides along, shipped wiring pins)
 node tests/test-guides-related.js  # "Keep learning" related-guides grid on all 7 guides (3 curated sibling cards each, no self-links, canonical titles match the home guide grid)
 node tests/test-odds-wx.js  # odds-board weather badges: venue cross-check vs ESPN (neutral-site aware, dome/retractable skip), pre-game + 16-day horizon only, multi-location forecast URL, escaped badge HTML
 node tests/test-odds-wx-dom.js  # weather badge wiring in shipped odds.js (hidden slot on NFL cards, gusty forecast reveals stadium badge, calm stays hidden, one multi-location fetch, no fetches on weather-free tabs like NBA)

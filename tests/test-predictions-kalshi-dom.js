@@ -99,7 +99,9 @@ let pass = 0, fail = 0;
 function ok(name, cond){ if(cond){ pass++; console.log("ok  ", name); } else { fail++; console.log("FAIL:", name); } }
 
 runCase("ok", (sb, els2) => {
-  const html = els2.predGrid.innerHTML;
+  /* v1.125.0: the single upcoming game is featured in the #predSpot
+     spotlight (not the grid), so assertions read spotlight + grid. */
+  const html = els2.predSpot.innerHTML + els2.predGrid.innerHTML;
   ok("NFL tab fetches the Kalshi snapshot", calls.indexOf("data/kalshi-nfl.json") > -1);
   ok("Polymarket card renders", html.indexOf("Market-implied") > -1);
   ok("Kalshi row rendered", html.indexOf(">Kalshi</span>") > -1);
@@ -110,7 +112,7 @@ runCase("ok", (sb, els2) => {
 
   /* snapshot failure: Polymarket cards still render, no Kalshi row */
   runCase("fail", (sb2, e2) => {
-    const h2 = e2.predGrid.innerHTML;
+    const h2 = e2.predSpot.innerHTML + e2.predGrid.innerHTML;
     ok("Polymarket cards render when snapshot fails", h2.indexOf("Market-implied") > -1);
     ok("no Kalshi row when snapshot fails", h2.indexOf(">Kalshi</span>") === -1);
     console.log(fail ? `\n${fail} FAILURES` : `\nALL ${pass} PREDICTIONS-KALSHI DOM TESTS PASSED`);

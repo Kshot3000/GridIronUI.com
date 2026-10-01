@@ -75,7 +75,9 @@ setTimeout(function(){
   check("markets: book line intact", mhtml.indexOf("book") >= 0 && mhtml.indexOf("tight book") >= 0);
   check("markets: Polymarket trade link intact", mhtml.indexOf("polymarket.com/event/ravens-vs-cowboys") >= 0);
 
-  var phtml = els["predGrid"].innerHTML;
+  /* v1.125.0: the nearest upcoming game is featured in the #predSpot
+     spotlight, so predictions assertions read spotlight + grid together. */
+  var phtml = (els["predSpot"] ? els["predSpot"].innerHTML : "") + els["predGrid"].innerHTML;
   check("predictions: 7d chip next to first outcome (Ravens 62%)", phtml.indexOf("62%") >= 0 && phtml.indexOf("▲ +1.5¢") >= 0);
   check("predictions: no chip when field missing", (function(){
     var i = phtml.indexOf("Lions vs. Packers"); if(i<0) return false;

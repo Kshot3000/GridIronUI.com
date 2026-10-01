@@ -100,6 +100,10 @@ var tabNfl = makeEl("tab-nfl"); tabNfl.setAttribute("data-k", "nfl");
 var tabNba = makeEl("tab-nba"); tabNba.setAttribute("data-k", "nba");
 getEl("predTabs")._children = [tabNfl, tabNba];
 
+/* v1.125.0: the spotlight countdown reuses home-strip's kickoffIn, so the
+   real home-strip.js loads here too — the sandbox then exercises the true
+   countdown path, not the degraded one. */
+vm.runInContext(fs.readFileSync(path.join(ROOT, "js/home-strip.js"), "utf8"), sandbox, {filename: "js/home-strip.js"});
 vm.runInContext(fs.readFileSync(path.join(ROOT, "js/predictions.js"), "utf8"), sandbox, {filename: "js/predictions.js"});
 
 function settle(fn){ setTimeout(fn, 60); }
@@ -110,13 +114,18 @@ settle(function(){
   assert(getEl("predGrid").innerHTML.indexOf("skel") !== -1, "NFL cards still pending: skeleton showing");
   tabNba._fire("click");
   settle(function(){
-    assert(getEl("predGrid").innerHTML.indexOf("Team E vs. Team F") !== -1,
-           "NBA tab renders its own cards");
+    /* v1.125.0: the tab's single future game is featured in the #predSpot
+       spotlight (countdown ticking), not in the grid — the generation guard
+       is about the response landing on the right tab, not which slot. */
+    assert(getEl("predSpot").innerHTML.indexOf("Team E vs. Team F") !== -1,
+           "NBA tab renders its own cards (in the next-game spotlight)");
     releaseNfl(nflLive);
     settle(function(){
-      assert(getEl("predGrid").innerHTML.indexOf("Team E vs. Team F") !== -1,
+      assert(getEl("predSpot").innerHTML.indexOf("Team E vs. Team F") !== -1,
              "stale NFL response does not overwrite the NBA tab");
-      assert(activeTimers().length === 0, "no timer while nothing is live, got "+activeTimers().length);
+      var at = activeTimers();
+      assert(at.length === 1 && at[0].ms === 60000,
+             "only the 60s spotlight countdown ticks when nothing is live, got "+JSON.stringify(at.map(function(t){return t.ms;})));
       assert(getEl("liveStatus").textContent === "" && getEl("liveStatus").innerHTML === "",
              "status cleared when nothing is live");
       assert(getEl("pauseBtn").style.display === "none", "pause button hidden when nothing is live");
@@ -125,34 +134,38 @@ settle(function(){
       nflDeferred = false;
       tabNfl._fire("click");
       settle(function(){
-        assert(intervals.length === 1, "one refresh timer scheduled when a game is likely live, got "+intervals.length);
-        assert(intervals[0].ms === 90000, "timer interval is 90s, got "+intervals[0].ms);
+        /* v1.125.0: the 60s spotlight countdown coexists with the 90s live
+           refresh — select the live timer by interval, not position. */
+        function liveT(){ var a = activeTimers().filter(function(t){ return t.ms === 90000; }); return a[0] || null; }
+        var lt = liveT();
+        assert(!!lt, "a 90s refresh timer is scheduled when a game is likely live");
         var st = getEl("liveStatus").innerHTML;
         assert(st.indexOf("live") !== -1, "status shows live state: "+JSON.stringify(st));
         assert(st.indexOf("updated") !== -1, "status shows an updated clock: "+JSON.stringify(st));
         assert(getEl("pauseBtn").style.display !== "none", "pause button visible while live");
-        var firstTimerId = intervals[0].id;
+        var firstTimerId = lt.id;
 
         /* 3. the tick does a silent reload: new fetch, no shimmer, old timer cleared */
         getEl("predGrid").innerHTML = "CARDS";
         var before = fetchCalls;
-        intervals[0].fn();
+        lt.fn();
         settle(function(){
           assert(fetchCalls > before, "tick re-fetches Polymarket (calls "+before+" -> "+fetchCalls+")");
           assert(getEl("predGrid").innerHTML.indexOf("skel") === -1, "silent reload shows no skeleton shimmer");
-          assert(activeTimers().length === 1, "silent reload leaves exactly one active timer, got "+activeTimers().length);
+          var lt2 = liveT();
+          assert(!!lt2, "silent reload reschedules the live timer");
           assert(cleared.indexOf(firstTimerId) !== -1, "silent reload clears the old timer first");
 
           /* 4. hidden tab: tick skips the fetch */
           sandbox.document.hidden = true;
           var b2 = fetchCalls;
-          intervals[0].fn();
+          lt2.fn();
           assert(fetchCalls === b2, "tick skips the fetch while the tab is hidden");
           sandbox.document.hidden = false;
 
           /* 5. pause: timer cleared, paused status, button flips to resume */
           getEl("pauseBtn")._fire("click");
-          assert(cleared.indexOf(intervals[0].id) !== -1, "pause clears the live timer");
+          assert(cleared.indexOf(lt2.id) !== -1, "pause clears the live timer");
           var ps = getEl("liveStatus").textContent;
           assert(ps.indexOf("paused") !== -1, "status shows paused state: "+JSON.stringify(ps));
           assert(getEl("pauseBtn").getAttribute("aria-pressed") === "true", "pause button aria-pressed=true when paused");
@@ -166,10 +179,14 @@ settle(function(){
             assert(intervals.length === timersAfterPause + 1, "resume reschedules the timer");
             assert(getEl("pauseBtn").getAttribute("aria-pressed") === "false", "pause button aria-pressed=false when live");
 
-            /* 7. switch to NBA (future games) -> timer cleared, status cleared */
+            /* 7. switch to NBA (future games) -> the 90s live timer is cleared
+               and the 60s spotlight countdown is scheduled instead */
             tabNba._fire("click");
             settle(function(){
-              assert(activeTimers().length === 0, "tab switch clears the live timer, got "+activeTimers().length);
+              assert(cleared.indexOf(firstTimerId) !== -1, "tab switch clears the live timer");
+              var at7 = activeTimers();
+              assert(at7.length === 1 && at7[0].ms === 60000,
+                     "tab switch leaves only the spotlight countdown, got "+JSON.stringify(at7.map(function(t){return t.ms;})));
               assert(getEl("liveStatus").textContent === "" && getEl("liveStatus").innerHTML === "",
                      "status cleared after switching away from live games");
               assert(getEl("pauseBtn").style.display === "none", "pause button hidden when nothing is live");
