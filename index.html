@@ -23,6 +23,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
+<style>
+/* v1.124.0 — strip watch info: broadcast network chip + live kickoff countdown */
+.tv-tag{white-space:nowrap}
+.kickoff-count{font-size:.82rem;color:var(--gold-soft,#e8c15a);font-weight:600;letter-spacing:.02em;margin-top:6px}
+</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://gridironui.xyz/#org","name":"GridIronUI","url":"https://gridironui.xyz/","sameAs":["https://x.com/kshot9000"]},{"@type":"WebSite","@id":"https://gridironui.xyz/#site","url":"https://gridironui.xyz/","name":"GridIronUI","publisher":{"@id":"https://gridironui.xyz/#org"},"description":"Learn sports betting from the ground up: guides, calculators, live odds, prediction markets, scores, news, injuries, weather and a DFS lineup lab — all in one place."}]}</script>
 </head>
@@ -143,7 +148,7 @@
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
-<script src="js/home-strip.js?v=1.120.0"></script>
+<script src="js/home-strip.js?v=1.124.0"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -162,9 +167,17 @@
     var snap = parts.pop();
     var rows = HS.withKalshi(HS.top([].concat.apply([], parts)), snap, Date.now());
     if(!rows.length){ $("homeGames").innerHTML = '<div class="empty">No games on the board right now.</div>'; return; }
+    /* The nearest upcoming kickoff gets a live countdown that ticks every
+       minute — a bettor shouldn't have to do timezone math on game day. */
+    var nextPre = HS.nearestPre(rows, Date.now());
     $("homeGames").innerHTML = rows.map(function(r){
       var badge = r.state==="in" ? '<span class="live-badge"><i></i>Live</span>'
         : '<span class="tag">'+GIU.esc(r.shortDetail||"Scheduled")+'</span>';
+      /* Where to watch, straight from the ESPN feed — only when it names one. */
+      var tv = r.broadcast ? '<span class="tag tv-tag" title="Broadcast network, per ESPN">📺 '+GIU.esc(r.broadcast)+'</span>' : "";
+      /* Live countdown on the nearest upcoming game only. */
+      var cd = (nextPre && r.id === nextPre.id && r.date)
+        ? '<div class="kickoff-count" data-kickoff="'+GIU.esc(r.date)+'"></div>' : "";
       /* Crowd prices from the Kalshi snapshot, when the game matched and the
          snapshot is fresh — favorite in gold, the same language as the
          predictions page. Never rendered for unmatched or stale rows. */
@@ -181,11 +194,22 @@
           '<span>'+side(k.aAbbr, k.aPct, k.aPct >= k.hPct)+' · '+side(k.hAbbr, k.hPct, k.hPct > k.aPct)+'</span>'+
           '<span>snapshot '+GIU.esc(HS.snapWhen(k.updatedAt))+'</span></div>';
       }
-      return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center">'+
-        '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+'</div>'+
+      return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+tv+'</div>'+cd+
         GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
         '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div>'+kp+'</div>';
     }).join("");
+    /* Arm the 60s countdown tick: one timer, all countdown elements; hides
+       any element whose kickoff has passed rather than going negative. */
+    var tickCd = function(){
+      var els = document.querySelectorAll('[data-kickoff]'), i, s;
+      for(i=0;i<els.length;i++){
+        s = HS.kickoffIn(els[i].getAttribute('data-kickoff'));
+        if(s) els[i].textContent = s; else els[i].style.display = "none";
+      }
+    };
+    tickCd();
+    setInterval(tickCd, 60000);
   }).catch(function(){ $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feeds didn't respond."); });
 
   /* headlines */

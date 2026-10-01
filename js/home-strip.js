@@ -38,7 +38,8 @@ function collect(leagueLabel, payload){
         shortDetail: (((c.status||{}).type)||{}).shortDetail || "",
         away: away,
         home: home,
-        venue: ((c.venue)||{}).fullName || ""
+        venue: ((c.venue)||{}).fullName || "",
+        broadcast: broadcastNames(c)
       });
     }catch(e){ /* skip the malformed event, keep the rest */ }
   });
@@ -178,11 +179,57 @@ function snapWhen(iso){
   }catch(e){ return ""; }
 }
 
+/* ---- Watch info + kickoff countdown (v1.124.0) ----
+   The "Today's games" strip tells a bettor not just who's favored but where
+   to watch and how long until kickoff — both straight from the ESPN payload,
+   never guessed. */
+
+/* First broadcast network names on a game ("Prime Video", "ESPN / ABC"),
+   or "" when ESPN names none. Pure, testable. */
+function broadcastNames(c){
+  try{
+    var b = ((c || {}).broadcasts || [])[0] || {};
+    var n = b.names;
+    if(Array.isArray(n)) n = n.filter(function(x){ return x; }).join(" / ");
+    return String(n || "").trim();
+  }catch(e){ return ""; }
+}
+
+/* "Kickoff in 13h 42m" for a future kickoff; null for past/unparseable —
+   the strip renders no countdown in those cases. */
+function kickoffIn(dateIso, nowMs){
+  var t = Date.parse(dateIso || "");
+  if(!isFinite(t)) return null;
+  var now = isFinite(nowMs) ? nowMs : Date.now();
+  var d = t - now;
+  if(d <= 0) return null;
+  var m = Math.floor(d / 60000);
+  if(m >= 24 * 60) return "Kickoff in " + Math.floor(m / 1440) + "d " + Math.floor((m % 1440) / 60) + "h";
+  if(m >= 60) return "Kickoff in " + Math.floor(m / 60) + "h " + (m % 60) + "m";
+  return "Kickoff in " + m + "m";
+}
+
+/* The nearest pre-game row with a real future kickoff, or null. Skips live,
+   finished, and dateless rows — the countdown only ever names one game. */
+function nearestPre(rows, nowMs){
+  var now = isFinite(nowMs) ? nowMs : Date.now();
+  var best = null, bt = Infinity;
+  (rows || []).forEach(function(r){
+    if(!r || r.state !== "pre") return;
+    var t = Date.parse(r.date || "");
+    if(!isFinite(t) || t <= now || t >= bt) return;
+    bt = t; best = r;
+  });
+  return best;
+}
+
 var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, collect: collect,
            rankRows: rankRows, top: top,
            normKalshiAbbr: normKalshiAbbr, kalshiPair: kalshiPair,
            kalshiPrice: kalshiPrice, kalshiSideAbbr: kalshiSideAbbr,
-           snapStale: snapStale, withKalshi: withKalshi, snapWhen: snapWhen};
+           snapStale: snapStale, withKalshi: withKalshi, snapWhen: snapWhen,
+           broadcastNames: broadcastNames, kickoffIn: kickoffIn,
+           nearestPre: nearestPre};
 if(typeof module !== "undefined" && module.exports) module.exports = api;
 else (window.GIU = window.GIU || {}).homeStrip = api;
 })();
