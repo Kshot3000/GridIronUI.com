@@ -148,7 +148,9 @@
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
+<script src="js/wx-shared.js?v=1.91.0"></script>
 <script src="js/home-strip.js?v=1.124.0"></script>
+<script src="js/home-wx.js?v=1.126.0"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -197,7 +199,10 @@
       return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
         '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+tv+'</div>'+cd+
         GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
-        '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div>'+kp+'</div>';
+        '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div>'+
+        /* v1.126.0 — game-day weather chips paint here for outdoor NFL/MLB
+           rows with noteworthy conditions; hidden until a forecast says so. */
+        '<div class="game-meta" data-wxchip="'+GIU.esc(r.league+":"+r.id)+'" hidden style="margin-top:8px;align-items:center"></div>'+kp+'</div>';
     }).join("");
     /* Arm the 60s countdown tick: one timer, all countdown elements; hides
        any element whose kickoff has passed rather than going negative. */
@@ -210,6 +215,30 @@
     };
     tickCd();
     setInterval(tickCd, 60000);
+    /* v1.126.0 — game-day weather chips: one Open-Meteo call for the strip's
+       outdoor NFL/MLB venues, chips paint into their placeholders. A
+       forecast hiccup or calm conditions leave the strip exactly as rendered
+       above — chips never block the strip and never invent a forecast. */
+    try{
+      var HXW = (window.GIU||{}).homeWx;
+      var wxJobs = HXW ? HXW.resolveRows(rows, {nfl: GIU.wxVenueFor, mlb: GIU.wxBallparkVenueFor}, Date.now()) : [];
+      var wxUrl = HXW && HXW.wxUrl(wxJobs);
+      if(wxUrl){
+        GIU.fetchJSON(wxUrl).then(function(d){
+          var arr = Array.isArray(d) ? d : [d];
+          wxJobs.forEach(function(g, i){
+            var hourly = (arr[i] && arr[i].hourly) || {time:[]};
+            var notesFn = g.league === "mlb" ? GIU.wxImpactNotesBsb : GIU.wxImpactNotes;
+            var notes = notesFn(GIU.wxSliceWindow({hourly:hourly}, g.kickISO));
+            if(!notes.length) return; /* calm day — nothing to say */
+            var slot = document.querySelector('[data-wxchip="'+g.slot+'"]');
+            if(!slot) return;
+            slot.innerHTML = HXW.chipHtml(g, notes, GIU.esc);
+            slot.hidden = false;
+          });
+        }).catch(function(){ /* chips stay off; the strip already rendered */ });
+      }
+    }catch(e){ /* chips stay off; the strip already rendered */ }
   }).catch(function(){ $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feeds didn't respond."); });
 
   /* headlines */
