@@ -56,8 +56,8 @@ assert(snap.games.every(function(g){ return Array.isArray(g.markets) && g.market
 
 /* ---- cache key ---- */
 var keyMatch = marketsHtml.match(/js\/markets\.js\?v=([\d.]+)/);
-assert(keyMatch && keyMatch[1] === "1.116.0",
-  "markets.html cache key for markets.js is v1.116.0 (Kalshi tabs paginate: first page of 12 cards + 'Show all N games' toggle)");
+assert(keyMatch && keyMatch[1] === "1.117.0",
+  "markets.html cache key for markets.js is v1.117.0 (disagree card excludes settled Kalshi games; D.matches drops 99c/1c Polymarket finals)");
 
 if(failures){ console.error(failures + " failure(s)"); process.exit(1); }
 console.log("all kalshi-snapshot checks passed");

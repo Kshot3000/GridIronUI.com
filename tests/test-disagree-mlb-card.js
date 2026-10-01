@@ -171,8 +171,8 @@ assert(/disagreeCard\s*\(\s*games\s*,\s*snap\s*,\s*dir\s*,\s*lkey\s*\)/.test(src
   "markets.js passes the tab league key into disagreeCard");
 assert(/function disagreeCard\s*\(\s*games\s*,\s*snap\s*,\s*dir\s*,\s*league\s*\)/.test(src),
   "disagreeCard takes a league parameter");
-assert(/D\.matches\s*\(evs,\s*\(snap\.games\|\|\[\]\),\s*dir,\s*window\.GIU\.teamFind,\s*league\)/.test(src),
-  "disagreeCard forwards league into D.matches");
+assert(/D\.matches\s*\(evs,\s*klGames,\s*dir,\s*window\.GIU\.teamFind,\s*league\)/.test(src),
+  "disagreeCard forwards league into D.matches (over the settled-filtered klGames)");
 assert(/teamFind\s*\(\s*dir\s*,\s*league\s*,\s*x\.abbrA\s*\)/.test(src),
   "disagreeCard forwards league into teamFind for row headers");
 assert(/MLB postseason games/.test(src) && !/matched NFL games/.test(src),

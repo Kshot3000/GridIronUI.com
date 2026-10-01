@@ -167,7 +167,15 @@ function disagreeCard(games, snap, dir, league){
   var D = window.Disagree;
   if(!D || !snap) return "";
   var evs = games.map(function(g){ return g.ev; });
-  var mtchs = D.matches(evs, (snap.games||[]), dir, window.GIU.teamFind, league);
+  /* Settled Kalshi games never cross-check — the same rule predictions.js
+     applies: a finished game has no live price to compare, and its 99c side
+     is a result, not a prediction. Kalshi keeps finished games in its "open"
+     listing until settlement finalizes, so without this the settlement-lag
+     window manufactures a fake cross-book "edge". */
+  var klGames = (snap.games||[]).filter(function(g){
+    return !(window.Kalshi && window.Kalshi.settled(g));
+  });
+  var mtchs = D.matches(evs, klGames, dir, window.GIU.teamFind, league);
   if(!mtchs.length) return "";
   var dis = D.disagreements(mtchs, 3);
   /* The card compares a LIVE Polymarket price against a FROZEN Kalshi price,

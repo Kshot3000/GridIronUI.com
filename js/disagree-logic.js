@@ -148,6 +148,12 @@ D.matches = function(pmEvents, kalshiGames, dir, teamFind, league){
     if(!t) return;
     var pm = D.pmMoneyline(ev);
     if(!pm) return;
+    /* A 99c/1c Polymarket price is a final, not a live number — Polymarket
+       leaves finished games in the active feed until it closes them, and a
+       live game only reaches an extreme in its final seconds. Comparing a
+       decided game against Kalshi manufactures a fake "edge" out of
+       settlement lag, so drop it here instead of matching it. */
+    if(pm.priceA >= 99 || pm.priceA <= 1) return;
     var ta = teamFind(dir, league, t[0]), tb = teamFind(dir, league, t[1]);
     if(!ta || !tb) return;
     var pa = normAbbr(ta.abbr), pb = normAbbr(tb.abbr);

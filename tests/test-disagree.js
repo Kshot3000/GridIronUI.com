@@ -119,5 +119,19 @@ assert(dis[1].abbrA === "KC" && dis[1].delta === -4, "negative delta preserved (
 var disDefault = D.disagreements([{abbrA:"KC",abbrB:"BUF",nameA:"Chiefs",nameB:"Bills",pmA:72,pmB:28,kalshiA:70,kalshiB:30}]);
 assert(disDefault.length === 0, "default threshold is 3c: a 2c gap is noise, not an edge");
 
+/* decided games: a 99c/1c Polymarket price is a final, not a live number
+   (finished games linger in the active feed until Polymarket closes them).
+   Matching one against Kalshi would manufacture a fake "edge" out of
+   settlement lag — matches() must drop it, never compare it. */
+var mDecided = D.matches(
+  [ev("Chiefs vs. Bills", [ml(["Chiefs","Bills"],[0.993,0.007],500)])], [kg], dir, teamFind);
+assert(mDecided.length === 0, "matches drops a decided game: Polymarket 99c is a final, not a live price");
+var mDecidedB = D.matches(
+  [ev("Chiefs vs. Bills", [ml(["Chiefs","Bills"],[0.004,0.996],500)])], [kg], dir, teamFind);
+assert(mDecidedB.length === 0, "matches drops a decided game on the other side too (1c)");
+var mHeavy = D.matches(
+  [ev("Chiefs vs. Bills", [ml(["Chiefs","Bills"],[0.98,0.02],500)])], [kg], dir, teamFind);
+assert(mHeavy.length === 1, "98c is a heavy live favorite, not a final — still matched");
+
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }
 console.log("all disagree-logic assertions passed");
