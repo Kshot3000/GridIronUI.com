@@ -1,4 +1,10 @@
-/* GridIronUI Injuries — ESPN injuries feed per league. */
+/* GridIronUI Injuries — ESPN injuries feed per league, with live auto-refresh.
+   The board re-pulls silently every 3 minutes while the tab is visible,
+   mirroring the news wire — designations change on game days, and that's
+   what moves lines. Search and severity filter survive silent refreshes;
+   players new or changed since the last check get an honest badge
+   (js/inj-live.js diffing), and the live-status pill carries the updated
+   clock with a pause/resume control. */
 (function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
@@ -8,6 +14,38 @@ var LEAGUES = [
   ["basketball/mens-college-basketball","NCAAB"],["soccer/eng.1","EPL"]
 ];
 var cur = 0, data = [];
+
+/* ---- live auto-refresh machinery ----
+   Silent 3-minute re-pulls; ticks skip while the tab is hidden and resume on
+   their own. prevStatus/changedKind are the per-league diff baseline: a
+   league switch resets them, so badges always mean "since you last checked
+   THIS league". */
+var LIVE_MS = 3*60*1000;
+var liveTimer = null, autoOn = true, lastUpdated = null;
+var tabSeq = 0; /* render generation: a slow tab response never overwrites a newer tab */
+var prevStatus = null, changedKind = {};
+var LIV = (typeof window !== "undefined" && window.InjLive) || null;
+function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+function clearLive(){ if(liveTimer){ clearInterval(liveTimer); liveTimer = null; } }
+function fmtClock(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function renderLiveStatus(){
+  var s = $("liveStatus"), b = $("pauseBtn");
+  if(!s) return;
+  if(autoOn){
+    s.className = "live-status live";
+    s.innerHTML = '<span class="live-dot" aria-hidden="true"></span>'+
+      'auto-refresh every 3 min'+
+      (lastUpdated ? ' · updated '+fmtClock(lastUpdated) : "");
+    if(b){ b.style.display = ""; b.innerHTML = "⏸ Pause live"; b.setAttribute("aria-pressed","false"); }
+  } else {
+    s.className = "live-status paused";
+    s.textContent = "auto-refresh paused";
+    if(b){ b.style.display = ""; b.innerHTML = "▶ Resume live"; b.setAttribute("aria-pressed","true"); }
+  }
+}
 /* Team-identity directory key per ESPN league path (NCAA leagues have no
    directory — teamHead falls back to the plain heading). */
 var DIRKEY = {"football/nfl":"nfl","basketball/nba":"nba","baseball/mlb":"mlb",
@@ -86,10 +124,13 @@ function teamTag(t){
   return parts.join(" ");
 }
 function passSev(i){ return sevF===-1 || sevRank(i.status)===sevF; }
-function load(){
+function load(silent){
+  clearLive(); /* tab switches and silent refreshes always reschedule */
+  var mySeq = ++tabSeq;
   var box = $("injGrid");
-  box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
+  if(!silent) box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
   GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+LEAGUES[cur][0]+"/injuries").then(function(d){
+    if(mySeq !== tabSeq) return; /* a newer tab switch already won — discard */
     data = (d.injuries||[]).map(function(t){
       /* Healthy players are not injuries — drop them before anything else. */
       t.injuries = (t.injuries||[]).filter(function(i){ return !isHealthy(i.status); });
@@ -101,8 +142,18 @@ function load(){
     data.forEach(function(t){
       (t.injuries||[]).sort(function(a,b){ return sevRank(b.status)-sevRank(a.status); });
     });
-    render("");
+    /* Diff against the last check for this league: new/changed designations
+       get an honest badge. First load is the baseline — no false flags. */
+    if(LIV){
+      var diff = LIV.diffStatuses(prevStatus, data);
+      changedKind = diff.changed; prevStatus = diff.next;
+    }
+    lastUpdated = Date.now();
+    render($("injSearch").value||""); /* silent refreshes keep your search + filter */
+    renderLiveStatus();
+    if(autoOn) liveTimer = setInterval(function(){ if(!isHidden()) load(true); }, LIVE_MS);
   }).catch(function(){
+    if(mySeq !== tabSeq) return;
     box.innerHTML = GIU.failBox("The ESPN injuries feed didn't respond for "+LEAGUES[cur][1]+".");
   });
 }
@@ -122,14 +173,20 @@ function render(q){
   var what = sevF===-1 ? "" : ' with status "'+SEVS.filter(function(s){return SEV_RANK[s[0]]===sevF;})[0][1]+'"';
   if(!teams.length){ box.innerHTML = '<div class="empty">No injuries'+GIU.esc(what)+' match "'+GIU.esc(q)+'" for '+LEAGUES[cur][1]+' right now.</div>'; return; }
   box.innerHTML = teams.map(function(t){
+    var teamNm = t.displayName || t.name || "Team";
     var rows = (t._shown||t.injuries).map(function(i){
       var nm = ((i.athlete||{}).displayName)||"Unknown";
       var detail = detailText(i);
-      return '<div class="gloss-term" style="padding:10px 0"><h3 style="font-size:.95rem">'+GIU.esc(nm)+' '+statusTag(i.status)+'</h3>'+
+      var badge = "";
+      if(LIV){
+        var kind = changedKind[LIV.statusKey(teamNm, nm)];
+        if(kind) badge = " "+LIV.badgeHtml(kind);
+      }
+      return '<div class="gloss-term" style="padding:10px 0"><h3 style="font-size:.95rem">'+GIU.esc(nm)+badge+' '+statusTag(i.status)+'</h3>'+
         '<p>'+GIU.esc(detail)+'</p>'+
         (i.date?'<p style="font-size:.78rem;color:var(--faint)">Updated '+GIU.esc(i.date.slice(0,10))+'</p>':"")+'</div>';
     }).join("");
-    return '<div class="card">'+GIU.teamHead(tdir, DIRKEY[LEAGUES[cur][0]], t.displayName, t.displayName||t.name||"Team")+'<p style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px">'+teamTag(t)+'</p>'+rows+'</div>';
+    return '<div class="card">'+GIU.teamHead(tdir, DIRKEY[LEAGUES[cur][0]], t.displayName, teamNm)+'<p style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px">'+teamTag(t)+'</p>'+rows+'</div>';
   }).join("");
 }
 $("injSev").innerHTML = SEVS.map(function(s,i){
@@ -149,6 +206,7 @@ Array.prototype.forEach.call($("injTabs").querySelectorAll(".tab"), function(t){
     Array.prototype.forEach.call($("injTabs").querySelectorAll(".tab"), function(x){x.classList.remove("active");});
     t.classList.add("active"); cur = Number(t.getAttribute("data-i")); $("injSearch").value="";
     sevF = -1;
+    prevStatus = null; changedKind = {}; /* new league, new baseline */
     Array.prototype.forEach.call($("injSev").querySelectorAll(".tab"), function(x){
       x.classList.toggle("active", x.getAttribute("data-sev")==="all");
     });
@@ -159,6 +217,11 @@ var deb=null;
 $("injSearch").addEventListener("input", function(){
   clearTimeout(deb); var v=this.value;
   deb=setTimeout(function(){ render(v); }, 220);
+});
+$("pauseBtn").addEventListener("click", function(){
+  autoOn = !autoOn;
+  if(autoOn){ load(true); }  /* resume: refresh now, timer reschedules */
+  else { clearLive(); renderLiveStatus(); }
 });
 load();
 })();

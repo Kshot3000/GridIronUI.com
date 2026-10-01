@@ -62,6 +62,8 @@ node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph
 node tests/test-odds-inj.js   # injury-badge pure logic (severity ranks, per-team counts, card lines, badge HTML)
 node tests/test-odds-inj-dom.js  # injury-badge wiring in shipped odds.js (hidden slots, live injection, quiet cases, feed failure)
 node tests/test-injuries.js  # injuries page: severity filter + sorting in the SHIPPED js/injuries.js
+node tests/test-inj-live.js  # injury-board live helpers: status diffing (new/downgraded/upgraded/updated), honest badges, shipped wiring pins
+node tests/test-injuries-live.js  # injuries board live auto-refresh (3-min silent tick, hidden-tab skip, search/filter preserved, change badges, pause/resume, league-switch baseline reset, tab-generation guard)
 node tests/test-odds.js       # odds logic tests
 node tests/test-odds-identity.js  # odds sport->identity-league mapping + identity header resolution
 node tests/test-odds-slip.js  # bet-slip math tests
