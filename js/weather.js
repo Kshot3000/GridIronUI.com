@@ -101,6 +101,89 @@ function renderWatch(boxId, entries){
 GIU.wxWatchEntries = watchEntries;
 GIU.wxWatchHTML = watchHTML;
 
+/* ---- followed teams (v1.154.0) ----
+   The odds board's ★ follows (js/team-follow.js, localStorage
+   "giu-followed-teams") already mark the odds board, scores,
+   predictions and injuries — but not the page a bettor checks on game
+   morning for their own team's kickoff conditions. Followed-team
+   games now get a gold rail + "★ Your team" tag on both weather
+   sections (NFL + MLB postseason), and one combined "Your teams"
+   jump strip opens the page with a chip per followed game (matchup
+   + venue, anchor-linked to the card's gold :target ring). Dome
+   games count too: "your team plays indoors, weather is a non-factor"
+   is itself the answer a bettor came for. Abbreviations compare in
+   the ESPN namespace both sides already use — the follow list is
+   built from the ESPN-sourced team directory on the odds board, and
+   scoreboard competitors carry ESPN abbreviations. No follows, or no
+   followed team on either slate: the strip stays hidden and the
+   page renders exactly as before — nothing is ever invented. */
+function teamFollow(){ try{ return (window.GIU && window.GIU.TeamFollow) || null; }catch(e){ return null; } }
+function followedList(){
+  var T = teamFollow();
+  try{ return T ? T.load() : []; }catch(e){ return []; }
+}
+/* followedWx: pure matcher. Takes plain game records
+   ({anchor, away, home, venue}) + the raw followed list and returns
+   one record per game a followed team plays in:
+   {anchor, abbr (the followed side), away, home, venue}.
+   Normalization mirrors team-follow.js list() (trim/upper, 2–4
+   letters, first-followed wins when both sides are followed);
+   garbage in -> []. Exported for tests. */
+function followedWx(games, followed){
+  var f = [], seen = {};
+  (Array.isArray(followed) ? followed : []).forEach(function(x){
+    if(typeof x !== "string") return;
+    var n = x.trim().toUpperCase();
+    if(/^[A-Z]{2,4}$/.test(n) && !seen[n]){ seen[n] = 1; f.push(n); }
+  });
+  if(!f.length || !Array.isArray(games)) return [];
+  var out = [];
+  games.forEach(function(g){
+    if(!g || !g.anchor) return;
+    var away = String(g.away == null ? "" : g.away).trim().toUpperCase();
+    var home = String(g.home == null ? "" : g.home).trim().toUpperCase();
+    if(!away && !home) return;
+    var hit = null, i;
+    for(i = 0; i < f.length; i++){ if(f[i] === away || f[i] === home){ hit = f[i]; break; } }
+    if(!hit) return;
+    out.push({ anchor: String(g.anchor), abbr: hit, away: away, home: home,
+               venue: g.venue == null ? "" : String(g.venue) });
+  });
+  return out;
+}
+/* Strip HTML for a match list: the "★ Your teams" label + one jump
+   chip per followed game (followed abbr, matchup, venue when known).
+   Everything source-derived is escaped. Pure; exported for tests. */
+function followHTML(matches){
+  return '<span class="follow-strip-label">★ Your teams</span>' +
+    (matches || []).map(function(m){
+      return '<a class="follow-chip-link" href="#'+GIU.esc(m.anchor)+'"><b>'+GIU.esc(m.abbr)+'</b> '+
+        GIU.esc(m.away || "")+' @ '+GIU.esc(m.home || "")+
+        (m.venue ? ' · '+GIU.esc(m.venue) : "")+'</a>';
+    }).join("");
+}
+GIU.wxFollowed = followedWx;
+GIU.wxFollowHTML = followHTML;
+/* Registered game records per section; the single strip merges both
+   sections' matches and re-renders as each bootstrap lands, so an
+   NFL chip never waits on the MLB feed (or vice versa). */
+var wxFollowGames = { nfl: [], mlb: [] };
+function renderFollowStrip(){
+  var box = $("wxFollow");
+  if(!box) return;
+  var fol = followedList();
+  var matches = followedWx(wxFollowGames.nfl, fol).concat(followedWx(wxFollowGames.mlb, fol));
+  if(!matches.length){ box.hidden = true; box.innerHTML = ""; return; }
+  box.innerHTML = followHTML(matches);
+  box.hidden = false;
+}
+/* anchor -> match map for one section's games, for card marks. */
+function folByAnchor(games){
+  var map = {};
+  followedWx(games, followedList()).forEach(function(m){ map[m.anchor] = m; });
+  return map;
+}
+
 /* The scoreboard fetch survives ESPN's week rollover: between the week's last
    game and the Tuesday rollover the default board is all-post, so without
    the fallback this page would sit empty on exactly the mornings bettors
@@ -116,6 +199,18 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
     box.parentNode.insertBefore(note.firstChild, box);
   }
   if(!evs.length){ box.innerHTML = '<div class="empty">No upcoming NFL games on the board.</div>'; return; }
+  /* v1.154.0 — followed-team marks for this slate (strip + card rail/tag) */
+  var nflGames = evs.map(function(ev){
+    var c0 = ev.competitions[0];
+    var h0 = c0.competitors.filter(function(t){return t.homeAway==="home";})[0];
+    var a0 = c0.competitors.filter(function(t){return t.homeAway==="away";})[0];
+    var v0 = h0 ? GIU.wxVenueFor(ev, h0.team.abbreviation) : null;
+    return { anchor: "wxg-"+String(ev.id).replace(/[^A-Za-z0-9_-]/g,""),
+             away: (a0&&a0.team&&a0.team.abbreviation)||"", home: (h0&&h0.team&&h0.team.abbreviation)||"",
+             venue: (v0 && v0.row) ? v0.row[1] : "" };
+  });
+  wxFollowGames.nfl = nflGames;
+  var nflFol = folByAnchor(nflGames);
   box.innerHTML = evs.map(function(ev){
     var c = ev.competitions[0];
     var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0];
@@ -126,15 +221,17 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
     try{ var dt=new Date(ev.date);
       when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
     }catch(e){}
-    return '<div class="card" id="wxg-'+GIU.esc(String(ev.id).replace(/[^A-Za-z0-9_-]/g,""))+'" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
+    var anch = "wxg-"+String(ev.id).replace(/[^A-Za-z0-9_-]/g,"");
+    return '<div class="card'+(nflFol[anch] ? " followed" : "")+'" id="'+GIU.esc(anch)+'" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
       ' data-away="'+GIU.esc((away&&away.team&&away.team.abbreviation)||"")+'" data-home="'+GIU.esc((home&&home.team&&home.team.abbreviation)||"")+'"'+
       (st ? ' data-sname="'+GIU.esc(st[1])+'" data-scity="'+GIU.esc(st[2])+'" data-slat="'+st[3]+'" data-slon="'+st[4]+'" data-sroof="'+st[5]+'"' : "")+'>'+
-      '<div class="game-meta"><span>'+when+'</span>'+(v.neutral?'<span class="tag" style="margin-left:8px">neutral site</span>':"")+'</div>'+
+      '<div class="game-meta"><span>'+when+'</span>'+(v.neutral?'<span class="tag" style="margin-left:8px">neutral site</span>':"")+(nflFol[anch]?' <span class="tag tag-yourteam">★ Your team</span>':"")+'</div>'+
       matchupHTML(away, home)+
       (st ? '<p style="font-size:.86rem;color:var(--muted);margin:0 0 10px">🏟️ '+GIU.esc(st[1])+' · '+GIU.esc(st[2])+(st[5]==="open"?"":' · <span class="tag blue">'+st[5]+' roof</span>')+'</p>'
           : '<p style="color:var(--faint)">Stadium data unavailable</p>')+
       '<div class="wx-body"><div class="skel" style="height:60px"></div></div></div>';
   }).join("");
+  renderFollowStrip();
   var watchJobs = [];
   Array.prototype.forEach.call(box.querySelectorAll("[data-game]"), function(card){
     var ds = card.dataset;
@@ -178,6 +275,19 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
     var evs = (res.events||[]).slice(0, 12);
     if(!evs.length) return; /* stays hidden outside October */
     wrap.hidden = false;
+    /* v1.154.0 — followed-team marks for the postseason slate */
+    var mlbGames = evs.map(function(ev){
+      var c0 = ev.competitions[0] || {};
+      var comps0 = c0.competitors || [];
+      var h0 = comps0.filter(function(t){return t.homeAway==="home";})[0];
+      var a0 = comps0.filter(function(t){return t.homeAway==="away";})[0];
+      var bp0 = (h0 && h0.team) ? GIU.wxBallparkVenueFor(ev, h0.team.abbreviation) : null;
+      return { anchor: "wxb-"+String(ev.id).replace(/[^A-Za-z0-9_-]/g,""),
+               away: (a0&&a0.team&&a0.team.abbreviation)||"", home: (h0&&h0.team&&h0.team.abbreviation)||"",
+               venue: bp0 ? bp0[1] : "" };
+    });
+    wxFollowGames.mlb = mlbGames;
+    var mlbFol = folByAnchor(mlbGames);
     grid.innerHTML = evs.map(function(ev){
       var c = ev.competitions[0] || {};
       var comps = c.competitors || [];
@@ -188,13 +298,15 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
       try{ var dt=new Date(ev.date);
         when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
       }catch(e){}
-      return '<div class="card" id="wxb-'+GIU.esc(String(ev.id).replace(/[^A-Za-z0-9_-]/g,""))+'" data-game="'+ev.id+'" data-kick="'+ev.date+'">'+
-        '<div class="game-meta"><span>'+when+'</span><span class="tag" style="margin-left:8px">MLB postseason</span></div>'+
+      var anch = "wxb-"+String(ev.id).replace(/[^A-Za-z0-9_-]/g,"");
+      return '<div class="card'+(mlbFol[anch] ? " followed" : "")+'" id="'+GIU.esc(anch)+'" data-game="'+ev.id+'" data-kick="'+ev.date+'">'+
+        '<div class="game-meta"><span>'+when+'</span><span class="tag" style="margin-left:8px">MLB postseason</span>'+(mlbFol[anch]?' <span class="tag tag-yourteam">★ Your team</span>':"")+'</div>'+
         matchupHTML(away, home)+
         (bp ? '<p style="font-size:.86rem;color:var(--muted);margin:0 0 10px">🏟️ '+GIU.esc(bp[1])+' · '+GIU.esc(bp[2])+(bp[5]==="open"?"":' · <span class="tag blue">'+bp[5]+' roof</span>')+'</p>'
             : '<p style="color:var(--faint)">Ballpark data unavailable</p>')+
         '<div class="wx-body" data-bp="'+(bp ? GIU.esc(bp[0]) : "")+'"><div class="skel" style="height:60px"></div></div></div>';
     }).join("");
+    renderFollowStrip();
     var watchJobs = [];
     Array.prototype.forEach.call(grid.querySelectorAll("[data-game]"), function(card){
       var evId = card.getAttribute("data-game");

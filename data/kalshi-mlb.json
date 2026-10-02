@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-10-02T11:38:59Z",
+ "updated_at": "2026-10-02T12:39:54Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -15,9 +15,9 @@
      "team": "Chicago WS",
      "yes_bid": 41,
      "yes_ask": 42,
-     "last": 41,
-     "volume": "69135.36",
-     "volume_24h": "65172.04",
+     "last": 42,
+     "volume": "70665.35",
+     "volume_24h": "66281.48",
      "close_time": "2026-10-06T17:00:00Z"
     },
     {
@@ -28,8 +28,8 @@
      "yes_bid": 58,
      "yes_ask": 59,
      "last": 59,
-     "volume": "79958.84",
-     "volume_24h": "67817.87",
+     "volume": "97172.35",
+     "volume_24h": "67968.65",
      "close_time": "2026-10-06T17:00:00Z"
     }
    ]
@@ -47,8 +47,8 @@
      "yes_bid": 36,
      "yes_ask": 37,
      "last": 37,
-     "volume": "10449.43",
-     "volume_24h": "10228.60",
+     "volume": "11610.77",
+     "volume_24h": "11343.72",
      "close_time": "2026-10-06T20:00:00Z"
     },
     {
@@ -56,11 +56,11 @@
      "title": "Los Angeles D wins",
      "kind": "winner",
      "team": "Los Angeles D",
-     "yes_bid": 64,
+     "yes_bid": 65,
      "yes_ask": 66,
      "last": 66,
-     "volume": "25943.27",
-     "volume_24h": "25724.60",
+     "volume": "28813.33",
+     "volume_24h": "27270.60",
      "close_time": "2026-10-06T20:00:00Z"
     }
    ]
@@ -78,8 +78,8 @@
      "yes_bid": 45,
      "yes_ask": 46,
      "last": 46,
-     "volume": "54534.38",
-     "volume_24h": "50386.93",
+     "volume": "55484.67",
+     "volume_24h": "50675.61",
      "close_time": "2026-10-06T22:30:00Z"
     },
     {
@@ -88,10 +88,10 @@
      "kind": "winner",
      "team": "Tampa Bay",
      "yes_bid": 54,
-     "yes_ask": 55,
-     "last": 55,
-     "volume": "21681.84",
-     "volume_24h": "20717.83",
+     "yes_ask": 56,
+     "last": 56,
+     "volume": "23857.79",
+     "volume_24h": "20494.67",
      "close_time": "2026-10-06T22:30:00Z"
     }
    ]
@@ -109,8 +109,8 @@
      "yes_bid": 65,
      "yes_ask": 66,
      "last": 66,
-     "volume": "49469.60",
-     "volume_24h": "47482.90",
+     "volume": "52550.20",
+     "volume_24h": "48455.53",
      "close_time": "2026-10-07T00:30:00Z"
     },
     {
@@ -121,8 +121,8 @@
      "yes_bid": 34,
      "yes_ask": 35,
      "last": 35,
-     "volume": "151697.00",
-     "volume_24h": "137710.12",
+     "volume": "152777.78",
+     "volume_24h": "137653.11",
      "close_time": "2026-10-07T00:30:00Z"
     }
    ]
@@ -138,7 +138,7 @@
      "kind": "winner",
      "team": "Milwaukee",
      "yes_bid": 55,
-     "yes_ask": 58,
+     "yes_ask": 57,
      "last": 58,
      "volume": "2337.94",
      "volume_24h": "2317.92",
@@ -150,10 +150,10 @@
      "kind": "winner",
      "team": "San Diego",
      "yes_bid": 44,
-     "yes_ask": 46,
+     "yes_ask": 45,
      "last": 46,
      "volume": "2056.80",
-     "volume_24h": "1424.74",
+     "volume_24h": "1420.73",
      "close_time": "2026-10-07T20:00:00Z"
     }
    ]
@@ -168,10 +168,10 @@
      "title": "Atlanta wins",
      "kind": "winner",
      "team": "Atlanta",
-     "yes_bid": 31,
-     "yes_ask": 47,
-     "last": 47,
-     "volume": "507.99",
+     "yes_bid": 40,
+     "yes_ask": 45,
+     "last": 45,
+     "volume": "518.89",
      "volume_24h": "507.99",
      "close_time": "2026-10-08T00:00:00Z"
     },
@@ -180,8 +180,8 @@
      "title": "Los Angeles D wins",
      "kind": "winner",
      "team": "Los Angeles D",
-     "yes_bid": 54,
-     "yes_ask": 74,
+     "yes_bid": 57,
+     "yes_ask": 63,
      "last": 72,
      "volume": "693.87",
      "volume_24h": "693.87",
@@ -199,11 +199,11 @@
      "title": "Chicago WS wins",
      "kind": "winner",
      "team": "Chicago WS",
-     "yes_bid": 41,
+     "yes_bid": 40,
      "yes_ask": 44,
      "last": 44,
-     "volume": "929.37",
-     "volume_24h": "783.25",
+     "volume": "968.81",
+     "volume_24h": "790.35",
      "close_time": "2026-10-08T21:00:00Z"
     },
     {
@@ -211,7 +211,7 @@
      "title": "Cleveland wins",
      "kind": "winner",
      "team": "Cleveland",
-     "yes_bid": 55,
+     "yes_bid": 56,
      "yes_ask": 58,
      "last": 59,
      "volume": "1152.62",
@@ -233,8 +233,8 @@
      "yes_bid": 50,
      "yes_ask": 53,
      "last": 53,
-     "volume": "1608.81",
-     "volume_24h": "1283.48",
+     "volume": "1701.62",
+     "volume_24h": "1340.50",
      "close_time": "2026-10-09T00:00:00Z"
     },
     {
@@ -242,11 +242,11 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 49,
+     "yes_bid": 48,
      "yes_ask": 51,
-     "last": 52,
-     "volume": "793.33",
-     "volume_24h": "672.44",
+     "last": 51,
+     "volume": "795.25",
+     "volume_24h": "674.36",
      "close_time": "2026-10-09T00:00:00Z"
     }
    ]
@@ -264,8 +264,8 @@
      "yes_bid": 40,
      "yes_ask": 49,
      "last": 49,
-     "volume": "99.12",
-     "volume_24h": "99.12",
+     "volume": "142.40",
+     "volume_24h": "132.38",
      "close_time": "2026-10-09T22:00:00Z"
     },
     {
@@ -294,9 +294,9 @@
      "team": "Milwaukee",
      "yes_bid": 45,
      "yes_ask": 53,
-     "last": 52,
-     "volume": "153.67",
-     "volume_24h": "153.67",
+     "last": 53,
+     "volume": "162.67",
+     "volume_24h": "162.67",
      "close_time": "2026-10-10T01:30:00Z"
     },
     {
@@ -376,28 +376,21 @@
    ]
   }
  ],
- "prev_at": "2026-10-02T10:40:23Z",
+ "prev_at": "2026-10-02T11:38:59Z",
  "moves": [
   {
-   "event_ticker": "KXMLBGAME-26OCT041600SDMIL",
-   "team": "Milwaukee",
-   "delta": 2,
-   "prev": 55,
-   "now": 57
-  },
-  {
-   "event_ticker": "KXMLBGAME-26OCT061800LADATL",
+   "event_ticker": "KXMLBGAME-26OCT042000ATLLAD",
    "team": "Atlanta",
-   "delta": 8,
-   "prev": 37,
-   "now": 45
+   "delta": 4,
+   "prev": 39,
+   "now": 43
   },
   {
-   "event_ticker": "KXMLBGAME-26OCT061800LADATL",
+   "event_ticker": "KXMLBGAME-26OCT042000ATLLAD",
    "team": "Los Angeles D",
-   "delta": -7,
-   "prev": 63,
-   "now": 56
+   "delta": -4,
+   "prev": 64,
+   "now": 60
   }
  ],
  "new_games": []

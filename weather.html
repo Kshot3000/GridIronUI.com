@@ -33,6 +33,16 @@
 .wx-watch-chip .tag{pointer-events:none}
 #wxGrid .card:target,#mlbWxGrid .card:target{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,180,41,.45)}
 #wxGrid .card,#mlbWxGrid .card{scroll-margin-top:90px}
+/* v1.154.0 — followed teams on the weather page: "Your teams" jump strip,
+   gold card rail + ★ tag (both the NFL and MLB postseason grids) */
+.follow-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:22px 0 0}
+.follow-strip[hidden]{display:none}
+.follow-strip-label{font-weight:700;color:var(--gold-soft);font-size:.86rem}
+.follow-chip-link{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(240,180,41,.45);border-radius:999px;padding:4px 11px;color:var(--text);background:rgba(240,180,41,.07);font-size:.84rem}
+.follow-chip-link:hover{color:var(--gold-soft);border-color:var(--gold)}
+.follow-chip-link b{color:var(--gold)}
+#wxGrid .card.followed,#mlbWxGrid .card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
+.tag-yourteam{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.5)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
@@ -51,6 +61,8 @@
   <div class="notice green">
     <strong>Why bettors care: wind moves totals more than rain.</strong> Sustained winds above ~15 mph suppress the passing game and field goals — historically pushing games under. Rain matters too, but mostly by pushing teams to run. Dome and retractable-roof games are marked so you don't handicap weather that isn't there.
   </div>
+  <!-- v1.154.0 — "Your teams" jump strip: one chip per followed-team game across both slates (js/weather.js renders it; hidden when nothing matches) -->
+  <div id="wxFollow" class="follow-strip" hidden></div>
   <div id="wxWatch" class="wx-watch" hidden></div>
   <div class="grid grid-2" id="wxGrid" style="margin-top:22px">
     <div class="card"><div class="skel" style="height:140px"></div></div>
@@ -74,7 +86,8 @@
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
+<script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/weather.js?v=1.151.0"></script>
+<script src="js/weather.js?v=1.154.0"></script>
 </body>
 </html>

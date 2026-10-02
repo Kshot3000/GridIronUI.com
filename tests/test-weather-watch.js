@@ -170,7 +170,7 @@ function runDom(){
   var html = fs.readFileSync(path.join(ROOT, "weather.html"), "utf8");
   assert(html.indexOf('id="wxWatch"') !== -1, "weather.html carries the NFL watch container");
   assert(html.indexOf('id="mlbWxWatch"') !== -1, "weather.html carries the MLB watch container");
-  assert(html.indexOf('src="js/weather.js?v=1.151.0"') !== -1, "weather.html pins weather.js at v1.151.0");
+  assert(html.indexOf('src="js/weather.js?v=1.154.0"') !== -1, "weather.html pins weather.js at v1.154.0");
   var js = fs.readFileSync(path.join(ROOT, "js/weather.js"), "utf8");
   assert(js.indexOf('renderWatch("wxWatch"') !== -1 && js.indexOf('renderWatch("mlbWxWatch"') !== -1,
     "both bootstraps render their watch strip");

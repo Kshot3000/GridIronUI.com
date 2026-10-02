@@ -99,6 +99,7 @@ node tests/test-team-brand.js  # ESPN team logo/color identity tests
 node tests/test-teams.js     # team-directory lookup (abbr/name/normalized) + vs-header tests
 node tests/test-weather.js    # weather matchup header + impact tests (kickoff->+3h game window, gusts, window-max impact tags)
 node tests/test-weather-watch.js  # Weather watch strip (flagged-only pure contract, red-first sort, escaped chips, DOM wiring: windy open-air game chipped to its card anchor, calm + dome games stay out, shipped weather.html pins)
+node tests/test-weather-follow.js  # followed teams on the weather page (v1.154.0): pure followedWx matcher (ESPN-abbr namespace, normalization, garbage-in -> []), combined NFL+MLB "Your teams" jump strip + gold card marks with the real team-follow.js and seeded/corrupt localStorage, shipped weather.html pins
 node tests/test-scores.js     # ESPN scoreboard stat-leader line tests
 node tests/test-scores-live.js  # scores page live auto-refresh (60s tick, hidden-tab skip, pause/resume, no stacking)
 node tests/test-scores-follow.js  # followed teams on the scores board (v1.149.0): pure followedGames matcher (ESPN-abbr namespace, normalization, garbage-in -> []), "Your teams" jump strip + gold card marks with the real team-follow.js and seeded/corrupt localStorage, shipped scores.html pins
