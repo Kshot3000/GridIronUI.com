@@ -34,6 +34,7 @@ node tests/test-roundrobin-dom.js  # round-robin wiring in shipped tools.js (leg
 node tests/test-tickethedge.js   # ticket hedge planner math (equal lock, free-roll, custom outcomes, error paths)
 node tests/test-tickethedge-dom.js  # ticket hedge wiring in shipped tools.js (three plans, custom stake, empty/bad-input states)
 node tests/test-tools-labels.js   # tools label/layout: ticket-hedge label fits its column, form-row tracks shrink so labels wrap
+node tests/test-tools-find.js  # tools finder (v1.159.0): pure filter over the real page catalog (card title+hint+synonym map, blank->all, garbage-in -> no match), XSS-safe <mark> title highlight, mount wiring (hide/show + honest N-of-17 count + empty state, Clear/Escape restore), shipped tools.html pins (finder ids, tools-find.js?v=1.159.0, tools.js untouched at v1.67.0)
 node tests/test-live-guide.js   # live-betting guide: TOC anchors, cross-link targets, footer/index/sitemap/bet-types wiring, guide math, cache keys
 node tests/test-linemove-guide.js   # line-movement guide: TOC anchors, cross-link targets, footer/index/sitemap wiring, guide math, honesty copy, cache keys
 node tests/test-props-guide.js   # player-props guide: TOC anchors, cross-link targets, footer/index/sitemap wiring, guide math, honesty copy, cache keys

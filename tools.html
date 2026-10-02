@@ -22,6 +22,21 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
+<style>
+/* tools finder (v1.159.0) — page-scoped so no shared CSS changes */
+.tool-find{display:flex;gap:10px;margin:26px 0 4px;max-width:540px}
+.tool-find input{flex:1;min-width:0;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.tool-find input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.tool-find button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;
+  padding:0 16px;font-weight:700;font-size:.9rem;cursor:pointer;white-space:nowrap}
+.tool-find button:hover{color:var(--gold);border-color:var(--gold)}
+.tool-count{margin:8px 0 0;font-size:.85rem;color:var(--muted);min-height:1.3em}
+.calc h3 mark{background:rgba(240,180,41,.30);color:inherit;border-radius:3px;padding:0 1px}
+.tool-empty{padding:26px 22px;margin-top:18px;border:1px solid var(--line);border-radius:12px;color:var(--muted)}
+.tool-empty h3{color:var(--text);margin:0 0 6px}
+.tool-empty p{margin:0}
+</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -36,7 +51,18 @@
 </div></section>
 
 <div class="wrap">
-  <div class="grid grid-2" style="margin-top:34px">
+  <div class="tool-find" role="search">
+    <label class="sr-only" for="toolQ">Find a calculator</label>
+    <input id="toolQ" type="search" autocomplete="off" spellcheck="false" aria-describedby="toolCount"
+           placeholder="Find a calculator — try “cash out”, “arb”, “wong”…">
+    <button id="toolClear" type="button" hidden>Clear</button>
+  </div>
+  <p id="toolCount" class="tool-count" role="status" aria-live="polite"></p>
+  <div id="toolEmpty" class="tool-empty" hidden>
+    <h3>No calculator matches that</h3>
+    <p>Try “hedge”, “kelly” or “parlay” — or clear the search to see all 17 tools.</p>
+  </div>
+  <div class="grid grid-2" style="margin-top:18px">
 
     <div class="card calc" id="converter">
       <span class="tag">Most used</span>
@@ -337,5 +363,6 @@
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/betmath.js?v=1.87.0"></script>
 <script src="js/tools.js?v=1.67.0"></script>
+<script src="js/tools-find.js?v=1.159.0"></script>
 </body>
 </html>
