@@ -23,6 +23,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+<style>
+/* v1.160.0 — ledger search highlights (page-scoped) */
+#jBetsBody mark{background:rgba(240,180,41,.30);color:inherit;border-radius:3px;padding:0 1px}
+</style>
 </head>
 <body>
 <script>window.GIU_BASE=".";</script>
@@ -84,13 +88,16 @@
   <div class="card" style="margin-top:22px">
     <span class="tag">Ledger</span>
     <h3>All bets <span class="hint" id="jCount"></span></h3>
-    <div class="form-row" style="max-width:560px">
+    <div class="form-row" style="max-width:820px">
+      <div class="field"><label for="jSearch">Search the ledger</label><input type="search" id="jSearch" placeholder="Team, pick, market…" autocomplete="off" spellcheck="false" aria-describedby="jMatchCount"></div>
       <div class="field"><label for="jFilterSport">Sport</label><select id="jFilterSport"><option value="all">All sports</option></select></div>
       <div class="field"><label for="jFilterResult">Result</label><select id="jFilterResult">
         <option value="all">All results</option><option value="pending">Pending</option>
         <option value="win">Wins</option><option value="loss">Losses</option><option value="push">Pushes</option>
       </select></div>
+      <div class="field" style="align-self:end"><button class="btn btn-ghost btn-sm" id="jSearchClear" type="button">Clear search</button></div>
     </div>
+    <p class="hint" id="jMatchCount" role="status" aria-live="polite" style="min-height:1.2em;margin:2px 0 8px"></p>
     <div class="jr-table-wrap">
       <table class="gd-stats" aria-label="Logged bets">
         <thead><tr><th style="text-align:left">Date</th><th style="text-align:left">Bet</th>
@@ -117,6 +124,6 @@
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/betmath.js?v=1.87.0"></script>
 <script src="js/team-brand.js?v=1.18.0"></script>
-<script src="js/journal.js?v=1.145.0"></script>
+<script src="js/journal.js?v=1.160.0"></script>
 </body>
 </html>

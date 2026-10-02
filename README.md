@@ -62,6 +62,7 @@ node tests/test-journal-csvimport.js  # journal CSV import math (export round-tr
 node tests/test-journal-csvimport-dom.js  # CSV import wiring in shipped journal.js (picker open, file read, dedupe by content, fresh ids, result message)
 node tests/test-journal-autofill.js  # closing-line auto-fill pure core: normalizePair order-insensitivity, 30h game-date window, latest-snapshot-wins, malformed storage safety, moneyline picked-side resolution (closeValueFor/resolvePickAbbr)
 node tests/test-journal-autofill-dom.js  # auto-fill wiring in shipped journal.js (button pin, fill latest match, manual close preserved, moneyline fills at picked team's close, unmatched/unresolvable/pre-v1.145.0 snapshots blank, honest report copy, no-snapshot/malformed-history safety)
+node tests/test-journal-search.js  # journal ledger search (v1.160.0): pure AND-term match over event/pick/sport/market/date (blank->all, garbage-in -> no match), XSS-safe <mark> highlight (longest-term wins), DOM wiring (live input, honest N-of-M count, named empty state, Escape/Clear restore, search surviving settle renders, composition with sport/result filters), shipped journal.html pins
 node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph set + layering, hero-pulse cache key
 node tests/test-odds-inj.js   # injury-badge pure logic (severity ranks, per-team counts, card lines, badge HTML)
 node tests/test-odds-inj-dom.js  # injury-badge wiring in shipped odds.js (hidden slots, live injection, quiet cases, feed failure)

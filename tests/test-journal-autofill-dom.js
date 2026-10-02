@@ -82,7 +82,7 @@ const $ = id => sandbox.document.getElementById(id);
 /* journal.html pins */
 const html = fs.readFileSync(__dirname + "/../journal.html", "utf8");
 ok("journal.html has the auto-fill button", html.includes('id="jAutofill"'));
-ok("journal.html wires journal.js v1.145.0", html.includes('js/journal.js?v=1.145.0'));
+ok("journal.html wires journal.js v1.160.0", html.includes('js/journal.js?v=1.160.0'));
 ok("journal.html loads team-brand.js for pair resolution", html.includes('js/team-brand.js?v='));
 ok("journal.html carries the auto-fill honesty hint", html.includes("never overwritten"));
 

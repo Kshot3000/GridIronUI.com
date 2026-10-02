@@ -116,17 +116,65 @@ function perSportHtml(s){
     "<th>Staked</th><th>Profit</th><th>ROI</th></tr></thead><tbody>" + rows + "</tbody></table>";
 }
 
-function betMatches(b, fSport, fResult){
-  if(fSport !== "all" && String(b.sport) !== fSport) return false;
-  if(fResult !== "all" && String(b.result) !== fResult) return false;
-  return true;
+/* ---- ledger search (v1.160.0) ----
+   A season-long ledger outgrows the sport/result dropdowns: the bettor
+   hunting "every Bears bet" or "Mahomes props" had to scroll the whole
+   table. Pure core: the query splits into terms and EVERY term must appear
+   somewhere in the bet's searchable text (event, pick, sport, market,
+   date) — so "nfl bears" and "mahomes prop" narrow across fields, while a
+   term that appears nowhere matches nothing, never everything. Garbage-in
+   (null bet, non-string fields) -> coerced text, never a throw. */
+function searchTerms(q){
+  return String(q == null ? "" : q).toLowerCase().split(/\s+/).filter(Boolean);
+}
+function betSearchText(b){
+  if(!b) return "";
+  return [b.event, b.pick, b.sport, b.market, b.date]
+    .map(function(v){ return String(v == null ? "" : v); }).join(" ").toLowerCase();
+}
+function betMatchesSearch(b, q){
+  var terms = searchTerms(q);
+  if(!terms.length) return true;
+  var hay = betSearchText(b);
+  return terms.every(function(t){ return hay.indexOf(t) !== -1; });
+}
+/* XSS-safe <mark> highlighting, same per-segment discipline as the
+   glossary/news/tools finders: scan the RAW text for any query term
+   (earliest match wins, longest term wins ties), escape every emitted
+   segment, wrap only the matched slices. No query -> plain escaped text,
+   byte-identical to the pre-search render. */
+function hlHtml(text, q){
+  var s = String(text == null ? "" : text);
+  var terms = searchTerms(q).sort(function(a, b){ return b.length - a.length; });
+  if(!terms.length || !s) return esc(s);
+  var lower = s.toLowerCase(), out = "", i = 0;
+  while(i < s.length){
+    var at = -1, len = 0;
+    terms.forEach(function(t){
+      var j = lower.indexOf(t, i);
+      if(j !== -1 && (at === -1 || j < at || (j === at && t.length > len))){ at = j; len = t.length; }
+    });
+    if(at === -1){ out += esc(s.slice(i)); break; }
+    out += esc(s.slice(i, at)) + "<mark>" + esc(s.slice(at, at + len)) + "</mark>";
+    i = at + len;
+  }
+  return out;
 }
 
-function betsHtml(fSport, fResult){
-  var rows = bets.filter(function(b){ return betMatches(b, fSport, fResult); });
+function betMatches(b, fSport, fResult, q){
+  if(fSport !== "all" && String(b.sport) !== fSport) return false;
+  if(fResult !== "all" && String(b.result) !== fResult) return false;
+  return betMatchesSearch(b, q);
+}
+
+function betsHtml(fSport, fResult, q){
+  var rows = bets.filter(function(b){ return betMatches(b, fSport, fResult, q); });
   if(!rows.length){
-    return '<tr><td colspan="7" class="hint" style="text-align:left">' +
-      (bets.length ? "No bets match these filters." : "No bets logged yet — log your first bet above.") + "</td></tr>";
+    var msg;
+    if(!bets.length) msg = "No bets logged yet — log your first bet above.";
+    else if(searchTerms(q).length) msg = "No bets match \u201C" + String(q).trim() + "\u201D — try a team, pick or market, or clear the search.";
+    else msg = "No bets match these filters.";
+    return '<tr><td colspan="7" class="hint" style="text-align:left">' + esc(msg) + "</td></tr>";
   }
   return rows.map(function(b){
     var p = b.profit;
@@ -158,8 +206,8 @@ function betsHtml(fSport, fResult){
     }
     return "<tr>" +
       "<td>" + esc(b.date || "") + "</td>" +
-      "<td style=\"text-align:left\"><b>" + esc(b.event) + '</b><br><span class="hint">' +
-        esc(b.sport) + " · " + esc(b.market) + " · " + esc(b.pick) + "</span></td>" +
+      "<td style=\"text-align:left\"><b>" + hlHtml(b.event, q) + '</b><br><span class="hint">' +
+        hlHtml(b.sport, q) + " · " + hlHtml(b.market, q) + " · " + hlHtml(b.pick, q) + "</span></td>" +
       "<td>" + priceCell + "</td>" +
       "<td>" + money(Number(b.stake)) + "</td>" +
       "<td>" + resultChip(b.result) + "</td>" +
@@ -269,7 +317,17 @@ function render(){
   paintCurve();
   $("jPerSport").innerHTML = perSportHtml(s);
   var fSport = $("jFilterSport").value, fResult = $("jFilterResult").value;
-  $("jBetsBody").innerHTML = betsHtml(fSport, fResult);
+  var qEl = $("jSearch");
+  var q = qEl ? String(qEl.value || "") : "";
+  $("jBetsBody").innerHTML = betsHtml(fSport, fResult, q);
+  /* honest shown-count: only narrates while a search/filter is narrowing
+     the ledger — at rest the heading count above already says it all */
+  var mc = $("jMatchCount");
+  if(mc){
+    var narrowing = searchTerms(q).length > 0 || fSport !== "all" || fResult !== "all";
+    var shown = bets.filter(function(b){ return betMatches(b, fSport, fResult, q); }).length;
+    mc.textContent = (narrowing && bets.length) ? shown + " of " + bets.length + " bets shown" : "";
+  }
   var n = bets.length;
   $("jCount").textContent = n === 1 ? "1 bet logged" : n + " bets logged";
   /* sport filter options follow the logged sports */
@@ -603,6 +661,22 @@ function init(){
   });
   $("jFilterSport").addEventListener("change", render);
   $("jFilterResult").addEventListener("change", render);
+  /* ledger search (v1.160.0): live on every keystroke; Escape or the Clear
+     button restores the full ledger. The query is DOM state only — settling,
+     deleting or re-rendering never loses it, and it is never persisted. */
+  var jSearch = $("jSearch");
+  if(jSearch){
+    jSearch.addEventListener("input", render);
+    jSearch.addEventListener("keydown", function(ev){
+      if(ev.key === "Escape"){ jSearch.value = ""; render(); }
+    });
+  }
+  var jSearchClear = $("jSearchClear");
+  if(jSearchClear) jSearchClear.addEventListener("click", function(){
+    if(jSearch) jSearch.value = "";
+    render();
+    if(jSearch && jSearch.focus) jSearch.focus();
+  });
   $("jBetsBody").addEventListener("click", tableClick);
   $("jExport").addEventListener("click", exportCSV);
   if($("jAutofill")) $("jAutofill").addEventListener("click", autoFillCloses);
@@ -624,6 +698,8 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 else init();
 
 window.Journal = { render: render, money: money, summaryHtml: summaryHtml, betsHtml: betsHtml,
+  betMatches: betMatches, betMatchesSearch: betMatchesSearch, searchTerms: searchTerms,
+  betSearchText: betSearchText, hlHtml: hlHtml,
   normalizePair: normalizePair, matchSnapshot: matchSnapshot, resolveBetPair: resolveBetPair,
   resolvePickAbbr: resolvePickAbbr, closeValueFor: closeValueFor,
   closeWindowMs: CLOSE_WINDOW_MS, autoFillCloses: autoFillCloses };
@@ -631,6 +707,8 @@ window.Journal = { render: render, money: money, summaryHtml: summaryHtml, betsH
 if(typeof module !== "undefined" && module.exports){
   module.exports = { normalizePair: normalizePair, matchSnapshot: matchSnapshot,
                      resolveBetPair: resolveBetPair, resolvePickAbbr: resolvePickAbbr,
-                     closeValueFor: closeValueFor, closeWindowMs: CLOSE_WINDOW_MS };
+                     closeValueFor: closeValueFor, closeWindowMs: CLOSE_WINDOW_MS,
+                     betMatchesSearch: betMatchesSearch, searchTerms: searchTerms,
+                     betSearchText: betSearchText };
 }
 })();
