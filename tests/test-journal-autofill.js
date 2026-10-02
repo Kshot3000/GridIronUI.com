@@ -17,6 +17,18 @@ const sandbox = {
   localStorage: {
     getItem: () => null, setItem: () => {}, removeItem: () => {},
   },
+  /* stub team directory for resolveBetPair / resolvePickAbbr */
+  GIU: {
+    teamFind: (dir, league, q) => {
+      const TEAMS = {
+        "kansas city chiefs": "KC", "green bay packers": "GB",
+        "chiefs": "KC", "packers": "GB",
+        "dallas cowboys": "DAL", "cowboys": "DAL",
+      };
+      const ab = TEAMS[String(q == null ? "" : q).toLowerCase()];
+      return ab ? { abbr: ab } : null;
+    },
+  },
   console,
 };
 sandbox.window = sandbox;
@@ -89,6 +101,52 @@ ok("all-malformed -> null",
 const withTotal = [snap(7, "GB|KC", gameIso(2 * H), -110, -105)];
 const m = J.matchSnapshot(bet("GB|KC"), withTotal);
 ok("returns the stored snapshot object itself", m === withTotal[0] && m.total === -105);
+
+/* ---- resolveBetPair / resolvePickAbbr (v1.145.0) ---- */
+function mlBet(o){
+  return Object.assign({ date: "2026-10-01", sport: "NFL",
+    event: "Kansas City Chiefs @ Green Bay Packers (DraftKings)",
+    market: "Moneyline" }, o || {});
+}
+ok("resolveBetPair still canonical after refactor",
+   J.resolveBetPair({}, mlBet({})) === "GB|KC");
+ok("resolvePickAbbr bare team name", J.resolvePickAbbr({}, mlBet({ pick: "Chiefs" })) === "KC");
+ok("resolvePickAbbr slip-style pick with trailing price",
+   J.resolvePickAbbr({}, mlBet({ pick: "Kansas City Chiefs -150" })) === "KC");
+ok("resolvePickAbbr home side by label",
+   J.resolvePickAbbr({}, mlBet({ pick: "Packers +125" })) === "GB");
+ok("resolvePickAbbr spread-style label strips cleanly",
+   J.resolvePickAbbr({}, mlBet({ pick: "Chiefs -3 · -110" })) === "KC");
+ok("resolvePickAbbr '?' stays blank", J.resolvePickAbbr({}, mlBet({ pick: "?" })) === null);
+ok("resolvePickAbbr empty pick stays blank", J.resolvePickAbbr({}, mlBet({ pick: "" })) === null);
+ok("resolvePickAbbr third team rejected",
+   J.resolvePickAbbr({}, mlBet({ pick: "Dallas Cowboys -110" })) === null);
+ok("resolvePickAbbr unresolvable event stays blank",
+   J.resolvePickAbbr({}, mlBet({ event: "Mystery FC @ Unknown United", pick: "Chiefs" })) === null);
+
+/* ---- closeValueFor (v1.145.0): picked-side moneyline closes ---- */
+function snapMl(t, pair, date, ml){
+  return { t: t, pair: pair, date: date, spread: -110, total: -110, ml: ml };
+}
+const mlSnap = snapMl(1000, "GB|KC", gameIso(5 * H), { KC: -145, GB: 125 });
+ok("closeValueFor spread passthrough",
+   J.closeValueFor(mlBet({ market: "Spread" }), mlSnap, {}) === -110);
+ok("closeValueFor total passthrough",
+   J.closeValueFor(mlBet({ market: "Total" }), mlSnap, {}) === -110);
+ok("closeValueFor moneyline uses the picked team's close (away)",
+   J.closeValueFor(mlBet({ pick: "Chiefs +130" }), mlSnap, {}) === -145);
+ok("closeValueFor moneyline uses the picked team's close (home)",
+   J.closeValueFor(mlBet({ pick: "Packers +125" }), mlSnap, {}) === 125);
+ok("closeValueFor moneyline pre-v1.145.0 snapshot (no ml) stays blank",
+   J.closeValueFor(mlBet({ pick: "Chiefs +130" }), snap(1000, "GB|KC", gameIso(5 * H)), {}) === null);
+ok("closeValueFor moneyline unresolvable pick stays blank",
+   J.closeValueFor(mlBet({ pick: "?" }), mlSnap, {}) === null);
+ok("closeValueFor parlay stays blank",
+   J.closeValueFor(mlBet({ market: "Parlay" }), mlSnap, {}) === null);
+ok("closeValueFor null snapshot stays blank", J.closeValueFor(mlBet(), null, {}) === null);
+ok("closeValueFor malformed stored price stays blank",
+   J.closeValueFor(mlBet({ market: "Spread" }),
+     { t: 1, pair: "GB|KC", date: gameIso(5 * H), spread: NaN }, {}) === null);
 
 console.log(pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

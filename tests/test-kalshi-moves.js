@@ -160,7 +160,7 @@ assert(/js\/kalshi-logic\.js\?v=1.141.0/.test(marketsHtml), "markets.html keys k
 var oddsHtml = read("odds.html");
 assert(/js\/odds-logic\.js\?v=1\.140\.0/.test(oddsHtml), "odds.html keys odds-logic.js at v1.140.0");
 assert(/js\/kalshi-logic\.js\?v=1\.141\.0/.test(oddsHtml), "odds.html keys kalshi-logic.js at v1.141.0");
-assert(/js\/odds\.js\?v=1\.143\.0/.test(oddsHtml), "odds.html keys odds.js at v1.143.0");
+assert(/js\/odds\.js\?v=1\.145\.0/.test(oddsHtml), "odds.html keys odds.js at v1.145.0");
 
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }
 console.log("\nAll kalshi-moves assertions passed.");

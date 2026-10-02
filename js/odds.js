@@ -225,17 +225,21 @@ function setOpens(o){
 function histKey(){ return "giu_odds_hist_"+sport; }
 function getHist(){ try{ return JSON.parse(localStorage.getItem(histKey())||"{}"); }catch(e){ return {}; } }
 function setHist(h){ try{ localStorage.setItem(histKey(), JSON.stringify(h)); }catch(e){} }
-/* ---- closing-line history (v1.143.0) — feeds the bet journal's auto-fill.
-   After every successful board pull we persist one compact entry per game to
-   localStorage "giu-odds-history": {t, pair, date, spread, total}. Only REAL
-   board data lands here — an event whose teams don't resolve to identity-dir
-   abbreviations is skipped (no invented pairs), and a game with no consensus
-   spread AND no consensus total price is skipped (no invented lines).
+/* ---- closing-line history (v1.143.0; moneyline per-side prices added v1.145.0)
+   — feeds the bet journal's auto-fill. After every successful board pull we
+   persist one compact entry per game to localStorage "giu-odds-history":
+   {t, pair, date, spread, total, ml}. Only REAL board data lands here — an
+   event whose teams don't resolve to identity-dir abbreviations is skipped
+   (no invented pairs), and a game with no consensus spread AND no consensus
+   total AND no consensus moneyline price is skipped (no invented lines).
    spread = consensus American price of the AWAY spread (the market's
    canonical side for the journal's close field); total = consensus American
-   price of the OVER. Capped at ~200 entries (oldest evicted). Everything is
-   wrapped in try/catch: private-mode failures stay silent, the board is the
-   product and history is a bonus. */
+   price of the OVER; ml = {ABBR: price} per-side consensus American
+   moneyline prices (a moneyline bet's close must be ITS side's price, not
+   the opponent's — unlike spreads/totals, moneyline sides are not mirror
+   images). Capped at ~200 entries (oldest evicted). Everything is wrapped in
+   try/catch: private-mode failures stay silent, the board is the product and
+   history is a bonus. */
 var CLOSE_HIST_KEY = "giu-odds-history", CLOSE_HIST_CAP = 200;
 function medDecPrice(books, mkey, name){
   var vals = [];
@@ -264,11 +268,20 @@ function saveCloseHistory(events, dir, league, nowMs){
       var ta = GIU.teamFind(dir, league, ev.away_team),
           th = GIU.teamFind(dir, league, ev.home_team);
       if(!ta || !th || !ta.abbr || !th.abbr) return;
-      var pair = [String(ta.abbr).toUpperCase(), String(th.abbr).toUpperCase()].sort().join("|");
+      var abbrA = String(ta.abbr).toUpperCase(), abbrH = String(th.abbr).toUpperCase();
+      var pair = [abbrA, abbrH].sort().join("|");
       var spread = amInt(medDecPrice(ev.bookmakers, "spreads", ev.away_team)),
           total = amInt(medDecPrice(ev.bookmakers, "totals", "Over"));
-      if(spread === null && total === null) return;
-      h.push({ t: nowMs, pair: pair, date: ev.commence_time, spread: spread, total: total });
+      /* per-side moneyline consensus (v1.145.0): keyed by abbreviation so the
+         journal can close a moneyline bet at its OWN side's price. */
+      var mlA = amInt(medDecPrice(ev.bookmakers, "h2h", ev.away_team)),
+          mlH = amInt(medDecPrice(ev.bookmakers, "h2h", ev.home_team));
+      var ml = {};
+      if(mlA !== null) ml[abbrA] = mlA;
+      if(mlH !== null) ml[abbrH] = mlH;
+      if(spread === null && total === null && mlA === null && mlH === null) return;
+      h.push({ t: nowMs, pair: pair, date: ev.commence_time, spread: spread,
+               total: total, ml: ml });
     });
     h.sort(function(a, b){ return (a.t || 0) - (b.t || 0); });
     if(h.length > CLOSE_HIST_CAP) h = h.slice(h.length - CLOSE_HIST_CAP);

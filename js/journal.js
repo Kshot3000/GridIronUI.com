@@ -8,7 +8,8 @@
 "use strict";
 var BM = window.BetMath;
 var LS_BETS = "giu.journal.v1", LS_SET = "giu.journal.settings.v1";
-var LS_HIST = "giu-odds-history"; /* written by js/odds.js after each board pull (v1.143.0) */
+var LS_HIST = "giu-odds-history"; /* written by js/odds.js after each board pull
+  (v1.143.0; per-side moneyline prices added v1.145.0) */
 var RESULT_LABEL = { pending: "Pending", win: "Win", loss: "Loss", push: "Push" };
 
 function $(id){ return document.getElementById(id); }
@@ -395,7 +396,7 @@ function tableClick(ev){
   render();
 }
 
-/* ---- closing-line auto-fill (v1.143.0) ----
+/* ---- closing-line auto-fill (v1.143.0; moneyline per-side closes v1.145.0) ----
    Pure, testable core. normalizePair builds the canonical "A|B" pair key
    (sorted uppercase, "|" joined) — the same format js/odds.js writes into
    giu-odds-history. matchSnapshot(bet, snaps) picks the latest stored
@@ -403,7 +404,11 @@ function tableClick(ev){
    normalizePair; the snapshot's GAME date must fall within the 30h before
    the end of the bet's date (a close only counts when the snapshot priced a
    game that was actually about to go off). Latest stored snapshot wins;
-   anything malformed or unmatched -> null, never a guess. */
+   anything malformed or unmatched -> null, never a guess.
+   closeValueFor(bet, snap, dir) resolves WHICH price a bet gets from its
+   snapshot: spread/total use the canonical-side consensus (v1.143.0),
+   moneyline uses the picked team's own consensus price (v1.145.0), and
+   anything else stays blank. */
 function normalizePair(a, b){
   var x = String(a == null ? "" : a).trim().toUpperCase();
   var y = String(b == null ? "" : b).trim().toUpperCase();
@@ -446,7 +451,10 @@ function loadHistory(){
    or unparseable events -> null: the bet stays blank, honestly. */
 var SPORT_LEAGUE = { NFL: "nfl", NBA: "nba", MLB: "mlb", NHL: "nhl", EPL: "epl" };
 var ALL_LEAGUES = ["nfl", "nba", "mlb", "nhl", "epl"];
-function resolveBetPair(dir, bet){
+function resolveBetSides(dir, bet){
+  /* Ordered [abbr0, abbr1] for the event AS WRITTEN (slip: "Away @ Home"),
+     plus the league order tried. null when unresolvable — callers leave the
+     bet blank rather than guessing a side. */
   if(!window.GIU || !GIU.teamFind) return null;
   var ev = String((bet && bet.event) || "").replace(/\s*\([^()]*\)\s*$/, "");
   var parts = ev.split(/\s+@\s+|\s+vs\.?\s+|\s+v\s+/i);
@@ -463,7 +471,46 @@ function resolveBetPair(dir, bet){
     return null;
   });
   if(!abbrs[0] || !abbrs[1]) return null;
-  return normalizePair(abbrs[0], abbrs[1]);
+  return { sides: abbrs, leagues: leagues };
+}
+function resolveBetPair(dir, bet){
+  var r = resolveBetSides(dir, bet);
+  return r ? normalizePair(r.sides[0], r.sides[1]) : null;
+}
+
+/* Moneyline needs the bettor's SIDE, not a canonical side: the close is the
+   closing price of the picked team (v1.145.0). Slip-written picks are
+   "Team Label" ("Kansas City Chiefs -150"); manual picks are usually a bare
+   name. Trailing price-ish tokens are stripped and each remainder is tried
+   against the directory, but only a team actually in this bet's event is
+   accepted — a pick resolving to a third team is an inconsistent bet and
+   stays blank, never a guess. */
+function resolvePickAbbr(dir, bet){
+  var r = resolveBetSides(dir, bet);
+  if(!r) return null;
+  var sides = r.sides, leagues = r.leagues;
+  function find(q){
+    var i, t;
+    for(i = 0; i < leagues.length; i++){
+      t = GIU.teamFind(dir, leagues[i], q);
+      if(t && t.abbr){
+        var a = String(t.abbr).toUpperCase();
+        if(a === sides[0] || a === sides[1]) return a;
+      }
+    }
+    return null;
+  }
+  var pick = String((bet && bet.pick) || "").trim();
+  if(!pick || pick === "?") return null;
+  var hit = find(pick);
+  if(hit) return hit;
+  var toks = pick.split(/\s+/);
+  while(toks.length > 1){
+    var last = toks[toks.length - 1];
+    if(/^[+-]?\d+(\.\d+)?$/.test(last) || last === "·") toks.pop();
+    else break;
+  }
+  return find(toks.join(" "));
 }
 
 var teamDirP = null;
@@ -475,11 +522,30 @@ function getTeamDir(){
   return teamDirP;
 }
 
-function closeFieldFor(market){
-  /* The snapshot carries spread + total consensus prices; other markets
-     (Moneyline, Parlay, …) have no stored close -> unmatched, left blank. */
-  var m = String(market == null ? "" : market);
-  return m === "Spread" ? "spread" : (m === "Total" ? "total" : null);
+/* Which closing price a bet gets from its matched snapshot — pure (v1.145.0).
+   Spread uses the snapshot's consensus away-spread price, Total the over
+   price (v1.143.0); Moneyline uses the consensus price of the PICKED team —
+   a dog bettor's CLV compares against the dog's own close, not the
+   favorite's, because moneyline sides are not mirror images. Snapshots
+   saved before v1.145.0 carry no ml map -> moneyline bets stay blank,
+   honestly. Other markets (Parlay, …) have no stored close -> blank.
+   Returns a whole American number, or null (never a guess). */
+function realNum(v){
+  var n = Number(v);
+  return (isFinite(n) && n !== 0) ? Math.round(n) : null;
+}
+function closeValueFor(bet, snap, dir){
+  if(!snap) return null;
+  var m = String((bet && bet.market) == null ? "" : bet.market);
+  if(m === "Spread") return realNum(snap.spread);
+  if(m === "Total") return realNum(snap.total);
+  if(m === "Moneyline"){
+    var abbr = resolvePickAbbr(dir, bet);
+    if(!abbr) return null;
+    var ml = (snap && snap.ml) || {};
+    return realNum(ml[abbr]);
+  }
+  return null;
 }
 
 /* "Auto-fill closing lines": for every bet WITHOUT a manually recorded
@@ -509,11 +575,8 @@ function autoFillCloses(){
       if(!pair) return;
       var snap = matchSnapshot({ pair: pair, date: b.date }, snaps);
       if(!snap) return;
-      var field = closeFieldFor(b.market);
-      if(!field) return;
-      var val = Number(snap[field]);
-      if(!(val > 0) && !(val < 0)) return; /* null/NaN/0: not a real price */
-      val = Math.round(val);
+      var val = closeValueFor(b, snap, dir);
+      if(val === null) return; /* unmatched market/side -> left blank, honestly */
       if(BM.closeValid(String(val))) return; /* never write an invalid close */
       b.close = val;
       filled++;
@@ -561,11 +624,13 @@ if(document.readyState === "loading") document.addEventListener("DOMContentLoade
 else init();
 
 window.Journal = { render: render, money: money, summaryHtml: summaryHtml, betsHtml: betsHtml,
-  normalizePair: normalizePair, matchSnapshot: matchSnapshot,
+  normalizePair: normalizePair, matchSnapshot: matchSnapshot, resolveBetPair: resolveBetPair,
+  resolvePickAbbr: resolvePickAbbr, closeValueFor: closeValueFor,
   closeWindowMs: CLOSE_WINDOW_MS, autoFillCloses: autoFillCloses };
 /* node test hook: the pure matching core loads without a DOM. */
 if(typeof module !== "undefined" && module.exports){
   module.exports = { normalizePair: normalizePair, matchSnapshot: matchSnapshot,
-                     closeWindowMs: CLOSE_WINDOW_MS };
+                     resolveBetPair: resolveBetPair, resolvePickAbbr: resolvePickAbbr,
+                     closeValueFor: closeValueFor, closeWindowMs: CLOSE_WINDOW_MS };
 }
 })();

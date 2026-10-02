@@ -59,8 +59,8 @@ node tests/test-journal-curve.js  # bankroll curve math (cumulative settled prof
 node tests/test-journal-curve-dom.js  # bankroll-curve wiring in shipped journal.js (hide when unsettled, DPR paint, aria, caption, null-context safety)
 node tests/test-journal-csvimport.js  # journal CSV import math (export round-trip, RFC-4180 quoting, column-order freedom, bad-row skips with reasons, honest result/date defaults)
 node tests/test-journal-csvimport-dom.js  # CSV import wiring in shipped journal.js (picker open, file read, dedupe by content, fresh ids, result message)
-node tests/test-journal-autofill.js  # closing-line auto-fill pure core: normalizePair order-insensitivity, 30h game-date window, latest-snapshot-wins, malformed storage safety
-node tests/test-journal-autofill-dom.js  # auto-fill wiring in shipped journal.js (button pin, fill latest match, manual close preserved, unmatched blank, honest report copy, no-snapshot/malformed-history safety)
+node tests/test-journal-autofill.js  # closing-line auto-fill pure core: normalizePair order-insensitivity, 30h game-date window, latest-snapshot-wins, malformed storage safety, moneyline picked-side resolution (closeValueFor/resolvePickAbbr)
+node tests/test-journal-autofill-dom.js  # auto-fill wiring in shipped journal.js (button pin, fill latest match, manual close preserved, moneyline fills at picked team's close, unmatched/unresolvable/pre-v1.145.0 snapshots blank, honest report copy, no-snapshot/malformed-history safety)
 node tests/test-hero-rain.js   # hero canvas: half-speed chart drift, rain glyph set + layering, hero-pulse cache key
 node tests/test-odds-inj.js   # injury-badge pure logic (severity ranks, per-team counts, card lines, badge HTML)
 node tests/test-odds-inj-dom.js  # injury-badge wiring in shipped odds.js (hidden slots, live injection, quiet cases, feed failure)
