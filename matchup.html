@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matchup Hub | GridIronUI</title>
+<meta name="description" content="One page per game: ESPN's spread and total, the best book prices with your free Odds API key, game-day weather, key injuries, Kalshi crowd prices, live Polymarket prices and line-move badges.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Matchup Hub | GridIronUI">
+<meta property="og:description" content="One page per game: ESPN's spread and total, the best book prices with your free Odds API key, game-day weather, key injuries, Kalshi crowd prices, live Polymarket prices and line-move badges.">
+<meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://gridironui.xyz/matchup.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kshot9000">
+<meta name="twitter:title" content="Matchup Hub | GridIronUI">
+<meta name="twitter:description" content="One page per game: ESPN's spread and total, the best book prices with your free Odds API key, game-day weather, key injuries, Kalshi crowd prices, live Polymarket prices and line-move badges.">
+<meta name="twitter:image" content="https://gridironui.xyz/img/og-image.jpg">
+<link rel="canonical" href="https://gridironui.xyz/matchup.html">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=1.104.0">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+</head>
+<body data-feedcheck>
+<script>window.GIU_BASE=".";</script>
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="hero-bg" aria-hidden="true" style="background-image:url('img/heroes/hero-arena.jpg')"></div>
+  <div class="wrap hero-inner">
+    <a class="back-link" href="scores.html" style="position:relative;z-index:2">← Scores</a>
+    <span class="kicker">Matchup hub</span>
+    <h1 id="hubTitle">One game, every angle</h1>
+    <p class="lede">The spread and total, the best price at every book, game-day weather, key injuries, the Kalshi crowd, live Polymarket prices and line-move badges — everything the site knows about one game, on one page. Every section says where its numbers came from; a section with no data says so instead of guessing.</p>
+  </div>
+</section>
+
+<div class="wrap" style="margin-top:30px">
+  <div id="hubBoot"><div class="spinner" aria-hidden="true"></div>
+    <p style="text-align:center;color:var(--faint)">Loading the matchup…</p></div>
+  <div id="hubBody" hidden>
+    <div class="card" id="hubHead" style="margin-bottom:18px"></div>
+    <div class="grid grid-2">
+      <div class="card" id="hubLines"><h2 style="margin-top:0">Spread &amp; total</h2><div id="hubLinesBody"></div></div>
+      <div class="card" id="hubMoves"><h2 style="margin-top:0">Line moves</h2><div id="hubMovesBody"></div></div>
+    </div>
+    <div class="card" id="hubWx" style="margin-top:18px"><h2 style="margin-top:0">Game-day weather</h2><div id="hubWxBody"></div></div>
+    <div class="card" id="hubInj" style="margin-top:18px"><h2 style="margin-top:0">Key injuries</h2><div id="hubInjBody"></div></div>
+    <div class="grid grid-2" style="margin-top:18px">
+      <div class="card" id="hubKalshi"><h2 style="margin-top:0">Kalshi crowd</h2><div id="hubKalshiBody"></div></div>
+      <div class="card" id="hubPm"><h2 style="margin-top:0">Polymarket</h2><div id="hubPmBody"></div></div>
+    </div>
+    <div class="notice" style="margin:26px 0">
+      <strong>Where these numbers come from.</strong> Team, kickoff, venue and the free line are ESPN's. Weather is the Open-Meteo forecast for the stadium's coordinates on game day. Kalshi prices are our server-side snapshot, timestamped where shown. Polymarket prices are fetched live in your browser when you load this page. Book prices and line moves need your free Odds API key — <a href="odds.html">set it up on the odds board</a>.
+    </div>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/site.js?v=1.104.0"></script>
+<script src="js/team-brand.js?v=1.18.0"></script>
+<script src="js/wx-shared.js?v=1.91.0"></script>
+<script src="js/home-strip.js?v=1.139.0"></script>
+<script src="js/home-wx.js?v=1.126.0"></script>
+<script src="js/odds-logic.js?v=1.128.0"></script>
+<script src="js/odds-pm.js?v=1.38.0"></script>
+<script src="js/matchup.js?v=1.139.0"></script>
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var M = window.Matchup, esc = GIU.esc;
+var OL = window.OddsLogic || null, PM = window.OddsPm || null;
+var HS = (window.GIU || {}).homeStrip || null, HXW = (window.GIU || {}).homeWx || null;
+
+function hide(id){ var el = $(id); if(el) el.hidden = true; }
+function show(id){ var el = $(id); if(el) el.hidden = false; }
+
+var P = M.parseParams(location.search);
+if(!P.league || !P.event){
+  $("hubBoot").innerHTML = '<div class="notice" style="margin:10px 0"><strong>This matchup link is missing a game.</strong> '+
+    'Matchup links carry a league and a game id (for example <code>?league=nfl&amp;event=401872958</code>). '+
+    'Head back to the <a href="scores.html">scores board</a> or the homepage strip and tap a game.</div>';
+  hide("hubBody");
+  return;
+}
+var leaguePath = M.leaguePath(P.league);
+var leagueLabel = P.league.toUpperCase();
+var info = null;
+
+/* ---------- header ---------- */
+function statusBadge(){
+  if(info.state === "in") return '<span class="live-badge"><i></i>'+esc(info.shortDetail || "Live")+'</span>';
+  if(info.state === "post") return '<span class="tag">Final</span>';
+  return '<span class="tag blue">'+esc(info.shortDetail || "Scheduled")+'</span>';
+}
+function kickText(){
+  try{
+    var d = new Date(info.date);
+    if(!isFinite(d)) return "";
+    return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})+
+      " · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+  }catch(e){ return ""; }
+}
+function renderHead(){
+  var rec = function(s){ return s.record ? '<span class="tag">'+esc(s.record)+'</span>' : ""; };
+  var score = (info.state !== "pre" && (info.away.score !== null || info.home.score !== null))
+    ? '<div class="num" style="font-size:1.6rem;font-weight:800;margin:6px 0">'+
+      esc(info.away.score == null ? "–" : info.away.score)+' – '+
+      esc(info.home.score == null ? "–" : info.home.score)+'</div>' : "";
+  $("hubTitle").textContent = info.away.abbr + " @ " + info.home.abbr + " — matchup hub";
+  $("hubHead").innerHTML =
+    '<div class="game-meta" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+    '<span class="tag">'+esc(leagueLabel)+'</span>'+statusBadge()+
+    (info.broadcast ? '<span class="tag tv-tag">📺 '+esc(info.broadcast)+'</span>' : "")+'</div>'+
+    '<h2 style="margin:0 0 4px">'+esc(info.away.name)+' <span style="color:var(--faint)">@</span> '+esc(info.home.name)+'</h2>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">'+rec(info.away)+rec(info.home)+'</div>'+score+
+    '<div class="game-meta"><span>'+esc(kickText())+'</span><span>'+esc(info.venue)+'</span></div>'+
+    '<div id="hubVs" style="margin-top:8px"></div>';
+  GIU.teamDir().then(function(dir){
+    var vh = GIU.vsHeader(dir, P.league, info.away.abbr, info.home.abbr);
+    if(vh){ var el = $("hubVs"); if(el) el.innerHTML = vh; }
+  }).catch(function(){});
+}
+
+/* ---------- spread & total ---------- */
+function renderLines(){
+  var box = $("hubLinesBody");
+  var espn = "";
+  if(info.espnSpread || info.espnTotal){
+    espn = '<div class="game-meta" style="margin-bottom:6px"><span class="tag blue">ESPN</span>'+
+      '<span>free line, no key needed</span></div>'+
+      '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px">'+
+      (info.espnSpread ? '<div><div style="font-size:.75rem;color:var(--faint)">SPREAD</div><div class="num" style="font-size:1.35rem;font-weight:800">'+esc(info.espnSpread)+'</div></div>' : "")+
+      (info.espnTotal ? '<div><div style="font-size:.75rem;color:var(--faint)">TOTAL</div><div class="num" style="font-size:1.35rem;font-weight:800">'+esc(info.espnTotal)+'</div></div>' : "")+
+      '</div>';
+  } else {
+    espn = '<div class="game-meta" style="margin-bottom:14px"><span>ESPN isn\u2019t carrying a spread or total for this game right now.</span></div>';
+  }
+  var key = "";
+  try{ key = localStorage.getItem("giu_odds_key") || ""; }catch(e){}
+  if(!key){
+    box.innerHTML = espn +
+      '<div class="empty" role="status" style="padding:28px 16px">'+
+      '<div class="card-icon" aria-hidden="true" style="font-size:1.8rem">🔌</div>'+
+      '<h3 style="margin:6px 0;color:var(--text)">Best book prices need your free key</h3>'+
+      '<p style="max-width:520px;margin:0 auto 10px;color:var(--muted);font-size:.9rem">The Odds API is free for 500 requests/month, no credit card — your key stays in this browser. '+
+      'Connect it once on the odds board and every matchup hub shows live best prices per side.</p>'+
+      '<a class="btn btn-gold btn-sm" href="odds.html">Connect my key on the odds board →</a></div>';
+    return;
+  }
+  box.innerHTML = espn + '<div class="game-meta" style="margin-bottom:8px"><span>Loading live book prices…</span></div>';
+  var sport = M.oddsSport(P.league);
+  var url = "https://api.the-odds-api.com/v4/sports/"+sport+"/odds/?apiKey="+encodeURIComponent(key)+
+            "&regions=us&markets=h2h,spreads,totals&oddsFormat=decimal";
+  fetch(url, {cache:"no-store"}).then(function(r){
+    if(r.status === 401) throw new Error("invalid-key");
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json();
+  }).then(function(events){
+    var ev = M.matchOddsEvent(events,
+      [info.away.abbr, info.away.name, info.away.short],
+      [info.home.abbr, info.home.name, info.home.short], info.date);
+    if(!ev){
+      box.innerHTML = espn + '<div class="game-meta"><span>The Odds API didn\u2019t pair this game — it may not be listed yet. The ESPN line above is the free read.</span></div>';
+      return;
+    }
+    var rows = (OL && OL.dec2am) ? M.bestBookRows(ev, OL, esc) : "";
+    box.innerHTML = espn +
+      '<div class="game-meta" style="margin-bottom:6px"><span class="tag gold">Best prices</span><span>across '+
+      esc(String((ev.bookmakers || []).length))+' books · live</span></div>'+
+      (rows || '<div class="game-meta"><span>No book prices posted for this game yet.</span></div>')+
+      '<p style="margin:10px 0 0;font-size:.75rem;color:var(--faint)">Best available price per side — the book paying the most. American odds in parentheses where the price is decimal from the feed.</p>';
+    renderMoves(ev, sport);
+  }).catch(function(e){
+    var msg = (e && e.message === "invalid-key")
+      ? "That API key didn\u2019t work. Double-check it on the <a href=\"odds.html\">odds board</a>."
+      : "The Odds API didn\u2019t respond. The ESPN line above is still the free read.";
+    box.innerHTML = espn + '<div class="notice">'+msg+'</div>';
+  });
+}
+
+/* ---------- line moves ----------
+   The visitor's personal opener map (the same giu_odds_open_<sport> the odds
+   board seeds) vs this pull's consensus, via OddsLogic.moverEntries — the
+   hub's badges mean exactly what the board's steam strip means. A first
+   visit seeds the opener for this game; moves appear on later visits. */
+function renderMoves(oddsEv, sport){
+  var box = $("hubMovesBody");
+  if(!OL || !oddsEv){
+    box.innerHTML = '<div class="game-meta"><span>Line moves need the Odds API key — connect it on the <a href="odds.html">odds board</a>.</span></div>';
+    return;
+  }
+  var okey = "giu_odds_open_"+sport, opens = {};
+  try{ opens = JSON.parse(localStorage.getItem(okey) || "{}") || {}; }catch(e){ opens = {}; }
+  var badges = M.moveBadgesHtml(oddsEv, opens, OL, esc);
+  if(!opens[oddsEv.id]){
+    /* seed the opener for this game, same contract as the board */
+    var cons = OL.consensus(oddsEv.bookmakers || [], oddsEv);
+    var sp = (cons.spread.a && cons.spread.a.pt != null) ? cons.spread.a.pt : null;
+    var tot = (cons.total.o && cons.total.o.pt != null) ? cons.total.o.pt : null;
+    if(sp !== null || tot !== null){
+      opens[oddsEv.id] = {sp: sp, tot: tot};
+      try{ localStorage.setItem(okey, JSON.stringify(opens)); }catch(e){}
+    }
+    box.innerHTML = '<div class="game-meta"><span>Baseline recorded — your opener for this game. Come back after the lines move and the badges land here.</span></div>';
+    return;
+  }
+  box.innerHTML = badges
+    ? '<div class="game-meta" style="margin-bottom:8px"><span>Since your first look:</span></div>'+
+      '<div style="font-size:1.15rem">'+badges+'</div>'+
+      '<p style="margin:10px 0 0;font-size:.78rem;color:var(--faint)">Away-side points for spreads, Over points for totals — the same reference the odds board\u2019s steam strip uses. Your opener never leaves this browser.</p>'
+    : '<div class="game-meta"><span>No meaningful moves since your opener for this game.</span></div>';
+}
+
+/* ---------- weather ----------
+   The exact home-wx pipeline the homepage strip uses: venue resolution
+   (neutral-site aware), pre-game + 16-day horizon + outdoor-only honesty
+   gates, one Open-Meteo fetch, the shared impact model. */
+function renderWeather(){
+  var box = $("hubWxBody");
+  if(!HXW || (P.league !== "nfl" && P.league !== "mlb")){
+    box.innerHTML = '<div class="game-meta"><span>Weather reads cover NFL and MLB games, where wind and rain move totals.</span></div>';
+    return;
+  }
+  var row = M.stripRowForGame(info, P.league);
+  var jobs;
+  try{
+    jobs = HXW.resolveRows([row], {nfl: GIU.wxVenueFor, mlb: GIU.wxBallparkVenueFor}, Date.now());
+  }catch(e){ jobs = []; }
+  if(!jobs.length){
+    box.innerHTML = '<div class="game-meta"><span>No weather read for this game — indoor or retractable-roof venue, out of the 16-day forecast window, or the game has already started.</span></div>';
+    return;
+  }
+  var g = jobs[0], wxUrl = HXW.wxUrl([g]);
+  GIU.fetchJSON(wxUrl).then(function(d){
+    var arr = Array.isArray(d) ? d : [d];
+    var hourly = (arr[0] && arr[0].hourly) || {time: []};
+    var notesFn = P.league === "mlb" ? GIU.wxImpactNotesBsb : GIU.wxImpactNotes;
+    var notes = notesFn(GIU.wxSliceWindow({hourly: hourly}, g.kickISO));
+    var venue = esc(g.stadium || "") + (g.city ? " ("+esc(g.city)+")" : "");
+    var kick;
+    try{ kick = new Date(g.kickISO).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }
+    catch(e){ kick = ""; }
+    box.innerHTML =
+      '<div class="game-meta" style="margin-bottom:8px"><span>'+venue+'</span>'+
+      (kick ? '<span>forecast for '+esc(kick)+'</span>' : "")+'</div>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      (notes.length ? notes.map(function(n){
+        return '<span class="'+esc(n.cls)+'" title="'+esc(n.text)+'">'+esc(n.text)+'</span>';
+      }).join("") : '<span class="tag green">No major concerns</span>')+'</div>'+
+      '<p style="margin:10px 0 0;font-size:.78rem;color:var(--faint)">Open-Meteo game-window forecast (kickoff hour +3), run through the site\u2019s shared weather-impact model. <a href="weather.html">Full game-day forecasts →</a></p>';
+  }).catch(function(){
+    box.innerHTML = '<div class="game-meta"><span>The forecast feed didn\u2019t respond — the rest of the hub is unaffected.</span></div>';
+  });
+}
+
+/* ---------- injuries ---------- */
+function injTag(status){
+  var s = String(status || "").toLowerCase();
+  var cls = /out|injured reserve|ir\b/.test(s) ? "tag red"
+          : /doubtful/.test(s) ? "tag red"
+          : /questionable|day-to-day/.test(s) ? "tag"
+          : "tag blue";
+  return '<span class="'+cls+'">'+esc(status || "—")+'</span>';
+}
+function renderInj(){
+  var box = $("hubInjBody");
+  GIU.fetchJSON(M.injuriesUrl(leaguePath), 15000).then(function(payload){
+    var sides = [
+      M.teamInjuries(payload, info.away.abbr, info.away.name),
+      M.teamInjuries(payload, info.home.abbr, info.home.name)
+    ];
+    box.innerHTML = sides.map(function(t, i){
+      var s = i === 0 ? info.away : info.home;
+      var head = '<h3 style="margin:0 0 6px;font-size:1rem">'+esc(s.abbr)+' '+esc(s.name)+'</h3>';
+      if(!t) return '<div>'+head+'<div class="game-meta"><span>Not listed in ESPN\u2019s injury report for '+esc(leagueLabel)+'.</span></div></div>';
+      if(!t.injuries.length)
+        return '<div>'+head+'<div class="game-meta"><span class="tag green">No reported injuries</span></div></div>';
+      var sum = M.injurySummary(t);
+      var rows = t.injuries.slice(0, 6).map(function(e){
+        return '<div style="padding:7px 0;border-top:1px solid var(--line-soft)">'+
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><strong style="font-size:.88rem">'+esc(e.name)+'</strong>'+injTag(e.status)+'</div>'+
+          (e.detail ? '<p style="margin:3px 0 0;font-size:.8rem;color:var(--muted)">'+esc(e.detail)+'</p>' : "")+
+          (e.date ? '<p style="margin:2px 0 0;font-size:.72rem;color:var(--faint)">Updated '+esc(e.date)+'</p>' : "")+'</div>';
+      }).join("");
+      var more = t.injuries.length > 6
+        ? '<p style="font-size:.78rem;color:var(--faint)">+ '+(t.injuries.length - 6)+' more on the <a href="injuries.html">injuries board</a></p>' : "";
+      return '<div>'+head+
+        '<div class="game-meta" style="margin-bottom:4px"><span>'+esc(sum)+'</span></div>'+rows+more+'</div>';
+    }).join('<div style="margin:14px 0;border-top:1px solid var(--line-soft)"></div>');
+  }).catch(function(){
+    box.innerHTML = '<div class="game-meta"><span>The ESPN injuries feed didn\u2019t respond.</span></div>';
+  });
+}
+
+/* ---------- Kalshi crowd price ---------- */
+function renderKalshi(){
+  var box = $("hubKalshiBody");
+  if(P.league !== "nfl" && P.league !== "mlb"){
+    box.innerHTML = '<div class="game-meta"><span>Kalshi snapshots cover NFL and MLB games.</span></div>';
+    return;
+  }
+  var snapFile = P.league === "nfl" ? "kalshi-nfl" : "kalshi-mlb";
+  GIU.fetchJSON("data/"+snapFile+".json").then(function(snap){
+    var kp = HS ? M.kalshiForGame(HS, info, P.league, (function(){
+      var m = {}; m[leagueLabel] = snap; return m;
+    })(), Date.now()) : null;
+    if(!kp){
+      box.innerHTML = '<div class="game-meta"><span>No Kalshi crowd price for this game — unmatched, or the snapshot is older than 6 hours and prices are withheld rather than posed as fresh.</span></div>';
+      return;
+    }
+    var side = function(abbr, pct, fav){
+      return esc(abbr)+" "+(fav
+        ? '<b class="num" style="color:var(--gold-soft)">'+pct+'%</b>'
+        : '<span class="num" style="color:var(--muted)">'+pct+'%</span>');
+    };
+    var when = HS ? HS.snapWhen(kp.updatedAt) : "";
+    box.innerHTML =
+      '<div class="game-meta" style="margin-bottom:6px"><span class="tag green" title="Real-money crowd prices from Kalshi\u2019s game-winner markets (server-side snapshot) — information, not a pick.">Kalshi</span></div>'+
+      '<div class="num" style="font-size:1.5rem;font-weight:800">'+side(kp.aAbbr, kp.aPct, kp.aPct >= kp.hPct)+
+      ' <span style="color:var(--faint);font-size:1rem">·</span> '+side(kp.hAbbr, kp.hPct, kp.hPct > kp.aPct)+'</div>'+
+      (when ? '<p style="margin:8px 0 0;font-size:.78rem;color:var(--faint)">snapshot '+esc(when)+'</p>' : "")+
+      '<p style="margin:6px 0 0;font-size:.78rem;color:var(--faint)"><a href="markets.html">Full prediction markets →</a></p>';
+  }).catch(function(){
+    box.innerHTML = '<div class="game-meta"><span>The Kalshi snapshot didn\u2019t load.</span></div>';
+  });
+}
+
+/* ---------- Polymarket live price ----------
+   The odds board's live-fetch pattern: one CORS-open gamma fetch, the
+   shared PM.pmPrices matcher, pinned 0/100 markets excluded. Labeled live
+   only because it IS fetched live, in this browser, right now. */
+function renderPm(){
+  var box = $("hubPmBody");
+  if(P.league !== "nfl" || !PM){
+    box.innerHTML = '<div class="game-meta"><span>Polymarket moneylines cover NFL games.</span></div>';
+    return;
+  }
+  box.innerHTML = '<div class="game-meta"><span>Fetching live Polymarket prices…</span></div>';
+  GIU.fetchJSON("https://gamma-api.polymarket.com/sports").then(function(ss){
+    var s = ((ss || []).filter(function(x){ return x && x.sport === "nfl"; }))[0];
+    if(!s || !s.series) throw new Error("no-series");
+    return GIU.fetchJSON(GIU.pmEventsUrl(s.series));
+  }).then(function(d){
+    var events = Array.isArray(d) ? d : (d && d.events) || [];
+    return GIU.teamDir().then(function(dir){
+      return {events: events, dir: dir};
+    });
+  }).then(function(r){
+    var map = PM.pmPrices(r.events, r.dir, GIU.teamFind);
+    var rec = M.pmForGame(PM, map, info.away.abbr, info.home.abbr);
+    if(!rec){
+      box.innerHTML = '<div class="game-meta"><span>No live Polymarket moneyline matched this game — unmatched, resolved, or no market posted.</span></div>';
+      return;
+    }
+    box.innerHTML =
+      '<div class="game-meta" style="margin-bottom:6px"><span class="tag blue">Live</span>'+
+      '<span>fetched just now in your browser</span></div>'+
+      '<div class="num" style="font-size:1.5rem;font-weight:800;color:var(--gold-soft)">'+
+      esc(rec.abbr)+' '+rec.pm+'¢</div>'+
+      '<p style="margin:8px 0 0;font-size:.78rem;color:var(--faint)">Polymarket\u2019s live moneyline price for '+esc(rec.abbr)+
+      ' — the market\u2019s implied win chance. Compare it with the books\u2019 no-vig line before you bet.</p>';
+  }).catch(function(){
+    box.innerHTML = '<div class="game-meta"><span>Polymarket didn\u2019t respond — the rest of the hub is unaffected.</span></div>';
+  });
+}
+
+/* ---------- boot ---------- */
+GIU.fetchJSON(M.summaryUrl(leaguePath, P.event), 15000).then(function(summary){
+  info = M.gameInfo(summary);
+  if(!info){
+    $("hubBoot").innerHTML = '<div class="notice"><strong>Couldn\u2019t find that game.</strong> '+
+      'ESPN didn\u2019t return a usable box for this link — the game may be from another week or the id is stale. '+
+      'Try the <a href="scores.html">scores board</a>.</div>';
+    hide("hubBody");
+    return;
+  }
+  info.leagueKey = P.league;
+  hide("hubBoot"); show("hubBody");
+  renderHead();
+  renderLines();
+  renderMoves(null, null); /* honest "needs key" state until the book fetch lands */
+  renderWeather();
+  renderInj();
+  renderKalshi();
+  renderPm();
+}).catch(function(){
+  $("hubBoot").innerHTML = GIU.failBox("The ESPN game feed didn't respond.");
+});
+})();
+</script>
+</body>
+</html>

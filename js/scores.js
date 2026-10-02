@@ -9,6 +9,11 @@ var LEAGUES = [
 ];
 var cur = 0, dayOffset = 0;
 
+/* ESPN league path -> matchup-hub league key (?league=nfl&event=id).
+   Leagues without a hub mapping get no Matchup link — never a bad link. */
+var HUBKEY = {"football/nfl":"nfl","basketball/nba":"nba",
+              "baseball/mlb":"mlb","hockey/nhl":"nhl"};
+
 function ymd(d){
   return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
 }
@@ -269,9 +274,15 @@ function renderBoard(evs){
       if(st.state==="in" || st.state==="post" || st.state==="pre"){
         var open = !!detailOpen[ev.id];
         var detAria = st.state === "pre" ? "Game detail" : "Box-score detail";
+        /* v1.139.0 — per-game matchup hub: one tap from any scoreboard card.
+           Leagues without a hub mapping (college, EPL) get no link. */
+        var hubKey = HUBKEY[LEAGUES[cur][0]];
+        var hubLink = hubKey
+          ? '<a class="btn btn-ghost btn-sm" style="margin-left:8px;vertical-align:middle" href="matchup.html?league='+hubKey+'&amp;event='+GIU.esc(ev.id)+'" aria-label="Open the matchup hub for this game">Matchup →</a>'
+          : "";
         det = '<div><button type="button" class="gd-toggle" data-ev="'+GIU.esc(ev.id)+'"'+
           ' aria-expanded="'+(open?"true":"false")+'" aria-controls="gd-'+GIU.esc(ev.id)+'">'+
-          (open?"Hide details":"Details")+'<span class="gd-chev" aria-hidden="true"></span></button></div>'+
+          (open?"Hide details":"Details")+'<span class="gd-chev" aria-hidden="true"></span></button>'+hubLink+'</div>'+
           '<div class="gd-detail" id="gd-'+GIU.esc(ev.id)+'" role="region" aria-label="'+detAria+'"'+
           (open?"":" hidden")+'>'+(open && detailCache[ev.id] ? detailCache[ev.id] : "")+'</div>';
       }
