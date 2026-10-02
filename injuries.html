@@ -22,6 +22,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
+<style>
+/* v1.153.0 — followed teams on the injuries board: "Your teams" jump strip,
+   gold card rail + ★ tag, and a :target ring on the jumped-to card */
+.follow-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 16px}
+.follow-strip[hidden]{display:none}
+.follow-strip-label{font-weight:700;color:var(--gold-soft);font-size:.86rem}
+.follow-chip-link{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(240,180,41,.45);border-radius:999px;padding:4px 11px;color:var(--text);background:rgba(240,180,41,.07);font-size:.84rem}
+.follow-chip-link:hover{color:var(--gold-soft);border-color:var(--gold)}
+.follow-chip-link b{color:var(--gold)}
+#injGrid .card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
+#injGrid .card:target{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,180,41,.45)}
+#injGrid .card{scroll-margin-top:90px}
+.tag-yourteam{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.5)}
+</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body data-feedcheck>
@@ -46,6 +60,8 @@
   </div>
   <div class="tabs" id="injSev" style="margin:2px 0 18px" aria-label="Filter by injury severity"></div>
   <p style="color:var(--faint);font-size:.85rem;margin:-6px 0 18px">Lists players with an official injury designation or other absence (e.g. suspension) — healthy ("Active") players are not shown.</p>
+  <!-- v1.153.0 — "Your teams" jump strip: one chip per followed team on this board (js/injuries.js renders it; hidden when nothing matches) -->
+  <div id="followStrip" class="follow-strip" hidden></div>
   <div class="grid grid-3" id="injGrid"></div>
   <div class="notice" style="margin:30px 0">
     <strong>Betting with injury news.</strong> Books adjust fast, but the first minutes after news breaks are where value lives — and where mistakes happen. Always confirm a player's status with the team's official report before kickoff; designations change.
@@ -55,7 +71,8 @@
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
+<script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/inj-live.js?v=1.127.0"></script>
-<script src="js/injuries.js?v=1.127.0"></script>
+<script src="js/injuries.js?v=1.153.0"></script>
 </body>
 </html>

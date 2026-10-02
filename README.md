@@ -124,6 +124,7 @@ node tests/test-predictions-live.js  # predictions page live auto-refresh (90s t
 node tests/test-kalshi-predrow.js  # Kalshi "two crowds" row on the predictions page (prices, gap chip, stale withhold, missing-data, XSS)
 node tests/test-news-live.js  # news wire live auto-refresh (3-min silent tick, hidden-tab skip, pause/resume, no stacking, tab-generation guard)
 node tests/test-news-search.js  # news wire headline search (v1.152.0): pure filter (headline+description, garbage-in -> []), XSS-safe <mark> highlight, DOM wiring (honest N-of-M count, query survives tab switch, Clear/Escape restore, error never resurrects stale cards), shipped news.html pins
+node tests/test-injuries-follow.js  # followed teams on the injuries board (v1.153.0): pure followedInjuries matcher (directory-resolved abbrs, counts over shown injuries, garbage-in -> []), cardKey anchors, "Your teams" jump strip + gold card marks with the real team-follow.js/team-brand.js and seeded/corrupt localStorage, shipped injuries.html pins
 node tests/test-odds-live.js  # odds board quota-smart auto-refresh (5-min tick only when games near, silent in-place re-pull, hidden-tab skip, timer no-stack, stale-sport generation guard, failed-pull keeps board)
 node tests/test-odds-spark.js  # line-movement sparkline logic (history record/dedupe/caps, series extraction, SVG geometry)
 node tests/test-odds-spark-dom.js  # sparkline wiring in shipped odds.js (renders with 2+ samples, hidden with 1, history recorded per fetch)

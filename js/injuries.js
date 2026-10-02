@@ -78,6 +78,93 @@ function isHealthy(status){
   return /^\s*active\s*$/i.test(String(status||""));
 }
 var SEV_RANK = {all:-1, out:3, doubtful:2, questionable:1};
+/* ---- followed teams (v1.153.0) ----
+   The odds board's ★ follows (js/team-follow.js, localStorage
+   "giu-followed-teams") already mark the odds board, scores and
+   predictions — but not the page where a followed team's news most
+   directly moves its lines. The injuries board sorts purely by
+   severity, so your team's questionable QB can sit buried mid-grid
+   under other teams' season-enders. Followed-team cards now get a
+   gold rail + "★ Your team" tag, and a "Your teams" strip of jump
+   chips opens the board (one chip per followed team ON this board,
+   under the current search/severity view). Team names resolve to
+   abbreviations through the same ESPN-sourced directory the cards'
+   headings use (GIU.teamFind); leagues with no directory (NCAA) and
+   unresolvable names simply never match — nothing is guessed. No
+   follows, or no followed team on this board: the strip stays
+   hidden and the board renders exactly as before. */
+function teamFollow(){ try{ return (window.GIU && window.GIU.TeamFollow) || null; }catch(e){ return null; } }
+function followedList(){
+  var T = teamFollow();
+  try{ return T ? T.load() : []; }catch(e){ return []; }
+}
+/* cardKey: stable anchor slug for a team card — the resolved
+   abbreviation when the directory knows the team, else a slug of the
+   display name. Pure; exported for tests. */
+function cardKey(name, abbr){
+  var a = String(abbr == null ? "" : abbr).trim().toLowerCase();
+  if(/^[a-z]{2,4}$/.test(a)) return a;
+  var s = String(name == null ? "" : name).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  return s || "team";
+}
+/* followedInjuries: pure matcher. Takes the board's team entries
+   ({displayName, injuries, _shown}), the raw followed list, and a
+   resolve(name) -> abbreviation function (the caller wires it to
+   GIU.teamFind + the league directory; tests inject a stub). Returns
+   one record per followed team on the board, in board order:
+   {key, abbr, name, out, doubtful, questionable, total} — counts over
+   the injuries actually shown (post severity filter), so a chip
+   never promises a designation the current view hides. Garbage
+   in -> []. Exported for tests. */
+function followedInjuries(teams, followed, resolve){
+  var f = [], seen = {};
+  (Array.isArray(followed) ? followed : []).forEach(function(x){
+    if(typeof x !== "string") return;
+    var n = x.trim().toUpperCase();
+    if(/^[A-Z]{2,4}$/.test(n) && !seen[n]){ seen[n] = 1; f.push(n); }
+  });
+  if(!f.length || !Array.isArray(teams) || typeof resolve !== "function") return [];
+  var out = [];
+  teams.forEach(function(t){
+    if(!t) return;
+    var name = t.displayName || t.name || "";
+    var abbr = "";
+    try{ abbr = String(resolve(name) || "").trim().toUpperCase(); }catch(e){ abbr = ""; }
+    if(!abbr || f.indexOf(abbr) === -1) return;
+    var c = sevCounts({ injuries: t._shown || t.injuries || [] });
+    out.push({ key: cardKey(name, abbr), abbr: abbr, name: name,
+               out: c[3], doubtful: c[2], questionable: c[1],
+               total: (t._shown || t.injuries || []).length });
+  });
+  return out;
+}
+/* Directory resolver for the current league (NCAA leagues have no
+   directory — DIRKEY is undefined there and nothing resolves). */
+function dirAbbr(name){
+  var lk = DIRKEY[LEAGUES[cur][0]];
+  if(!lk) return "";
+  try{
+    var hit = GIU.teamFind(tdir, lk, name);
+    return (hit && hit.abbr) ? String(hit.abbr) : "";
+  }catch(e){ return ""; }
+}
+/* The "Your teams" jump strip: one chip per followed team on this
+   board, anchor-linked to the card's #inj-<key> (gold :target ring).
+   Empty match list -> strip hidden and emptied, so league switches,
+   searches and empty boards never leave a stale strip behind. */
+function renderFollowStrip(matches){
+  var el = $("followStrip");
+  if(!el) return;
+  if(!matches || !matches.length){ el.innerHTML = ""; el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '<span class="follow-strip-label">★ Your teams</span>' +
+    matches.map(function(m){
+      var worst = m.out ? m.out+" out" : m.doubtful ? m.doubtful+" doubtful" :
+                  m.questionable ? m.questionable+" questionable" : m.total+" reported";
+      return '<a class="follow-chip-link" href="#inj-'+GIU.esc(m.key)+'">'+
+        '<b>'+GIU.esc(m.abbr)+'</b> '+GIU.esc(m.name)+' · '+GIU.esc(worst)+'</a>';
+    }).join("");
+}
 function teamWeight(t){
   var w = 0;
   (t.injuries||[]).forEach(function(i){
@@ -170,10 +257,17 @@ function render(q){
       return (((i.athlete||{}).displayName||"")+" "+detailText(i)+" "+(i.status||"")).toLowerCase().indexOf(q)!==-1;
     });
   });
+  /* v1.153.0 — followed-team matches for this view (strip + card marks) */
+  var fol = followedInjuries(teams, followedList(), dirAbbr);
+  var folByKey = {};
+  fol.forEach(function(m){ folByKey[m.key] = m; });
+  renderFollowStrip(fol);
   var what = sevF===-1 ? "" : ' with status "'+SEVS.filter(function(s){return SEV_RANK[s[0]]===sevF;})[0][1]+'"';
   if(!teams.length){ box.innerHTML = '<div class="empty">No injuries'+GIU.esc(what)+' match "'+GIU.esc(q)+'" for '+LEAGUES[cur][1]+' right now.</div>'; return; }
   box.innerHTML = teams.map(function(t){
     var teamNm = t.displayName || t.name || "Team";
+    var key = cardKey(teamNm, dirAbbr(teamNm));
+    var folHit = folByKey[key] || null;
     var rows = (t._shown||t.injuries).map(function(i){
       var nm = ((i.athlete||{}).displayName)||"Unknown";
       var detail = detailText(i);
@@ -186,7 +280,7 @@ function render(q){
         '<p>'+GIU.esc(detail)+'</p>'+
         (i.date?'<p style="font-size:.78rem;color:var(--faint)">Updated '+GIU.esc(i.date.slice(0,10))+'</p>':"")+'</div>';
     }).join("");
-    return '<div class="card">'+GIU.teamHead(tdir, DIRKEY[LEAGUES[cur][0]], t.displayName, teamNm)+'<p style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px">'+teamTag(t)+'</p>'+rows+'</div>';
+    return '<div class="card'+(folHit ? " followed" : "")+'" id="inj-'+GIU.esc(key)+'">'+GIU.teamHead(tdir, DIRKEY[LEAGUES[cur][0]], t.displayName, teamNm)+'<p style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px">'+(folHit ? '<span class="tag tag-yourteam">★ Your team</span>' : "")+teamTag(t)+'</p>'+rows+'</div>';
   }).join("");
 }
 $("injSev").innerHTML = SEVS.map(function(s,i){
@@ -223,5 +317,6 @@ $("pauseBtn").addEventListener("click", function(){
   if(autoOn){ load(true); }  /* resume: refresh now, timer reschedules */
   else { clearLive(); renderLiveStatus(); }
 });
+try{ window.GIU = window.GIU || {}; window.GIU.injuriesFollowed = followedInjuries; window.GIU.injuriesCardKey = cardKey; }catch(e){}
 load();
 })();
