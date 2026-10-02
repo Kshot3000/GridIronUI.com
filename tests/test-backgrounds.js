@@ -55,7 +55,7 @@ assert(totalBytes > 0 && totalBytes < 400 * 1024,
 var heroBgPages = pages.filter(function(p){
   return fs.readFileSync(p, "utf8").indexOf('class="hero-bg"') !== -1;
 });
-assert(heroBgPages.length === 7, "7 pages carry photo hero backgrounds (found " + heroBgPages.length + ")");
+assert(heroBgPages.length === 8, "8 pages carry photo hero backgrounds (found " + heroBgPages.length + ")");
 var localBg = heroBgPages.every(function(p){
   var html = fs.readFileSync(p, "utf8");
   return /hero-bg"[^>]*>/.test(html) &&
