@@ -22,6 +22,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
+<style>
+/* v1.150.0 — followed teams on Predictions: "Your teams" jump strip,
+   gold card rail + ★ tag, and a :target ring on the jumped-to card
+   (same treatment the scores board got in v1.149.0) */
+.follow-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 16px}
+.follow-strip[hidden]{display:none}
+.follow-strip-label{font-weight:700;color:var(--gold-soft);font-size:.86rem}
+.follow-chip-link{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(240,180,41,.45);border-radius:999px;padding:4px 11px;color:var(--text);background:rgba(240,180,41,.07);font-size:.84rem}
+.follow-chip-link:hover{color:var(--gold-soft);border-color:var(--gold)}
+.follow-chip-link b{color:var(--gold)}
+.card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
+.card:target{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,180,41,.45)}
+.tag.your-team{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.4)}
+</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body data-feedcheck>
@@ -50,6 +64,8 @@
     <button class="tab" data-k="nhl">NHL</button>
     <button class="tab" data-k="epl">EPL</button>
   </div>
+  <!-- v1.150.0 — "Your teams" jump strip: one chip per followed-team game on this tab (js/predictions.js renders it; hidden when nothing matches) -->
+  <div id="followStrip" class="follow-strip" hidden></div>
   <div id="predSpot" style="margin-bottom:18px"></div>
   <div class="grid grid-2" id="predGrid" style="margin-top:22px">
     <div class="card"><div class="skel" style="height:140px"></div></div>
@@ -67,6 +83,7 @@
 <script src="js/disagree-logic.js?v=1.129.0"></script>
 <script src="js/home-strip.js?v=1.139.0"></script>
 <script src="js/predictions-fallback.js?v=1.135.0"></script>
-<script src="js/predictions.js?v=1.135.0"></script>
+<script src="js/team-follow.js?v=1.142.0"></script>
+<script src="js/predictions.js?v=1.150.0"></script>
 </body>
 </html>

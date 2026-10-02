@@ -101,6 +101,7 @@ node tests/test-weather.js    # weather matchup header + impact tests (kickoff->
 node tests/test-scores.js     # ESPN scoreboard stat-leader line tests
 node tests/test-scores-live.js  # scores page live auto-refresh (60s tick, hidden-tab skip, pause/resume, no stacking)
 node tests/test-scores-follow.js  # followed teams on the scores board (v1.149.0): pure followedGames matcher (ESPN-abbr namespace, normalization, garbage-in -> []), "Your teams" jump strip + gold card marks with the real team-follow.js and seeded/corrupt localStorage, shipped scores.html pins
+node tests/test-predictions-follow.js  # followed teams on Predictions (v1.150.0): pure followedPredictions matcher (title sides resolved via teamFind, ESPN-abbr namespace, garbage-in -> []), "Your teams" jump strip incl. the spotlight card's own anchor, gold card marks with the real team-follow.js and seeded/corrupt localStorage, shipped predictions.html pins
 node tests/test-scores-detail.js  # game-detail logic (ESPN summary -> scoring timeline, period table, team-stats comparison)
 node tests/test-scores-detail-dom.js  # game-detail expander wiring (toggle, cache, failure retry, stale-response guard)
 node tests/test-winprob.js  # win-probability series, biggest swing, Matchup Predictor, chart/predictor markup

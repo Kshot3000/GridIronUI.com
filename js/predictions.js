@@ -88,6 +88,91 @@ function renderLiveStatus(){
 }
 function parseArr(s){ try{ var v = typeof s==="string"?JSON.parse(s):s; return Array.isArray(v)?v:[]; }catch(e){ return []; } }
 
+/* ---- followed teams (v1.150.0) ----
+   The odds board's ★ follows (js/team-follow.js, localStorage
+   "giu-followed-teams") already mark the scores board (v1.149.0); they now
+   mark this page too — the place a bettor checks what the crowd thinks of
+   their teams before game day. Followed-team games get a gold rail +
+   "★ Your team" tag, every card gains a #pg-<slug> anchor, and a "Your
+   teams" jump strip opens the board with one chip per followed game on
+   this league tab (the spotlight card included — it is pulled out of the
+   grid, so its chip must point at the spotlight's own anchor). Matching
+   resolves BOTH title sides through the caller's teamFind against the
+   ESPN-sourced team directory, so abbreviations compare in the same
+   ESPN namespace the follow list was built in; a side that doesn't
+   resolve simply can't match — never a fuzzy guess. No follows, or no
+   followed team on this tab: the strip stays hidden and the cards render
+   exactly as before. */
+function teamFollow(){ try{ return (window.GIU && window.GIU.TeamFollow) || null; }catch(e){ return null; } }
+function followedList(){
+  var T = teamFollow();
+  try{ return T ? T.load() : []; }catch(e){ return []; }
+}
+/* rowKey: the card anchor key for a row — the event's slug (URL-safe by
+   construction on Polymarket), else its id, else a slugified title, else
+   a positional key. Sanitized regardless of source so a hostile slug can
+   never break out of the id attribute. */
+function rowKey(r, idx){
+  var ev = (r && r.ev) || {};
+  var raw = String(ev.slug || ev.id || "").trim().toLowerCase();
+  var k = raw.replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "");
+  if(k) return k;
+  var t = String(ev.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return t || ("game-" + (idx || 0));
+}
+/* followedPredictions: pure matcher. Takes prediction rows ({ev:{title,
+   slug,...}}), the raw followed list, the team directory, the league key
+   and a teamFind(dir, league, name) resolver; returns one record per row
+   a followed team plays in: {key, abbr (the followed side), abbrA, abbrB
+   ("" when a side doesn't resolve), aName, bName}. First followed entry
+   wins when both sides are followed. Garbage in -> []. Exported for
+   tests as GIU.predictionsFollowed. */
+function followedPredictions(rows, followed, dir, league, find){
+  var f = [], seen = {};
+  (Array.isArray(followed) ? followed : []).forEach(function(x){
+    if(typeof x !== "string") return;
+    var n = x.trim().toUpperCase();
+    if(/^[A-Z]{2,4}$/.test(n) && !seen[n]){ seen[n] = 1; f.push(n); }
+  });
+  if(!f.length || !Array.isArray(rows) || typeof find !== "function") return [];
+  var out = [];
+  rows.forEach(function(r, idx){
+    var ev = (r && r.ev) || {};
+    var tp = String(ev.title || "").split(/\s+vs\.?\s+/);
+    if(tp.length !== 2 || !tp[0].trim() || !tp[1].trim()) return;
+    var ta = null, tb = null;
+    try{ ta = find(dir, league, tp[0].trim()); }catch(e){ ta = null; }
+    try{ tb = find(dir, league, tp[1].trim()); }catch(e){ tb = null; }
+    var aa = (ta && ta.abbr) ? String(ta.abbr).trim().toUpperCase() : "";
+    var bb = (tb && tb.abbr) ? String(tb.abbr).trim().toUpperCase() : "";
+    if(!aa && !bb) return;
+    var hit = null, i;
+    for(i = 0; i < f.length; i++){ if(f[i] === aa || f[i] === bb){ hit = f[i]; break; } }
+    if(!hit) return;
+    out.push({ key: rowKey(r, idx), abbr: hit, abbrA: aa, abbrB: bb,
+               aName: tp[0].trim(), bName: tp[1].trim() });
+  });
+  return out;
+}
+/* The "Your teams" jump strip: one chip per followed game on this tab,
+   anchor-linked to the card's #pg-<key> (grid or spotlight — both carry
+   the id, and the jumped-to card gets a gold :target ring). Empty match
+   list -> strip hidden and emptied, so tab switches, empty boards and
+   the Kalshi-only fallback never leave a stale strip behind. */
+function renderFollowStrip(matches){
+  var el = $("followStrip");
+  if(!el) return;
+  if(!matches || !matches.length){ el.innerHTML = ""; el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '<span class="follow-strip-label">★ Your teams</span>' +
+    matches.map(function(m){
+      var a = m.abbrA || m.aName || "", b = m.abbrB || m.bName || "";
+      return '<a class="follow-chip-link" href="#pg-'+GIU.esc(m.key)+'">'+
+        '<b>★ '+GIU.esc(m.abbr)+'</b> '+GIU.esc(a)+' vs '+GIU.esc(b)+'</a>';
+    }).join("");
+}
+try{ window.GIU = window.GIU || {}; window.GIU.predictionsFollowed = followedPredictions; window.GIU.predictionsRowKey = rowKey; }catch(e){}
+
 function skel(){
   $("predGrid").innerHTML = '<div class="card"><div class="skel" style="height:140px"></div></div>'+
     '<div class="card"><div class="skel" style="height:140px"></div></div>';
@@ -110,7 +195,7 @@ function nextUpcoming(rows){
 /* Card HTML shared by the grid and the spotlight: matchup header, kickoff
    time, Polymarket probability bars, the Kalshi cross-check when matched,
    and the source-market link. */
-function cardInner(r, dir, key){
+function cardInner(r, dir, key, folAbbr){
   var t = fmtT(r.ev.startTime || r.ev.eventDate);
   var slug = r.ev.slug||"";
   var tp = String(r.ev.title||"").split(/\s+vs\.?\s+/);
@@ -134,6 +219,7 @@ function cardInner(r, dir, key){
     }).join("");
   }
   return '<span class="tag green">Market-implied</span>'+
+    (folAbbr ? ' <span class="tag your-team">★ Your team</span>' : '')+
     head+
     (t ? '<div class="game-meta" style="margin-bottom:12px"><span>'+t+'</span></div>' : '<div style="height:8px"></div>')+
     body+
@@ -177,7 +263,7 @@ function load(key, my, silent){
   key = key || curKey; curKey = key;
   my = (my===undefined) ? tabSeq : my;
   clearLive(); /* tab switches and silent refreshes always reschedule */
-  if(!silent) skel();
+  if(!silent){ skel(); renderFollowStrip([]); /* no stale chips while the new tab loads */ }
   /* The snapshot fetch starts now, alongside the Polymarket lookup, so a
      Polymarket failure doesn't cost the Kalshi-only fallback an extra
      round-trip. Resolves null when the league has no snapshot or it fails —
@@ -244,9 +330,18 @@ function load(key, my, silent){
     if(!rows.length){
       $("predGrid").innerHTML = '<div class="empty">No upcoming game markets with clear win probabilities for this league right now — check back closer to game day.</div>';
       var ps = $("predSpot"); if(ps) ps.innerHTML = "";
+      renderFollowStrip([]);
       liveN = 0; renderLiveStatus();
       return;
     }
+    /* ---- followed teams (v1.150.0): mark this tab's followed games and
+       open the "Your teams" jump strip. Computed on the full row list —
+       before the spotlight split — so a followed game that IS the next
+       game still gets its chip (pointing at the spotlight's anchor). */
+    var fol = followedPredictions(rows, followedList(), dir, key, GIU.teamFind);
+    var folByKey = {};
+    fol.forEach(function(m){ folByKey[m.key] = m.abbr; });
+    renderFollowStrip(fol);
     /* ---- "Next game" spotlight (v1.125.0) ----
        The nearest upcoming game gets a featured card above the grid: a
        live-ticking kickoff countdown, the same Polymarket probability bars
@@ -263,12 +358,12 @@ function load(key, my, silent){
         var cd = spotCountdown(iso);
         spotIso = iso;
         spotEl.innerHTML =
-          '<div class="card" style="border:1px solid var(--gold-glow);box-shadow:0 0 28px rgba(240,180,41,.12)">'+
+          '<div class="card'+(folByKey[rowKey(spot, rows.indexOf(spot))] ? " followed" : "")+'" id="pg-'+GIU.esc(rowKey(spot, rows.indexOf(spot)))+'" style="border:1px solid var(--gold-glow);box-shadow:0 0 28px rgba(240,180,41,.12)">'+
           '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">'+
           '<span class="tag" style="background:var(--gold);color:#171204;font-weight:800;letter-spacing:.05em">'+GIU.esc(kicker)+'</span>'+
           (cd ? '<span id="spotCountdown" class="num" style="color:var(--gold-soft);font-weight:800;font-size:1rem">'+GIU.esc(cd)+'</span>' : "")+
           '</div>'+
-          cardInner(spot, dir, key)+
+          cardInner(spot, dir, key, folByKey[rowKey(spot, rows.indexOf(spot))])+
           '</div>';
         if(cd && !spotTimer){
           spotTimer = setInterval(tickSpot, SPOT_MS);
@@ -278,7 +373,8 @@ function load(key, my, silent){
       }
     }
     $("predGrid").innerHTML = gridRows.map(function(r){
-      return '<div class="card">'+cardInner(r, dir, key)+'</div>';
+      var k = rowKey(r, rows.indexOf(r));
+      return '<div class="card'+(folByKey[k] ? " followed" : "")+'" id="pg-'+GIU.esc(k)+'">'+cardInner(r, dir, key, folByKey[k])+'</div>';
     }).join("");
     /* ---- live auto-refresh ----
        Refresh in-place every 90s, but only while a shown game is likely
@@ -302,6 +398,7 @@ function load(key, my, silent){
       catch(e){ html = null; }
       var ps = $("predSpot");
       if(ps) ps.innerHTML = "";
+      renderFollowStrip([]); /* fallback cards carry no follow marks — strip must not point at them */
       if(html){
         $("predGrid").innerHTML = html;
         /* Fallback mode: one silent retry on the normal refresh beat so the
