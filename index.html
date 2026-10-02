@@ -27,6 +27,9 @@
 /* v1.124.0 — strip watch info: broadcast network chip + live kickoff countdown */
 .tv-tag{white-space:nowrap}
 .kickoff-count{font-size:.82rem;color:var(--gold-soft,#e8c15a);font-weight:600;letter-spacing:.02em;margin-top:6px}
+/* v1.156.0 — followed teams on the strip: same gold language as the boards */
+.game-card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
+.tag.your-team{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.4)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://gridironui.xyz/#org","name":"GridIronUI","url":"https://gridironui.xyz/","sameAs":["https://x.com/kshot9000"]},{"@type":"WebSite","@id":"https://gridironui.xyz/#site","url":"https://gridironui.xyz/","name":"GridIronUI","publisher":{"@id":"https://gridironui.xyz/#org"},"description":"Learn sports betting from the ground up: guides, calculators, live odds, prediction markets, scores, news, injuries, weather and a DFS lineup lab — all in one place."}]}</script>
@@ -149,7 +152,8 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/home-strip.js?v=1.139.0"></script>
+<script src="js/home-strip.js?v=1.156.0"></script>
+<script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/home-wx.js?v=1.126.0"></script>
 <script>
 (function(){
@@ -220,7 +224,12 @@
     Promise.all(jobs).then(function(parts){
       loading = false;
       var mlbSnap = parts.pop(), nflSnap = parts.pop();
-      var rows = HS.withKalshi(HS.top([].concat.apply([], parts)),
+      /* v1.156.0 — followed teams pin ahead of their tier (read fresh on
+         every pull, so an unfollow on the odds board shows up here on the
+         next silent refresh too). No follows -> topFollowed == top(). */
+      var fol = [];
+      try{ fol = (GIU.TeamFollow && GIU.TeamFollow.load()) || []; }catch(e){ fol = []; }
+      var rows = HS.withKalshi(HS.topFollowed([].concat.apply([], parts), fol),
                                {NFL: nflSnap, MLB: mlbSnap}, Date.now());
       curRows = rows;
       if(!rows.length){
@@ -256,8 +265,8 @@
             '<span>'+side(k.aAbbr, k.aPct, k.aPct >= k.hPct)+' · '+side(k.hAbbr, k.hPct, k.hPct > k.aPct)+'</span>'+
             '<span>snapshot '+GIU.esc(HS.snapWhen(k.updatedAt))+'</span></div>';
         }
-        return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
-          '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+tv+'</div>'+cd+
+        return '<div class="game-card'+(r.followed ? " followed" : "")+'"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+          '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+tv+(r.followed ? '<span class="tag your-team">★ Your team</span>' : "")+'</div>'+cd+
           GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
           '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span>'+
           /* v1.139.0 — per-game matchup hub: one tap from any strip card. */

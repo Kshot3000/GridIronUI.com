@@ -24,7 +24,7 @@ ok("hub sets window.GIU_BASE", hub.indexOf('window.GIU_BASE=".') !== -1);
 
 /* ---- script keys ---- */
 ok("hub keys matchup.js at v1.139.0", hub.indexOf('js/matchup.js?v=1.139.0') !== -1);
-ok("hub keys home-strip.js at v1.139.0", hub.indexOf('js/home-strip.js?v=1.139.0') !== -1);
+ok("hub keys home-strip.js at v1.156.0", hub.indexOf('js/home-strip.js?v=1.156.0') !== -1);
 ok("hub loads odds-logic.js (movers + best prices)",
   hub.indexOf("js/odds-logic.js") !== -1 && hub.indexOf("window.OddsLogic") !== -1);
 ok("hub loads odds-pm.js (live Polymarket matching)",
@@ -95,8 +95,8 @@ ok("scores hub link covers the four US leagues",
 var scoresHtml = read("scores.html");
 ok("scores.html keys scores.js at v1.149.0", scoresHtml.indexOf("js/scores.js?v=1.149.0") !== -1);
 var preds = read("predictions.html");
-ok("index.html keys home-strip.js at v1.139.0", index.indexOf("js/home-strip.js?v=1.139.0") !== -1);
-ok("predictions.html keys home-strip.js at v1.139.0", preds.indexOf("js/home-strip.js?v=1.139.0") !== -1);
+ok("index.html keys home-strip.js at v1.156.0", index.indexOf("js/home-strip.js?v=1.156.0") !== -1);
+ok("predictions.html keys home-strip.js at v1.156.0", preds.indexOf("js/home-strip.js?v=1.156.0") !== -1);
 
 console.log(failures ? "\n" + failures + " FAILURES" : "\nALL MATCHUP-DOM TESTS PASSED");
 process.exit(failures ? 1 : 0);

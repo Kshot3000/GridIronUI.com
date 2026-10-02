@@ -4,7 +4,7 @@
    "pre" row's kickoff has passed but the feed still lists it pre — the exact
    staleness a tab left open through kickoff shows. Everything else (all
    future pre-games, empty, malformed) stays quiet: no pointless re-pulls.
-   Also re-pins the index.html home-strip.js cache key at v1.139.0.
+   Also re-pins the index.html home-strip.js cache key at v1.156.0.
    Run: node tests/test-home-strip-live.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -47,11 +47,11 @@ ok("rows are not mutated by the check", (function(){
   return JSON.stringify(r) === before;
 })());
 
-/* shipped wiring: index.html pins the v1.139.0 key so returning visitors
+/* shipped wiring: index.html pins the v1.156.0 key so returning visitors
    get the new refresh logic, not a cached copy of the old strip script. */
 var html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-ok("index.html pins home-strip.js?v=1.139.0",
-  html.indexOf("js/home-strip.js?v=1.139.0") !== -1);
+ok("index.html pins home-strip.js?v=1.156.0",
+  html.indexOf("js/home-strip.js?v=1.156.0") !== -1);
 
 /* the 60s master tick calls loadStrip(true) through needsRefresh — pin the
    wiring so a future edit can't silently drop the refresh. */

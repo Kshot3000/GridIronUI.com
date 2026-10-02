@@ -108,7 +108,7 @@ assert(HS.nearestPre([], NOW) === null, "nearestPre: empty rows -> null");
 
 /* ---- shipped wiring pins ---- */
 var html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-assert(html.indexOf("js/home-strip.js?v=1.139.0") !== -1, "index.html pins home-strip.js?v=1.139.0");
+assert(html.indexOf("js/home-strip.js?v=1.156.0") !== -1, "index.html pins home-strip.js?v=1.156.0");
 assert(html.indexOf("data-kickoff") !== -1, "index.html renders the countdown slot");
 assert(html.indexOf('data-league="') !== -1, "index.html tags the countdown slot with its league");
 assert(html.indexOf("HS.gameNoun(") !== -1, "index.html passes the league through the noun for the ticker");

@@ -58,6 +58,80 @@ function rankRows(a, b){
 function top(rows, n){
   return (rows||[]).slice().sort(rankRows).slice(0, n == null ? 6 : n);
 }
+
+/* ---- Followed teams first (v1.156.0) ----
+   The odds board's ★ follows (js/team-follow.js, localStorage
+   "giu-followed-teams") already mark the odds, scores, predictions,
+   injuries, weather and markets boards — but the homepage strip, the
+   first thing a returning bettor sees, ranked purely by live-ness and
+   kickoff: follow the Bears, land on the homepage on a busy Sunday,
+   and your game could sit below the strip's 6-card cap entirely.
+   Now followed teams' games pin ahead of their tier: a followed live
+   game leads the strip, a followed upcoming game outranks every
+   non-followed upcoming game (live games still outrank it — a game
+   happening now is news regardless), and followed cards carry the
+   same gold mark as every other board. Abbreviations compare in the
+   ESPN namespace both sides already use (scoreboard competitors vs
+   the ESPN-sourced follow list); normalization mirrors team-follow.js
+   list(). No follows -> topFollowed is exactly top(): the strip is
+   byte-identical in behavior for everyone who never starred a team. */
+
+/* Pure: clean a raw follow list (deduped, plausible abbrs only).
+   Garbage in -> []. */
+function followList(raw){
+  if(!Array.isArray(raw)) return [];
+  var out = [], seen = {};
+  raw.forEach(function(x){
+    if(typeof x !== "string") return;
+    var n = x.trim().toUpperCase();
+    if(/^[A-Z]{2,4}$/.test(n) && !seen[n]){ seen[n] = 1; out.push(n); }
+  });
+  return out;
+}
+function rowAbbr(side){
+  var a = side && side.team && side.team.abbreviation;
+  return typeof a === "string" ? a.trim().toUpperCase() : "";
+}
+/* Pure: the first followed abbreviation playing in this row (follow-list
+   order wins, as on the scores board), or null. Malformed rows -> null. */
+function followedAbbr(row, followed){
+  var f = followList(followed);
+  if(!f.length || !row) return null;
+  var aa = rowAbbr(row.away), ha = rowAbbr(row.home), i;
+  if(!aa && !ha) return null;
+  for(i = 0; i < f.length; i++){
+    if(f[i] === aa || f[i] === ha) return f[i];
+  }
+  return null;
+}
+/* Pure: NEW row objects stamped .followed for matched rows; unmatched
+   rows pass through by reference (input never mutated), so withKalshi
+   and the weather chips see the same rows as before. */
+function withFollowed(rows, followed){
+  var f = followList(followed);
+  if(!f.length || !Array.isArray(rows)) return Array.isArray(rows) ? rows.slice() : [];
+  return rows.map(function(r){
+    var ab = followedAbbr(r, f);
+    if(!ab) return r;
+    var out = {};
+    for(var k in r) out[k] = r[k];
+    out.followed = ab;
+    return out;
+  });
+}
+/* Tier rank: live+followed, live, upcoming+followed, upcoming. Within a
+   tier the strip's own rankRows decides (live first, then kickoff). */
+function rankFollowed(a, b){
+  function tier(r){
+    return (r && r.state === "in" ? 0 : 2) + (r && r.followed ? 0 : 1);
+  }
+  var d = tier(a) - tier(b);
+  return d !== 0 ? d : rankRows(a, b);
+}
+/* Sorted top-n with follows pinned (see above); n defaults to 6. */
+function topFollowed(rows, followed, n){
+  return withFollowed(rows, followed).sort(rankFollowed).slice(0, n == null ? 6 : n);
+}
 /* ---- Kalshi crowd prices on the strip (v1.120.0, extended to MLB v1.138.0) ----
    The server-side Kalshi snapshots (data/kalshi-nfl.json, data/kalshi-mlb.json)
    are CORS-safe, so NFL and MLB strip rows can carry the real-money crowd's
@@ -313,6 +387,9 @@ function needsRefresh(rows, nowMs){
 
 var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, collect: collect,
            rankRows: rankRows, top: top,
+           followList: followList, followedAbbr: followedAbbr,
+           withFollowed: withFollowed, rankFollowed: rankFollowed,
+           topFollowed: topFollowed,
            normKalshiAbbr: normKalshiAbbr, kalshiPair: kalshiPair,
            kalshiPrice: kalshiPrice, kalshiSideAbbr: kalshiSideAbbr,
            kalshiDate: kalshiDate, rowGameDay: rowGameDay,
