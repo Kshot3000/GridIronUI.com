@@ -242,6 +242,11 @@ function render(opts){
     var arbs = OL.biggestArbs(OL.arbEntries(events), 5);
     board.innerHTML = (arbs.length ? renderArbs(arbs, lastUpdated) : "") +
                       (movers.length ? renderMovers(movers) : "") + cards;
+    /* v1.140.0 — Middle finder strip: cross-book middling windows, painted
+       by the new js/middle-finder.js. Key-gated by construction: this is the
+       keyed render path, so it never runs without a key. */
+    if(window.MiddleFinder && window.MiddleFinder.paint)
+      window.MiddleFinder.paint(board, events, lastUpdated);
     boardHasGames = true;
     setSnap(now);
     setOpens(opens);
