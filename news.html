@@ -33,6 +33,18 @@
 .news-search button:hover{color:var(--gold);border-color:var(--gold)}
 .news-count{font-size:.85rem;color:var(--muted);min-height:1.3em}
 #newsGrid mark{background:rgba(240,180,41,.30);color:inherit;border-radius:3px;padding:0 1px}
+/* v1.157.0 — followed teams on the news wire: "Your teams" jump strip,
+   gold card rail + ★ tag, and a :target ring on the jumped-to card */
+.follow-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 16px}
+.follow-strip[hidden]{display:none}
+.follow-strip-label{font-weight:700;color:var(--gold-soft);font-size:.86rem}
+.follow-chip-link{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(240,180,41,.45);border-radius:999px;padding:4px 11px;color:var(--text);background:rgba(240,180,41,.07);font-size:.84rem;text-decoration:none;max-width:100%}
+.follow-chip-link:hover{color:var(--gold-soft);border-color:var(--gold)}
+.follow-chip-link b{color:var(--gold)}
+#newsGrid .card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
+#newsGrid .card:target{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,180,41,.45)}
+#newsGrid .card{scroll-margin-top:90px}
+.tag.your-team{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.4)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
@@ -63,6 +75,8 @@
     <span class="news-count" id="newsCount" role="status" aria-live="polite"></span>
   </div>
   <div class="tabs" id="newsTabs"></div>
+  <!-- v1.157.0 — "Your teams" jump strip: one chip per followed-team story in the current view (js/news.js renders it; hidden when nothing matches) -->
+  <div id="newsFollow" class="follow-strip" hidden></div>
   <div class="grid grid-2" id="newsGrid"></div>
 
   <!-- v1.29.0 — display ad slot (renders only once an AdSense ad-unit ID is set) -->
@@ -71,6 +85,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
-<script src="js/news.js?v=1.152.0"></script>
+<script src="js/team-follow.js?v=1.142.0"></script>
+<script src="js/news.js?v=1.157.0"></script>
 </body>
 </html>

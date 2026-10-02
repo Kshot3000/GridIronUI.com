@@ -184,7 +184,7 @@ settle(function(){
       assert(html.indexOf('id="newsClear"') !== -1, "news.html ships #newsClear");
       assert(html.indexOf('id="newsCount"') !== -1, "news.html ships #newsCount");
       assert(html.indexOf('aria-describedby="newsCount"') !== -1, "search input is described by the count");
-      assert(html.indexOf('js/news.js?v=1.152.0') !== -1, "news.html pins news.js?v=1.152.0");
+      assert(html.indexOf('js/news.js?v=1.157.0') !== -1, "news.html pins news.js?v=1.157.0");
 
       if(failures){ console.error(failures + " FAILURES"); process.exit(1); }
       console.log("ALL NEWS-SEARCH TESTS PASS");
