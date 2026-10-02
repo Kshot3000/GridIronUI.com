@@ -23,6 +23,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+<style>
+/* v1.142.0 team-follow — ★ toggles + manage bar, in the board's visual language */
+.follow-ctl{display:flex;align-items:center;gap:6px;margin-top:8px}
+.follow-ctl-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.follow-btn{background:none;border:1px solid var(--line-soft);border-radius:8px;color:var(--faint);font-size:1rem;line-height:1;padding:4px 9px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.follow-btn:hover{color:var(--gold-soft);border-color:var(--gold-soft)}
+.follow-btn.on{color:var(--gold);border-color:var(--gold);background:rgba(240,180,41,.1)}
+.follow-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0;padding:10px 14px;border:1px solid var(--line-soft);border-radius:10px;background:rgba(240,180,41,.05);font-size:.86rem;color:var(--muted)}
+.follow-bar[hidden]{display:none}
+.follow-label{font-weight:700;color:var(--gold-soft)}
+.follow-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-soft);border-radius:999px;padding:3px 6px 3px 10px;color:var(--text);background:rgba(255,255,255,.03)}
+.follow-chip b{color:var(--gold)}
+.follow-x{background:none;border:none;color:var(--faint);font-size:.9rem;line-height:1;padding:2px 6px;cursor:pointer;border-radius:6px}
+.follow-x:hover{color:var(--red)}
+.follow-note{color:var(--faint);font-size:.82rem}
+.tf-star{color:var(--gold);font-weight:700}
+</style>
 </head>
 <body data-feedcheck>
 <script>window.GIU_BASE=".";</script>
@@ -61,6 +78,9 @@
     </div>
   </div>
 
+  <!-- v1.142.0 team-follow: "Followed teams" manage bar (chips + unfollow + notification fallback) -->
+  <div id="followBar" class="follow-bar" hidden></div>
+
   <div id="alertToasts" class="alert-toasts" aria-live="polite"></div>
 
   <div id="oddsBoard"></div>
@@ -87,6 +107,7 @@
 <script src="js/odds-wx.js?v=1.95.0"></script>
 <script src="js/odds-pm.js?v=1.38.0"></script>
 <script src="js/odds-inj.js?v=1.50.0"></script>
-<script src="js/odds.js?v=1.128.0"></script>
+<script src="js/team-follow.js?v=1.142.0"></script>
+<script src="js/odds.js?v=1.142.0"></script>
 </body>
 </html>

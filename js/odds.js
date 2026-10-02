@@ -58,6 +58,137 @@ var alertBase = {};               /* sport -> {eventId: {sp, tot}} */
 try{ alertThr = Number(localStorage.getItem(alertThrKey)) || 0; }catch(e){ alertThr = 0; }
 if(!(alertThr === 1 || alertThr === 1.5 || alertThr === 2)) alertThr = 0;
 
+/* ---- team-follow line alerts (v1.142.0) ----
+   ★ toggles on each game card follow teams (localStorage key
+   "giu-followed-teams", owned by js/team-follow.js -> window.GIU.TeamFollow).
+   teamFollowTick runs inside maybeAlerts with its own per-sport baseline so a
+   followed team's steam move pings even when the threshold picker is off —
+   threshold = the picker's value, or 1 pt when alerts are off. In-page toasts
+   for followed teams get a ★ marker; the browser Notification reuses the
+   existing notifyAlert path (hidden tab + granted permission). Everything is
+   local: the tab must be open and pulling lines. */
+var tfBase = {}, tfDir = {};
+var tfPermKey = "giu_followed_perm_asked";
+function teamFollow(){ try{ return (window.GIU && window.GIU.TeamFollow) || null; }catch(e){ return null; } }
+function tfPermAsked(){
+  try{ return localStorage.getItem(tfPermKey) === "1"; }catch(e){ return true; }
+}
+function tfSetPermAsked(){
+  try{ localStorage.setItem(tfPermKey, "1"); }catch(e){}
+}
+/* Shared Notification permission request — the alerts picker and the first
+   team-follow both use this. Asked on an explicit gesture, only while the
+   permission is still "default"; a denial leaves the in-page toasts working. */
+function requestNotifyPermission(){
+  try{
+    if("Notification" in window && window.Notification &&
+       window.Notification.permission === "default"){
+      var p = window.Notification.requestPermission();
+      if(p && p.catch) p.catch(function(){});
+    }
+  }catch(e){}
+}
+/* Resolve one side of a matchup to its abbreviation; null when the team
+   directory can't resolve it (never guessed). */
+function tfAbbrOf(dir, league, name){
+  var T = teamFollow();
+  return T ? T.abbrOf(GIU.teamFind, dir, league, name) : null;
+}
+/* ★ follow toggles for one game card: one button per side that resolves to
+   an abbreviation. Persisted via the follow module; aria-pressed mirrors
+   state; hidden entirely when neither side resolves (never guessed). */
+function tfToggleHtml(dir, league, away, home){
+  var T = teamFollow();
+  if(!T) return "";
+  var followed = T.load();
+  function btn(name){
+    var abbr = tfAbbrOf(dir, league, name);
+    if(!abbr) return "";
+    var on = T.has(followed, abbr);
+    var verb = on ? "Unfollow " : "Follow ";
+    var lbl = verb + name + " — line-move alerts";
+    return '<button type="button" class="follow-btn'+(on ? " on" : "")+'"'+
+      ' data-follow="'+GIU.esc(abbr)+'" data-name="'+GIU.esc(name)+'"'+
+      ' aria-pressed="'+on+'" aria-label="'+GIU.esc(lbl)+'" title="'+GIU.esc(lbl)+'">★</button>';
+  }
+  var h = btn(away) + btn(home);
+  if(!h) return "";
+  return '<div class="follow-ctl"><span class="follow-ctl-label" aria-hidden="true">Follow</span>'+
+    '<span role="group" aria-label="Follow teams for line-move alerts">'+h+'</span></div>';
+}
+/* Display name for a followed abbreviation, resolved against the loaded
+   team directory across leagues; falls back to the bare abbreviation. */
+function tfDisplayName(abbr){
+  if(!tfDir) return abbr;
+  var leagues = Object.keys(tfDir), i, t = null;
+  for(i = 0; i < leagues.length; i++){
+    try{ t = GIU.teamFind(tfDir, leagues[i], abbr); }catch(e){ t = null; }
+    if(t && t.displayName) return t.displayName;
+  }
+  return abbr;
+}
+/* Honest fallback when browser notifications can't work: denied or the
+   Notification API is missing entirely. Shown in the manage bar, once. */
+function tfNotifyNote(){
+  var blocked = false;
+  try{
+    if(!("Notification" in window)) blocked = true;
+    else if(window.Notification && window.Notification.permission === "denied") blocked = true;
+  }catch(e){ blocked = true; }
+  if(!blocked) return "";
+  return ' <span class="follow-note" role="note">Browser notifications blocked — followed-team moves still appear in the alerts panel below.</span>';
+}
+/* The "Followed teams" manage bar: chips with unfollow buttons + the
+   notification fallback note. Hidden when there is nothing to say. */
+function renderFollowBar(){
+  var T = teamFollow(), bar = $("followBar");
+  if(!T || !bar) return;
+  var chips = T.load().map(function(abbr){
+    var nm = tfDisplayName(abbr);
+    return '<span class="follow-chip"><b>'+GIU.esc(abbr)+'</b> '+GIU.esc(nm)+
+      ' <button type="button" class="follow-x" data-unfollow="'+GIU.esc(abbr)+
+      '" aria-label="Unfollow '+GIU.esc(nm)+'">✕</button></span>';
+  }).join(" ");
+  var note = tfNotifyNote();
+  bar.hidden = !(chips || note);
+  bar.innerHTML = chips
+    ? '<span class="follow-label">★ Followed teams</span> ' + chips + note
+    : note;
+}
+/* Sync every ★ toggle's aria-pressed/class/label with the stored list
+   (cards re-render on every pull, so this runs after each render too). */
+function refreshFollowButtons(){
+  var T = teamFollow();
+  if(!T || !document.querySelectorAll) return;
+  var followed = T.load(), i, b;
+  var btns = document.querySelectorAll(".follow-btn");
+  for(i = 0; i < btns.length; i++){
+    b = btns[i];
+    var on = T.has(followed, b.getAttribute("data-follow"));
+    var verb = on ? "Unfollow " : "Follow ";
+    var lbl = verb + (b.getAttribute("data-name") || "") + " — line-move alerts";
+    b.setAttribute("aria-pressed", String(on));
+    b.setAttribute("aria-label", lbl);
+    b.setAttribute("title", lbl);
+    if(b.classList) b.classList.toggle("on", on);
+  }
+}
+/* Flip one team's follow state (from a ★ toggle), then refresh UI. The
+   first follow ever in this browser asks for Notification permission once,
+   reusing the alerts picker's request path — never nagged again. */
+function toggleFollow(b){
+  var T = teamFollow();
+  if(!T) return;
+  var before = T.load();
+  var r = T.toggle(b.getAttribute("data-follow"));
+  if(before.length === 0 && r.list.length === 1 && !tfPermAsked()){
+    tfSetPermAsked();
+    requestNotifyPermission();
+  }
+  renderFollowBar();
+  refreshFollowButtons();
+}
+
 /* ---- bet slip state (local only, never leaves the browser) ---- */
 var Slip = window.OddsSlip;
 var slip = [];
@@ -250,7 +381,10 @@ function render(opts){
        pull's baseline, toast every threshold crossing, then re-baseline —
        all after the board is on screen so an alert hiccup never blocks
        lines. Zero API quota: it reuses the events just pulled. */
-    maybeAlerts(events, mySeq);
+    maybeAlerts(events, mySeq, dir);
+    /* v1.142.0 team-follow: refresh ★ states + the manage bar once the board is on screen */
+    renderFollowBar();
+    refreshFollowButtons();
     /* keep slip prices honest against the fresh board */
     if(slip.length){ Slip.reprice(slip, now); saveSlip(); }
     refreshPickMarks();
@@ -497,16 +631,41 @@ function renderMovers(movers){
    alerts on only seeds the baseline (nothing moved yet — honest by
    default); later pulls toast each threshold crossing, then re-baseline
    so the same move never fires twice. */
-function maybeAlerts(events, mySeq){
+function maybeAlerts(events, mySeq, dir){
   if(mySeq !== renderSeq) return; /* stale sport response — discard */
+  tfDir = dir || {}; /* v1.142.0 team-follow: directory for name resolution */
+  teamFollowTick(events, dir); /* v1.142.0: followed teams ping on their own baseline */
   if(!(alertThr > 0)) return;
   var fresh = OL.alertBaseline(events);
   var base = alertBase[sport];
   if(base){
     var hits = OL.moveAlerts(events, base, alertThr, Date.now());
-    hits.forEach(fireAlert);
+    var byId = {};
+    events.forEach(function(ev){ if(ev && ev.id != null) byId[ev.id] = ev; });
+    hits.forEach(function(a){ fireAlert(a, byId[a.id]); }); /* v1.142.0: pass the event so followed teams get the ★ marker */
   }
   alertBase[sport] = fresh;
+}
+/* v1.142.0 team-follow: own baseline/threshold pass over the same pull.
+   Fires for followed-team steam moves even when the threshold picker is off
+   (falls back to the finest 1-pt threshold); the toast dedupe in fireAlert
+   keeps a move from stacking twice when both passes fire. */
+function teamFollowTick(events, dir){
+  var T = teamFollow();
+  if(!T) return;
+  var followed = T.load();
+  var thr = (alertThr > 0) ? alertThr : 1;
+  var fresh = OL.alertBaseline(events);
+  var base = tfBase[sport];
+  if(base && followed.length){
+    var league = OL.sportLeague(sport);
+    var byId = {};
+    events.forEach(function(ev){ if(ev && ev.id != null) byId[ev.id] = ev; });
+    T.involvedMoves(GIU.teamFind, dir || {}, league, events, base, followed,
+                    thr, Date.now(), OL.moveAlerts)
+      .forEach(function(a){ fireAlert(a, byId[a.id]); });
+  }
+  tfBase[sport] = fresh;
 }
 function alertMoveText(a){
   var kind = a.kind === "spread" ? "Spread" : "Total";
@@ -523,14 +682,26 @@ function alertMoveText(a){
    dismiss button; duplicate toast for the same game+kind is never
    stacked twice. Browser Notification only when the tab is hidden and
    permission was granted — a visible tab gets the toast, not the buzz. */
-function fireAlert(a){
+/* v1.142.0: fireAlert(a, ev) — ev is the moved game (when known) so the
+   toast carries a ★ marker when the move involves a followed team. */
+function fireAlert(a, ev){
   var t = alertMoveText(a);
   var body = t.body;
+  var T = teamFollow(), fabbr = (a && a.followed) || null;
+  if(T && !fabbr && ev){
+    var league = OL.sportLeague(sport);
+    fabbr = T.followedInGame(T.load(),
+      tfAbbrOf(tfDir, league, ev.away_team),
+      tfAbbrOf(tfDir, league, ev.home_team));
+  }
+  var star = fabbr
+    ? '<span class="tf-star" aria-hidden="true" title="A team you follow">★</span> '
+    : "";
   var toast = document.createElement("div");
   toast.className = "alert-toast";
   toast.setAttribute("role", "status");
   toast.setAttribute("data-alert", a.id + "|" + a.kind);
-  toast.innerHTML = '<span aria-hidden="true">🔔</span><span><b>Line move</b> — ' +
+  toast.innerHTML = '<span aria-hidden="true">🔔</span>'+star+'<span><b>Line move</b> — ' +
     '<a href="#' + GIU.esc(a.anchor) + '">' + GIU.esc(a.title) + "</a>: " + body + "</span>" +
     '<button class="alert-x" aria-label="Dismiss alert">×</button>';
   var box = $("alertToasts");
@@ -543,14 +714,14 @@ function fireAlert(a){
     while(box.children && box.children.length > 3)
       box.removeChild(box.lastChild);
   }
-  notifyAlert(a, t);
+  notifyAlert(a, t, fabbr);
 }
-function notifyAlert(a, t){
+function notifyAlert(a, t, fabbr){
   try{
     if(document.hidden !== true) return;
     if(!("Notification" in window)) return;
     if(window.Notification.permission !== "granted") return;
-    new window.Notification("GridIronUI line move", {
+    new window.Notification(fabbr ? "GridIronUI ★ followed-team move" : "GridIronUI line move", {
       body: a.title + ": " + t.kind + " " +
             (a.kind === "spread" ? OL.fmtPt(a.from) : a.from) + " → " +
             (a.kind === "spread" ? OL.fmtPt(a.to) : a.to),
@@ -744,7 +915,8 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
     ? '<div class="game-meta inj-check" data-injcheck="'+GIU.esc(ev.id)+'" hidden></div>' : "";
   return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
-    '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div></div></div>'+
+    '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div>'+
+    tfToggleHtml(dir, league, a, h)+'</div></div>'+ /* v1.142.0 team-follow ★ toggles */
     arbFlagHtml()+consLineHtml()+fairLineHtml()+pmSlot+injSlot+histHtml()+wxSlot+bestCard+
     '<div class="table-scroll"><table class="data"><thead><tr><th>Book</th>'+
     '<th>'+GIU.esc(OL.shortName(a))+' spread</th><th>'+GIU.esc(OL.shortName(h))+' spread</th>'+
@@ -1050,13 +1222,7 @@ $("autoRef").addEventListener("change", function(){
     try{ localStorage.setItem(alertThrKey, String(alertThr)); }catch(e){}
     if(alertThr > 0){
       alertBase = {}; /* re-baseline from the next pull — no stale moves */
-      try{
-        if("Notification" in window && window.Notification &&
-           window.Notification.permission === "default"){
-          var p = window.Notification.requestPermission();
-          if(p && p.catch) p.catch(function(){});
-        }
-      }catch(e){}
+      requestNotifyPermission(); /* v1.142.0: shared with first team-follow */
       render({silent:true}); /* seed the baseline on this pull, alert from the next */
     }
   });
@@ -1089,6 +1255,27 @@ $("oddsBoard").addEventListener("click", function(e){
     " (" + OL.dec2am(leg.price) + ") at " + leg.bookTitle + (added ? " from" : " to") + " your slip");
   renderSlip();
 });
+/* v1.142.0 team-follow: ★ toggles on game cards (delegated, survives re-renders) */
+$("oddsBoard").addEventListener("click", function(e){
+  var b = e.target && e.target.closest ? e.target.closest(".follow-btn") : null;
+  if(!b) return;
+  toggleFollow(b);
+});
+/* v1.142.0 team-follow: unfollow buttons in the manage bar (delegated).
+   Guarded: the bar only exists on odds.html. */
+(function(){
+  var bar = $("followBar");
+  if(!bar || !bar.addEventListener) return;
+  bar.addEventListener("click", function(e){
+    var x = e.target && e.target.closest ? e.target.closest(".follow-x") : null;
+    if(!x) return;
+    var T = teamFollow();
+    if(!T) return;
+    T.save(T.unfollow(T.load(), x.getAttribute("data-unfollow")));
+    renderFollowBar();
+    refreshFollowButtons();
+  });
+})();
 /* slip panel: remove legs, clear, share, stake math (delegated + bubbled input) */
 $("slipPanel").addEventListener("click", function(e){
   var x = e.target && e.target.closest ? e.target.closest("[data-unslip]") : null;
@@ -1135,5 +1322,9 @@ if(sharedTs){
   if(st2) st2.setAttribute("aria-expanded", "true");
 }
 GIU.teamDir().then(function(d){ slipDir = d || {}; renderSlip(); });
+/* v1.142.0 team-follow: restore persisted follows on load; refresh the
+   manage bar once the team directory lands so chips show real names. */
+renderFollowBar();
+GIU.teamDir().then(function(d){ tfDir = d || {}; renderFollowBar(); });
 render();
 })();
