@@ -52,6 +52,34 @@ var L = {
         '<span class="num" style="font-weight:800;color:var(--gold);font-size:1.02rem;min-width:58px;text-align:right">'+L.mkEsc(am)+"</span>"+
       "</div></div>";
   },
+  /* ---------- find-a-game search (odds board, v1.163.0) ----------
+     Pure AND-term matching for the board's finder, shared by the keyed
+     cards (js/odds.js stamps the same text as data-find) and the no-key
+     market-line cards below. The query splits into terms and EVERY term
+     must appear, so "chiefs bills" narrows across fields while a term
+     that appears nowhere matches nothing, never everything. Garbage in
+     -> "" text (which matches only a blank query), never a throw. */
+  searchTerms: function(q){
+    return String(q == null ? "" : q).toLowerCase().split(/\s+/).filter(function(t){ return !!t; });
+  },
+  marketSearchText: function(g){
+    if(!g) return "";
+    var parts = [];
+    if(g.title) parts.push(String(g.title));
+    if(g.sub) parts.push(String(g.sub));
+    (Array.isArray(g.teams) ? g.teams : []).forEach(function(t){
+      if(t && t.name) parts.push(String(t.name));
+    });
+    return parts.join(" ").toLowerCase();
+  },
+  marketMatchesSearch: function(g, q){
+    var terms = L.searchTerms(q);
+    if(!terms.length) return true;
+    var hay = L.marketSearchText(g);
+    if(!hay) return false;
+    for(var i = 0; i < terms.length; i++){ if(hay.indexOf(terms[i]) === -1) return false; }
+    return true;
+  },
   marketGameCard: function(g, when, moveMap, prevAt){
     /* moveMap is an optional {teamName: delta} for this game, from the
        snapshot's baked snapshot-to-snapshot diff (K.diffMoves contract).
@@ -68,7 +96,7 @@ var L = {
        the market close_time, which Kalshi sets days after kickoff (in-play
        trading window), so formatting it as the game time would mislead. */
     var t = g.sub ? L.mkEsc(g.sub) : "";
-    return '<div class="card game-card">'+
+    return '<div class="card game-card" data-find="'+L.mkEsc(L.marketSearchText(g))+'">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">'+
         '<h3 style="margin:0;font-size:1rem">'+L.mkEsc(g.title)+'</h3><span class="tag green">Kalshi</span></div>'+
       '<div class="game-meta" style="margin-bottom:4px">'+

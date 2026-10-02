@@ -39,6 +39,12 @@
 .follow-x:hover{color:var(--red)}
 .follow-note{color:var(--faint);font-size:.82rem}
 .tf-star{color:var(--gold);font-weight:700}
+/* v1.163.0 find-a-game — the boards' gold-ring search language */
+.odds-find{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;max-width:680px}
+.odds-find input{flex:1;min-width:200px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.odds-find input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.odds-find-count{font-size:.84rem;color:var(--faint)}
 </style>
 </head>
 <body data-feedcheck>
@@ -83,13 +89,21 @@
 
   <div id="alertToasts" class="alert-toasts" aria-live="polite"></div>
 
+  <!-- v1.163.0 — find-a-game: filters the pull already on screen (never re-fetches, so it can't burn API quota) -->
+  <div class="odds-find" role="search">
+    <input type="search" id="oddsQ" placeholder="Find a game — team or abbr (Bears, CHI, Kansas City…)" autocomplete="off" spellcheck="false" aria-label="Find a game on this board" aria-describedby="oddsCount">
+    <button class="btn btn-ghost btn-sm" id="oddsClear" type="button" hidden>Clear search</button>
+    <span id="oddsCount" class="odds-find-count" role="status" aria-live="polite"></span>
+  </div>
+  <div id="oddsFindEmpty" class="empty" role="status" hidden></div>
+
   <div id="oddsBoard"></div>
 
   <!-- v1.29.0 — display ad slot (renders only once an AdSense ad-unit ID is set) -->
   <div class="ad-slot" data-ad-slot="oddsInline"></div>
 
   <div class="notice" style="margin:30px 0">
-    <strong>How to read this board.</strong> Green cells are the best available price for that outcome across every book shown. The "best place to bet" badge goes to the book holding the most best prices for that game. The <b style="color:var(--gold-soft)">📊 consensus line</b> is the median number across every book listed — the reference point sharps use. The <b style="color:var(--gold-soft)">📐 no-vig fair line</b> strips the book hold out of the consensus moneyline: what a fair book would pay each side. If a book's price beats the fair price, that's value; the "books hold ≈ X%" figure is the average vig baked into the listed prices. A <b style="color:var(--gold)">⚡</b> on a price means that book is a full point (spread/total) or ~3% of win probability (moneyline) off the consensus: a possibly stale line or a deliberate lean — either way, that's where the value, or the trap, lives. ▲▼ marks movement since your last refresh. A <b style="color:var(--gold-soft)">🌬️ game-day weather badge</b> appears on NFL and MLB postseason cards when the forecast at the real venue actually matters — gusty wind, heavy rain, extreme temps — with the stadium named and the impact spelled out; no badge means a calm, weather-neutral day (domes stay quiet by design). The <b style="color:var(--gold-soft)">🔔 alerts</b> picker pings you — here on the page, or as a browser notification when the tab is hidden — whenever a re-pull shows a consensus spread or total move of at least 1, 1.5 or 2 points; alerts are local to this browser and only fire while the tab is open and pulling lines. The <b style="color:var(--green)">⚖️ Sure bets</b> strip flags cross-book arbitrage — every outcome covered at different books, with the dutch-book stake split for $100; arbs vanish in seconds and books limit arb bettors fast, so confirm both prices before you bet. The <b style="color:var(--green)">🎯 Middle finder</b> flags cross-book middling windows — two books' numbers far enough apart that one final score cashes both sides — with the window and the juice cost of playing both legs; a middle is a swing, not an edge. <strong>Tap any price</strong> to add it to your slip — the Slip button (bottom-right) combines your legs into parlay odds with a potential payout. Odds update when books move them — always confirm the final price in the sportsbook app before betting.
+    <strong>How to read this board.</strong> Looking for one game on a full slate? Type a team name or abbreviation into <b style="color:var(--text)">Find a game</b> above the board — it filters the lines already loaded (never re-pulls, so it can't burn your API quota) and keeps filtering across refreshes and sport tabs. Green cells are the best available price for that outcome across every book shown. The "best place to bet" badge goes to the book holding the most best prices for that game. The <b style="color:var(--gold-soft)">📊 consensus line</b> is the median number across every book listed — the reference point sharps use. The <b style="color:var(--gold-soft)">📐 no-vig fair line</b> strips the book hold out of the consensus moneyline: what a fair book would pay each side. If a book's price beats the fair price, that's value; the "books hold ≈ X%" figure is the average vig baked into the listed prices. A <b style="color:var(--gold)">⚡</b> on a price means that book is a full point (spread/total) or ~3% of win probability (moneyline) off the consensus: a possibly stale line or a deliberate lean — either way, that's where the value, or the trap, lives. ▲▼ marks movement since your last refresh. A <b style="color:var(--gold-soft)">🌬️ game-day weather badge</b> appears on NFL and MLB postseason cards when the forecast at the real venue actually matters — gusty wind, heavy rain, extreme temps — with the stadium named and the impact spelled out; no badge means a calm, weather-neutral day (domes stay quiet by design). The <b style="color:var(--gold-soft)">🔔 alerts</b> picker pings you — here on the page, or as a browser notification when the tab is hidden — whenever a re-pull shows a consensus spread or total move of at least 1, 1.5 or 2 points; alerts are local to this browser and only fire while the tab is open and pulling lines. The <b style="color:var(--green)">⚖️ Sure bets</b> strip flags cross-book arbitrage — every outcome covered at different books, with the dutch-book stake split for $100; arbs vanish in seconds and books limit arb bettors fast, so confirm both prices before you bet. The <b style="color:var(--green)">🎯 Middle finder</b> flags cross-book middling windows — two books' numbers far enough apart that one final score cashes both sides — with the window and the juice cost of playing both legs; a middle is a swing, not an edge. <strong>Tap any price</strong> to add it to your slip — the Slip button (bottom-right) combines your legs into parlay odds with a potential payout. Odds update when books move them — always confirm the final price in the sportsbook app before betting.
   </div>
 </div>
 
@@ -99,7 +113,7 @@
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/team-brand.js?v=1.18.0"></script>
-<script src="js/odds-logic.js?v=1.140.0"></script>
+<script src="js/odds-logic.js?v=1.163.0"></script>
 <script src="js/kalshi-logic.js?v=1.147.0"></script>
 <script src="js/betmath.js?v=1.87.0"></script>
 <script src="js/odds-slip.js?v=1.54.0"></script>
@@ -109,6 +123,6 @@
 <script src="js/odds-inj.js?v=1.50.0"></script>
 <script src="js/middle-finder.js?v=1.140.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
-<script src="js/odds.js?v=1.145.0"></script>
+<script src="js/odds.js?v=1.163.0"></script>
 </body>
 </html>

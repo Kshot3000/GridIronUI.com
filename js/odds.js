@@ -21,6 +21,103 @@ window.GIU.oddsNearWindow = function(events, nowMs){
     return t > nowMs - 4*3600*1000 && t < nowMs + 8*3600*1000;
   });
 };
+/* ---- find-a-game (v1.163.0) ----
+   The board had sport tabs but no way to find ONE game: on a full
+   NCAAF/NCAAB Saturday (100+ cards) a bettor hunting one matchup
+   scrolled the whole board. Pure searchTerms/gameSearchText/
+   gameMatchesSearch (exported as GIU.oddsSearchTerms/GIU.oddsGameText/
+   GIU.oddsGameSearch; the market-line variants delegate to OddsLogic):
+   the query splits into terms and EVERY term must appear in the game's
+   away/home names plus their directory-resolved abbreviation, display,
+   short and location names (so "kc" and "kansas city" both find the
+   Chiefs), while a term that appears nowhere matches nothing, never
+   everything; garbage-in -> "" text, never a throw.
+   Filtering is DOM state over the pull already on screen — typing
+   NEVER re-fetches, so it can't burn the visitor's Odds API quota —
+   and applySearch re-runs after every render, so the query survives
+   sport switches and the 5-minute silent auto-refresh instead of
+   being wiped by them. The Sure-bets / Biggest-moves / Middle-finder
+   strips are filtered with the board: a strip row whose game is
+   hidden is hidden too, and a strip with no visible row steps aside,
+   so no chip ever promises a card the search hid. The query is DOM
+   state only, never persisted. No query -> nothing is toggled and the
+   board renders exactly as before. */
+var searchQ = "";
+function searchTerms(q){
+  return String(q == null ? "" : q).toLowerCase().split(/\s+/).filter(function(t){ return !!t; });
+}
+function gameSearchText(ev, dir, league){
+  if(!ev) return "";
+  var parts = [];
+  [ev.away_team, ev.home_team].forEach(function(name){
+    if(!name) return;
+    parts.push(String(name));
+    var t = null;
+    try{ t = (window.GIU && GIU.teamFind) ? GIU.teamFind(dir, league, name) : null; }catch(e){ t = null; }
+    if(t) [t.abbr, t.displayName, t.shortDisplayName, t.location].forEach(function(v){
+      if(v) parts.push(String(v));
+    });
+  });
+  return parts.join(" ").toLowerCase();
+}
+function gameMatchesSearch(ev, q, dir, league){
+  var terms = searchTerms(q);
+  if(!terms.length) return true;
+  var hay = gameSearchText(ev, dir, league);
+  if(!hay) return false;
+  for(var i = 0; i < terms.length; i++){ if(hay.indexOf(terms[i]) === -1) return false; }
+  return true;
+}
+window.GIU.oddsSearchTerms = searchTerms;
+window.GIU.oddsGameText = gameSearchText;
+window.GIU.oddsGameSearch = gameMatchesSearch;
+window.GIU.oddsMarketText = function(g){ return OL && OL.marketSearchText ? OL.marketSearchText(g) : ""; };
+window.GIU.oddsMarketSearch = function(g, q){ return OL && OL.marketMatchesSearch ? OL.marketMatchesSearch(g, q) : !searchTerms(q).length; };
+/* Honest count + Clear visibility + the named empty state, narrated
+   only while a search is active. Null-guarded: without the hooks the
+   board renders exactly as before. */
+function renderSearchMeta(shown, total, active){
+  var c = $("oddsCount"), b = $("oddsClear"), e = $("oddsFindEmpty");
+  if(c) c.textContent = (active && total > 0)
+    ? (shown === 0 ? "No matches" : shown + " of " + total + " games") : "";
+  if(b) b.hidden = !active;
+  if(e){
+    var show = !!(active && total > 0 && shown === 0);
+    e.hidden = !show;
+    if(show) e.textContent = 'No games match "' + String(searchQ).trim() +
+      '" on this board — clear the search to see all ' + total + " games.";
+  }
+}
+function applySearch(){
+  var board = $("oddsBoard");
+  if(!board || !board.querySelectorAll) { renderSearchMeta(0, 0, false); return; }
+  var terms = searchTerms(searchQ), active = terms.length > 0, i, j, el;
+  var cards = board.querySelectorAll("[data-find]");
+  var shown = 0, vis = {};
+  for(i = 0; i < cards.length; i++){
+    el = cards[i];
+    var txt = el.getAttribute ? (el.getAttribute("data-find") || "") : "";
+    var ok = !active || terms.every(function(t){ return txt.indexOf(t) !== -1; });
+    if(el.style) el.style.display = ok ? "" : "none";
+    if(ok){ shown++; if(el.id) vis[el.id] = 1; }
+  }
+  var rows = board.querySelectorAll("a.arb, a.mover");
+  for(i = 0; i < rows.length; i++){
+    var href = rows[i].getAttribute ? (rows[i].getAttribute("href") || "") : "";
+    var id = href.charAt(0) === "#" ? href.slice(1) : "";
+    var rok = !active || !!vis[id];
+    if(rows[i].style) rows[i].style.display = rok ? "" : "none";
+  }
+  var secs = board.querySelectorAll(".arb-card, .movers-card, .mid-card");
+  for(i = 0; i < secs.length; i++){
+    if(!active){ if(secs[i].style) secs[i].style.display = ""; continue; }
+    var sr = secs[i].querySelectorAll ? secs[i].querySelectorAll("a.arb, a.mover") : [];
+    var any = false;
+    for(j = 0; j < sr.length; j++){ if(!sr[j].style || sr[j].style.display !== "none"){ any = true; break; } }
+    if(secs[i].style) secs[i].style.display = any ? "" : "none";
+  }
+  renderSearchMeta(shown, cards.length, active);
+}
 var SPORTS = [
   ["americanfootball_nfl","NFL"],["basketball_nba","NBA"],["baseball_mlb","MLB"],
   ["icehockey_nhl","NHL"],["americanfootball_ncaaf","NCAAF"],["basketball_ncaab","NCAAB"],
@@ -369,6 +466,7 @@ function renderMarketFallback(){
   var snap = MARKET_SNAP[sport];
   if(!snap || !window.Kalshi || !window.OddsLogic){
     board.innerHTML = noKeyBoardHtml();
+    applySearch();
     return;
   }
   board.innerHTML = '<div class="spinner"></div><p style="text-align:center;color:var(--faint)">Loading market prices…</p>';
@@ -381,9 +479,11 @@ function renderMarketFallback(){
                                                   window.Kalshi.stale(d && d.updated_at),
                                                   d && d.moves, d && d.prev_at);
     board.innerHTML = html + noKeyBoardHtml(!!html);
+    applySearch(); /* v1.163.0: an active find-a-game query survives the tab switch */
   }).catch(function(){
     if(seq !== renderSeq || key) return;
     board.innerHTML = noKeyBoardHtml();
+    applySearch();
   });
 }
 
@@ -461,6 +561,7 @@ function render(opts){
     if(slip.length){ Slip.reprice(slip, now); saveSlip(); }
     refreshPickMarks();
     renderSlip();
+    applySearch(); /* v1.163.0: re-apply an active find-a-game query to the fresh pull */
     setStatus();
     /* NFL tab bonus, after the board is on screen: game-day weather badges
        on open-air game cards. One Open-Meteo fetch (no key, no quota cost),
@@ -985,7 +1086,7 @@ function renderGame(ev, prev, now, opens, hist, dir, league){
      reportable injuries. Filled after the board renders; hidden until then. */
   var injSlot = (sport === "americanfootball_nfl")
     ? '<div class="game-meta inj-check" data-injcheck="'+GIU.esc(ev.id)+'" hidden></div>' : "";
-  return '<div class="card" id="'+GIU.esc(anchor)+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
+  return '<div class="card" id="'+GIU.esc(anchor)+'" data-find="'+GIU.esc(gameSearchText(ev, dir, league))+'" style="margin-bottom:20px"><div class="section-head" style="margin-bottom:14px"><div>'+
     titleHtml+
     '<div class="game-meta"><span>'+fmtT(ev.commence_time)+'</span></div>'+
     tfToggleHtml(dir, league, a, h)+'</div></div>'+ /* v1.142.0 team-follow ★ toggles */
@@ -1297,6 +1398,27 @@ $("autoRef").addEventListener("change", function(){
       requestNotifyPermission(); /* v1.142.0: shared with first team-follow */
       render({silent:true}); /* seed the baseline on this pull, alert from the next */
     }
+  });
+})();
+/* v1.163.0 find-a-game: typing filters the pull already on screen (zero
+   API quota), Escape / Clear restore the full board. Guarded: without
+   the hooks the board is untouched. */
+(function initFind(){
+  var inp = $("oddsQ");
+  if(!inp || !inp.addEventListener) return;
+  inp.addEventListener("input", function(){
+    searchQ = inp.value || "";
+    applySearch();
+  });
+  inp.addEventListener("keydown", function(e){
+    if(e && e.key === "Escape"){
+      inp.value = ""; searchQ = ""; applySearch();
+    }
+  });
+  var clr = $("oddsClear");
+  if(clr && clr.addEventListener) clr.addEventListener("click", function(){
+    inp.value = ""; searchQ = ""; applySearch();
+    if(inp.focus) inp.focus();
   });
 })();
 /* slip: toggle legs from the board (delegated, survives re-renders) */
