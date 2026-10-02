@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-10-02T18:43:00Z",
+ "updated_at": "2026-10-02T19:45:19Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -16,8 +16,8 @@
      "yes_bid": 41,
      "yes_ask": 43,
      "last": 43,
-     "volume": "147292.15",
-     "volume_24h": "135043.02",
+     "volume": "152395.94",
+     "volume_24h": "138591.41",
      "close_time": "2026-10-06T17:00:00Z"
     },
     {
@@ -28,8 +28,8 @@
      "yes_bid": 58,
      "yes_ask": 59,
      "last": 59,
-     "volume": "156231.94",
-     "volume_24h": "93528.52",
+     "volume": "159256.81",
+     "volume_24h": "95218.98",
      "close_time": "2026-10-06T17:00:00Z"
     }
    ]
@@ -47,8 +47,8 @@
      "yes_bid": 33,
      "yes_ask": 34,
      "last": 34,
-     "volume": "37054.38",
-     "volume_24h": "36979.66",
+     "volume": "41077.82",
+     "volume_24h": "40975.97",
      "close_time": "2026-10-06T20:00:00Z"
     },
     {
@@ -58,9 +58,9 @@
      "team": "Los Angeles D",
      "yes_bid": 66,
      "yes_ask": 67,
-     "last": 66,
-     "volume": "68373.79",
-     "volume_24h": "68258.38",
+     "last": 67,
+     "volume": "72378.65",
+     "volume_24h": "72198.70",
      "close_time": "2026-10-06T20:00:00Z"
     }
    ]
@@ -78,8 +78,8 @@
      "yes_bid": 44,
      "yes_ask": 45,
      "last": 45,
-     "volume": "69913.69",
-     "volume_24h": "58384.16",
+     "volume": "74286.72",
+     "volume_24h": "61246.27",
      "close_time": "2026-10-06T22:30:00Z"
     },
     {
@@ -90,8 +90,8 @@
      "yes_bid": 55,
      "yes_ask": 56,
      "last": 56,
-     "volume": "35145.10",
-     "volume_24h": "20430.12",
+     "volume": "36724.32",
+     "volume_24h": "21719.87",
      "close_time": "2026-10-06T22:30:00Z"
     }
    ]
@@ -108,9 +108,9 @@
      "team": "Milwaukee",
      "yes_bid": 64,
      "yes_ask": 65,
-     "last": 64,
-     "volume": "89782.04",
-     "volume_24h": "73647.15",
+     "last": 65,
+     "volume": "93323.13",
+     "volume_24h": "75626.22",
      "close_time": "2026-10-07T00:30:00Z"
     },
     {
@@ -121,8 +121,8 @@
      "yes_bid": 34,
      "yes_ask": 35,
      "last": 35,
-     "volume": "179796.24",
-     "volume_24h": "142734.46",
+     "volume": "183332.27",
+     "volume_24h": "140776.96",
      "close_time": "2026-10-07T00:30:00Z"
     }
    ]
@@ -139,9 +139,9 @@
      "team": "Milwaukee",
      "yes_bid": 54,
      "yes_ask": 57,
-     "last": 58,
-     "volume": "3303.45",
-     "volume_24h": "2792.64",
+     "last": 57,
+     "volume": "3424.82",
+     "volume_24h": "2854.74",
      "close_time": "2026-10-07T20:00:00Z"
     },
     {
@@ -149,11 +149,11 @@
      "title": "San Diego wins",
      "kind": "winner",
      "team": "San Diego",
-     "yes_bid": 44,
+     "yes_bid": 43,
      "yes_ask": 46,
      "last": 46,
-     "volume": "2378.16",
-     "volume_24h": "1219.94",
+     "volume": "2519.74",
+     "volume_24h": "1319.62",
      "close_time": "2026-10-07T20:00:00Z"
     }
    ]
@@ -168,11 +168,11 @@
      "title": "Atlanta wins",
      "kind": "winner",
      "team": "Atlanta",
-     "yes_bid": 40,
-     "yes_ask": 45,
+     "yes_bid": 42,
+     "yes_ask": 46,
      "last": 45,
-     "volume": "3099.63",
-     "volume_24h": "3099.63",
+     "volume": "3128.01",
+     "volume_24h": "3128.01",
      "close_time": "2026-10-08T00:00:00Z"
     },
     {
@@ -180,11 +180,11 @@
      "title": "Los Angeles D wins",
      "kind": "winner",
      "team": "Los Angeles D",
-     "yes_bid": 57,
+     "yes_bid": 54,
      "yes_ask": 58,
      "last": 59,
-     "volume": "3050.91",
-     "volume_24h": "3050.91",
+     "volume": "3334.03",
+     "volume_24h": "3334.03",
      "close_time": "2026-10-08T00:00:00Z"
     }
    ]
@@ -202,8 +202,8 @@
      "yes_bid": 41,
      "yes_ask": 44,
      "last": 44,
-     "volume": "1070.50",
-     "volume_24h": "801.93",
+     "volume": "1081.64",
+     "volume_24h": "753.57",
      "close_time": "2026-10-08T21:00:00Z"
     },
     {
@@ -212,10 +212,10 @@
      "kind": "winner",
      "team": "Cleveland",
      "yes_bid": 55,
-     "yes_ask": 58,
+     "yes_ask": 59,
      "last": 59,
-     "volume": "1197.42",
-     "volume_24h": "795.09",
+     "volume": "1216.08",
+     "volume_24h": "810.65",
      "close_time": "2026-10-08T21:00:00Z"
     }
    ]
@@ -230,11 +230,11 @@
      "title": "New York Y wins",
      "kind": "winner",
      "team": "New York Y",
-     "yes_bid": 50,
-     "yes_ask": 53,
+     "yes_bid": 49,
+     "yes_ask": 54,
      "last": 54,
-     "volume": "2239.14",
-     "volume_24h": "1564.02",
+     "volume": "2330.38",
+     "volume_24h": "1536.81",
      "close_time": "2026-10-09T00:00:00Z"
     },
     {
@@ -245,8 +245,8 @@
      "yes_bid": 46,
      "yes_ask": 50,
      "last": 46,
-     "volume": "1107.36",
-     "volume_24h": "810.70",
+     "volume": "1210.06",
+     "volume_24h": "943.27",
      "close_time": "2026-10-09T00:00:00Z"
     }
    ]
@@ -263,9 +263,9 @@
      "team": "Atlanta",
      "yes_bid": 41,
      "yes_ask": 46,
-     "last": 47,
-     "volume": "191.12",
-     "volume_24h": "191.12",
+     "last": 46,
+     "volume": "228.36",
+     "volume_24h": "228.36",
      "close_time": "2026-10-09T22:00:00Z"
     },
     {
@@ -274,7 +274,7 @@
      "kind": "winner",
      "team": "Los Angeles D",
      "yes_bid": 55,
-     "yes_ask": 59,
+     "yes_ask": 58,
      "last": 59,
      "volume": "289.86",
      "volume_24h": "289.86",
@@ -295,8 +295,8 @@
      "yes_bid": 44,
      "yes_ask": 52,
      "last": 52,
-     "volume": "198.42",
-     "volume_24h": "181.65",
+     "volume": "224.78",
+     "volume_24h": "215.19",
      "close_time": "2026-10-10T01:30:00Z"
     },
     {
@@ -305,10 +305,10 @@
      "kind": "winner",
      "team": "San Diego",
      "yes_bid": 48,
-     "yes_ask": 56,
+     "yes_ask": 55,
      "last": 55,
-     "volume": "239.47",
-     "volume_24h": "239.47",
+     "volume": "257.36",
+     "volume_24h": "257.36",
      "close_time": "2026-10-10T01:30:00Z"
     }
    ]
@@ -355,10 +355,10 @@
      "kind": "winner",
      "team": "New York Y",
      "yes_bid": 58,
-     "yes_ask": 62,
-     "last": 62,
-     "volume": "100.52",
-     "volume_24h": "100.52",
+     "yes_ask": 63,
+     "last": 63,
+     "volume": "116.25",
+     "volume_24h": "116.25",
      "close_time": "2026-10-11T00:00:00Z"
     },
     {
@@ -368,15 +368,23 @@
      "team": "Tampa Bay",
      "yes_bid": 37,
      "yes_ask": 42,
-     "last": 42,
-     "volume": "34.55",
-     "volume_24h": "34.55",
+     "last": 37,
+     "volume": "42.38",
+     "volume_24h": "42.38",
      "close_time": "2026-10-11T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-02T17:39:57Z",
- "moves": [],
+ "prev_at": "2026-10-02T18:43:00Z",
+ "moves": [
+  {
+   "event_ticker": "KXMLBGAME-26OCT042000ATLLAD",
+   "team": "Los Angeles D",
+   "delta": -2,
+   "prev": 58,
+   "now": 56
+  }
+ ],
  "new_games": []
 }

@@ -34,6 +34,13 @@
 .game-card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
 .game-card:target{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,180,41,.45)}
 .tag.your-team{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.4)}
+/* v1.161.0 — find a game on the scores board (page-scoped, the news
+   wire's search language: gold focus ring, ghost Clear, honest count) */
+.score-find{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;max-width:680px}
+.score-find input{flex:1;min-width:200px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.score-find input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.score-find-count{font-size:.84rem;color:var(--faint)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
@@ -63,11 +70,17 @@
       <button class="btn btn-ghost btn-sm" id="pauseBtn" style="display:none" aria-pressed="false">⏸ Pause live</button>
     </div>
   </div>
+  <!-- v1.161.0 — find a game: live filter over team names, abbreviations and venue on the board already loaded (js/scores.js; the query survives league/day switches and the 60s refresh, and is never persisted) -->
+  <div class="score-find" role="search">
+    <input type="search" id="scoreQ" placeholder="Find a game — team, abbr or venue (Bears, CHI, Soldier Field…)" autocomplete="off" spellcheck="false" aria-label="Find a game on this board" aria-describedby="scoreCount">
+    <button class="btn btn-ghost btn-sm" id="scoreClear" type="button" hidden>Clear search</button>
+    <span id="scoreCount" class="score-find-count" role="status" aria-live="polite"></span>
+  </div>
   <!-- v1.149.0 — "Your teams" jump strip: one chip per followed-team game on this board (js/scores.js renders it; hidden when nothing matches) -->
   <div id="followStrip" class="follow-strip" hidden></div>
   <div class="grid grid-3" id="scoreGrid"></div>
   <div class="notice" style="margin:30px 0">
-    <strong>About "live".</strong> When games are in progress, the board refreshes itself every 60 seconds while this tab is open — no browser refresh needed. Lines shown are ESPN's consensus data, not a sportsbook's live price — check the <a href="odds.html">odds board</a> before betting.
+    <strong>About "live".</strong> When games are in progress, the board refreshes itself every 60 seconds while this tab is open — no browser refresh needed. Lines shown are ESPN's consensus data, not a sportsbook's live price — check the <a href="odds.html">odds board</a> before betting. Looking for one game on a full slate? Type a team, abbreviation or venue into <b style="color:var(--text)">Find a game</b> above the board — it filters the games already loaded and keeps filtering as the board refreshes.
   </div>
 </div>
 
@@ -76,6 +89,6 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/scores-detail.js?v=1.57.0"></script>
-<script src="js/scores.js?v=1.149.0"></script>
+<script src="js/scores.js?v=1.161.0"></script>
 </body>
 </html>

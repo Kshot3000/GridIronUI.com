@@ -174,7 +174,7 @@ function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
   var html = fs.readFileSync(path.join(ROOT, "scores.html"), "utf8");
   assert(html.indexOf('id="followStrip"') !== -1, "scores.html ships the followStrip container");
   assert(html.indexOf("js/team-follow.js?v=1.142.0") !== -1, "scores.html loads team-follow.js (content unchanged since v1.142.0)");
-  assert(html.indexOf("js/scores.js?v=1.149.0") !== -1, "scores.html bumps scores.js to ?v=1.149.0");
+  assert(html.indexOf("js/scores.js?v=1.161.0") !== -1, "scores.html bumps scores.js to ?v=1.161.0");
   assert(html.indexOf(".game-card.followed") !== -1 && html.indexOf(".follow-chip-link") !== -1 &&
          html.indexOf(".game-card:target") !== -1, "scores.html carries the page-scoped followed styles");
   var src = fs.readFileSync(path.join(ROOT, "js/scores.js"), "utf8");

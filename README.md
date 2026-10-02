@@ -105,6 +105,7 @@ node tests/test-weather-follow.js  # followed teams on the weather page (v1.154.
 node tests/test-scores.js     # ESPN scoreboard stat-leader line tests
 node tests/test-scores-live.js  # scores page live auto-refresh (60s tick, hidden-tab skip, pause/resume, no stacking)
 node tests/test-scores-follow.js  # followed teams on the scores board (v1.149.0): pure followedGames matcher (ESPN-abbr namespace, normalization, garbage-in -> []), "Your teams" jump strip + gold card marks with the real team-follow.js and seeded/corrupt localStorage, shipped scores.html pins
+node tests/test-scores-search.js  # find-a-game on the scores board (v1.161.0): pure AND-term match over team names/abbrs/venue (blank->all, garbage-in -> no match), DOM wiring (live filter, honest N-of-M count, named empty state, Escape/Clear restore, follow strip tracks the filtered board, re-renders stay filtered), shipped scores.html pins
 node tests/test-predictions-follow.js  # followed teams on Predictions (v1.150.0): pure followedPredictions matcher (title sides resolved via teamFind, ESPN-abbr namespace, garbage-in -> []), "Your teams" jump strip incl. the spotlight card's own anchor, gold card marks with the real team-follow.js and seeded/corrupt localStorage, shipped predictions.html pins
 node tests/test-scores-detail.js  # game-detail logic (ESPN summary -> scoring timeline, period table, team-stats comparison)
 node tests/test-scores-detail-dom.js  # game-detail expander wiring (toggle, cache, failure retry, stale-response guard)

@@ -90,6 +90,64 @@ function renderFollowStrip(matches){
         (when ? ' · '+GIU.esc(when) : "")+'</a>';
     }).join("");
 }
+/* ---- find a game (v1.161.0) ----
+   The boards above carry league tabs and day navigation but no way to
+   find ONE game: a Saturday NCAAF slate runs 50+ cards and a full
+   NCAAB day 100+, so a bettor checking "did Alabama cover?" scrolled
+   the whole grid. The finder is a live filter over the board already
+   loaded — team names, abbreviations and the venue — with the same
+   discipline as the news/journal finders: the query splits into terms
+   and EVERY term must appear, so "bears soldier" narrows across
+   fields while a term that appears nowhere matches nothing, never
+   everything. The query is board state (never persisted): filtering
+   re-renders from the last board pulled, so it survives league/day
+   switches and the 60s silent refresh instead of being wiped by
+   them, and an open game's details survive a search round-trip via
+   the same cache the refresh uses. The "Your teams" strip is computed
+   over the FILTERED board, so a chip never promises a card the
+   search hid. No query -> the board renders byte-identically. */
+var searchQ = "", lastEvs = [];
+function searchTerms(q){
+  return String(q == null ? "" : q).toLowerCase().split(/\s+/).filter(function(t){ return !!t; });
+}
+/* Pure: the searchable text for one event — both competitors' display
+   name, short name, location and abbreviation, plus the venue.
+   Garbage in -> "" (which matches only a blank query). */
+function gameSearchText(ev){
+  var c = ev && ev.competitions && ev.competitions[0];
+  if(!c || !Array.isArray(c.competitors)) return "";
+  var parts = [];
+  c.competitors.forEach(function(t){
+    var team = (t && t.team) || {};
+    [team.displayName, team.shortDisplayName, team.location, team.abbreviation].forEach(function(v){
+      if(v) parts.push(String(v));
+    });
+  });
+  if(c.venue && c.venue.fullName) parts.push(String(c.venue.fullName));
+  return parts.join(" ").toLowerCase();
+}
+/* Pure: blank query matches every game (the unfiltered board); a
+   non-blank query matches only when every term appears in the game's
+   searchable text. Garbage event + non-blank query -> false. */
+function gameMatchesSearch(ev, q){
+  var terms = searchTerms(q);
+  if(!terms.length) return true;
+  var hay = gameSearchText(ev);
+  if(!hay) return false;
+  for(var i = 0; i < terms.length; i++){ if(hay.indexOf(terms[i]) === -1) return false; }
+  return true;
+}
+/* Honest count + Clear visibility, narrated only while a search is
+   active — the board's own chrome (day label, live status) stays the
+   story otherwise. Null-guarded: pages/tests without the hooks render
+   exactly as before. */
+function renderSearchMeta(shown, total){
+  var c = $("scoreCount"), b = $("scoreClear");
+  var active = searchTerms(searchQ).length > 0;
+  if(c) c.textContent = (active && total > 0)
+    ? (shown === 0 ? "No matches" : shown + " of " + total + " games") : "";
+  if(b) b.hidden = !active;
+}
 function dayLabel(){
   var d = new Date(); d.setDate(d.getDate()+dayOffset);
   return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
@@ -270,7 +328,9 @@ function renderLiveStatus(){
 
 function renderEmptyBoard(){
   var box = $("scoreGrid");
+  lastEvs = [];
   renderFollowStrip([]);
+  renderSearchMeta(0, 0);
   box.innerHTML = '<div class="empty">No games on '+GIU.esc(dayLabel())+'. Try another day or league.</div>';
 }
 
@@ -323,7 +383,9 @@ function load(silent){
       renderBoard(evs);
     }
   }).catch(function(){
+    lastEvs = [];
     renderFollowStrip([]);
+    renderSearchMeta(0, 0);
     box.innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond for "+LEAGUES[cur][1]+".");
   });
 }
@@ -332,12 +394,25 @@ function load(silent){
    the 60s live tick. Used by load() and directly by the smart-day jump. */
 function renderBoard(evs){
   var box = $("scoreGrid");
-  /* v1.149.0 — followed-team matches for this board (strip + card marks) */
-  var fol = followedGames(evs, followedList());
+  /* v1.161.0 — the board the finder filters: every render (load, league/
+     day switch, 60s tick, search keystroke) starts from the last slate
+     pulled and re-applies the active query. */
+  lastEvs = Array.isArray(evs) ? evs : [];
+  var visible = lastEvs.filter(function(ev){ return gameMatchesSearch(ev, searchQ); });
+  /* v1.149.0 — followed-team matches for this board (strip + card marks);
+     v1.161.0 — computed over the filtered board so a strip chip never
+     promises a card the search hid (the news wire's discipline). */
+  var fol = followedGames(visible, followedList());
   var folById = {};
   fol.forEach(function(m){ folById[m.id] = m.abbr; });
   renderFollowStrip(fol);
-      box.innerHTML = smartNoticeHtml() + evs.map(function(ev){
+  if(searchTerms(searchQ).length && !visible.length){
+      /* Named empty state — never a blank grid under an active search. */
+      box.innerHTML = smartNoticeHtml() + '<div class="empty">No games match &quot;'+
+        GIU.esc(String(searchQ).trim())+'&quot; on this board. Clear the search to see all '+
+        lastEvs.length+' games.</div>';
+  } else {
+      box.innerHTML = smartNoticeHtml() + visible.map(function(ev){
       var c = ev.competitions[0], st = c.status.type;
       var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0] || c.competitors[0];
       var away = c.competitors.filter(function(t){return t.homeAway==="away";})[0] || c.competitors[1] || {};
@@ -372,13 +447,16 @@ function renderBoard(evs){
         '<div class="game-meta"><span>'+GIU.esc((c.venue||{}).fullName||"")+'</span>'+
         (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+det+'</div>';
       }).join("");
+  }
     /* ---- live auto-refresh ----
        In-progress games keep the board fresh every 60s. Ticks skip while the
        tab is hidden (nothing to see), and resume on their own when it comes
-       back — no visibility listeners needed. */
-    liveN = liveCount(evs);
+       back — no visibility listeners needed. The live count describes the
+       whole slate pulled, not the search's filtered view. */
+    liveN = liveCount(lastEvs);
     lastUpdated = Date.now();
     renderLiveStatus();
+    renderSearchMeta(visible.length, lastEvs.length);
     /* Open details survive the re-render (restored from cache in the card
        template above); open in-progress details are silently re-pulled so
        the scoring timeline stays fresh on the 60s tick. */
@@ -389,6 +467,9 @@ function renderBoard(evs){
        fresh (unpainted) canvases — paint them after every re-render. */
     paintDetailCanvases(box);
     if(liveN > 0 && autoOn){
+      /* renderBoard can now be re-entered by a search keystroke, not only
+         via load() — clear first so the board never stacks 60s timers. */
+      clearLive();
       liveTimer = setInterval(function(){ if(!isHidden()) load(true); }, LIVE_MS);
     }
 }
@@ -413,8 +494,34 @@ $("pauseBtn").addEventListener("click", function(){
   if(autoOn && liveN > 0){ load(true); }  /* resume: refresh now, timer reschedules */
   else { clearLive(); renderLiveStatus(); }
 });
+/* v1.161.0 — find-a-game wiring. The query lives in module state, so it
+   survives league/day switches and the 60s silent refresh; filtering
+   re-renders from lastEvs without a refetch. No hooks on the page ->
+   nothing is wired and the board behaves exactly as before. */
+var searchInput = $("scoreQ"), searchClearBtn = $("scoreClear");
+function rerenderForSearch(){
+  if(lastEvs.length) renderBoard(lastEvs); else renderSearchMeta(0, 0);
+}
+function resetSearch(){
+  searchQ = "";
+  if(searchInput) searchInput.value = "";
+  rerenderForSearch();
+  if(searchInput && searchInput.focus) searchInput.focus();
+}
+if(searchInput && searchInput.addEventListener){
+  searchInput.addEventListener("input", function(){
+    searchQ = searchInput.value || "";
+    rerenderForSearch();
+  });
+  searchInput.addEventListener("keydown", function(e){
+    if(e && e.key === "Escape") resetSearch();
+  });
+}
+if(searchClearBtn && searchClearBtn.addEventListener){
+  searchClearBtn.addEventListener("click", resetSearch);
+}
 /* test seam: pure helpers exported in node, attached to GIU in the browser */
-if(typeof module !== "undefined" && module.exports){ module.exports = { smartDay: smartDay, scoreboardUrl: scoreboardUrl, ymd: ymd, followedGames: followedGames }; }
-else if(typeof window !== "undefined"){ window.GIU = window.GIU || {}; window.GIU.scoresSmartDay = smartDay; window.GIU.scoresBoardUrl = scoreboardUrl; window.GIU.scoresFollowedGames = followedGames; }
+if(typeof module !== "undefined" && module.exports){ module.exports = { smartDay: smartDay, scoreboardUrl: scoreboardUrl, ymd: ymd, followedGames: followedGames, gameMatchesSearch: gameMatchesSearch, gameSearchText: gameSearchText, searchTerms: searchTerms }; }
+else if(typeof window !== "undefined"){ window.GIU = window.GIU || {}; window.GIU.scoresSmartDay = smartDay; window.GIU.scoresBoardUrl = scoreboardUrl; window.GIU.scoresFollowedGames = followedGames; window.GIU.scoresGameSearch = gameMatchesSearch; window.GIU.scoresGameText = gameSearchText; window.GIU.scoresSearchTerms = searchTerms; }
 load();
 })();

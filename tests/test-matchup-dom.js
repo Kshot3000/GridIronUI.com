@@ -93,7 +93,7 @@ ok("scores hub link covers the four US leagues",
     return scoresJs.indexOf('"'+k+'":"') !== -1;
   }));
 var scoresHtml = read("scores.html");
-ok("scores.html keys scores.js at v1.149.0", scoresHtml.indexOf("js/scores.js?v=1.149.0") !== -1);
+ok("scores.html keys scores.js at v1.161.0", scoresHtml.indexOf("js/scores.js?v=1.161.0") !== -1);
 var preds = read("predictions.html");
 ok("index.html keys home-strip.js at v1.156.0", index.indexOf("js/home-strip.js?v=1.156.0") !== -1);
 ok("predictions.html keys home-strip.js at v1.156.0", preds.indexOf("js/home-strip.js?v=1.156.0") !== -1);
