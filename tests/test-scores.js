@@ -103,8 +103,8 @@ setTimeout(function(){
   assert(html.indexOf("passingYards")===-1 && html.indexOf("rushingYards")===-1,
          "raw ESPN category keys never rendered");
 
-  /* 2. pre-game card has no leaders row */
-  var cards = html.split('<div class="game-card">');
+  /* 2. pre-game card has no leaders row (cards carry id="sg-<event>" since v1.149.0) */
+  var cards = html.split('<div class="game-card"');
   assert(cards.length===5, "four game cards rendered, got "+(cards.length-1));
   assert(cards[2].indexOf('class="leaders"')===-1, "pre-game card shows no leaders row");
 

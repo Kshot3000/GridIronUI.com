@@ -17,6 +17,79 @@ var HUBKEY = {"football/nfl":"nfl","basketball/nba":"nba",
 function ymd(d){
   return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
 }
+
+/* ---- followed teams (v1.149.0) ----
+   The odds board's ★ follows (js/team-follow.js, localStorage
+   "giu-followed-teams") name the teams a bettor actually cares about —
+   but until now they meant nothing on the page where those teams play.
+   The scores board now marks followed-team games with a gold ★ tag and
+   a left rail, and opens with a "Your teams" strip of jump chips (one
+   per followed game on this board) so a Sunday slate of 15 games is a
+   one-tap trip to your game instead of a scroll hunt. No follows, or no
+   followed team on this board/day/league: the strip stays hidden and
+   the board renders exactly as before — nothing is ever invented. */
+function teamFollow(){ try{ return (window.GIU && window.GIU.TeamFollow) || null; }catch(e){ return null; } }
+function followedList(){
+  var T = teamFollow();
+  try{ return T ? T.load() : []; }catch(e){ return []; }
+}
+/* followedGames: pure matcher. Takes ESPN scoreboard events + the raw
+   followed list and returns one record per event a followed team plays
+   in: {id, abbr (the followed side), away, home, state, detail}.
+   Abbreviations compare in the ESPN namespace both sides already use —
+   the follow list is built from the ESPN-sourced team directory on the
+   odds board, and scoreboard competitors carry ESPN abbreviations.
+   Normalization mirrors team-follow.js list() (trim/upper, 2–4 letters);
+   garbage in -> []. Exported for tests. */
+function followedGames(evs, followed){
+  var f = [], seen = {};
+  (Array.isArray(followed) ? followed : []).forEach(function(x){
+    if(typeof x !== "string") return;
+    var n = x.trim().toUpperCase();
+    if(/^[A-Z]{2,4}$/.test(n) && !seen[n]){ seen[n] = 1; f.push(n); }
+  });
+  if(!f.length || !Array.isArray(evs)) return [];
+  var out = [];
+  evs.forEach(function(ev){
+    var c = ev && ev.competitions && ev.competitions[0];
+    if(!c || !Array.isArray(c.competitors)) return;
+    var away = "", home = "";
+    c.competitors.forEach(function(t){
+      var a = (t && t.team && t.team.abbreviation) ? String(t.team.abbreviation).trim().toUpperCase() : "";
+      if(!a) return;
+      if(t.homeAway === "home") home = a;
+      else if(t.homeAway === "away") away = a;
+    });
+    /* positional fallback mirrors the card renderer's own fallback */
+    if(!away && c.competitors[0] && c.competitors[0].team) away = String(c.competitors[0].team.abbreviation || "").trim().toUpperCase();
+    if(!home && c.competitors[1] && c.competitors[1].team) home = String(c.competitors[1].team.abbreviation || "").trim().toUpperCase();
+    if(!away && !home) return;
+    var hit = null, i;
+    for(i = 0; i < f.length; i++){ if(f[i] === away || f[i] === home){ hit = f[i]; break; } }
+    if(!hit) return;
+    var st = (c.status && c.status.type) || {};
+    out.push({ id: ev.id, abbr: hit, away: away, home: home,
+               state: st.state || "", detail: st.shortDetail || "" });
+  });
+  return out;
+}
+/* The "Your teams" jump strip: one chip per followed game on the board,
+   anchor-linked to the card's #sg-<id> (the card carries a gold :target
+   ring). Empty match list -> strip hidden and emptied, so day/league
+   switches and the smart-day jump never leave a stale strip behind. */
+function renderFollowStrip(matches){
+  var el = $("followStrip");
+  if(!el) return;
+  if(!matches || !matches.length){ el.innerHTML = ""; el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '<span class="follow-strip-label">★ Your teams</span>' +
+    matches.map(function(m){
+      var when = m.state === "in" ? "Live" : (m.detail || "");
+      return '<a class="follow-chip-link" href="#sg-'+GIU.esc(m.id)+'">'+
+        '<b>'+GIU.esc(m.abbr)+'</b> '+GIU.esc(m.away||"")+' @ '+GIU.esc(m.home||"")+
+        (when ? ' · '+GIU.esc(when) : "")+'</a>';
+    }).join("");
+}
 function dayLabel(){
   var d = new Date(); d.setDate(d.getDate()+dayOffset);
   return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
@@ -197,6 +270,7 @@ function renderLiveStatus(){
 
 function renderEmptyBoard(){
   var box = $("scoreGrid");
+  renderFollowStrip([]);
   box.innerHTML = '<div class="empty">No games on '+GIU.esc(dayLabel())+'. Try another day or league.</div>';
 }
 
@@ -249,6 +323,7 @@ function load(silent){
       renderBoard(evs);
     }
   }).catch(function(){
+    renderFollowStrip([]);
     box.innerHTML = GIU.failBox("The ESPN scoreboard feed didn't respond for "+LEAGUES[cur][1]+".");
   });
 }
@@ -257,6 +332,11 @@ function load(silent){
    the 60s live tick. Used by load() and directly by the smart-day jump. */
 function renderBoard(evs){
   var box = $("scoreGrid");
+  /* v1.149.0 — followed-team matches for this board (strip + card marks) */
+  var fol = followedGames(evs, followedList());
+  var folById = {};
+  fol.forEach(function(m){ folById[m.id] = m.abbr; });
+  renderFollowStrip(fol);
       box.innerHTML = smartNoticeHtml() + evs.map(function(ev){
       var c = ev.competitions[0], st = c.status.type;
       var home = c.competitors.filter(function(t){return t.homeAway==="home";})[0] || c.competitors[0];
@@ -286,7 +366,8 @@ function renderBoard(evs){
           '<div class="gd-detail" id="gd-'+GIU.esc(ev.id)+'" role="region" aria-label="'+detAria+'"'+
           (open?"":" hidden")+'>'+(open && detailCache[ev.id] ? detailCache[ev.id] : "")+'</div>';
       }
-      return '<div class="game-card">'+badge+
+      return '<div class="game-card'+(folById[ev.id] ? " followed" : "")+'" id="sg-'+GIU.esc(ev.id)+'">'+badge+
+        (folById[ev.id] ? ' <span class="tag your-team">★ Your team</span>' : "")+
         GIU.teamRow(away, aw)+ GIU.teamRow(home, hw)+
         '<div class="game-meta"><span>'+GIU.esc((c.venue||{}).fullName||"")+'</span>'+
         (bc?'<span>📺 '+GIU.esc(bc.join(", "))+'</span>':"")+odds+'</div>'+leaders+det+'</div>';
@@ -333,7 +414,7 @@ $("pauseBtn").addEventListener("click", function(){
   else { clearLive(); renderLiveStatus(); }
 });
 /* test seam: pure helpers exported in node, attached to GIU in the browser */
-if(typeof module !== "undefined" && module.exports){ module.exports = { smartDay: smartDay, scoreboardUrl: scoreboardUrl, ymd: ymd }; }
-else if(typeof window !== "undefined"){ window.GIU = window.GIU || {}; window.GIU.scoresSmartDay = smartDay; window.GIU.scoresBoardUrl = scoreboardUrl; }
+if(typeof module !== "undefined" && module.exports){ module.exports = { smartDay: smartDay, scoreboardUrl: scoreboardUrl, ymd: ymd, followedGames: followedGames }; }
+else if(typeof window !== "undefined"){ window.GIU = window.GIU || {}; window.GIU.scoresSmartDay = smartDay; window.GIU.scoresBoardUrl = scoreboardUrl; window.GIU.scoresFollowedGames = followedGames; }
 load();
 })();
