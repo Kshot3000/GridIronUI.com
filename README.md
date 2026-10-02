@@ -152,6 +152,8 @@ node tests/test-scores-daynav.js  # scores day-nav: the ← Today → + date row
 node tests/test-header-nav-scroll.js  # desktop header: the 15-link nav flexes + scrolls internally (no page-level horizontal scroll at any desktop width), active tab scrolled into view, style.css/site.js keys pinned
 node tests/test-arbs.js       # cross-book arbitrage logic (stake splits, moneyline/spread/total pairing, same-book exclusion, 3-way EPL)
 node tests/test-arbs-dom.js   # Sure bets strip wiring in shipped odds.js (strip render, game flags, quiet-when-empty)
+node tests/test-middle-finder.js  # cross-book middle finder logic (spread/total windows, same-book exclusion, juice math, malformed input)
+node tests/test-middle-finder-dom.js  # Middle finder wiring in shipped odds.html/odds.js/middle-finder.js (panel render, key gating, empty state, findMiddles call)
 node tests/test-fairline.js    # no-vig fair moneyline math (vig removal, orientation, hold, null paths)
 node tests/test-fairline-dom.js  # fair line wiring in shipped odds.js (render, hold figure, quiet-when-one-sided)
 node tests/test-odds-alerts.js # line-move alert candidates (threshold gating, baseline seeding, started-game skip, no re-fire)

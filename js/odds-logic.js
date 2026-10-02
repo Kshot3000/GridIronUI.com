@@ -518,6 +518,103 @@ var L = {
       return d !== 0 ? d : (a.title < b.title ? -1 : (a.title > b.title ? 1 : 0));
     }).slice(0, Math.max(0, n));
   },
+  /* ---- cross-book middle finder (v1.140.0) ----
+     A "middle" is two bets on the same game at DIFFERENT books whose numbers
+     disagree enough that one final score cashes BOTH sides: e.g. Bears -2.5
+     @ book A and Packers +3.5 @ book B — a Bears win by exactly 3 lands
+     between 2.5 and 3.5, so both legs win. Same-book pairs never count (one
+     book won't let you middle its own line), and a window that can't cash
+     both sides is not a middle: final margins are whole numbers, so a spread
+     window must contain a whole number strictly inside it; totals must
+     disagree by a full point or more. Records carry the window and the juice
+     cost of staking $100 on each leg — "win both if the final lands between
+     X and Y" — never an implied probability edge. */
+  /* one outcome's {point, price} for a named side at one book, or null when
+     the book posts no usable number. price is null (not fatal) when the
+     price is missing or invalid — the window is still real, its cost isn't. */
+  midOutcome: function(bk, mkey, name){
+    var o = L.oneOutcome(bk, mkey, name);
+    if(!o || o.point === null || o.point === undefined || !isFinite(o.point)) return null;
+    var pr = Number(o.price);
+    return { point: Number(o.point), price: (isFinite(pr) && pr > 1) ? pr : null };
+  },
+  /* juice of staking $100 on each leg: miss = the worse one-sided outcome
+     (win the cheaper leg, lose the other — exactly one leg always wins a
+     middle pair), hit = both legs cash. Nulls when a price is unknown. */
+  midJuice: function(d1, d2){
+    if(d1 === null || d2 === null) return { costMiss: null, winBoth: null };
+    function r2(x){ return Math.round(x*100)/100; }
+    return { costMiss: r2(100*Math.min(d1, d2) - 200),
+             winBoth: r2(100*(d1-1) + 100*(d2-1)) };
+  },
+  /* true when a whole number sits strictly inside (lo, hi) */
+  midHasInt: function(lo, hi){
+    return Math.floor(lo) + 1 < hi - 1e-9;
+  },
+  /* every middle on one event: each ordered pair of distinct books, both
+     cross assignments (away@A+home@B). Returns records shaped like the arb
+     entries: {id, anchor, title, kind, marketLabel, legs, lo, hi, width,
+     costMiss, winBoth}. */
+  middlesForEvent: function(ev){
+    var books = ev.bookmakers || [];
+    if(!ev || ev.id === undefined || ev.id === null || books.length < 2) return [];
+    var out = [];
+    var anchor = "game-" + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, "");
+    var title = ev.away_team + " @ " + ev.home_team;
+    function leg(name, bk, mo){
+      return { name: name, book: bk.key, bookTitle: bk.title || bk.key,
+               point: mo.point, price: mo.price };
+    }
+    function push(kind, label, legA, legB, lo, hi){
+      var j = L.midJuice(legA.price, legB.price);
+      out.push({ id: ev.id, anchor: anchor, title: title, kind: kind,
+                 marketLabel: label, legs: [legA, legB],
+                 lo: lo, hi: hi, width: Math.round((hi-lo)*100)/100,
+                 costMiss: j.costMiss, winBoth: j.winBoth });
+    }
+    for(var i=0; i<books.length; i++){
+      for(var k=0; k<books.length; k++){
+        if(i === k) continue; /* same-book pairs never count */
+        var A = books[i], B = books[k];
+        /* spreads, in away-margin terms: away@A wins iff margin > -pa,
+           home@B wins iff margin < pb — both win iff -pa < margin < pb,
+           i.e. pa + pb > 0, with a whole number strictly inside */
+        var pa = L.midOutcome(A, "spreads", ev.away_team);
+        var pb = L.midOutcome(B, "spreads", ev.home_team);
+        if(pa && pb && pa.point + pb.point > 1e-9){
+          var lo = -pa.point, hi = pb.point;
+          if(L.midHasInt(lo, hi))
+            push("spread", "Spread",
+                 leg(ev.away_team, A, pa), leg(ev.home_team, B, pb), lo, hi);
+        }
+        /* totals: over@A wins iff total > oa, under@B iff total < ub.
+           The board's rule: the books must disagree by a full point or more. */
+        var oa = L.midOutcome(A, "totals", "Over");
+        var ub = L.midOutcome(B, "totals", "Under");
+        if(oa && ub && ub.point - oa.point >= 1 - 1e-9)
+          push("total", "Total",
+               leg("Over", A, oa), leg("Under", B, ub), oa.point, ub.point);
+      }
+    }
+    return out;
+  },
+  /* every middle on the board, across all events */
+  findMiddles: function(events){
+    var out = [];
+    (events||[]).forEach(function(ev){
+      if(!ev) return;
+      L.middlesForEvent(ev).forEach(function(m){ out.push(m); });
+    });
+    return out;
+  },
+  /* widest windows first; stable title tie-break so the strip never shuffles */
+  biggestMiddles: function(entries, n){
+    n = (n === undefined) ? 5 : n;
+    return (entries||[]).slice().sort(function(a, b){
+      var d = b.width - a.width;
+      return d !== 0 ? d : (a.title < b.title ? -1 : (a.title > b.title ? 1 : 0));
+    }).slice(0, Math.max(0, n));
+  },
   /* SVG geometry for a sparkline. Returns null with fewer than 2 points —
      a single dot is not a trend. A flat series draws a mid-height line
      (no divide-by-zero). Returns {line, area, lx, ly}: the line path, the
