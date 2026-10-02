@@ -43,6 +43,13 @@
 .follow-chip-link b{color:var(--gold)}
 #wxGrid .card.followed,#mlbWxGrid .card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
 .tag-yourteam{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.5)}
+/* v1.165.0 — find a game on the weather page (page-scoped, the boards'
+   gold-ring search language: gold focus ring, ghost Clear, honest count) */
+.wx-find{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 0;max-width:680px}
+.wx-find input{flex:1;min-width:200px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.wx-find input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.wx-find-count{font-size:.84rem;color:var(--faint)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
@@ -61,6 +68,13 @@
   <div class="notice green">
     <strong>Why bettors care: wind moves totals more than rain.</strong> Sustained winds above ~15 mph suppress the passing game and field goals — historically pushing games under. Rain matters too, but mostly by pushing teams to run. Dome and retractable-roof games are marked so you don't handicap weather that isn't there.
   </div>
+  <!-- v1.165.0 — find a game: live filter over team names, abbreviations and venue across BOTH slates on this page (js/weather.js; DOM state over the cards already loaded — typing never re-fetches a forecast, and the query is never persisted) -->
+  <div class="wx-find" role="search">
+    <input type="search" id="wxQ" placeholder="Find a game — team, abbr or venue (Bears, CHI, Soldier Field…)" autocomplete="off" spellcheck="false" aria-label="Find a game on this page" aria-describedby="wxCount">
+    <button class="btn btn-ghost btn-sm" id="wxClear" type="button" hidden>Clear search</button>
+    <span id="wxCount" class="wx-find-count" role="status" aria-live="polite"></span>
+  </div>
+  <div id="wxFindEmpty" class="empty" role="status" hidden></div>
   <!-- v1.154.0 — "Your teams" jump strip: one chip per followed-team game across both slates (js/weather.js renders it; hidden when nothing matches) -->
   <div id="wxFollow" class="follow-strip" hidden></div>
   <div id="wxWatch" class="wx-watch" hidden></div>
@@ -88,6 +102,6 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/weather.js?v=1.154.0"></script>
+<script src="js/weather.js?v=1.165.0"></script>
 </body>
 </html>

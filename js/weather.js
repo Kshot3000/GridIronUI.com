@@ -184,6 +184,131 @@ function folByAnchor(games){
   return map;
 }
 
+/* ---- find a game (v1.165.0) ----
+   Every other game board on the site has a finder (scores v1.161.0,
+   markets v1.162.0, odds v1.163.0, predictions v1.164.0) — the weather
+   page was the last one without, where finding ONE game's forecast on
+   game morning meant scrolling up to 16 NFL cards plus the MLB
+   postseason section. One finder now covers BOTH slates: the query
+   splits into terms and EVERY term must appear in the game's search
+   text (both teams' full names + abbreviations, venue name + city —
+   "bears" finds Chicago by name, "chi soldier" narrows across team
+   and venue), so a term that appears nowhere matches nothing, never
+   everything; garbage in -> empty text, never throws.
+   Filtering is DOM state over the cards ALREADY on screen: each card
+   is stamped data-find at render and applyWxSearch only toggles
+   display, so typing NEVER re-fetches a forecast (Open-Meteo calls
+   stay exactly the ones the page already made) and both bootstraps
+   re-apply the query after they render, so a query typed while a
+   slate is still loading lands on it when it arrives. The "Your
+   teams" strip and both Weather watch strips are filtered with the
+   board — a chip whose game is hidden hides too, and a strip with
+   no visible chip steps aside — and a section whose every game is
+   filtered out (the whole MLB wrap) steps aside with it. The query
+   is DOM state only, never persisted. No query -> nothing is
+   toggled and the page is byte-identical in behavior. */
+function searchTerms(q){
+  return String(q == null ? "" : q).toLowerCase().split(/\s+/).filter(function(t){ return !!t; });
+}
+/* Search text for one game record ({awayName, homeName, awayAbbr,
+   homeAbbr, venue, city}); missing/garbage fields add nothing. */
+function wxSearchText(g){
+  if(!g || typeof g !== "object") return "";
+  var parts = [];
+  [g.awayName, g.homeName, g.awayAbbr, g.homeAbbr, g.venue, g.city].forEach(function(v){
+    if(v != null && String(v).trim()) parts.push(String(v));
+  });
+  return parts.join(" ").toLowerCase();
+}
+function wxMatchesSearch(g, q){
+  var terms = searchTerms(q);
+  if(!terms.length) return true;
+  var text = wxSearchText(g);
+  if(!text) return false;
+  for(var i = 0; i < terms.length; i++){ if(text.indexOf(terms[i]) === -1) return false; }
+  return true;
+}
+try{ GIU.wxSearchTerms = searchTerms; GIU.wxGameText = wxSearchText;
+     GIU.wxGameSearch = wxMatchesSearch; }catch(e){}
+var searchQ = "";
+/* Honest count + Clear visibility + the named empty state, narrated
+   only while a search is active. total counts the cards actually on
+   screen across both slates; without the hooks (or before any slate
+   lands) the meta stays silent rather than inventing a number. */
+function renderWxSearchMeta(shown, total, active){
+  var c = $("wxCount"), b = $("wxClear"), e = $("wxFindEmpty");
+  if(c) c.textContent = (active && total > 0)
+    ? (shown === 0 ? "No matches" : shown + " of " + total + " games") : "";
+  if(b) b.hidden = !active;
+  if(e){
+    var show = !!(active && total > 0 && shown === 0);
+    e.hidden = !show;
+    if(show) e.textContent = 'No games match "' + String(searchQ).trim() +
+      '" on this page — clear the search to see all ' + total + " games.";
+  }
+}
+function applyWxSearch(){
+  var terms = searchTerms(searchQ), active = terms.length > 0;
+  var shown = 0, total = 0, vis = {}, perGrid = {}, i, j, el;
+  ["wxGrid", "mlbWxGrid"].forEach(function(gid){
+    var grid = $(gid), s = 0, n = 0;
+    if(grid && grid.querySelectorAll){
+      var cards = grid.querySelectorAll("[data-find]");
+      n = cards.length;
+      for(i = 0; i < cards.length; i++){
+        el = cards[i];
+        var txt = el.getAttribute ? (el.getAttribute("data-find") || "") : "";
+        var ok = !active || terms.every(function(t){ return txt.indexOf(t) !== -1; });
+        if(el.style) el.style.display = ok ? "" : "none";
+        if(ok){ s++; if(el.id) vis[el.id] = 1; }
+      }
+    }
+    perGrid[gid] = { shown: s, total: n };
+    shown += s; total += n;
+  });
+  /* The jump strips track the filtered board: a chip promises a card,
+     so a chip whose card the search hid hides too — and a strip left
+     with no visible chip steps aside entirely. */
+  ["wxFollow", "wxWatch", "mlbWxWatch"].forEach(function(bid){
+    var box = $(bid);
+    if(!box || !box.querySelectorAll) return;
+    var chips = box.querySelectorAll("a");
+    if(!chips.length) return;
+    var any = false;
+    for(j = 0; j < chips.length; j++){
+      var href = chips[j].getAttribute ? (chips[j].getAttribute("href") || "") : "";
+      var cid = href.charAt(0) === "#" ? href.slice(1) : "";
+      var cok = !active || !!vis[cid];
+      if(chips[j].style) chips[j].style.display = cok ? "" : "none";
+      if(cok) any = true;
+    }
+    box.hidden = !any;
+  });
+  /* A fully filtered-out MLB slate takes its whole section with it —
+     heading and explainer over an empty grid would just be noise. */
+  var wrap = $("mlbWxWrap");
+  if(wrap && wrap.style && perGrid.mlbWxGrid && perGrid.mlbWxGrid.total > 0)
+    wrap.style.display = (active && perGrid.mlbWxGrid.shown === 0) ? "none" : "";
+  renderWxSearchMeta(shown, total, active);
+}
+function resetWxSearch(){
+  searchQ = "";
+  var q = $("wxQ");
+  if(q) q.value = "";
+  applyWxSearch();
+  if(q && q.focus) q.focus();
+}
+(function wireWxFind(){
+  try{
+    var q = $("wxQ");
+    if(!q || !q.addEventListener) return;
+    q.addEventListener("input", function(){ searchQ = q.value || ""; applyWxSearch(); });
+    q.addEventListener("keydown", function(ev){ if(ev && ev.key === "Escape") resetWxSearch(); });
+    var b = $("wxClear");
+    if(b && b.addEventListener) b.addEventListener("click", resetWxSearch);
+  }catch(e){ /* no DOM (tests/imports): the finder simply never wires */ }
+})();
+
 /* The scoreboard fetch survives ESPN's week rollover: between the week's last
    game and the Tuesday rollover the default board is all-post, so without
    the fallback this page would sit empty on exactly the mornings bettors
@@ -198,7 +323,7 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
     note.innerHTML = GIU.wxFallbackNoticeHTML(res.week, GIU.esc);
     box.parentNode.insertBefore(note.firstChild, box);
   }
-  if(!evs.length){ box.innerHTML = '<div class="empty">No upcoming NFL games on the board.</div>'; return; }
+  if(!evs.length){ box.innerHTML = '<div class="empty">No upcoming NFL games on the board.</div>'; applyWxSearch(); return; }
   /* v1.154.0 — followed-team marks for this slate (strip + card rail/tag) */
   var nflGames = evs.map(function(ev){
     var c0 = ev.competitions[0];
@@ -222,7 +347,11 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
       when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
     }catch(e){}
     var anch = "wxg-"+String(ev.id).replace(/[^A-Za-z0-9_-]/g,"");
-    return '<div class="card'+(nflFol[anch] ? " followed" : "")+'" id="'+GIU.esc(anch)+'" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
+    var findText = wxSearchText({ awayName: (away&&away.team&&(away.team.displayName||away.team.name))||"",
+      homeName: (home&&home.team&&(home.team.displayName||home.team.name))||"",
+      awayAbbr: (away&&away.team&&away.team.abbreviation)||"", homeAbbr: (home&&home.team&&home.team.abbreviation)||"",
+      venue: st ? st[1] : "", city: st ? st[2] : "" });
+    return '<div class="card'+(nflFol[anch] ? " followed" : "")+'" id="'+GIU.esc(anch)+'" data-find="'+GIU.esc(findText)+'" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
       ' data-away="'+GIU.esc((away&&away.team&&away.team.abbreviation)||"")+'" data-home="'+GIU.esc((home&&home.team&&home.team.abbreviation)||"")+'"'+
       (st ? ' data-sname="'+GIU.esc(st[1])+'" data-scity="'+GIU.esc(st[2])+'" data-slat="'+st[3]+'" data-slon="'+st[4]+'" data-sroof="'+st[5]+'"' : "")+'>'+
       '<div class="game-meta"><span>'+when+'</span>'+(v.neutral?'<span class="tag" style="margin-left:8px">neutral site</span>':"")+(nflFol[anch]?' <span class="tag tag-yourteam">★ Your team</span>':"")+'</div>'+
@@ -232,6 +361,7 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
       '<div class="wx-body"><div class="skel" style="height:60px"></div></div></div>';
   }).join("");
   renderFollowStrip();
+  applyWxSearch();
   var watchJobs = [];
   Array.prototype.forEach.call(box.querySelectorAll("[data-game]"), function(card){
     var ds = card.dataset;
@@ -256,11 +386,12 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
   });
   /* Weather watch strip: fills in once every open-air forecast has settled —
      flagged games only; a calm slate (or all domes) leaves it hidden. */
-  Promise.all(watchJobs).then(function(list){ renderWatch("wxWatch", list); });
+  Promise.all(watchJobs).then(function(list){ renderWatch("wxWatch", list); applyWxSearch(); });
 
 
 }).catch(function(){
   $("wxGrid").innerHTML = GIU.failBox("The ESPN schedule feed didn't respond, so there's nothing to attach weather to.");
+  applyWxSearch();
 });
 
 /* ---- MLB postseason weather (October baseball) ----
@@ -299,7 +430,11 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
         when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
       }catch(e){}
       var anch = "wxb-"+String(ev.id).replace(/[^A-Za-z0-9_-]/g,"");
-      return '<div class="card'+(mlbFol[anch] ? " followed" : "")+'" id="'+GIU.esc(anch)+'" data-game="'+ev.id+'" data-kick="'+ev.date+'">'+
+      var findText = wxSearchText({ awayName: (away&&away.team&&(away.team.displayName||away.team.name))||"",
+        homeName: (home&&home.team&&(home.team.displayName||home.team.name))||"",
+        awayAbbr: (away&&away.team&&away.team.abbreviation)||"", homeAbbr: (home&&home.team&&home.team.abbreviation)||"",
+        venue: bp ? bp[1] : "", city: bp ? bp[2] : "" });
+      return '<div class="card'+(mlbFol[anch] ? " followed" : "")+'" id="'+GIU.esc(anch)+'" data-find="'+GIU.esc(findText)+'" data-game="'+ev.id+'" data-kick="'+ev.date+'">'+
         '<div class="game-meta"><span>'+when+'</span><span class="tag" style="margin-left:8px">MLB postseason</span>'+(mlbFol[anch]?' <span class="tag tag-yourteam">★ Your team</span>':"")+'</div>'+
         matchupHTML(away, home)+
         (bp ? '<p style="font-size:.86rem;color:var(--muted);margin:0 0 10px">🏟️ '+GIU.esc(bp[1])+' · '+GIU.esc(bp[2])+(bp[5]==="open"?"":' · <span class="tag blue">'+bp[5]+' roof</span>')+'</p>'
@@ -307,6 +442,7 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
         '<div class="wx-body" data-bp="'+(bp ? GIU.esc(bp[0]) : "")+'"><div class="skel" style="height:60px"></div></div></div>';
     }).join("");
     renderFollowStrip();
+    applyWxSearch();
     var watchJobs = [];
     Array.prototype.forEach.call(grid.querySelectorAll("[data-game]"), function(card){
       var evId = card.getAttribute("data-game");
@@ -336,7 +472,7 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
         return null;
       }));
     });
-    Promise.all(watchJobs).then(function(list){ renderWatch("mlbWxWatch", list); });
+    Promise.all(watchJobs).then(function(list){ renderWatch("mlbWxWatch", list); applyWxSearch(); });
   }).catch(function(){
     /* Feed failed: leave the section hidden rather than showing an error
        box for a bonus section — the NFL grid above carries the page. */
