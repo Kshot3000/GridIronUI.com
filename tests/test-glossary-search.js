@@ -166,8 +166,8 @@ ok("mount refuses without terms",
 
 /* ---- shipped glossary.html wiring pins ---- */
 var html = fs.readFileSync(path.join(ROOT, "glossary.html"), "utf8");
-ok("glossary.html loads js/glossary.js?v=1.139.0",
-   html.indexOf('src="js/glossary.js?v=1.139.0"') !== -1);
+ok("glossary.html loads js/glossary.js?v=1.144.1",
+   html.indexOf('src="js/glossary.js?v=1.144.1"') !== -1);
 ok("search input shipped", html.indexOf('id="glossQ"') !== -1 &&
    html.indexOf('type="search"') !== -1);
 ok("clear button shipped", html.indexOf('id="glossClear"') !== -1);
