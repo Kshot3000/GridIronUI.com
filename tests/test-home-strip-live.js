@@ -51,7 +51,7 @@ ok("rows are not mutated by the check", (function(){
    get the new refresh logic, not a cached copy of the old strip script. */
 var html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 ok("index.html pins home-strip.js?v=1.137.0",
-  html.indexOf("js/home-strip.js?v=1.137.0") !== -1);
+  html.indexOf("js/home-strip.js?v=1.138.0") !== -1);
 
 /* the 60s master tick calls loadStrip(true) through needsRefresh — pin the
    wiring so a future edit can't silently drop the refresh. */

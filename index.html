@@ -149,7 +149,7 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/home-strip.js?v=1.137.0"></script>
+<script src="js/home-strip.js?v=1.138.0"></script>
 <script src="js/home-wx.js?v=1.126.0"></script>
 <script>
 (function(){
@@ -213,13 +213,15 @@
       return GIU.fetchJSON(HS.scoreUrl(l[0])).then(function(d){ return HS.collect(l[1], d); })
         .catch(function(){ return []; });
     });
-    /* Kalshi NFL snapshot: real-money crowd prices for the NFL strip rows.
-       Resolves null on any failure — the strip renders fine without prices. */
+    /* Kalshi snapshots: real-money crowd prices for the NFL + MLB strip rows.
+       Each resolves null on any failure — the strip renders fine without prices. */
     jobs.push(GIU.fetchJSON("data/kalshi-nfl.json").catch(function(){ return null; }));
+    jobs.push(GIU.fetchJSON("data/kalshi-mlb.json").catch(function(){ return null; }));
     Promise.all(jobs).then(function(parts){
       loading = false;
-      var snap = parts.pop();
-      var rows = HS.withKalshi(HS.top([].concat.apply([], parts)), snap, Date.now());
+      var mlbSnap = parts.pop(), nflSnap = parts.pop();
+      var rows = HS.withKalshi(HS.top([].concat.apply([], parts)),
+                               {NFL: nflSnap, MLB: mlbSnap}, Date.now());
       curRows = rows;
       if(!rows.length){
         if(!silent) $("homeGames").innerHTML = '<div class="empty">No games on the board right now.</div>';
@@ -250,7 +252,7 @@
               : '<span class="num" style="color:var(--muted)">'+pct+'%</span>');
           };
           kp = '<div class="game-meta" style="margin-top:8px;border-top:1px solid var(--line-soft);padding-top:8px">'+
-            '<span class="tag green" title="Real-money crowd prices from Kalshi\u2019s NFL game-winner markets (server-side snapshot) \u2014 information, not a pick.">Kalshi</span>'+
+            '<span class="tag green" title="Real-money crowd prices from Kalshi\u2019s '+(r.league==="MLB"?"MLB":"NFL")+' game-winner markets (server-side snapshot) \u2014 information, not a pick.">Kalshi</span>'+
             '<span>'+side(k.aAbbr, k.aPct, k.aPct >= k.hPct)+' · '+side(k.hAbbr, k.hPct, k.hPct > k.aPct)+'</span>'+
             '<span>snapshot '+GIU.esc(HS.snapWhen(k.updatedAt))+'</span></div>';
         }

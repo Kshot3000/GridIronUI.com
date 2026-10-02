@@ -58,14 +58,18 @@ function rankRows(a, b){
 function top(rows, n){
   return (rows||[]).slice().sort(rankRows).slice(0, n == null ? 6 : n);
 }
-/* ---- Kalshi crowd prices on the strip (v1.120.0) ----
-   The server-side Kalshi NFL snapshot (data/kalshi-nfl.json) is CORS-safe,
-   so NFL strip rows can carry the real-money crowd's win probability next
-   to the matchup — information, not a pick. Matching is by unordered team
-   abbreviation pair, the same honest approach as the markets page's
-   cross-book comparison: unmatchable rows stay unannotated, never guessed,
-   and a stale snapshot annotates nothing rather than posing as a live
-   read. */
+/* ---- Kalshi crowd prices on the strip (v1.120.0, extended to MLB v1.138.0) ----
+   The server-side Kalshi snapshots (data/kalshi-nfl.json, data/kalshi-mlb.json)
+   are CORS-safe, so NFL and MLB strip rows can carry the real-money crowd's
+   win probability next to the matchup — information, not a pick. Matching is
+   by unordered team abbreviation pair, the same honest approach as the
+   markets page's cross-book comparison: unmatchable rows stay unannotated,
+   never guessed, and a stale snapshot annotates nothing rather than posing
+   as a live read.
+   MLB postseason snapshots list the same pair several times (Game 1, Game 2,
+   ... of a series), so when a pair is ambiguous the row's game day picks the
+   listing whose ticker date matches — a Game 2 row never wears Game 1's
+   prices. */
 
 /* Kalshi tickers use JAC (Jaguars) / WAS (Commanders); ESPN uses JAX / WSH. */
 var KALSHI_ALIAS = {JAC: "JAX", WAS: "WSH"};
@@ -120,6 +124,30 @@ function kalshiSideAbbr(m){
   return t ? normKalshiAbbr(t[1]) : null;
 }
 
+/* Game date from a Kalshi event ticker: "KXNFLGAME-26SEP27ARISF" and
+   "KXMLBGAME-26SEP292000BOSNYY" both embed the local game day as YYMONDD.
+   Returns "YYYY-MM-DD" or null. Same contract as D.kalshiDate on the markets
+   page, duplicated so this module stays dependency-free. */
+var KALSHI_MONS = {JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+function kalshiDate(g){
+  var t = String((g && g.event_ticker) || "");
+  var m = t.match(/^[A-Z]+-(\d{2})([A-Z]{3})(\d{2})/);
+  if(!m || !KALSHI_MONS[m[2]]) return null;
+  return (2000 + Number(m[1])) + "-" + String(KALSHI_MONS[m[2]]).padStart(2, "0") + "-" + m[3];
+}
+
+/* Eastern-calendar game day of a strip row: ESPN dates are UTC and evening
+   games land on the next UTC day, so shift back 4h (Eastern Daylight —
+   correct for the Sept/Oct window this disambiguator exists for). Null when
+   the row carries no parseable date. */
+function rowGameDay(r){
+  var t = Date.parse((r && r.date) || "");
+  if(!isFinite(t)) return null;
+  var e = new Date(t - 4 * 3600000);
+  function p(n){ return String(n).padStart(2, "0"); }
+  return e.getUTCFullYear() + "-" + p(e.getUTCMonth() + 1) + "-" + p(e.getUTCDate());
+}
+
 /* Snapshot freshness: the loop rebuilds these hourly, so anything older
    than maxAgeH hours (default 6 — the same bar the Kalshi board uses) is
    withheld rather than presented as a live read. Unparseable stamp = stale. */
@@ -130,41 +158,63 @@ function snapStale(iso, nowMs, maxAgeH){
   return (now - t) > (maxAgeH || 6) * 3600000;
 }
 
-/* Annotate strip rows with the snapshot's crowd prices. Returns NEW row
-   objects (input rows are never mutated). Rows that can't be matched, games
-   with an unpriced side, non-NFL rows, and stale or malformed snapshots come
-   back without a kp — the strip renders exactly as before. */
-function withKalshi(rows, snap, nowMs){
+/* Annotate strip rows with the snapshots' crowd prices. snaps is a
+   league->snapshot map ({NFL: snapOrNull, MLB: snapOrNull}); a bare snapshot
+   is still accepted as the old single-snapshot (NFL) call shape. Returns NEW
+   row objects (input rows are never mutated). Rows that can't be matched,
+   games with an unpriced side, leagues without a snapshot, and stale or
+   malformed snapshots come back without a kp — the strip renders exactly as
+   before. */
+function withKalshi(rows, snaps, nowMs){
   rows = Array.isArray(rows) ? rows : [];
-  var games = snap && Array.isArray(snap.games) ? snap.games : null;
-  if(!games || snapStale(snap.updated_at, nowMs)) return rows.slice();
-  var byPair = {};
-  games.forEach(function(g){
-    var pair = kalshiPair(g);
-    if(!pair) return;
-    var key = pair.join("|");
-    if(byPair[key]) return; /* first listing wins; snapshots don't duplicate */
-    var sides = {};
-    ((g && g.markets) || []).forEach(function(m){
-      var ab = kalshiSideAbbr(m), px = kalshiPrice(m);
-      if(ab && px !== null && sides[ab] === undefined) sides[ab] = px;
+  if(snaps && Array.isArray(snaps.games)) snaps = {NFL: snaps}; /* old call shape */
+  snaps = (snaps && typeof snaps === "object") ? snaps : {};
+  var idx = {}; /* league -> pairKey -> [{sides, date, updatedAt}] */
+  ["NFL", "MLB"].forEach(function(league){
+    var snap = snaps[league];
+    var games = snap && Array.isArray(snap.games) ? snap.games : null;
+    if(!games || snapStale(snap.updated_at, nowMs)) return;
+    var byPair = idx[league] = {};
+    games.forEach(function(g){
+      var pair = kalshiPair(g);
+      if(!pair) return;
+      var key = pair.join("|");
+      var sides = {};
+      ((g && g.markets) || []).forEach(function(m){
+        var ab = kalshiSideAbbr(m), px = kalshiPrice(m);
+        if(ab && px !== null && sides[ab] === undefined) sides[ab] = px;
+      });
+      (byPair[key] = byPair[key] || []).push({sides: sides, date: kalshiDate(g),
+                                             updatedAt: snap.updated_at});
     });
-    byPair[key] = sides;
   });
   return rows.map(function(r){
-    if(!r || r.league !== "NFL") return r;
+    if(!r) return r;
+    var byPair = idx[r.league];
+    if(!byPair) return r;
     var ra = r.away && r.away.team && r.away.team.abbreviation;
     var rh = r.home && r.home.team && r.home.team.abbreviation;
     if(!ra || !rh) return r;
     var au = String(ra).toUpperCase(), hu = String(rh).toUpperCase();
-    var sides = byPair[[au, hu].sort().join("|")];
-    if(!sides) return r;
-    var aPct = sides[au], hPct = sides[hu];
+    var cands = byPair[[au, hu].sort().join("|")];
+    if(!cands || !cands.length) return r;
+    var pick = cands[0];
+    if(cands.length > 1){
+      /* Same pair listed more than once (MLB series games): the row's game
+         day disambiguates. No date match -> no annotation, never a guess. */
+      var day = rowGameDay(r), found = null, i;
+      for(i = 0; i < cands.length; i++){
+        if(cands[i].date && cands[i].date === day){ found = cands[i]; break; }
+      }
+      if(!found) return r;
+      pick = found;
+    }
+    var aPct = pick.sides[au], hPct = pick.sides[hu];
     if(aPct === undefined || hPct === undefined) return r;
     var out = {};
     for(var k in r) out[k] = r[k];
     out.kp = {aAbbr: au, aPct: aPct, hAbbr: hu, hPct: hPct,
-              updatedAt: snap.updated_at};
+              updatedAt: pick.updatedAt};
     return out;
   });
 }
@@ -265,6 +315,7 @@ var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, collect: collect,
            rankRows: rankRows, top: top,
            normKalshiAbbr: normKalshiAbbr, kalshiPair: kalshiPair,
            kalshiPrice: kalshiPrice, kalshiSideAbbr: kalshiSideAbbr,
+           kalshiDate: kalshiDate, rowGameDay: rowGameDay,
            snapStale: snapStale, withKalshi: withKalshi, snapWhen: snapWhen,
            broadcastNames: broadcastNames, kickoffIn: kickoffIn,
            nearestPre: nearestPre, gameNoun: gameNoun, needsRefresh: needsRefresh};
