@@ -99,11 +99,13 @@
       </table>
     </div>
     <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" id="jAutofill">⚡ Auto-fill closing lines</button>
       <button class="btn btn-ghost btn-sm" id="jExport">⬇ Export CSV</button>
       <button class="btn btn-ghost btn-sm" id="jImport">⬆ Import CSV</button>
       <input type="file" id="jImportFile" accept=".csv,text/csv" style="display:none" aria-label="Import journal CSV file" tabindex="-1">
       <button class="btn btn-ghost btn-sm" id="jClear">🗑 Clear journal</button>
     </div>
+    <p class="hint" style="margin-top:10px;font-size:.76rem;line-height:1.5">Auto-fill reads the closing price from this browser's saved odds-board snapshots (consensus away-spread / over-total price, real board data only) for bets logged on game day. A bet with a manually recorded close is never overwritten — and anything without a matching snapshot stays blank.</p>
   </div>
 
   <div class="notice" style="margin:34px 0">
@@ -114,6 +116,7 @@
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
 <script src="js/betmath.js?v=1.87.0"></script>
-<script src="js/journal.js?v=1.87.0"></script>
+<script src="js/team-brand.js?v=1.18.0"></script>
+<script src="js/journal.js?v=1.143.0"></script>
 </body>
 </html>

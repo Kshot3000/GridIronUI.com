@@ -8,6 +8,7 @@
 "use strict";
 var BM = window.BetMath;
 var LS_BETS = "giu.journal.v1", LS_SET = "giu.journal.settings.v1";
+var LS_HIST = "giu-odds-history"; /* written by js/odds.js after each board pull (v1.143.0) */
 var RESULT_LABEL = { pending: "Pending", win: "Win", loss: "Loss", push: "Push" };
 
 function $(id){ return document.getElementById(id); }
@@ -394,6 +395,137 @@ function tableClick(ev){
   render();
 }
 
+/* ---- closing-line auto-fill (v1.143.0) ----
+   Pure, testable core. normalizePair builds the canonical "A|B" pair key
+   (sorted uppercase, "|" joined) — the same format js/odds.js writes into
+   giu-odds-history. matchSnapshot(bet, snaps) picks the latest stored
+   snapshot for a bet: bet is {pair, date} with pair pre-resolved via
+   normalizePair; the snapshot's GAME date must fall within the 30h before
+   the end of the bet's date (a close only counts when the snapshot priced a
+   game that was actually about to go off). Latest stored snapshot wins;
+   anything malformed or unmatched -> null, never a guess. */
+function normalizePair(a, b){
+  var x = String(a == null ? "" : a).trim().toUpperCase();
+  var y = String(b == null ? "" : b).trim().toUpperCase();
+  if(!x || !y) return null;
+  return [x, y].sort().join("|");
+}
+var CLOSE_WINDOW_MS = 30 * 3600 * 1000;
+function betEventEndMs(dateStr){
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateStr == null ? "" : dateStr));
+  if(!m) return NaN;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59).getTime();
+}
+function matchSnapshot(bet, snaps){
+  if(!bet || !bet.pair || !Array.isArray(snaps)) return null;
+  var betT = betEventEndMs(bet.date);
+  if(!isFinite(betT)) return null;
+  var best = null;
+  snaps.forEach(function(s){
+    if(!s || s.pair !== bet.pair) return;
+    var g = Date.parse(s.date);
+    if(!isFinite(g)) return;
+    var gap = betT - g;
+    if(gap < 0 || gap > CLOSE_WINDOW_MS) return;
+    if(!best || Number(s.t || 0) > Number(best.t || 0)) best = s;
+  });
+  return best;
+}
+
+function loadHistory(){
+  /* Malformed storage (or private mode) -> empty history, never a throw. */
+  try{
+    var h = JSON.parse(localStorage.getItem(LS_HIST));
+    return Array.isArray(h) ? h : [];
+  }catch(e){ return []; }
+}
+
+/* Bet -> canonical pair key via the ESPN identity directory (team-brand.js).
+   The slip writes events as "Away @ Home"; manual entries are free text, so
+   "vs"/"v" and a trailing " (Book)" suffix are accepted too. Unknown teams
+   or unparseable events -> null: the bet stays blank, honestly. */
+var SPORT_LEAGUE = { NFL: "nfl", NBA: "nba", MLB: "mlb", NHL: "nhl", EPL: "epl" };
+var ALL_LEAGUES = ["nfl", "nba", "mlb", "nhl", "epl"];
+function resolveBetPair(dir, bet){
+  if(!window.GIU || !GIU.teamFind) return null;
+  var ev = String((bet && bet.event) || "").replace(/\s*\([^()]*\)\s*$/, "");
+  var parts = ev.split(/\s+@\s+|\s+vs\.?\s+|\s+v\s+/i);
+  if(parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) return null;
+  var sportKey = SPORT_LEAGUE[String((bet && bet.sport) || "").toUpperCase()];
+  var leagues = (sportKey ? [sportKey] : [])
+    .concat(ALL_LEAGUES.filter(function(l){ return l !== sportKey; }));
+  var abbrs = parts.map(function(p){
+    var q = p.trim(), i, t;
+    for(i = 0; i < leagues.length; i++){
+      t = GIU.teamFind(dir, leagues[i], q);
+      if(t && t.abbr) return String(t.abbr).toUpperCase();
+    }
+    return null;
+  });
+  if(!abbrs[0] || !abbrs[1]) return null;
+  return normalizePair(abbrs[0], abbrs[1]);
+}
+
+var teamDirP = null;
+function getTeamDir(){
+  if(!teamDirP){
+    var p = (window.GIU && GIU.teamDir) ? GIU.teamDir() : Promise.resolve({});
+    teamDirP = p.then(function(d){ return d || {}; }, function(){ return {}; });
+  }
+  return teamDirP;
+}
+
+function closeFieldFor(market){
+  /* The snapshot carries spread + total consensus prices; other markets
+     (Moneyline, Parlay, …) have no stored close -> unmatched, left blank. */
+  var m = String(market == null ? "" : market);
+  return m === "Spread" ? "spread" : (m === "Total" ? "total" : null);
+}
+
+/* "Auto-fill closing lines": for every bet WITHOUT a manually recorded
+   close, take the latest stored odds-board snapshot for the same teams in
+   the 30h window and record its closing price. Manual closes are never
+   touched; bets with no match stay blank and the report says exactly how
+   many filled. Returns a promise (the team directory loads async). */
+function autoFillCloses(){
+  showErr("");
+  var btn = $("jAutofill");
+  var snaps = loadHistory();
+  var cands = bets.filter(function(b){ return b.close == null || b.close === ""; });
+  function done(msg, n){
+    showErr(msg);
+    if(btn){ btn.disabled = false; btn.textContent = "⚡ Auto-fill closing lines"; }
+    return n;
+  }
+  if(!cands.length){
+    done("Every bet already has a closing price — nothing to fill.", 0);
+    return Promise.resolve(0);
+  }
+  if(btn){ btn.disabled = true; btn.textContent = "Filling…"; }
+  return getTeamDir().then(function(dir){
+    var filled = 0;
+    cands.forEach(function(b){
+      var pair = resolveBetPair(dir, b);
+      if(!pair) return;
+      var snap = matchSnapshot({ pair: pair, date: b.date }, snaps);
+      if(!snap) return;
+      var field = closeFieldFor(b.market);
+      if(!field) return;
+      var val = Number(snap[field]);
+      if(!(val > 0) && !(val < 0)) return; /* null/NaN/0: not a real price */
+      val = Math.round(val);
+      if(BM.closeValid(String(val))) return; /* never write an invalid close */
+      b.close = val;
+      filled++;
+    });
+    if(filled){ saveBets(bets); render(); }
+    return done("Filled " + filled + " of " + cands.length +
+               " closing lines — unmatched bets left blank.", filled);
+  }, function(){
+    return done("Couldn't load the team directory — closing lines left blank. Try again.", 0);
+  });
+}
+
 function init(){
   if(!$("jBetsBody")) return; /* not on journal.html */
   bets = loadBets();
@@ -410,6 +542,7 @@ function init(){
   $("jFilterResult").addEventListener("change", render);
   $("jBetsBody").addEventListener("click", tableClick);
   $("jExport").addEventListener("click", exportCSV);
+  if($("jAutofill")) $("jAutofill").addEventListener("click", autoFillCloses);
   $("jImport").addEventListener("click", function(){ showErr(""); $("jImportFile").click(); });
   $("jImportFile").addEventListener("change", function(){
     if(this.files && this.files[0]) importCSV(this.files[0]);
@@ -427,5 +560,12 @@ function init(){
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
 else init();
 
-window.Journal = { render: render, money: money, summaryHtml: summaryHtml, betsHtml: betsHtml };
+window.Journal = { render: render, money: money, summaryHtml: summaryHtml, betsHtml: betsHtml,
+  normalizePair: normalizePair, matchSnapshot: matchSnapshot,
+  closeWindowMs: CLOSE_WINDOW_MS, autoFillCloses: autoFillCloses };
+/* node test hook: the pure matching core loads without a DOM. */
+if(typeof module !== "undefined" && module.exports){
+  module.exports = { normalizePair: normalizePair, matchSnapshot: matchSnapshot,
+                     closeWindowMs: CLOSE_WINDOW_MS };
+}
 })();

@@ -94,6 +94,56 @@ function setOpens(o){
 function histKey(){ return "giu_odds_hist_"+sport; }
 function getHist(){ try{ return JSON.parse(localStorage.getItem(histKey())||"{}"); }catch(e){ return {}; } }
 function setHist(h){ try{ localStorage.setItem(histKey(), JSON.stringify(h)); }catch(e){} }
+/* ---- closing-line history (v1.143.0) — feeds the bet journal's auto-fill.
+   After every successful board pull we persist one compact entry per game to
+   localStorage "giu-odds-history": {t, pair, date, spread, total}. Only REAL
+   board data lands here — an event whose teams don't resolve to identity-dir
+   abbreviations is skipped (no invented pairs), and a game with no consensus
+   spread AND no consensus total price is skipped (no invented lines).
+   spread = consensus American price of the AWAY spread (the market's
+   canonical side for the journal's close field); total = consensus American
+   price of the OVER. Capped at ~200 entries (oldest evicted). Everything is
+   wrapped in try/catch: private-mode failures stay silent, the board is the
+   product and history is a bonus. */
+var CLOSE_HIST_KEY = "giu-odds-history", CLOSE_HIST_CAP = 200;
+function medDecPrice(books, mkey, name){
+  var vals = [];
+  (books || []).forEach(function(bk){
+    var o = OL.oneOutcome(bk, mkey, name);
+    if(o && isFinite(o.price)) vals.push(Number(o.price));
+  });
+  if(!vals.length) return null;
+  vals.sort(function(x, y){ return x - y; });
+  var m = vals.length >> 1;
+  return vals.length % 2 ? vals[m] : (vals[m - 1] + vals[m]) / 2;
+}
+function amInt(dec){
+  /* OL.dec2am returns "+144" (string) or -133 (number); the journal's close
+     field is a whole American price, so normalize to an integer or null. */
+  if(dec === null || dec === undefined || !isFinite(Number(dec))) return null;
+  var n = Number(OL.dec2am(dec));
+  return isFinite(n) ? Math.round(n) : null;
+}
+function saveCloseHistory(events, dir, league, nowMs){
+  try{
+    var h = JSON.parse(localStorage.getItem(CLOSE_HIST_KEY) || "[]");
+    if(!Array.isArray(h)) h = [];
+    (events || []).forEach(function(ev){
+      if(!ev || !ev.commence_time) return;
+      var ta = GIU.teamFind(dir, league, ev.away_team),
+          th = GIU.teamFind(dir, league, ev.home_team);
+      if(!ta || !th || !ta.abbr || !th.abbr) return;
+      var pair = [String(ta.abbr).toUpperCase(), String(th.abbr).toUpperCase()].sort().join("|");
+      var spread = amInt(medDecPrice(ev.bookmakers, "spreads", ev.away_team)),
+          total = amInt(medDecPrice(ev.bookmakers, "totals", "Over"));
+      if(spread === null && total === null) return;
+      h.push({ t: nowMs, pair: pair, date: ev.commence_time, spread: spread, total: total });
+    });
+    h.sort(function(a, b){ return (a.t || 0) - (b.t || 0); });
+    if(h.length > CLOSE_HIST_CAP) h = h.slice(h.length - CLOSE_HIST_CAP);
+    localStorage.setItem(CLOSE_HIST_KEY, JSON.stringify(h));
+  }catch(e){}
+}
 
 function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
 function fmtClock(ts){
@@ -246,6 +296,10 @@ function render(opts){
     setSnap(now);
     setOpens(opens);
     setHist(hist);
+    /* v1.143.0 — persist this pull's per-game consensus prices for the bet
+       journal's closing-line auto-fill (real board data only; see
+       saveCloseHistory). After the board is on screen, like the alerts. */
+    saveCloseHistory(events, dir, league, lastUpdated);
     /* Line-move alerts: compare this pull's consensus against the last
        pull's baseline, toast every threshold crossing, then re-baseline —
        all after the board is on screen so an alert hiccup never blocks
