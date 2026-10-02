@@ -149,79 +149,34 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/home-strip.js?v=1.129.1"></script>
+<script src="js/home-strip.js?v=1.137.0"></script>
 <script src="js/home-wx.js?v=1.126.0"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
   var HS = window.GIU.homeStrip;
-  /* "Happening now": the four US-league scoreboards in parallel, finished
-     games dropped, live games ranked first, then earliest kickoff. Each
-     league failing alone never sinks the strip — only a total blackout does. */
-  var jobs = HS.LEAGUES.map(function(l){
-    return GIU.fetchJSON(HS.scoreUrl(l[0])).then(function(d){ return HS.collect(l[1], d); })
-      .catch(function(){ return []; });
-  });
-  /* Kalshi NFL snapshot: real-money crowd prices for the NFL strip rows.
-     Resolves null on any failure — the strip renders fine without prices. */
-  jobs.push(GIU.fetchJSON("data/kalshi-nfl.json").catch(function(){ return null; }));
-  Promise.all(jobs).then(function(parts){
-    var snap = parts.pop();
-    var rows = HS.withKalshi(HS.top([].concat.apply([], parts)), snap, Date.now());
-    if(!rows.length){ $("homeGames").innerHTML = '<div class="empty">No games on the board right now.</div>'; return; }
-    /* The nearest upcoming kickoff gets a live countdown that ticks every
-       minute — a bettor shouldn't have to do timezone math on game day. */
-    var nextPre = HS.nearestPre(rows, Date.now());
-    $("homeGames").innerHTML = rows.map(function(r){
-      var badge = r.state==="in" ? '<span class="live-badge"><i></i>Live</span>'
-        : '<span class="tag">'+GIU.esc(r.shortDetail||"Scheduled")+'</span>';
-      /* Where to watch, straight from the ESPN feed — only when it names one. */
-      var tv = r.broadcast ? '<span class="tag tv-tag" title="Broadcast network, per ESPN">📺 '+GIU.esc(r.broadcast)+'</span>' : "";
-      /* Live countdown on the nearest upcoming game only. The league rides
-         along so the countdown noun matches the sport ("First pitch in…"
-         on MLB, not "Kickoff in…"). */
-      var cd = (nextPre && r.id === nextPre.id && r.date)
-        ? '<div class="kickoff-count" data-kickoff="'+GIU.esc(r.date)+'" data-league="'+GIU.esc(r.league)+'"></div>' : "";
-      /* Crowd prices from the Kalshi snapshot, when the game matched and the
-         snapshot is fresh — favorite in gold, the same language as the
-         predictions page. Never rendered for unmatched or stale rows. */
-      var kp = "";
-      if(r.kp){
-        var k = r.kp;
-        var side = function(abbr, pct, fav){
-          return GIU.esc(abbr)+" "+(fav
-            ? '<b class="num" style="color:var(--gold-soft)">'+pct+'%</b>'
-            : '<span class="num" style="color:var(--muted)">'+pct+'%</span>');
-        };
-        kp = '<div class="game-meta" style="margin-top:8px;border-top:1px solid var(--line-soft);padding-top:8px">'+
-          '<span class="tag green" title="Real-money crowd prices from Kalshi\u2019s NFL game-winner markets (server-side snapshot) \u2014 information, not a pick.">Kalshi</span>'+
-          '<span>'+side(k.aAbbr, k.aPct, k.aPct >= k.hPct)+' · '+side(k.hAbbr, k.hPct, k.hPct > k.aPct)+'</span>'+
-          '<span>snapshot '+GIU.esc(HS.snapWhen(k.updatedAt))+'</span></div>';
-      }
-      return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
-        '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+tv+'</div>'+cd+
-        GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
-        '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div>'+
-        /* v1.126.0 — game-day weather chips paint here for outdoor NFL/MLB
-           rows with noteworthy conditions; hidden until a forecast says so. */
-        '<div class="game-meta" data-wxchip="'+GIU.esc(r.league+":"+r.id)+'" hidden style="margin-top:8px;align-items:center"></div>'+kp+'</div>';
-    }).join("");
-    /* Arm the 60s countdown tick: one timer, all countdown elements; hides
-       any element whose kickoff has passed rather than going negative. */
-    var tickCd = function(){
-      var els = document.querySelectorAll('[data-kickoff]'), i, s;
-      for(i=0;i<els.length;i++){
-        s = HS.kickoffIn(els[i].getAttribute('data-kickoff'), Date.now(),
-          HS.gameNoun(els[i].getAttribute('data-league')));
-        if(s) els[i].textContent = s; else els[i].style.display = "none";
-      }
-    };
-    tickCd();
-    setInterval(tickCd, 60000);
-    /* v1.126.0 — game-day weather chips: one Open-Meteo call for the strip's
-       outdoor NFL/MLB venues, chips paint into their placeholders. A
-       forecast hiccup or calm conditions leave the strip exactly as rendered
-       above — chips never block the strip and never invent a forecast. */
+  var curRows = [];    /* last rendered rows — the 60s freshness check reads this */
+  var loading = false; /* one strip fetch in flight at a time */
+  var chipCache = {};  /* slot -> painted weather-chip HTML, restored after silent re-renders */
+
+  /* Paint the text of every [data-kickoff] countdown element. Elements whose
+     kickoff has passed hide rather than go negative. */
+  function paintCountdown(){
+    var els = document.querySelectorAll('[data-kickoff]'), i, s;
+    for(i=0;i<els.length;i++){
+      s = HS.kickoffIn(els[i].getAttribute('data-kickoff'), Date.now(),
+        HS.gameNoun(els[i].getAttribute('data-league')));
+      if(s) els[i].textContent = s; else els[i].style.display = "none";
+    }
+  }
+
+  /* v1.126.0 — game-day weather chips: one Open-Meteo call for the strip's
+     outdoor NFL/MLB venues, chips paint into their placeholders. A
+     forecast hiccup or calm conditions leave the strip exactly as rendered
+     above — chips never block the strip and never invent a forecast.
+     Painted chips are cached so silent re-renders restore them instead of
+     re-fetching. */
+  function paintWx(rows){
     try{
       var HXW = (window.GIU||{}).homeWx;
       var wxJobs = HXW ? HXW.resolveRows(rows, {nfl: GIU.wxVenueFor, mlb: GIU.wxBallparkVenueFor}, Date.now()) : [];
@@ -238,11 +193,103 @@
             if(!slot) return;
             slot.innerHTML = HXW.chipHtml(g, notes, GIU.esc);
             slot.hidden = false;
+            chipCache[g.slot] = slot.innerHTML;
           });
         }).catch(function(){ /* chips stay off; the strip already rendered */ });
       }
     }catch(e){ /* chips stay off; the strip already rendered */ }
-  }).catch(function(){ $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feeds didn't respond."); });
+  }
+
+  /* "Happening now": the four US-league scoreboards in parallel, finished
+     games dropped, live games ranked first, then earliest kickoff. Each
+     league failing alone never sinks the strip — only a total blackout does.
+     silent=true is the game-night refresh: re-pulls score data without
+     nuking the strip on failure and without re-running the weather fetch
+     (already-painted chips are restored from the cache). */
+  function loadStrip(silent){
+    if(loading) return;
+    loading = true;
+    var jobs = HS.LEAGUES.map(function(l){
+      return GIU.fetchJSON(HS.scoreUrl(l[0])).then(function(d){ return HS.collect(l[1], d); })
+        .catch(function(){ return []; });
+    });
+    /* Kalshi NFL snapshot: real-money crowd prices for the NFL strip rows.
+       Resolves null on any failure — the strip renders fine without prices. */
+    jobs.push(GIU.fetchJSON("data/kalshi-nfl.json").catch(function(){ return null; }));
+    Promise.all(jobs).then(function(parts){
+      loading = false;
+      var snap = parts.pop();
+      var rows = HS.withKalshi(HS.top([].concat.apply([], parts)), snap, Date.now());
+      curRows = rows;
+      if(!rows.length){
+        if(!silent) $("homeGames").innerHTML = '<div class="empty">No games on the board right now.</div>';
+        return;
+      }
+      /* The nearest upcoming kickoff gets a live countdown that ticks every
+         minute — a bettor shouldn't have to do timezone math on game day. */
+      var nextPre = HS.nearestPre(rows, Date.now());
+      $("homeGames").innerHTML = rows.map(function(r){
+        var badge = r.state==="in" ? '<span class="live-badge"><i></i>Live</span>'
+          : '<span class="tag">'+GIU.esc(r.shortDetail||"Scheduled")+'</span>';
+        /* Where to watch, straight from the ESPN feed — only when it names one. */
+        var tv = r.broadcast ? '<span class="tag tv-tag" title="Broadcast network, per ESPN">📺 '+GIU.esc(r.broadcast)+'</span>' : "";
+        /* Live countdown on the nearest upcoming game only. The league rides
+           along so the countdown noun matches the sport ("First pitch in…"
+           on MLB, not "Kickoff in…"). */
+        var cd = (nextPre && r.id === nextPre.id && r.date)
+          ? '<div class="kickoff-count" data-kickoff="'+GIU.esc(r.date)+'" data-league="'+GIU.esc(r.league)+'"></div>' : "";
+        /* Crowd prices from the Kalshi snapshot, when the game matched and the
+           snapshot is fresh — favorite in gold, the same language as the
+           predictions page. Never rendered for unmatched or stale rows. */
+        var kp = "";
+        if(r.kp){
+          var k = r.kp;
+          var side = function(abbr, pct, fav){
+            return GIU.esc(abbr)+" "+(fav
+              ? '<b class="num" style="color:var(--gold-soft)">'+pct+'%</b>'
+              : '<span class="num" style="color:var(--muted)">'+pct+'%</span>');
+          };
+          kp = '<div class="game-meta" style="margin-top:8px;border-top:1px solid var(--line-soft);padding-top:8px">'+
+            '<span class="tag green" title="Real-money crowd prices from Kalshi\u2019s NFL game-winner markets (server-side snapshot) \u2014 information, not a pick.">Kalshi</span>'+
+            '<span>'+side(k.aAbbr, k.aPct, k.aPct >= k.hPct)+' · '+side(k.hAbbr, k.hPct, k.hPct > k.aPct)+'</span>'+
+            '<span>snapshot '+GIU.esc(HS.snapWhen(k.updatedAt))+'</span></div>';
+        }
+        return '<div class="game-card"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+          '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+tv+'</div>'+cd+
+          GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
+          '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span></div>'+
+          /* v1.126.0 — game-day weather chips paint here for outdoor NFL/MLB
+             rows with noteworthy conditions; hidden until a forecast says so. */
+          '<div class="game-meta" data-wxchip="'+GIU.esc(r.league+":"+r.id)+'" hidden style="margin-top:8px;align-items:center"></div>'+kp+'</div>';
+      }).join("");
+      paintCountdown();
+      if(silent){
+        /* restore already-painted weather chips — no re-fetch mid-game */
+        for(var slot in chipCache){
+          var el = document.querySelector('[data-wxchip="'+slot+'"]');
+          if(el){ el.innerHTML = chipCache[slot]; el.hidden = false; }
+        }
+      }else{
+        paintWx(rows);
+      }
+    }).catch(function(){
+      loading = false;
+      if(!silent) $("homeGames").innerHTML = GIU.failBox("The ESPN scoreboard feeds didn't respond.");
+    });
+  }
+
+  /* v1.137.0 — one 60s master tick. On game night a tab left open goes stale:
+     the countdown hid at kickoff but the row still read "Scheduled", and a
+     live game's score froze until the visitor reloaded. Now the strip
+     silently re-pulls while any game is live or a kickoff slipped past —
+     scores and statuses stay honest without touching a quiet board. */
+  function tick(){
+    paintCountdown();
+    if(HS.needsRefresh(curRows, Date.now())) loadStrip(true);
+  }
+  loadStrip(false);
+  tick();
+  setInterval(tick, 60000);
 
   /* headlines */
   GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=4").then(function(d){

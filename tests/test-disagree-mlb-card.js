@@ -90,20 +90,24 @@ function pmOn(aCents){
   };
 }
 var gapDir = (expA - 4 > 0) ? -4 : 4; /* keep the PM price inside 1..99 */
-var mt = D.matches([pmOn(expA + gapDir)], snap.games, dir, teamFind, "mlb");
+/* Strictly inside (1, 99): the decided-game filter (v1.117.0) drops PM
+   prices at exactly 1 or 99, so when the snapshot game's price runs to the
+   edge (e.g. PHI at 5 -> synthetic 1), clamp rather than pin a figure. */
+var pmA = Math.max(2, Math.min(98, expA + gapDir));
+var mt = D.matches([pmOn(pmA)], snap.games, dir, teamFind, "mlb");
 assert(mt.length === 1,
   aAb+"/"+bAb+" on the snapshot game day matches one Kalshi game on league=mlb");
 if(mt.length && expA !== null){
   var m = mt[0];
   assert(m.abbrA === aAb && m.abbrB === bAb,
     "sides resolve to "+aAb+"/"+bAb+" (got "+m.abbrA+"/"+m.abbrB+")");
-  assert(m.pmA === expA + gapDir && m.pmB === 100 - expA - gapDir,
+  assert(m.pmA === pmA && m.pmB === 100 - pmA,
     "Polymarket prices carried through (got "+m.pmA+"/"+m.pmB+")");
   assert(m.kalshiA === expA && m.kalshiB === expB,
     "Kalshi sides match the snapshot numbers (got "+m.kalshiA+"/"+m.kalshiB+", want "+expA+"/"+expB+")");
   var dis = D.disagreements(mt, 3);
-  assert(dis.length === 1 && dis[0].delta === gapDir,
-    "4c gap flagged as a disagreement (delta "+(dis[0]&&dis[0].delta)+")");
+  assert(dis.length === 1 && dis[0].delta === pmA - expA,
+    "gap flagged as a disagreement (delta "+(dis[0]&&dis[0].delta)+")");
   var mtAgree = D.matches([pmOn(expA)], snap.games, dir, teamFind, "mlb");
   assert(D.disagreements(mtAgree, 3).length === 0,
     "0c gap correctly not flagged");

@@ -239,13 +239,35 @@ function nearestPre(rows, nowMs){
   return best;
 }
 
+/* ---- Live-strip freshness (v1.137.0) ----
+   True when the strip's data is stale enough to re-pull: a game is live
+   (scores and statuses change by the minute), or a pre-game row's kickoff
+   has passed while ESPN still lists it "pre" (kickoff flipped while the tab
+   sat open — the row would otherwise read "Scheduled" forever). Garbage or
+   missing dates never trigger a refresh: an unparseable kickoff is a "don't
+   know", not a "refresh me". Pure, testable. */
+function needsRefresh(rows, nowMs){
+  var now = isFinite(nowMs) ? nowMs : Date.now();
+  var rs = Array.isArray(rows) ? rows : [];
+  for(var i = 0; i < rs.length; i++){
+    var r = rs[i];
+    if(!r) continue;
+    if(r.state === "in") return true;
+    if(r.state === "pre"){
+      var t = Date.parse(r.date || "");
+      if(isFinite(t) && t <= now) return true;
+    }
+  }
+  return false;
+}
+
 var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, collect: collect,
            rankRows: rankRows, top: top,
            normKalshiAbbr: normKalshiAbbr, kalshiPair: kalshiPair,
            kalshiPrice: kalshiPrice, kalshiSideAbbr: kalshiSideAbbr,
            snapStale: snapStale, withKalshi: withKalshi, snapWhen: snapWhen,
            broadcastNames: broadcastNames, kickoffIn: kickoffIn,
-           nearestPre: nearestPre, gameNoun: gameNoun};
+           nearestPre: nearestPre, gameNoun: gameNoun, needsRefresh: needsRefresh};
 if(typeof module !== "undefined" && module.exports) module.exports = api;
 else (window.GIU = window.GIU || {}).homeStrip = api;
 })();
