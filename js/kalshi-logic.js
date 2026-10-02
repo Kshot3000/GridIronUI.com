@@ -85,14 +85,16 @@ K.settled = function(g){
 K.games = function(snap){
   var out = [];
   ((snap && snap.games) || []).forEach(function(g){
+    var tickers = {};
     var teams = (g.markets || []).filter(function(m){ return m.kind !== "other"; }).map(function(m){
+      if(m && m.team && m.ticker) tickers[m.team] = m.ticker;
       return {name: m.team, price: K.price(m), book: K.book(m), vol: K.vol(m)};
     }).filter(function(t){ return t.name && t.price !== null; });
     if(teams.length < 2) return;
     teams.sort(function(a, b){ return b.price - a.price; });
     out.push({
       title: g.title, sub: g.sub_title, ticker: g.event_ticker,
-      close: K.gameTime(g), teams: teams, settled: K.settled(g)
+      close: K.gameTime(g), teams: teams, tickers: tickers, settled: K.settled(g)
     });
   });
   out.sort(function(a, b){
@@ -272,6 +274,112 @@ K.fmtWhen = function(ms){
     return d.toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}) +
       " · " + d.toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit"});
   }catch(e){ return ""; }
+};
+
+/* ---- Kalshi price history (data/kalshi-history.json) ----
+   scripts/fetch-kalshi.py appends one yes-price point per priced winner
+   market to that file after every successful fetch, each series capped at
+   168 points (about a week of hourly runs). The file starts empty and only
+   ever accumulates real observations — nothing invents history, and the
+   page only ever charts points that are really there. */
+
+K.HIST_CAP = 168;
+
+/* Pure append: the node-testable spec of the fetcher's history step
+   (scripts/fetch-kalshi.py:append_history must stay in lockstep with it).
+   Returns a NEW history map {ticker: [{t, yes}]} with one point per priced
+   winner market appended ({t: snap.updated_at, yes: K.price cents}), each
+   series trimmed to the newest K.HIST_CAP points (oldest dropped).
+   - carried-forward stale games (game.stale) add no point: their prices
+     were not observed this run;
+   - non-winner ("other") markets, tickerless markets, and unpriced markets
+     are skipped — nothing guessed;
+   - an identical price to the previous point STILL appends: every point is
+     one honest observation at its timestamp, and "N snapshots" in the chart
+     caption counts real observations, never faked ones;
+   - garbage in -> a clean map out, never invented points. */
+K.appendHistory = function(hist, snap){
+  var out = {}, k;
+  hist = (hist && typeof hist === "object") ? hist : {};
+  for(k in hist){
+    if(hist.hasOwnProperty(k) && Array.isArray(hist[k])) out[k] = hist[k].slice();
+  }
+  var t = (snap && typeof snap.updated_at === "string" && snap.updated_at) ? snap.updated_at : null;
+  if(!t) return out;
+  ((snap && snap.games) || []).forEach(function(g){
+    if(!g || g.stale) return; /* carried forward — no fresh observation */
+    ((g && g.markets) || []).forEach(function(m){
+      if(!m || m.kind === "other" || !m.ticker) return;
+      var p = K.price(m);
+      if(p === null) return;
+      var s = out[m.ticker];
+      if(!Array.isArray(s)) s = out[m.ticker] = [];
+      s.push({t: t, yes: p});
+      if(s.length > K.HIST_CAP) out[m.ticker] = s.slice(s.length - K.HIST_CAP);
+    });
+  });
+  return out;
+};
+
+/* Per-game history for one normalized K.games game: {teamName: [{t, yes}]}.
+   Reads game.tickers (market ticker per team name, built by K.games).
+   Garbage points are dropped, prices rounded to whole cents. */
+K.gameHist = function(game, hist){
+  var out = {};
+  hist = (hist && typeof hist === "object") ? hist : {};
+  var tk = (game && game.tickers) || {};
+  ((game && game.teams) || []).forEach(function(tm){
+    var s = hist[tk[tm.name]];
+    out[tm.name] = (Array.isArray(s) ? s : []).filter(function(p){
+      return p && typeof p.t === "string" && p.t && isFinite(Number(p.yes));
+    }).map(function(p){ return {t: p.t, yes: Math.round(Number(p.yes))}; });
+  });
+  return out;
+};
+
+function r2(x){ return Math.round(x * 100) / 100; }
+
+/* Sparkline geometry for an array of whole-cent yes prices. Returns null
+   when fewer than two valid points exist — one dot is not a trend, and the
+   caller renders the honest "history accumulating" note instead of a chart.
+   Otherwise returns {pts: [[x,y]...], min, max} in canvas pixels (y flipped
+   for canvas coordinates), pad inset around the edges. */
+K.sparkPath = function(series, w, h, pad){
+  var vals = [];
+  (series || []).forEach(function(v){
+    /* Number(null)/Number("") is 0 — both would masquerade as a real 0c
+       price. Only parse genuine values; everything else is missing. */
+    if(v === null || v === undefined || v === "") return;
+    v = Number(v);
+    if(isFinite(v)) vals.push(v);
+  });
+  if(vals.length < 2) return null;
+  w = (w > 0) ? w : 100; h = (h > 0) ? h : 40;
+  pad = (pad === undefined || pad === null) ? 3 : pad;
+  var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  var span = max - min, iw = w - 2 * pad, ih = h - 2 * pad;
+  var pts = vals.map(function(v, i){
+    var x = pad + (i / (vals.length - 1)) * iw;
+    var y = (span === 0) ? h / 2 : (h - pad) - ((v - min) / span) * ih;
+    return [r2(x), r2(y)];
+  });
+  return {pts: pts, min: min, max: max};
+};
+
+/* Caption text for a Kalshi price-history sparkline. Honest by construction:
+   never "live", always names the snapshot count and the snapshot time. With
+   fewer than 2 points there is no chart, so the text says history is
+   accumulating instead of faking a trend. */
+K.sparkCaption = function(n, snapIso){
+  n = Math.max(0, Math.floor(Number(n) || 0));
+  var when = K.fmtWhen(Date.parse(snapIso || ""));
+  if(n < 2){
+    return "Kalshi price history accumulating — only " +
+      (n === 0 ? "no snapshots" : "1 snapshot") +
+      " recorded so far; the chart appears once more snapshots build up." +
+      (when ? " Latest snapshot " + when + "." : "");
+  }
+  return "Kalshi price history · " + n + " snapshots · snapshot " + (when || "time unknown");
 };
 
 if(typeof module !== "undefined" && module.exports) module.exports = K;

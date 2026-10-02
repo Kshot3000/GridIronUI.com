@@ -10,6 +10,16 @@ renders as the "Kalshi NFL" tab.
 Honesty rules: the snapshot carries its own updated_at; the page labels it as
 a snapshot and warns when it goes stale. Nothing here invents a price.
 
+Price history: after every successful snapshot write, this script appends one
+yes-price point per priced winner market to data/kalshi-history.json, a map
+of {market_ticker: [{t: "<iso>", yes: <cents>}]}, capped at 168 points per
+ticker (about a week of hourly runs). The file starts empty and only ever
+accumulates real observations — carried-forward stale games add no point
+(their prices weren't observed this run), and identical prices still append
+(every point is one honest observation at its timestamp). The append logic
+mirrors K.appendHistory in js/kalshi-logic.js (the JS module is the
+node-testable spec; this function must stay in lockstep with it).
+
 The snapshot also carries a snapshot-to-snapshot diff so the pages can show
 "what moved" badges without keeping history client-side:
   prev_at   — the previous snapshot's updated_at (null on the first snapshot)
@@ -42,6 +52,8 @@ def parse_args(argv=None):
                    help="Kalshi series ticker (default KXNFLGAME)")
     p.add_argument("--out", default=os.path.join(ROOT, "data", "kalshi-nfl.json"),
                    help="output snapshot path (default data/kalshi-nfl.json)")
+    p.add_argument("--history", default=None,
+                   help="price-history output path (default: kalshi-history.json next to --out)")
     return p.parse_args(argv)
 
 def get(url, retries=4):
@@ -171,6 +183,58 @@ def diff_moves(prev_games, prev_at, games, min_delta=2):
                               "delta": d, "prev": before, "now": now})
     return moves, new_games
 
+HISTORY_CAP = 168  # per-ticker points kept: ~a week of hourly runs
+
+def append_history(out_path, snap, hist_path=None):
+    """Mirror of K.appendHistory in js/kalshi-logic.js (the JS module is the
+    node-testable spec; this function must stay in lockstep with it).
+    Appends one {t, yes} point per priced winner market to the history file
+    (default kalshi-history.json next to the snapshot), trimming each series
+    to the newest HISTORY_CAP points. Carried-forward stale games add no
+    point; "other" markets, tickerless and unpriced markets are skipped;
+    identical prices still append (every point is one honest observation).
+    Atomic: writes a tmp file and renames. Returns points appended."""
+    if hist_path is None:
+        hist_path = os.path.join(os.path.dirname(out_path), "kalshi-history.json")
+    hist = {}
+    if os.path.exists(hist_path):
+        try:
+            with open(hist_path) as f:
+                hist = json.load(f) or {}
+            if not isinstance(hist, dict):
+                hist = {}
+        except Exception as e:
+            print("WARN: could not read price history at %s; starting fresh: %s"
+                  % (hist_path, e), file=sys.stderr)
+            hist = {}
+    t = snap.get("updated_at")
+    if not t:
+        return 0
+    n = 0
+    for g in snap.get("games", []):
+        if not g or g.get("stale"):
+            continue  # carried forward — no fresh observation
+        for m in g.get("markets", []):
+            if not m or m.get("kind") == "other" or not m.get("ticker"):
+                continue
+            p = js_price(m.get("yes_bid"), m.get("yes_ask"), m.get("last"))
+            if p is None:
+                continue
+            series = hist.get(m["ticker"])
+            if not isinstance(series, list):
+                series = []
+            series.append({"t": t, "yes": p})
+            if len(series) > HISTORY_CAP:
+                series = series[-HISTORY_CAP:]
+            hist[m["ticker"]] = series
+            n += 1
+    os.makedirs(os.path.dirname(hist_path) or ".", exist_ok=True)
+    tmp = hist_path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(hist, f, indent=1)
+    os.replace(tmp, hist_path)
+    return n
+
 def main(argv=None):
     args = parse_args(argv)
     SERIES, OUT = args.series, args.out
@@ -250,9 +314,12 @@ def main(argv=None):
     with open(tmp, "w") as f:
         json.dump(snap, f, indent=1)
     os.replace(tmp, OUT)
+    # Accumulate price history from the snapshot that was just written.
+    hist_n = append_history(OUT, snap, args.history)
     n_mk = sum(len(g["markets"]) for g in games)
     print("wrote %s: %d games, %d markets, %d moves, %d new games (prev %s)"
           % (OUT, len(games), n_mk, len(moves), len(new_games), prev_at or "none"))
+    print("appended %d price-history points" % hist_n)
 
 if __name__ == "__main__":
     main()

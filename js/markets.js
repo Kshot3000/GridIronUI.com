@@ -328,7 +328,94 @@ function kalshiAbbrs(g){
   var m = String((g&&g.sub)||"").match(/^([A-Z]{2,3})\s+vs\s+([A-Z]{2,3})\b/);
   return m ? [m[1], m[2]] : null;
 }
-function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt){
+/* Kalshi price-history sparkline: a per-game canvas chart of the yes-price
+   history accumulated server-side (data/kalshi-history.json — timestamped
+   snapshots, never labeled live). The favorite side plots in gold, the other
+   side in blue when it has at least 2 points of its own (one dot is never a
+   trend — with <2 points the card shows the honest accumulating note instead
+   of a chart). The canvas carries an aria-label with the same numbers as the
+   visible caption, so screen readers get the story too. Hand-rolled canvas
+   only — no external chart CDN. */
+function kalshiSpark(game, hist, snapAt){
+  var K = window.Kalshi;
+  if(!K || !K.sparkPath || !K.gameHist || !K.sparkCaption || !GIU || !GIU.esc) return "";
+  var byTeam = K.gameHist(game, hist || {});
+  var fav = game.teams[0], dog = game.teams[1];
+  function yeses(t){ return t ? (byTeam[t.name] || []).map(function(p){ return p.yes; }) : []; }
+  var favS = yeses(fav), dogS = yeses(dog);
+  var favG = K.sparkPath(favS, 600, 120);
+  var wrap = 'margin-top:10px;border-top:1px solid var(--line-soft);padding-top:10px';
+  if(!favG){
+    /* Not enough history for a chart — say so honestly, never fake points. */
+    return '<div style="'+wrap+'"><span class="tag green">Kalshi</span> '+
+      '<span style="font-size:.8rem;color:var(--faint)">'+GIU.esc(K.sparkCaption(favS.length, snapAt))+'</span></div>';
+  }
+  var dogG = K.sparkPath(dogS, 600, 120);
+  var caption = K.sparkCaption(favS.length, snapAt);
+  var label = "Kalshi price history for " + fav.name + " vs " + (dog ? dog.name : "field") +
+    ": " + favS.length + " snapshots; latest yes prices " + fav.name + " " + fav.price + " cents" +
+    (dog ? ", " + dog.name + " " + dog.price + " cents" : "") +
+    " (server-side snapshot, not live)";
+  var legend = '<span style="display:inline-block;width:14px;height:3px;background:#f0b429;border-radius:2px;margin-right:5px;vertical-align:middle"></span>'+
+    GIU.esc(fav.name)+
+    (dogG ? ' &nbsp;·&nbsp; <span style="display:inline-block;width:14px;height:3px;background:#4aa8ff;border-radius:2px;margin-right:5px;vertical-align:middle"></span>'+GIU.esc(dog.name) : "");
+  return '<div style="'+wrap+'"><div style="font-size:.78rem;color:var(--faint);margin-bottom:6px"><span class="tag green">Kalshi</span> '+GIU.esc(caption)+'</div>'+
+    '<canvas class="kalshi-spark" width="600" height="120" role="img" aria-label="'+GIU.esc(label)+'" '+
+    'style="width:100%;max-width:360px;height:auto;display:block" '+
+    'data-fav="'+GIU.esc(JSON.stringify(favG.pts))+'"'+
+    (dogG ? ' data-dog="'+GIU.esc(JSON.stringify(dogG.pts))+'"' : "")+'>'+
+    GIU.esc(label)+'</canvas>'+
+    '<div style="font-size:.72rem;color:var(--faint);margin-top:4px">'+legend+'</div></div>';
+}
+/* Draw every kalshi-spark canvas after the cards land in the DOM (points
+   ride in data attributes). Degrades gracefully: no canvas support, no
+   points, or no draw context leaves the aria-label + caption telling the
+   story — never junk. Colors read the site's CSS variables with hard
+   fallbacks so the chart keeps the dark-sportsbook identity. */
+function cssVar(name, fallback){
+  try{
+    var v = (document.defaultView || window).getComputedStyle(document.documentElement).getPropertyValue(name);
+    v = String(v || "").trim();
+    return v || fallback;
+  }catch(e){ return fallback; }
+}
+function drawSparkLine(ctx, pts, color, fill){
+  if(!pts || pts.length < 2) return;
+  if(fill){
+    ctx.save();
+    ctx.beginPath();
+    pts.forEach(function(p, i){ i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+    ctx.lineTo(pts[pts.length - 1][0], 120);
+    ctx.lineTo(pts[0][0], 120);
+    ctx.closePath();
+    var g = ctx.createLinearGradient(0, 0, 0, 120);
+    g.addColorStop(0, color); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.fill();
+    ctx.restore();
+  }
+  ctx.beginPath();
+  pts.forEach(function(p, i){ i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+  ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.lineJoin = "round"; ctx.lineCap = "round";
+  ctx.stroke();
+  var last = pts[pts.length - 1];
+  ctx.beginPath(); ctx.arc(last[0], last[1], 4.5, 0, 2 * Math.PI);
+  ctx.fillStyle = color; ctx.fill();
+}
+function drawKalshiSparks(box){
+  var cs;
+  try{ cs = box.querySelectorAll("canvas.kalshi-spark"); }catch(e){ return; }
+  var gold = cssVar("--gold", "#f0b429"), blue = cssVar("--blue", "#4aa8ff");
+  Array.prototype.forEach.call(cs || [], function(cv){
+    var ctx = null;
+    try{ ctx = cv.getContext("2d"); }catch(e){ ctx = null; }
+    if(!ctx) return;
+    var fav = parseArr(cv.getAttribute("data-fav")), dog = parseArr(cv.getAttribute("data-dog"));
+    drawSparkLine(ctx, fav, "rgba(240,180,41,.28)", true);
+    drawSparkLine(ctx, fav, gold, false);
+    drawSparkLine(ctx, dog, blue, false);
+  });
+}
+function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt){
   var ab = kalshiAbbrs(g);
   /* Kalshi's abbreviations don't always match ESPN's (CWS vs CHW) — run them
      through the shared alias map so the header keeps full team identity. */
@@ -375,6 +462,7 @@ function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt){
     '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+newTag+
     head+meta+
     rows+
+    kalshiSpark(g, hist, snapAt)+
     '<div class="game-meta"><a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi →</a></div></div>';
 }
 function loadKalshi(my, silent, league){
@@ -389,9 +477,13 @@ function loadKalshi(my, silent, league){
   }
   Promise.all([
     GIU.fetchJSON(cfg.file),
+    /* Price history accumulates server-side next to the snapshot; a missing
+       file (first run) is not an error — the cards render with the honest
+       "accumulating" note and everything else keeps working. */
+    GIU.fetchJSON("data/kalshi-history.json").catch(function(){ return {}; }),
     GIU.teamDir()
   ]).then(function(x){
-    var snap = x[0], dir = x[1];
+    var snap = x[0], hist = x[1] || {}, dir = x[2];
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     var games = window.Kalshi.games(snap);
     if(!games.length){
@@ -419,15 +511,15 @@ function loadKalshi(my, silent, league){
     (snap.new_games || []).forEach(function(et){ if(et) newSet[et] = 1; });
     var prevAt = snap.prev_at || null;
     box.innerHTML = stale + shown.map(function(g){
-      return kalshiCard(g, dir, cfg, moveMap[g.ticker], !!newSet[g.ticker], prevAt);
+      return kalshiCard(g, dir, cfg, moveMap[g.ticker], !!newSet[g.ticker], prevAt, hist, snap.updated_at);
     }).join("") +
       (games.length > KALSHI_PAGE
         ? '<div style="margin:8px 0 34px;text-align:center"><button class="btn btn-ghost" id="kalshiShowAll" aria-expanded="'+showAll+'">'+
           (showAll ? "Show fewer games" : "Show all "+games.length+" games")+'</button></div>'
         : "");
+    drawKalshiSparks(box); /* paint the price-history canvases just rendered */
     var tgl = $("kalshiShowAll");
-    if(tgl) tgl.addEventListener("click", function(){
-      kalshiShowAll[league] = !kalshiShowAll[league];
+    if(tgl) tgl.addEventListener("click", function(){      kalshiShowAll[league] = !kalshiShowAll[league];
       loadKalshi(tabSeq, true, league); /* silent re-render keeps the toggle state */
     });
     /* ---- live auto-refresh ----

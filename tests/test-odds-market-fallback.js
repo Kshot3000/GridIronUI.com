@@ -99,7 +99,7 @@ assert(mixedHtml.indexOf("Done Game") === -1, "settled game excluded from the bo
 
 /* ---- odds.html wiring guards ---- */
 var oddsHtml = fs.readFileSync(path.join(__dirname, "..", "odds.html"), "utf8");
-assert(/js\/kalshi-logic\.js\?v=1\.129\.1/.test(oddsHtml), "odds.html loads kalshi-logic.js keyed");
+assert(/js\/kalshi-logic\.js\?v=1.141.0/.test(oddsHtml), "odds.html loads kalshi-logic.js keyed");
 assert(/js\/odds-logic\.js\?v=1\.128\.0/.test(oddsHtml), "odds.html bumps odds-logic.js key");
 assert(/js\/odds\.js\?v=1\.128\.0/.test(oddsHtml), "odds.html bumps odds.js key");
 var oddsJs = fs.readFileSync(path.join(__dirname, "..", "js", "odds.js"), "utf8");
