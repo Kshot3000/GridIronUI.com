@@ -177,7 +177,7 @@ assert(Array.isArray(mtNfl), "default league arg still works (nfl backward compa
 var src = fs.readFileSync(path.join(ROOT, "js", "markets.js"), "utf8");
 assert(/lkey\s*===\s*"mlb"\s*\?\s*"data\/kalshi-mlb\.json"/.test(src),
   'markets.js maps the MLB tab to data/kalshi-mlb.json');
-assert(/disagreeCard\s*\(\s*games\s*,\s*snap\s*,\s*dir\s*,\s*lkey\s*\)/.test(src),
+assert(/disagreeCard\s*\(\s*visible\s*,\s*snap\s*,\s*dir\s*,\s*lkey\s*\)/.test(src),
   "markets.js passes the tab league key into disagreeCard");
 assert(/function disagreeCard\s*\(\s*games\s*,\s*snap\s*,\s*dir\s*,\s*league\s*\)/.test(src),
   "disagreeCard takes a league parameter");

@@ -45,6 +45,13 @@
 .follow-chip-link b{color:var(--gold)}
 #marketGrid .card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
 .tag.your-team{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.4)}
+/* v1.162.0 — find-a-game: page-scoped finder row (the scores board's
+   gold-ring search language) */
+.market-find{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;max-width:680px}
+.market-find input{flex:1;min-width:200px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.market-find input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.market-find-count{font-size:.84rem;color:var(--faint)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
@@ -71,12 +78,18 @@
       <button class="btn btn-ghost btn-sm" id="pauseBtn" aria-pressed="false" style="display:none">⏸ Pause live</button>
     </span>
   </div>
+  <!-- v1.162.0 — find-a-game: filters the active tab's loaded games (js/markets.js); on the Kalshi tabs it searches every game in the snapshot, not just the first page shown -->
+  <div class="market-find" role="search">
+    <input type="search" id="marketQ" placeholder="Find a game — team or abbr (Chiefs, KC, Yankees…)" autocomplete="off" spellcheck="false" aria-label="Find a game on this tab" aria-describedby="marketCount">
+    <button class="btn btn-ghost btn-sm" id="marketClear" type="button" hidden>Clear search</button>
+    <span id="marketCount" class="market-find-count" role="status" aria-live="polite"></span>
+  </div>
   <!-- v1.155.0 — "Your teams" jump strip: one chip per followed-team game on the active tab (js/markets.js renders it; hidden when nothing matches; a chip for a Kalshi game behind "Show all" expands the list first) -->
   <div id="followStrip" class="follow-strip" hidden></div>
   <div class="grid grid-3" id="marketGrid"></div>
 
   <div class="notice" style="margin:30px 0">
-    <strong>How to read these.</strong> Each market is binary — Yes/No, Team A/Team B — and the two prices always sum to ~100¢. When a price disagrees with your own number, that's a potential edge; when it agrees with the sportsbooks, that's confirmation. The <b class="num">7d</b> badge shows how far the price has moved in the last week (reported by Polymarket), and the book line shows the live bid/ask spread — momentum and liquidity worth knowing before you bet. On the Kalshi tabs, <span class="mv-up">▲</span>/<span class="mv-dn">▼</span> badges mark prices that moved 2¢ or more since the previous snapshot — the crowd's freshest lean, straight from the order book. The <b style="color:var(--text)">Market pulse</b> strip above the Kalshi cards names the tab's biggest snapshot-to-snapshot moves in one glance; each chip jumps to its game's card. Games involving a team you ★-follow on the <a href="odds.html">odds board</a> are marked <b style="color:var(--text)">★ Your team</b> on every tab here too, with a jump strip above the cards — a followed Kalshi game hiding behind "Show all" expands the list when its chip is tapped. Never treat a market price as a prediction <i>about</i> the game — it <i>is</i> the crowd's probability estimate, with real money behind it.
+    <strong>How to read these.</strong> Each market is binary — Yes/No, Team A/Team B — and the two prices always sum to ~100¢. When a price disagrees with your own number, that's a potential edge; when it agrees with the sportsbooks, that's confirmation. The <b class="num">7d</b> badge shows how far the price has moved in the last week (reported by Polymarket), and the book line shows the live bid/ask spread — momentum and liquidity worth knowing before you bet. On the Kalshi tabs, <span class="mv-up">▲</span>/<span class="mv-dn">▼</span> badges mark prices that moved 2¢ or more since the previous snapshot — the crowd's freshest lean, straight from the order book. The <b style="color:var(--text)">Market pulse</b> strip above the Kalshi cards names the tab's biggest snapshot-to-snapshot moves in one glance; each chip jumps to its game's card. Games involving a team you ★-follow on the <a href="odds.html">odds board</a> are marked <b style="color:var(--text)">★ Your team</b> on every tab here too, with a jump strip above the cards — a followed Kalshi game hiding behind "Show all" expands the list when its chip is tapped. Looking for one game on a full tab? <b style="color:var(--text)">Find a game</b> above the board filters the active tab's games as you type — on the Kalshi tabs it searches every game in the snapshot, including the ones behind "Show all". Never treat a market price as a prediction <i>about</i> the game — it <i>is</i> the crowd's probability estimate, with real money behind it.
   </div>
 
   <!-- v1.29.0 — referral slots (render only when referral links are configured) -->
@@ -98,6 +111,6 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/disagree-logic.js?v=1.129.1"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
-<script src="js/markets.js?v=1.155.0"></script>
+<script src="js/markets.js?v=1.162.0"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* Tests for followed teams on the Markets page (v1.155.0, js/markets.js).
+/* Tests for followed teams on the Markets page (v1.162.0, js/markets.js).
    The odds board's ★ follows (js/team-follow.js, localStorage
    "giu-followed-teams") already mark odds / scores / predictions /
    injuries / weather; they now mark BOTH sources on this page too:
@@ -302,7 +302,7 @@ function pins(){
   var html = fs.readFileSync(path.join(ROOT, "markets.html"), "utf8");
   assert(html.indexOf('id="followStrip"') !== -1, "markets.html carries the #followStrip container");
   assert(html.indexOf("js/team-follow.js?v=1.142.0") !== -1, "markets.html loads team-follow.js at its content version v1.142.0");
-  assert(html.indexOf("js/markets.js?v=1.155.0") !== -1, "markets.html keys markets.js at v1.155.0");
+  assert(html.indexOf("js/markets.js?v=1.162.0") !== -1, "markets.html keys markets.js at v1.162.0");
   assert(html.indexOf(".follow-strip") !== -1 && html.indexOf(".card.followed") !== -1 && html.indexOf(".tag.your-team") !== -1,
          "markets.html carries the page-scoped follow styles");
   assert(html.indexOf('<script src="js/team-follow.js') < html.indexOf('<script src="js/markets.js'), "team-follow.js loads before markets.js");

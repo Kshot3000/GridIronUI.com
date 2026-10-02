@@ -41,6 +41,103 @@ var KALSHI_TABS = {
 var KALSHI_PAGE = 12;
 var kalshiShowAll = {nfl: false, mlb: false};
 
+/* ---- find-a-game (v1.162.0) ----
+   Every OTHER game board on the site has a finder (scores v1.161.0,
+   news, journal, tools, glossary) — this page was the last one where
+   finding ONE game meant scrolling: the Kalshi tabs list 30 NFL games
+   (12 on the first page, the rest behind "Show all") and the
+   Polymarket tabs silently cap at the 10 soonest games, so a game
+   outside the cap wasn't even on the page to Ctrl-F for. The query
+   splits into terms and EVERY term must appear in the game's
+   searchable text (AND semantics, the scores-board contract), so
+   "chiefs bills" or "kc buffalo" narrows across fields while a term
+   that appears nowhere matches nothing, never everything. Filtering
+   renders from the last board pulled (lastPM / lastKalshi), so the
+   query is board state that survives tab switches and the silent
+   refresh instead of being wiped by them; while a search is active
+   the page caps lift (Polymarket renders every match, Kalshi shows
+   all matches instead of the first page), so a search can find any
+   game on the tab. The "Your teams" strip and the Kalshi pulse strip
+   are computed over the FILTERED board, so a chip never promises a
+   card the search hid; the tab note and live count still describe
+   the whole board. No query -> both tabs render byte-identically. */
+var searchQ = "", lastPM = null, lastKalshi = null, renderGen = 0;
+function searchTerms(q){
+  return String(q == null ? "" : q).toLowerCase().split(/\s+/).filter(function(t){ return !!t; });
+}
+function termsMatch(hay, q){
+  var terms = searchTerms(q);
+  if(!terms.length) return true;
+  if(!hay) return false;
+  for(var i = 0; i < terms.length; i++){ if(hay.indexOf(terms[i]) === -1) return false; }
+  return true;
+}
+/* Pure: the searchable text for one Polymarket game — the event title
+   plus the outcome names on its moneyline / spread / total markets
+   (the priced team names, so a nickname the title abbreviates can
+   still match). When the caller passes the team directory + league +
+   GIU.teamFind (renderPM does), both title sides' abbreviations are
+   appended too, so "kc" finds the Chiefs game the way it does on the
+   Kalshi tabs' sub lines; a side that doesn't resolve simply adds
+   nothing — never a fuzzy guess. Garbage in -> "" (matches only a
+   blank query). */
+function pmSearchText(g, dir, league, find){
+  var ev = (g && g.ev) || {};
+  var parts = [];
+  if(ev.title) parts.push(String(ev.title));
+  [g && g.mls, g && g.spread, g && g.total].forEach(function(ms){
+    (Array.isArray(ms) ? ms : (ms ? [ms] : [])).forEach(function(m){
+      parseArr(m && m.outcomes).forEach(function(o){ if(o) parts.push(String(o)); });
+    });
+  });
+  if(typeof find === "function"){
+    var tp = String(ev.title || "").split(/\s+vs\.?\s+/);
+    if(tp.length === 2){
+      tp.forEach(function(side){
+        var hit = null;
+        try{ hit = find(dir, league, side.trim()); }catch(e){ hit = null; }
+        if(hit && hit.abbr) parts.push(String(hit.abbr));
+      });
+    }
+  }
+  return parts.join(" ").toLowerCase();
+}
+/* Pure: the searchable text for one Kalshi snapshot game — the title,
+   the sub line (which carries both abbreviations, "KC vs BUF (...)"),
+   and the priced team names. Garbage in -> "". */
+function kalshiSearchText(g){
+  if(!g) return "";
+  var parts = [];
+  if(g.title) parts.push(String(g.title));
+  if(g.sub) parts.push(String(g.sub));
+  (Array.isArray(g.teams) ? g.teams : []).forEach(function(t){
+    if(t && t.name) parts.push(String(t.name));
+  });
+  return parts.join(" ").toLowerCase();
+}
+function pmMatchesSearch(g, q, dir, league, find){ return termsMatch(pmSearchText(g, dir, league, find), q); }
+function kalshiMatchesSearch(g, q){ return termsMatch(kalshiSearchText(g), q); }
+/* Honest count + Clear visibility, narrated only while a search is
+   active — the tab note stays the story otherwise. Null-guarded:
+   pages/tests without the hooks render exactly as before. */
+function renderSearchMeta(shown, total){
+  var c = $("marketCount"), b = $("marketClear");
+  var active = searchTerms(searchQ).length > 0;
+  if(c) c.textContent = (active && total > 0)
+    ? (shown === 0 ? "No matches" : shown + " of " + total + " games") : "";
+  if(b) b.hidden = !active;
+}
+try{
+  if(typeof window !== "undefined"){
+    window.GIU = window.GIU || {};
+    window.GIU.marketsSearchTerms = searchTerms;
+    window.GIU.marketsPmSearchText = pmSearchText;
+    window.GIU.marketsKalshiSearchText = kalshiSearchText;
+    window.GIU.marketsPmMatchesSearch = pmMatchesSearch;
+    window.GIU.marketsKalshiMatchesSearch = kalshiMatchesSearch;
+  }
+}catch(e){}
+
 /* ---- followed teams (v1.155.0) ----
    The odds board's ★ follows (js/team-follow.js, localStorage
    "giu-followed-teams") already mark odds, scores, predictions, injuries
@@ -397,6 +494,7 @@ function disagreeCard(games, snap, dir, league){
 function load(my, silent){
   my = (my===undefined) ? tabSeq : my;
   clearLive(); /* league switches and silent refreshes always reschedule */
+  kalshiTab = null; /* v1.162.0 — the finder re-renders the ACTIVE board; a Polymarket load owns the page from here */
   var box = $("marketGrid");
   if(!silent){
     box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
@@ -431,20 +529,62 @@ function load(my, silent){
       games.push({ev:ev, mls:mls, spread:spread, total:total});
     });
     games.sort(function(a,b){ return startOf(a.ev)-startOf(b.ev); });
-    games = games.slice(0,10);
-    if(!games.length){
-      box.innerHTML = '<div class="empty">No upcoming '+GIU.esc(lname)+' game markets on Polymarket right now. Markets cluster around game days — check back mid-week.</div>';
-      $("marketNote").textContent = "";
-      renderFollowStrip([]);
-      liveN = 0; renderLiveStatus();
-      return;
-    }
-    $("marketNote").textContent = games.length+" games · prices live from Polymarket · volume in $";
-    /* ---- followed teams (v1.155.0): mark this tab's followed games ---- */
-    var folPM = followedPM(games, followedList(), dir, lkey, (GIU && GIU.teamFind) || null);
-    var folByKey = {};
-    folPM.forEach(function(m){ folByKey[m.key] = m; });
-    box.innerHTML = games.map(function(g, gi){
+    /* v1.162.0 — the parsed board (BEFORE the 10-game cap, so a search
+       can reach every game on the tab) is cached and rendered by
+       renderPM, which re-applies the active query on every render. */
+    lastPM = { games: games, dir: dir, lname: lname, lkey: lkey };
+    lastUpdated = Date.now();
+    renderPM();
+  }).catch(function(){
+    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
+    lastPM = null;
+    box.innerHTML = GIU.failBox("Polymarket's API didn't respond. No prices are shown rather than stale ones.");
+    $("marketNote").textContent = "";
+    renderFollowStrip([]);
+    renderSearchMeta(0, 0);
+    liveN = 0; renderLiveStatus();
+  });
+}
+
+/* Render the Polymarket board from lastPM, applying the find-a-game
+   query (v1.162.0). Called by load() on every fresh pull and by the
+   finder on every keystroke — it never refetches the feed itself.
+   The cross-book card rides along after the render, guarded by
+   renderGen so a slow snapshot read can never land on a newer
+   (re-filtered) board. */
+function renderPM(){
+  var st = lastPM; if(!st) return;
+  var box = $("marketGrid");
+  var gen = ++renderGen;
+  var games = st.games, dir = st.dir, lkey = st.lkey, lname = st.lname;
+  clearLive(); /* a search keystroke re-enters here — never stack the 90s tick */
+  if(!games.length){
+    box.innerHTML = '<div class="empty">No upcoming '+GIU.esc(lname)+' game markets on Polymarket right now. Markets cluster around game days — check back mid-week.</div>';
+    $("marketNote").textContent = "";
+    renderFollowStrip([]);
+    renderSearchMeta(0, 0);
+    liveN = 0; renderLiveStatus();
+    return;
+  }
+  var searching = searchTerms(searchQ).length > 0;
+  var visible = games.filter(function(g){ return pmMatchesSearch(g, searchQ, dir, lkey, (GIU && GIU.teamFind) || null); });
+  $("marketNote").textContent = games.length+" games · prices live from Polymarket · volume in $";
+  /* ---- followed teams (v1.155.0): mark this tab's followed games.
+     v1.162.0 — computed over the FILTERED board, so a strip chip never
+     promises a card the search hid (the scores/news discipline). ---- */
+  var folPM = followedPM(visible, followedList(), dir, lkey, (GIU && GIU.teamFind) || null);
+  var folByKey = {};
+  folPM.forEach(function(m){ folByKey[m.key] = m; });
+  if(searching && !visible.length){
+    /* Named empty state — never a blank grid under an active search. */
+    box.innerHTML = '<div class="empty">No markets match &quot;'+GIU.esc(String(searchQ).trim())+
+      '&quot; on this tab. Clear the search to see all '+games.length+' games.</div>';
+  } else {
+    /* No query -> the board keeps its 10-game cap, byte-identical to
+       before. Searching lifts the cap: every match renders. */
+    var shownGames = searching ? visible : visible.slice(0, 10);
+    box.innerHTML = shownGames.map(function(g){
+      var gi = games.indexOf(g);
       var t = fmtT(g.ev.startTime || g.ev.eventDate);
       var slug = g.ev.slug||"";
       var body = g.mls.map(marketRow).join("") +
@@ -460,38 +600,35 @@ function load(my, silent){
         body+
         '<div class="game-meta"><a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">Trade on Polymarket →</a></div></div>';
     }).join("");
-    renderFollowStrip(pmChips(folPM));
-    /* ---- cross-book disagreement (NFL and MLB tabs) ----
-       Each tab's Kalshi snapshot prices the same game-winners as Polymarket;
-       when the two books differ by 3c+ on a side, that gap is a real edge
-       signal. This fetch rides along after the main board renders — a
-       snapshot hiccup hides the strip, never the live prices. */
-    var kalFile = lkey === "nfl" ? "data/kalshi-nfl.json"
-                : (lkey === "mlb" ? "data/kalshi-mlb.json" : null);
-    if(kalFile && games.length && window.Disagree){
-      GIU.fetchJSON(kalFile).then(function(snap){
-        if(my !== tabSeq) return; /* user moved to another tab meanwhile */
-        var html = disagreeCard(games, snap, dir, lkey);
-        if(html) box.insertAdjacentHTML("afterbegin", html);
-      }).catch(function(){ /* optional strip — failure shows nothing, not junk */ });
-    }
-    /* ---- live auto-refresh ----
-       Refresh in-place every 90s, but only while a shown game is likely
-       in-progress — otherwise the timer would burn requests on dead pages. */
-    kalshiTab = null;
-    liveN = likelyLive(games);
-    lastUpdated = Date.now();
-    renderLiveStatus();
-    if(liveN > 0 && autoOn){
-      liveTimer = setInterval(function(){ if(!isHidden()) load(tabSeq, true); }, PM_MS);
-    }
-  }).catch(function(){
-    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
-    box.innerHTML = GIU.failBox("Polymarket's API didn't respond. No prices are shown rather than stale ones.");
-    $("marketNote").textContent = "";
-    renderFollowStrip([]);
-    liveN = 0; renderLiveStatus();
-  });
+  }
+  renderFollowStrip(pmChips(folPM));
+  renderSearchMeta(visible.length, games.length);
+  /* ---- cross-book disagreement (NFL and MLB tabs) ----
+     Each tab's Kalshi snapshot prices the same game-winners as Polymarket;
+     when the two books differ by 3c+ on a side, that gap is a real edge
+     signal. This fetch rides along after the main board renders — a
+     snapshot hiccup hides the strip, never the live prices. Computed
+     over the filtered board, so the card only ever compares games
+     actually on screen. */
+  var kalFile = lkey === "nfl" ? "data/kalshi-nfl.json"
+              : (lkey === "mlb" ? "data/kalshi-mlb.json" : null);
+  if(kalFile && visible.length && window.Disagree){
+    GIU.fetchJSON(kalFile).then(function(snap){
+      if(gen !== renderGen) return; /* a newer render (tab/search/refresh) already won */
+      var html = disagreeCard(visible, snap, dir, lkey);
+      if(html) box.insertAdjacentHTML("afterbegin", html);
+    }).catch(function(){ /* optional strip — failure shows nothing, not junk */ });
+  }
+  /* ---- live auto-refresh ----
+     Refresh in-place every 90s, but only while a shown game is likely
+     in-progress — otherwise the timer would burn requests on dead pages.
+     The live count describes the whole tab pulled, not the filtered view. */
+  kalshiTab = null;
+  liveN = likelyLive(games);
+  renderLiveStatus();
+  if(liveN > 0 && autoOn){
+    liveTimer = setInterval(function(){ if(!isHidden()) load(tabSeq, true); }, PM_MS);
+  }
 }
 
 /* Kalshi — a second prediction-market book on this page. Kalshi's public API
@@ -728,6 +865,7 @@ function loadKalshi(my, silent, league){
   league = league || "nfl";
   var cfg = KALSHI_TABS[league] || KALSHI_TABS.nfl;
   clearLive(); /* league switches and silent refreshes always reschedule */
+  kalshiTab = league; /* v1.162.0 — the finder re-renders the ACTIVE board from here */
   var box = $("marketGrid");
   if(!silent){
     box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
@@ -744,86 +882,122 @@ function loadKalshi(my, silent, league){
   ]).then(function(x){
     var snap = x[0], hist = x[1] || {}, dir = x[2];
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
-    var games = window.Kalshi.games(snap);
-    if(!games.length){
-      box.innerHTML = '<div class="empty">'+GIU.esc(cfg.empty)+'</div>';
-      $("marketNote").textContent = "";
-      renderFollowStrip([]);
-      liveN = 0; renderLiveStatus();
-      return;
-    }
-    var when = agoShort(snap.updated_at);
-    $("marketNote").textContent = games.length+" games · snapshot refreshed "+when+" · Kalshi's API blocks browsers, so prices update when the snapshot rebuilds";
-    var stale = window.Kalshi.stale(snap.updated_at)
-      ? '<div class="notice" style="margin-bottom:16px"><strong>This snapshot is stale</strong> (over 6 hours old). Treat these prices as a rough guide until the next refresh — we\'d rather say so than let you bet on cold numbers.</div>'
-      : "";
-    var showAll = !!kalshiShowAll[league];
-    var shown = showAll ? games : games.slice(0, KALSHI_PAGE);
-    /* "What moved" wiring: the fetch script bakes a snapshot-to-snapshot
-       diff into the file (K.diffMoves contract). Index it by event ticker
-       so each card can badge the teams whose price moved 2c+ since the
-       previous snapshot — and tag games that weren't listed before. */
-    var moveMap = {}, newSet = {};
-    (snap.moves || []).forEach(function(mv){
-      if(!mv || !mv.event_ticker) return;
-      (moveMap[mv.event_ticker] = moveMap[mv.event_ticker] || {})[mv.team] = mv.delta;
-    });
-    (snap.new_games || []).forEach(function(et){ if(et) newSet[et] = 1; });
-    var prevAt = snap.prev_at || null;
-    /* ---- followed teams (v1.155.0): mark this tab's followed games ---- */
-    var folK = followedKalshi(games, followedList(),
-      (window.Disagree && window.Disagree.normAbbr) || null);
-    var folByTicker = {};
-    folK.forEach(function(m){ folByTicker[m.ticker] = m; });
-    var shownSet = {};
-    shown.forEach(function(g){ if(g && g.ticker) shownSet[g.ticker] = 1; });
+    /* v1.162.0 — the loaded snapshot board is cached and rendered by
+       renderKalshi, which re-applies the active query on every render. */
+    lastKalshi = { snap: snap, hist: hist, dir: dir, league: league, cfg: cfg,
+                   games: window.Kalshi.games(snap) };
+    lastUpdated = Date.now();
+    renderKalshi();
+  }).catch(function(){
+    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
+    lastKalshi = null;
+    box.innerHTML = GIU.failBox("The Kalshi snapshot couldn't be loaded. Kalshi's API blocks browser requests, so this page depends on the server-side snapshot — nothing is shown rather than stale prices.");
+    $("marketNote").textContent = "";
+    renderFollowStrip([]);
+    renderSearchMeta(0, 0);
+    liveN = 0; renderLiveStatus();
+  });
+}
+
+/* Render the Kalshi tab from lastKalshi, applying the find-a-game
+   query (v1.162.0). Called by loadKalshi() on every fresh snapshot
+   and by the finder on every keystroke — it never refetches itself.
+   While a search is active the first-page cap lifts: every match
+   renders, and the pulse + follow strips are computed over the
+   filtered board so no chip promises a card the search hid. */
+function renderKalshi(){
+  var st = lastKalshi; if(!st) return;
+  var snap = st.snap, hist = st.hist, dir = st.dir,
+      league = st.league, cfg = st.cfg, games = st.games;
+  var box = $("marketGrid");
+  ++renderGen;
+  clearLive(); /* a search keystroke re-enters here — never stack the 5-min tick */
+  if(!games.length){
+    box.innerHTML = '<div class="empty">'+GIU.esc(cfg.empty)+'</div>';
+    $("marketNote").textContent = "";
+    renderFollowStrip([]);
+    renderSearchMeta(0, 0);
+    liveN = 0; renderLiveStatus();
+    return;
+  }
+  var when = agoShort(snap.updated_at);
+  $("marketNote").textContent = games.length+" games · snapshot refreshed "+when+" · Kalshi's API blocks browsers, so prices update when the snapshot rebuilds";
+  var stale = window.Kalshi.stale(snap.updated_at)
+    ? '<div class="notice" style="margin-bottom:16px"><strong>This snapshot is stale</strong> (over 6 hours old). Treat these prices as a rough guide until the next refresh — we\'d rather say so than let you bet on cold numbers.</div>'
+    : "";
+  var searching = searchTerms(searchQ).length > 0;
+  var visible = games.filter(function(g){ return kalshiMatchesSearch(g, searchQ); });
+  /* "What moved" wiring: the fetch script bakes a snapshot-to-snapshot
+     diff into the file (K.diffMoves contract). Index it by event ticker
+     so each card can badge the teams whose price moved 2c+ since the
+     previous snapshot — and tag games that weren't listed before. */
+  var moveMap = {}, newSet = {};
+  (snap.moves || []).forEach(function(mv){
+    if(!mv || !mv.event_ticker) return;
+    (moveMap[mv.event_ticker] = moveMap[mv.event_ticker] || {})[mv.team] = mv.delta;
+  });
+  (snap.new_games || []).forEach(function(et){ if(et) newSet[et] = 1; });
+  var prevAt = snap.prev_at || null;
+  /* ---- followed teams (v1.155.0): mark this tab's followed games.
+     v1.162.0 — computed over the FILTERED board (scores discipline). ---- */
+  var folK = followedKalshi(visible, followedList(),
+    (window.Disagree && window.Disagree.normAbbr) || null);
+  var folByTicker = {};
+  folK.forEach(function(m){ folByTicker[m.ticker] = m; });
+  /* No query -> the first-page cap works exactly as before. Searching
+     lifts it: every match is shown, so the toggle steps aside. */
+  var showAll = !!kalshiShowAll[league];
+  var shown = searching ? visible : (showAll ? visible : visible.slice(0, KALSHI_PAGE));
+  var shownSet = {};
+  shown.forEach(function(g){ if(g && g.ticker) shownSet[g.ticker] = 1; });
+  if(searching && !visible.length){
+    /* Named empty state — never a blank grid under an active search. */
+    box.innerHTML = stale + '<div class="empty">No markets match &quot;'+GIU.esc(String(searchQ).trim())+
+      '&quot; on this tab. Clear the search to see all '+games.length+' games.</div>';
+  } else {
     box.innerHTML = stale +
-      pulseStrip(games, shown, moveMap, prevAt, newSet, cfg) +
+      pulseStrip(visible, shown, moveMap, prevAt, newSet, cfg) +
       shown.map(function(g){
       return kalshiCard(g, dir, cfg, moveMap[g.ticker], !!newSet[g.ticker], prevAt, hist, snap.updated_at,
         folByTicker[g.ticker] ? folByTicker[g.ticker].abbr : null);
     }).join("") +
-      (games.length > KALSHI_PAGE
+      (!searching && games.length > KALSHI_PAGE
         ? '<div style="margin:8px 0 34px;text-align:center"><button class="btn btn-ghost" id="kalshiShowAll" aria-expanded="'+showAll+'">'+
           (showAll ? "Show fewer games" : "Show all "+games.length+" games")+'</button></div>'
         : "");
-    drawKalshiSparks(box); /* paint the price-history canvases just rendered */
-    bindPulseChips(box); /* pulse chips for hidden games expand-then-scroll */
-    renderFollowStrip(kalshiChips(folK, shownSet));
-    if(pulseScrollTo){
-      /* a pulse chip on a hidden card expanded the list — land on the card
-         now that the re-render put it in the DOM. */
-      var land = null;
-      try{ land = document.getElementById(pulseScrollTo); }catch(e){ land = null; }
-      pulseScrollTo = null;
-      if(land && land.scrollIntoView){
-        var reduce = false;
-        try{ reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }catch(e2){}
-        try{ land.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"}); }catch(e3){}
-      }
+  }
+  drawKalshiSparks(box); /* paint the price-history canvases just rendered */
+  bindPulseChips(box); /* pulse chips for hidden games expand-then-scroll */
+  renderFollowStrip(kalshiChips(folK, shownSet));
+  renderSearchMeta(visible.length, games.length);
+  if(pulseScrollTo){
+    /* a pulse chip on a hidden card expanded the list — land on the card
+       now that the re-render put it in the DOM. */
+    var land = null;
+    try{ land = document.getElementById(pulseScrollTo); }catch(e){ land = null; }
+    pulseScrollTo = null;
+    if(land && land.scrollIntoView){
+      var reduce = false;
+      try{ reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }catch(e2){}
+      try{ land.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"}); }catch(e3){}
     }
-    var tgl = $("kalshiShowAll");
-    if(tgl) tgl.addEventListener("click", function(){      kalshiShowAll[league] = !kalshiShowAll[league];
-      loadKalshi(tabSeq, true, league); /* silent re-render keeps the toggle state */
-    });
-    /* ---- live auto-refresh ----
-       The snapshot file is rebuilt regularly server-side, so a
-       silent 5-minute re-fetch picks up fresh prices between site pushes —
-       no page reload, no shimmer. */
-    kalshiTab = league;
-    snapN = games.length; liveN = games.length;
-    lastUpdated = Date.now();
-    renderLiveStatus();
-    if(games.length > 0 && autoOn){
-      liveTimer = setInterval(function(){ if(!isHidden()) loadKalshi(tabSeq, true, kalshiTab); }, KAL_MS);
-    }
-  }).catch(function(){
-    if(my !== tabSeq) return; /* user moved to another tab meanwhile */
-    box.innerHTML = GIU.failBox("The Kalshi snapshot couldn't be loaded. Kalshi's API blocks browser requests, so this page depends on the server-side snapshot — nothing is shown rather than stale prices.");
-    $("marketNote").textContent = "";
-    renderFollowStrip([]);
-    liveN = 0; renderLiveStatus();
+  }
+  var tgl = $("kalshiShowAll");
+  if(tgl) tgl.addEventListener("click", function(){
+    kalshiShowAll[league] = !kalshiShowAll[league];
+    renderKalshi(); /* v1.162.0 — local re-render from the loaded snapshot; no refetch, search state kept */
   });
+  /* ---- live auto-refresh ----
+     The snapshot file is rebuilt regularly server-side, so a
+     silent 5-minute re-fetch picks up fresh prices between site pushes —
+     no page reload, no shimmer. Counts describe the whole tab, not
+     the filtered view. */
+  kalshiTab = league;
+  snapN = games.length; liveN = games.length;
+  renderLiveStatus();
+  if(games.length > 0 && autoOn){
+    liveTimer = setInterval(function(){ if(!isHidden()) loadKalshi(tabSeq, true, kalshiTab); }, KAL_MS);
+  }
 }
 
 $("marketTabs").innerHTML = LEAGUES.map(function(q,i){
@@ -846,6 +1020,35 @@ $("pauseBtn").addEventListener("click", function(){
     if(kalshiTab) loadKalshi(tabSeq, true, kalshiTab); else load(tabSeq, true);
   } else { clearLive(); renderLiveStatus(); }
 });
+/* v1.162.0 — find-a-game wiring. The query lives in module state, so
+   it survives tab switches and both silent refreshes; filtering
+   re-renders whichever board is active from its cached pull, never a
+   refetch. No hooks on the page -> nothing is wired and the page
+   behaves exactly as before. */
+var searchInput = $("marketQ"), searchClearBtn = $("marketClear");
+function rerenderForSearch(){
+  if(kalshiTab && lastKalshi && lastKalshi.league === kalshiTab) renderKalshi();
+  else if(!kalshiTab && lastPM) renderPM();
+  else renderSearchMeta(0, 0);
+}
+function resetSearch(){
+  searchQ = "";
+  if(searchInput) searchInput.value = "";
+  rerenderForSearch();
+  if(searchInput && searchInput.focus) searchInput.focus();
+}
+if(searchInput && searchInput.addEventListener){
+  searchInput.addEventListener("input", function(){
+    searchQ = searchInput.value || "";
+    rerenderForSearch();
+  });
+  searchInput.addEventListener("keydown", function(e){
+    if(e && e.key === "Escape") resetSearch();
+  });
+}
+if(searchClearBtn && searchClearBtn.addEventListener){
+  searchClearBtn.addEventListener("click", resetSearch);
+}
 bindFollowStrip(); /* "Your teams" chips for hidden Kalshi games expand-then-scroll */
 load(++tabSeq);
 })();
