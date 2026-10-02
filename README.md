@@ -142,7 +142,8 @@ node tests/test-wx-ballparks.js  # MLB ballpark dataset (30 geocoded parks, roof
 node tests/test-wx-bsb-impact.js  # baseball weather impact model (wind-direction framing, rain delay/PPD risk, cold/heat carry notes)
 node tests/test-wx-mlb-postseason.js  # MLB postseason fetcher (seasontype=3 board, pre/in kept, post dropped, empty/failure semantics)
 node tests/test-watch-outlets.js  # Watch page outlet/playlist ids pinned to verified channel ids (CBS Sports rebrand catch 2026-09-29; ESPN/NFL-on-ESPN label swap + FOX Sports->NFL on FOX rebrand catch 2026-10-01)
-node tests/test-watch-facade.js  # Watch click-to-play facades (autoplay URL, honest poster labels, youtube-only conversion, tap-to-player activation, fake-DOM wiring, page-scoped CSS + v1.130.0 key pins)
+node tests/test-watch-facade.js  # Watch click-to-play facades (autoplay URL, honest poster labels, youtube-only conversion, tap-to-player activation, fake-DOM wiring, page-scoped CSS + v1.148.0 key pins)
+node tests/test-watch-weekend.js  # Watch weekend pass: per-outlet branded posters (OUTLETS lookup, escaped wordmark, accent hue), date-gated #weekend-spotlight band (fail-closed expiry), editorial claims pinned to data/kalshi-mlb.json + data/kalshi-nfl.json, v1.148.0 key pins
 node tests/test-scores-smartday.js  # scores smart-day (any league tab on a no-game day jumps to the next game day with an honest league-aware notice; failure/null-window stay on the empty state; Today clears notice, no re-scan)
 node tests/test-cache-keys.js  # cache-key regression guard (every js ?v= key >= the release that last changed that file)
 node tests/test-readme-testlist.js  # README test-list drift guard: every test file listed, no dead references

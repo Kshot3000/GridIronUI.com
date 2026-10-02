@@ -36,6 +36,18 @@
 .v-facade:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @keyframes vf-breathe{0%,100%{box-shadow:0 0 0 0 rgba(240,180,41,.28)}50%{box-shadow:0 0 0 12px rgba(240,180,41,0)}}
 @media (prefers-reduced-motion:reduce){.vf-disc{animation:none}.v-facade:hover .vf-disc{transform:none;box-shadow:none}}
+/* v1.148.0 — branded outlet posters: the outlet's own name in a per-outlet accent hue above the gold play disc */
+.vf-brand{display:block;font-family:Archivo,Inter,sans-serif;font-weight:900;font-size:clamp(1.5rem,1.1rem+2.6vw,2.5rem);
+ letter-spacing:.08em;text-transform:uppercase;line-height:1.05;text-align:center;
+ color:hsl(var(--vf-hue,45),80%,70%);text-shadow:0 2px 20px hsla(var(--vf-hue,45),80%,45%,.35)}
+/* v1.148.0 — weekend spotlight band (date-gated by js/watch.js; hidden until in window) */
+.wk-band{margin:26px 0 0;padding:20px 22px;border:1px solid rgba(240,180,41,.35);border-left:4px solid var(--gold);
+ border-radius:12px;background:linear-gradient(180deg,rgba(240,180,41,.08),rgba(240,180,41,.02))}
+.wk-band h2{margin:8px 0 8px;font-size:1.35rem}
+.wk-band p{color:var(--muted);margin:0 0 12px}
+.wk-band p strong{color:var(--text)}
+.wk-links{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 10px}
+.wk-fine{font-size:.78rem;margin:0}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
@@ -54,6 +66,19 @@
   <div class="notice green">
     <strong>When to check back.</strong> Prediction shows typically drop <b style="color:var(--text)">mid-week</b> (Tuesday–Thursday) ahead of weekend games, with more segments landing the <b style="color:var(--text)">morning of game day</b>. If a playlist looks quiet on Monday, that's normal — the week's shows haven't dropped yet.
   </div>
+
+  <section id="weekend-spotlight" class="wk-band" data-start="2026-10-02" data-end="2026-10-05" hidden>
+    <span class="tag">This weekend · Oct 3–5</span>
+    <h2>Division Series open Saturday, NFL Week 5 on Sunday</h2>
+    <p>Four MLB Division Series get underway Saturday — <strong>Chicago WS vs Cleveland, Atlanta vs Los Angeles D, New York Y vs Tampa Bay, San Diego vs Milwaukee</strong> (per this morning's Kalshi snapshot) — and the NFL's <strong>30-game Week 5 slate</strong> kicks off Sunday. Prediction shows drop all week; the weekend previews land on these feeds as they're published.</p>
+    <p class="wk-links">
+      <a class="btn btn-gold btn-sm" href="https://www.youtube.com/playlist?list=UUoLrcjPV5PbUrUyXq5mjc_A" target="_blank" rel="noopener">MLB channel →</a>
+      <a class="btn btn-gold btn-sm" href="https://www.youtube.com/playlist?list=UUiio0ydw439X13KyZgMIcHw" target="_blank" rel="noopener">NFL on ESPN →</a>
+      <a class="btn btn-gold btn-sm" href="https://www.youtube.com/playlist?list=UUvQrivswRDGK0lZ_AcUHp8g" target="_blank" rel="noopener">NFL on FOX →</a>
+      <a class="btn btn-gold btn-sm" href="markets.html">Kalshi Division Series prices →</a>
+    </p>
+    <p class="wk-fine">This band shows Oct 2–5 only, then hides itself — the feeds below stay current on their own.</p>
+  </section>
 
   <div class="section-head" style="margin-top:34px">
     <div><span class="kicker">By outlet</span><h2>Major sports outlets</h2></div>
@@ -95,6 +120,6 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
-<script src="js/watch.js?v=1.130.0"></script>
+<script src="js/watch.js?v=1.148.0"></script>
 </body>
 </html>

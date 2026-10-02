@@ -201,8 +201,8 @@ ok(W.boot(pg4.doc) === 0, "boot is quiet on pages with no video cards");
 
 /* ---------- shipped wiring pins ---------- */
 var html = fs.readFileSync(path.join(ROOT, "watch.html"), "utf8");
-ok(/<script src="js\/watch\.js\?v=1\.130\.0"><\/script>/.test(html),
-   "watch.html loads js/watch.js with a v1.130.0 cache key");
+ok(/<script src="js\/watch\.js\?v=1\.148\.0"><\/script>/.test(html),
+   "watch.html loads js/watch.js with a v1.148.0 cache key");
 ok(/<style>[\s\S]*?\.v-facade\{[^}]*aspect-ratio:16\/9/.test(html),
    "watch.html carries the page-scoped .v-facade poster CSS (16:9, matches old iframe box)");
 ok(/\.v-facade:focus-visible/.test(html), "poster has a visible focus state");
