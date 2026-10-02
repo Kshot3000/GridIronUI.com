@@ -32,7 +32,13 @@ var dir = {mlb: [
   {abbr:"CHW", displayName:"Chicago White Sox",  shortDisplayName:"White Sox"},
   {abbr:"HOU", displayName:"Houston Astros",     shortDisplayName:"Astros"},
   {abbr:"PHI", displayName:"Philadelphia Phillies", shortDisplayName:"Phillies"},
-  {abbr:"ATL", displayName:"Atlanta Braves",     shortDisplayName:"Braves"}
+  {abbr:"ATL", displayName:"Atlanta Braves",     shortDisplayName:"Braves"},
+  /* ALDS board (04:43Z snapshot): PHI@ATL Game 3 finalized out; the
+     Oct 3-7 games are CWS@CLE, ATL@LAD, NYY@TB, SD@MIL. */
+  {abbr:"CLE", displayName:"Cleveland Guardians", shortDisplayName:"Guardians"},
+  {abbr:"LAD", displayName:"Los Angeles Dodgers", shortDisplayName:"Dodgers"},
+  {abbr:"MIL", displayName:"Milwaukee Brewers",  shortDisplayName:"Brewers"},
+  {abbr:"TB",  displayName:"Tampa Bay Rays",     shortDisplayName:"Rays"}
 ]};
 function teamFind(d, league, q){
   var list = (d||{})[league] || [];

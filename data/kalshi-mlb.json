@@ -1,39 +1,8 @@
 {
- "updated_at": "2026-10-02T01:33:54Z",
+ "updated_at": "2026-10-02T04:43:13Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
-  {
-   "event_ticker": "KXMLBGAME-26OCT011400PHIATL",
-   "title": "Game 3: Philadelphia vs Atlanta",
-   "sub_title": "PHI vs ATL (Oct 1)",
-   "markets": [
-    {
-     "ticker": "KXMLBGAME-26OCT011400PHIATL-ATL",
-     "title": "Atlanta wins",
-     "kind": "winner",
-     "team": "Atlanta",
-     "yes_bid": 95,
-     "yes_ask": 96,
-     "last": 96,
-     "volume": "5247286.97",
-     "volume_24h": "5133951.27",
-     "close_time": "2026-10-04T18:00:00Z"
-    },
-    {
-     "ticker": "KXMLBGAME-26OCT011400PHIATL-PHI",
-     "title": "Philadelphia wins",
-     "kind": "winner",
-     "team": "Philadelphia",
-     "yes_bid": 4,
-     "yes_ask": 5,
-     "last": 5,
-     "volume": "5305075.20",
-     "volume_24h": "5038554.23",
-     "close_time": "2026-10-04T18:00:00Z"
-    }
-   ]
-  },
   {
    "event_ticker": "KXMLBGAME-26OCT031300CWSCLE",
    "title": "Game 1: Chicago WS vs Cleveland",
@@ -46,9 +15,9 @@
      "team": "Chicago WS",
      "yes_bid": 41,
      "yes_ask": 42,
-     "last": 42,
-     "volume": "20772.83",
-     "volume_24h": "20740.48",
+     "last": 41,
+     "volume": "55931.16",
+     "volume_24h": "54628.50",
      "close_time": "2026-10-06T17:00:00Z"
     },
     {
@@ -59,9 +28,40 @@
      "yes_bid": 58,
      "yes_ask": 59,
      "last": 59,
-     "volume": "69770.70",
-     "volume_24h": "69748.86",
+     "volume": "73281.20",
+     "volume_24h": "63320.69",
      "close_time": "2026-10-06T17:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT031600ATLLAD",
+   "title": "Game 1: Atlanta vs Los Angeles D",
+   "sub_title": "ATL vs LAD (Oct 3)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT031600ATLLAD-ATL",
+     "title": "Atlanta wins",
+     "kind": "winner",
+     "team": "Atlanta",
+     "yes_bid": 36,
+     "yes_ask": 37,
+     "last": 37,
+     "volume": "4211.19",
+     "volume_24h": "4211.19",
+     "close_time": "2026-10-06T20:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT031600ATLLAD-LAD",
+     "title": "Los Angeles D wins",
+     "kind": "winner",
+     "team": "Los Angeles D",
+     "yes_bid": 64,
+     "yes_ask": 65,
+     "last": 64,
+     "volume": "9044.06",
+     "volume_24h": "8790.19",
+     "close_time": "2026-10-06T20:00:00Z"
     }
    ]
   },
@@ -78,8 +78,8 @@
      "yes_bid": 44,
      "yes_ask": 46,
      "last": 46,
-     "volume": "24215.75",
-     "volume_24h": "24173.09",
+     "volume": "48306.84",
+     "volume_24h": "48306.84",
      "close_time": "2026-10-06T22:30:00Z"
     },
     {
@@ -87,11 +87,11 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 54,
+     "yes_bid": 55,
      "yes_ask": 56,
      "last": 56,
-     "volume": "16225.77",
-     "volume_24h": "16222.26",
+     "volume": "19629.63",
+     "volume_24h": "19629.63",
      "close_time": "2026-10-06T22:30:00Z"
     }
    ]
@@ -107,10 +107,10 @@
      "kind": "winner",
      "team": "Milwaukee",
      "yes_bid": 65,
-     "yes_ask": 67,
-     "last": 67,
-     "volume": "30043.92",
-     "volume_24h": "28243.38",
+     "yes_ask": 66,
+     "last": 66,
+     "volume": "42957.14",
+     "volume_24h": "42953.40",
      "close_time": "2026-10-07T00:30:00Z"
     },
     {
@@ -121,8 +121,8 @@
      "yes_bid": 34,
      "yes_ask": 35,
      "last": 35,
-     "volume": "107586.95",
-     "volume_24h": "107276.15",
+     "volume": "135547.09",
+     "volume_24h": "135447.94",
      "close_time": "2026-10-07T00:30:00Z"
     }
    ]
@@ -137,11 +137,11 @@
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 56,
-     "yes_ask": 58,
-     "last": 58,
-     "volume": "1257.19",
-     "volume_24h": "1257.19",
+     "yes_bid": 55,
+     "yes_ask": 57,
+     "last": 57,
+     "volume": "2120.63",
+     "volume_24h": "2120.63",
      "close_time": "2026-10-07T20:00:00Z"
     },
     {
@@ -149,12 +149,43 @@
      "title": "San Diego wins",
      "kind": "winner",
      "team": "San Diego",
-     "yes_bid": 43,
+     "yes_bid": 44,
      "yes_ask": 46,
      "last": 46,
-     "volume": "1505.00",
-     "volume_24h": "1505.00",
+     "volume": "1887.76",
+     "volume_24h": "1887.76",
      "close_time": "2026-10-07T20:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT042000ATLLAD",
+   "title": "Game 2: Atlanta vs Los Angeles D",
+   "sub_title": "ATL vs LAD (Oct 4)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT042000ATLLAD-ATL",
+     "title": "Atlanta wins",
+     "kind": "winner",
+     "team": "Atlanta",
+     "yes_bid": 38,
+     "yes_ask": 40,
+     "last": 36,
+     "volume": "39.23",
+     "volume_24h": "39.23",
+     "close_time": "2026-10-08T00:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT042000ATLLAD-LAD",
+     "title": "Los Angeles D wins",
+     "kind": "winner",
+     "team": "Los Angeles D",
+     "yes_bid": 54,
+     "yes_ask": 71,
+     "last": 72,
+     "volume": "405.45",
+     "volume_24h": "405.45",
+     "close_time": "2026-10-08T00:00:00Z"
     }
    ]
   },
@@ -170,9 +201,9 @@
      "team": "Chicago WS",
      "yes_bid": 42,
      "yes_ask": 45,
-     "last": 45,
-     "volume": "528.13",
-     "volume_24h": "528.13",
+     "last": 43,
+     "volume": "805.22",
+     "volume_24h": "799.71",
      "close_time": "2026-10-08T21:00:00Z"
     },
     {
@@ -180,11 +211,11 @@
      "title": "Cleveland wins",
      "kind": "winner",
      "team": "Cleveland",
-     "yes_bid": 55,
-     "yes_ask": 56,
-     "last": 54,
-     "volume": "515.21",
-     "volume_24h": "515.21",
+     "yes_bid": 58,
+     "yes_ask": 60,
+     "last": 59,
+     "volume": "1123.18",
+     "volume_24h": "1117.67",
      "close_time": "2026-10-08T21:00:00Z"
     }
    ]
@@ -199,11 +230,11 @@
      "title": "New York Y wins",
      "kind": "winner",
      "team": "New York Y",
-     "yes_bid": 49,
-     "yes_ask": 55,
-     "last": 55,
-     "volume": "1165.55",
-     "volume_24h": "1163.94",
+     "yes_bid": 51,
+     "yes_ask": 53,
+     "last": 54,
+     "volume": "1541.92",
+     "volume_24h": "1541.92",
      "close_time": "2026-10-09T00:00:00Z"
     },
     {
@@ -211,32 +242,156 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 47,
+     "yes_bid": 49,
      "yes_ask": 51,
      "last": 51,
-     "volume": "578.29",
-     "volume_24h": "578.29",
+     "volume": "724.81",
+     "volume_24h": "724.81",
      "close_time": "2026-10-09T00:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT061800LADATL",
+   "title": "Game 3: Los Angeles D vs Atlanta",
+   "sub_title": "LAD vs ATL (Oct 6)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT061800LADATL-ATL",
+     "title": "Atlanta wins",
+     "kind": "winner",
+     "team": "Atlanta",
+     "yes_bid": 20,
+     "yes_ask": 49,
+     "last": 0,
+     "volume": "0.00",
+     "volume_24h": "0.00",
+     "close_time": "2026-10-09T22:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT061800LADATL-LAD",
+     "title": "Los Angeles D wins",
+     "kind": "winner",
+     "team": "Los Angeles D",
+     "yes_bid": 21,
+     "yes_ask": 85,
+     "last": 88,
+     "volume": "4.90",
+     "volume_24h": "4.90",
+     "close_time": "2026-10-09T22:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT062130MILSD",
+   "title": "Game 3: Milwaukee vs San Diego",
+   "sub_title": "MIL vs SD (Oct 6)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT062130MILSD-MIL",
+     "title": "Milwaukee wins",
+     "kind": "winner",
+     "team": "Milwaukee",
+     "yes_bid": 43,
+     "yes_ask": 51,
+     "last": 51,
+     "volume": "44.33",
+     "volume_24h": "44.33",
+     "close_time": "2026-10-10T01:30:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT062130MILSD-SD",
+     "title": "San Diego wins",
+     "kind": "winner",
+     "team": "San Diego",
+     "yes_bid": 42,
+     "yes_ask": 56,
+     "last": 0,
+     "volume": "0.00",
+     "volume_24h": "0.00",
+     "close_time": "2026-10-10T01:30:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT071600CLECWS",
+   "title": "Game 3: Cleveland vs Chicago WS",
+   "sub_title": "CLE vs CWS (Oct 7)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT071600CLECWS-CWS",
+     "title": "Chicago WS wins",
+     "kind": "winner",
+     "team": "Chicago WS",
+     "yes_bid": 40,
+     "yes_ask": 54,
+     "last": 52,
+     "volume": "383.93",
+     "volume_24h": "383.93",
+     "close_time": "2026-10-10T20:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT071600CLECWS-CLE",
+     "title": "Cleveland wins",
+     "kind": "winner",
+     "team": "Cleveland",
+     "yes_bid": 46,
+     "yes_ask": 54,
+     "last": 55,
+     "volume": "3.57",
+     "volume_24h": "3.57",
+     "close_time": "2026-10-10T20:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT072000TBNYY",
+   "title": "Game 3: Tampa Bay vs New York Y",
+   "sub_title": "TB vs NYY (Oct 7)",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT072000TBNYY-NYY",
+     "title": "New York Y wins",
+     "kind": "winner",
+     "team": "New York Y",
+     "yes_bid": 51,
+     "yes_ask": 62,
+     "last": 0,
+     "volume": "0.00",
+     "volume_24h": "0.00",
+     "close_time": "2026-10-11T00:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT072000TBNYY-TB",
+     "title": "Tampa Bay wins",
+     "kind": "winner",
+     "team": "Tampa Bay",
+     "yes_bid": 37,
+     "yes_ask": 42,
+     "last": 43,
+     "volume": "33.79",
+     "volume_24h": "33.79",
+     "close_time": "2026-10-11T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-01T23:46:43Z",
+ "prev_at": "2026-10-02T01:33:54Z",
  "moves": [
   {
-   "event_ticker": "KXMLBGAME-26OCT011400PHIATL",
-   "team": "Atlanta",
-   "delta": 45,
-   "prev": 51,
-   "now": 96
-  },
-  {
-   "event_ticker": "KXMLBGAME-26OCT011400PHIATL",
-   "team": "Philadelphia",
-   "delta": -45,
-   "prev": 50,
-   "now": 5
+   "event_ticker": "KXMLBGAME-26OCT051700CWSCLE",
+   "team": "Cleveland",
+   "delta": 3,
+   "prev": 56,
+   "now": 59
   }
  ],
- "new_games": []
+ "new_games": [
+  "KXMLBGAME-26OCT031600ATLLAD",
+  "KXMLBGAME-26OCT042000ATLLAD",
+  "KXMLBGAME-26OCT061800LADATL",
+  "KXMLBGAME-26OCT062130MILSD",
+  "KXMLBGAME-26OCT071600CLECWS",
+  "KXMLBGAME-26OCT072000TBNYY"
+ ]
 }

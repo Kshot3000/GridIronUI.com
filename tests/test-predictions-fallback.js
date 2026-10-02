@@ -98,8 +98,13 @@ assert(html.indexOf("Trying Polymarket again automatically") !== -1,
   "render: banner promises the automatic retry the loader performs");
 assert(html.indexOf("server-side snapshot") !== -1,
   "render: prices labeled as a server-side snapshot, not live");
-assert(html.indexOf("Steelers") !== -1 || html.indexOf("PIT") !== -1,
-  "render: real game content present (tonight's PIT/CLE TNF game)");
+/* "real game content present" is derived from the snapshot itself — the
+   board rotates (tonight's TNF game was PIT/CLE; after the final it left
+   the board), so hard-coding a team name kept expiring. The first game is
+   always rendered by render(), so this stays green through every rotation. */
+var firstGameTitle = (real.games[0] && real.games[0].title) || "";
+assert(firstGameTitle !== "" && html.indexOf(firstGameTitle) !== -1,
+  "render: real game content present (from the current snapshot: "+firstGameTitle+")");
 assert(html.indexOf("Trade on Kalshi") !== -1, "render: Kalshi outbound link present");
 /* no cross-crowd gap chip without Polymarket prices */
 assert(html.indexOf("vs Polymarket") === -1,

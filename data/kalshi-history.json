@@ -1,1 +1,506 @@
-{}
+{
+ "KXNFLGAME-26OCT04INDWAS-IND": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 65
+  }
+ ],
+ "KXNFLGAME-26OCT04INDWAS-WAS": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 36
+  }
+ ],
+ "KXNFLGAME-26OCT04ARINYG-ARI": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 57
+  }
+ ],
+ "KXNFLGAME-26OCT04ARINYG-NYG": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 44
+  }
+ ],
+ "KXNFLGAME-26OCT04DALHOU-DAL": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 41
+  }
+ ],
+ "KXNFLGAME-26OCT04DALHOU-HOU": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 60
+  }
+ ],
+ "KXNFLGAME-26OCT04GBTB-GB": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 63
+  }
+ ],
+ "KXNFLGAME-26OCT04GBTB-TB": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 38
+  }
+ ],
+ "KXNFLGAME-26OCT04JACCIN-CIN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 58
+  }
+ ],
+ "KXNFLGAME-26OCT04JACCIN-JAC": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 43
+  }
+ ],
+ "KXNFLGAME-26OCT04LARPHI-LAR": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 64
+  }
+ ],
+ "KXNFLGAME-26OCT04LARPHI-PHI": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 37
+  }
+ ],
+ "KXNFLGAME-26OCT04NEBUF-BUF": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 75
+  }
+ ],
+ "KXNFLGAME-26OCT04NEBUF-NE": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 26
+  }
+ ],
+ "KXNFLGAME-26OCT04NYJCHI-CHI": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 63
+  }
+ ],
+ "KXNFLGAME-26OCT04NYJCHI-NYJ": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 38
+  }
+ ],
+ "KXNFLGAME-26OCT04TENBAL-BAL": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 85
+  }
+ ],
+ "KXNFLGAME-26OCT04TENBAL-TEN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 15
+  }
+ ],
+ "KXNFLGAME-26OCT04MIAMIN-MIA": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 17
+  }
+ ],
+ "KXNFLGAME-26OCT04MIAMIN-MIN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 84
+  }
+ ],
+ "KXNFLGAME-26OCT04DENSF-DEN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 44
+  }
+ ],
+ "KXNFLGAME-26OCT04DENSF-SF": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 57
+  }
+ ],
+ "KXNFLGAME-26OCT04KCLV-KC": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 66
+  }
+ ],
+ "KXNFLGAME-26OCT04KCLV-LV": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 35
+  }
+ ],
+ "KXNFLGAME-26OCT04LACSEA-LAC": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 25
+  }
+ ],
+ "KXNFLGAME-26OCT04LACSEA-SEA": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 76
+  }
+ ],
+ "KXNFLGAME-26OCT04DETCAR-CAR": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 36
+  }
+ ],
+ "KXNFLGAME-26OCT04DETCAR-DET": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 65
+  }
+ ],
+ "KXNFLGAME-26OCT05ATLNO-ATL": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 45
+  }
+ ],
+ "KXNFLGAME-26OCT05ATLNO-NO": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 56
+  }
+ ],
+ "KXNFLGAME-26OCT08TBDAL-DAL": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 82
+  }
+ ],
+ "KXNFLGAME-26OCT08TBDAL-TB": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 19
+  }
+ ],
+ "KXNFLGAME-26OCT11PHIJAC-JAC": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 59
+  }
+ ],
+ "KXNFLGAME-26OCT11PHIJAC-PHI": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 43
+  }
+ ],
+ "KXNFLGAME-26OCT11CINMIA-CIN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 82
+  }
+ ],
+ "KXNFLGAME-26OCT11CINMIA-MIA": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 17
+  }
+ ],
+ "KXNFLGAME-26OCT11CLENYJ-CLE": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 50
+  }
+ ],
+ "KXNFLGAME-26OCT11CLENYJ-NYJ": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 52
+  }
+ ],
+ "KXNFLGAME-26OCT11HOUTEN-HOU": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 76
+  }
+ ],
+ "KXNFLGAME-26OCT11HOUTEN-TEN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 27
+  }
+ ],
+ "KXNFLGAME-26OCT11INDPIT-IND": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 44
+  }
+ ],
+ "KXNFLGAME-26OCT11INDPIT-PIT": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 57
+  }
+ ],
+ "KXNFLGAME-26OCT11LVNE-LV": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 41
+  }
+ ],
+ "KXNFLGAME-26OCT11LVNE-NE": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 60
+  }
+ ],
+ "KXNFLGAME-26OCT11MINNO-MIN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 54
+  }
+ ],
+ "KXNFLGAME-26OCT11MINNO-NO": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 47
+  }
+ ],
+ "KXNFLGAME-26OCT11NYGWAS-NYG": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 44
+  }
+ ],
+ "KXNFLGAME-26OCT11NYGWAS-WAS": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 57
+  }
+ ],
+ "KXNFLGAME-26OCT11DENLAC-DEN": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 56
+  }
+ ],
+ "KXNFLGAME-26OCT11DENLAC-LAC": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 46
+  }
+ ],
+ "KXNFLGAME-26OCT11CHIGB-CHI": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 46
+  }
+ ],
+ "KXNFLGAME-26OCT11CHIGB-GB": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 55
+  }
+ ],
+ "KXNFLGAME-26OCT11DETARI-ARI": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 32
+  }
+ ],
+ "KXNFLGAME-26OCT11DETARI-DET": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 69
+  }
+ ],
+ "KXNFLGAME-26OCT11SFSEA-SF": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 40
+  }
+ ],
+ "KXNFLGAME-26OCT11SFSEA-SEA": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 63
+  }
+ ],
+ "KXNFLGAME-26OCT11BALATL-ATL": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 29
+  }
+ ],
+ "KXNFLGAME-26OCT11BALATL-BAL": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 73
+  }
+ ],
+ "KXNFLGAME-26OCT12BUFLAR-BUF": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 48
+  }
+ ],
+ "KXNFLGAME-26OCT12BUFLAR-LAR": [
+  {
+   "t": "2026-10-02T04:42:59Z",
+   "yes": 55
+  }
+ ],
+ "KXMLBGAME-26OCT031300CWSCLE-CWS": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 42
+  }
+ ],
+ "KXMLBGAME-26OCT031300CWSCLE-CLE": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 59
+  }
+ ],
+ "KXMLBGAME-26OCT031600ATLLAD-ATL": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 37
+  }
+ ],
+ "KXMLBGAME-26OCT031600ATLLAD-LAD": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 65
+  }
+ ],
+ "KXMLBGAME-26OCT031830NYYTB-NYY": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 45
+  }
+ ],
+ "KXMLBGAME-26OCT031830NYYTB-TB": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 56
+  }
+ ],
+ "KXMLBGAME-26OCT032030SDMIL-MIL": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 66
+  }
+ ],
+ "KXMLBGAME-26OCT032030SDMIL-SD": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 35
+  }
+ ],
+ "KXMLBGAME-26OCT041600SDMIL-MIL": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 56
+  }
+ ],
+ "KXMLBGAME-26OCT041600SDMIL-SD": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 45
+  }
+ ],
+ "KXMLBGAME-26OCT042000ATLLAD-ATL": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 39
+  }
+ ],
+ "KXMLBGAME-26OCT042000ATLLAD-LAD": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 63
+  }
+ ],
+ "KXMLBGAME-26OCT051700CWSCLE-CWS": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 44
+  }
+ ],
+ "KXMLBGAME-26OCT051700CWSCLE-CLE": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 59
+  }
+ ],
+ "KXMLBGAME-26OCT052000NYYTB-NYY": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 52
+  }
+ ],
+ "KXMLBGAME-26OCT052000NYYTB-TB": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 50
+  }
+ ],
+ "KXMLBGAME-26OCT061800LADATL-ATL": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 35
+  }
+ ],
+ "KXMLBGAME-26OCT061800LADATL-LAD": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 53
+  }
+ ],
+ "KXMLBGAME-26OCT062130MILSD-MIL": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 47
+  }
+ ],
+ "KXMLBGAME-26OCT062130MILSD-SD": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 49
+  }
+ ],
+ "KXMLBGAME-26OCT071600CLECWS-CWS": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 47
+  }
+ ],
+ "KXMLBGAME-26OCT071600CLECWS-CLE": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 50
+  }
+ ],
+ "KXMLBGAME-26OCT072000TBNYY-NYY": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 57
+  }
+ ],
+ "KXMLBGAME-26OCT072000TBNYY-TB": [
+  {
+   "t": "2026-10-02T04:43:13Z",
+   "yes": 40
+  }
+ ]
+}
