@@ -69,7 +69,7 @@ ok("hub meta description sane length", desc.length >= 50 && desc.length <= 320, 
 ok("hub og:title matches <title>", hub.indexOf('<meta property="og:title" content="'+title+'">') !== -1);
 ok("hub og:description matches meta description",
   hub.indexOf('<meta property="og:description" content="'+desc+'">') !== -1);
-ok("hub og:image", hub.indexOf('<meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">') !== -1);
+ok("hub og:image", hub.indexOf('<meta property="og:image" content="https://gridironui.xyz/img/og-image-v2.jpg">') !== -1);
 ok("hub og:url", hub.indexOf('<meta property="og:url" content="https://gridironui.xyz/matchup.html">') !== -1);
 ok("hub twitter:site @kshot9000", hub.indexOf('<meta name="twitter:site" content="@kshot9000">') !== -1);
 ok("hub canonical", hub.indexOf('<link rel="canonical" href="https://gridironui.xyz/matchup.html">') !== -1);

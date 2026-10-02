@@ -47,7 +47,7 @@ PAGES.forEach(p => {
   ok(p + " exactly one og:description", count('property="og:description"') === 1);
   ok(p + " exactly one twitter:title", count('name="twitter:title"') === 1);
   ok(p + " exactly one twitter:description", count('name="twitter:description"') === 1);
-  ok(p + " og:image", html.indexOf('<meta property="og:image" content="https://gridironui.xyz/img/og-image.jpg">') !== -1);
+  ok(p + " og:image", html.indexOf('<meta property="og:image" content="https://gridironui.xyz/img/og-image-v2.jpg">') !== -1);
   ok(p + " og:image dimensions", html.indexOf('<meta property="og:image:width" content="1200">') !== -1 &&
      html.indexOf('<meta property="og:image:height" content="630">') !== -1);
   ok(p + " og:url", html.indexOf('<meta property="og:url" content="' + canonFor(p) + '">') !== -1);
@@ -56,7 +56,7 @@ PAGES.forEach(p => {
   ok(p + " twitter:site @kshot9000", html.indexOf('<meta name="twitter:site" content="@kshot9000">') !== -1);
   ok(p + " twitter:title", html.indexOf('<meta name="twitter:title" content="' + title + '">') !== -1);
   ok(p + " twitter:description", html.indexOf('<meta name="twitter:description" content="' + desc + '">') !== -1);
-  ok(p + " twitter:image", html.indexOf('<meta name="twitter:image" content="https://gridironui.xyz/img/og-image.jpg">') !== -1);
+  ok(p + " twitter:image", html.indexOf('<meta name="twitter:image" content="https://gridironui.xyz/img/og-image-v2.jpg">') !== -1);
   // canonical
   ok(p + " canonical matches live URL", html.indexOf('<link rel="canonical" href="' + canonFor(p) + '">') !== -1);
 });
