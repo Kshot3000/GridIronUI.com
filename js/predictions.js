@@ -173,6 +173,82 @@ function renderFollowStrip(matches){
 }
 try{ window.GIU = window.GIU || {}; window.GIU.predictionsFollowed = followedPredictions; window.GIU.predictionsRowKey = rowKey; }catch(e){}
 
+/* ---- find a game (v1.164.0) ----
+   Every other game board got a finder (scores v1.161.0, markets
+   v1.162.0, odds v1.163.0) — this was the last one without, and it had
+   a second, quieter problem: the board silently capped at 10 games,
+   so a game outside the cap wasn't even on the page to find. The pure
+   matcher below splits the query into terms and EVERY term must
+   appear in the game's search text — title sides plus BOTH sides'
+   directory-resolved abbreviations (GIU.teamFind, the followedPredictions
+   approach: "kc" finds the Chiefs game) plus priced outcome names — so
+   "chiefs bills" narrows across sides while a term that appears
+   nowhere matches nothing, never everything. Garbage in -> empty text
+   / no match, never a throw.
+   The loader caches the FULL parsed board (lastBoard, before the
+   10-game cap) and paintBoard() renders through the query: while a
+   search is active the cap lifts (every match renders), the "Next
+   game" spotlight steps aside (its game joins the grid like any other
+   match — no game is privileged out of the results), and the "Your
+   teams" strip is computed over the FILTERED board so a chip never
+   promises a card the search hid. Typing re-paints from the cache —
+   it never re-fetches — and because load() paints through the same
+   path, the query survives league tab switches and the 90s silent
+   refresh. No query -> the board renders exactly as before (10-game
+   cap, spotlight split, follow strip over the capped board). The
+   query is DOM state only, never persisted. */
+var searchQ = "";
+var lastBoard = null; /* {rows (full, uncapped), dir, key} from the last successful load */
+function searchTerms(q){
+  return String(q == null ? "" : q).toLowerCase().split(/\s+/).filter(function(t){ return !!t; });
+}
+function predSearchText(r, dir, league, find){
+  var ev = (r && r.ev) || {};
+  var parts = [String(ev.title || "")];
+  var tp = String(ev.title || "").split(/\s+vs\.?\s+/);
+  if(tp.length === 2 && typeof find === "function"){
+    [tp[0].trim(), tp[1].trim()].forEach(function(name){
+      if(!name) return;
+      var t = null;
+      try{ t = find(dir, league, name); }catch(e){ t = null; }
+      if(t && t.abbr) parts.push(String(t.abbr));
+    });
+  }
+  if(r && Array.isArray(r.mls)){
+    r.mls.forEach(function(m){
+      parseArr(m && m.outcomes).forEach(function(o){ parts.push(String(o || "")); });
+    });
+  }
+  return parts.join(" ").toLowerCase();
+}
+function predMatchesSearch(r, q, dir, league, find){
+  var terms = searchTerms(q);
+  if(!terms.length) return true;
+  var text = predSearchText(r, dir, league, find);
+  if(!text) return false;
+  for(var i = 0; i < terms.length; i++){ if(text.indexOf(terms[i]) === -1) return false; }
+  return true;
+}
+try{ window.GIU = window.GIU || {}; window.GIU.predictionsSearchTerms = searchTerms;
+     window.GIU.predictionsSearchText = predSearchText; window.GIU.predictionsMatchesSearch = predMatchesSearch; }catch(e){}
+/* Honest live-region count + Clear visibility. total === null means no
+   searchable board is on screen (loading, league-empty, or the Kalshi
+   fallback): the count stays silent rather than inventing a number. */
+function renderSearchMeta(total, shown){
+  var c = $("predCount"), b = $("predClear");
+  var searching = searchTerms(searchQ).length > 0;
+  if(b) b.hidden = !searching;
+  if(!c) return;
+  if(!searching || total == null){ c.textContent = ""; return; }
+  c.textContent = shown > 0 ? (shown + " of " + total + " games") : "No matches";
+}
+function resetSearch(){
+  searchQ = "";
+  var q = $("predQ"); if(q) q.value = "";
+  if(lastBoard) paintBoard(); else renderSearchMeta(null, 0);
+  if(q && q.focus) q.focus();
+}
+
 function skel(){
   $("predGrid").innerHTML = '<div class="card"><div class="skel" style="height:140px"></div></div>'+
     '<div class="card"><div class="skel" style="height:140px"></div></div>';
@@ -259,11 +335,78 @@ function probRow(label, pct, chg){
   return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.9rem">'+GIU.esc(label)+'</span><b class="num" style="font-size:1.25rem;color:'+(hot?"var(--gold-soft)":"var(--muted)")+'">'+pct+'%'+chip+'</b></div>'+
   '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);margin-bottom:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(hot?"linear-gradient(90deg,var(--green),var(--gold))":"rgba(255,255,255,.18)")+'"></div></div>';
 }
+/* paintBoard: render the cached board (lastBoard) through the current
+   search query — follow strip, spotlight, grid, search count. Called by
+   load() on every successful pull and by the finder on every keystroke
+   (from the cache; typing never fetches). Spotlight/timer discipline:
+   while searching, the spotlight timer is stopped and its card joins
+   the grid; when the search clears, the spotlight re-arms its 60s
+   countdown here. The 90s live-refresh timer is load()'s business and
+   is never touched here, so keystrokes can't stack it. */
+function paintBoard(){
+  if(!lastBoard) return;
+  var rows = lastBoard.rows, dir = lastBoard.dir, key = lastBoard.key;
+  var searching = searchTerms(searchQ).length > 0;
+  var view = searching
+    ? rows.filter(function(r){ return predMatchesSearch(r, searchQ, dir, key, GIU.teamFind); })
+    : rows.slice(0, 10);
+  /* ---- followed teams (v1.150.0): computed over the VIEW — the capped
+     board normally, the filtered board while searching — so the strip
+     never promises a card the search hid. */
+  var fol = followedPredictions(view, followedList(), dir, key, GIU.teamFind);
+  var folByKey = {};
+  fol.forEach(function(m){ folByKey[m.key] = m.abbr; });
+  renderFollowStrip(fol);
+  renderSearchMeta(rows.length, view.length);
+  var spotEl = $("predSpot");
+  function gridCard(r){
+    var k = rowKey(r, rows.indexOf(r));
+    return '<div class="card'+(folByKey[k] ? " followed" : "")+'" id="pg-'+GIU.esc(k)+'">'+cardInner(r, dir, key, folByKey[k])+'</div>';
+  }
+  if(searching){
+    if(spotTimer){ clearInterval(spotTimer); spotTimer = null; }
+    spotIso = null;
+    if(spotEl) spotEl.innerHTML = "";
+    $("predGrid").innerHTML = view.length ? view.map(gridCard).join("") :
+      '<div class="empty">No games match &quot;'+GIU.esc(String(searchQ).trim())+'&quot; on this board — clear the search to see all '+rows.length+' games.</div>';
+    return;
+  }
+  /* ---- "Next game" spotlight (v1.125.0) ----
+     The nearest upcoming game gets a featured card above the grid: a
+     live-ticking kickoff countdown, the same Polymarket probability bars
+     and Kalshi cross-check as a normal card, and it's removed from the
+     grid so it never appears twice. Quiet when every listed game has
+     already started — the grid alone covers it. */
+  var spot = nextUpcoming(view);
+  var gridRows = spot ? view.filter(function(r){ return r !== spot; }) : view;
+  if(spotEl){
+    if(spot){
+      var kicker = SPOT_KICKER[key] || "Next game";
+      var iso = spot.ev.startTime || spot.ev.eventDate || "";
+      var cd = spotCountdown(iso);
+      spotIso = iso;
+      spotEl.innerHTML =
+        '<div class="card'+(folByKey[rowKey(spot, rows.indexOf(spot))] ? " followed" : "")+'" id="pg-'+GIU.esc(rowKey(spot, rows.indexOf(spot)))+'" style="border:1px solid var(--gold-glow);box-shadow:0 0 28px rgba(240,180,41,.12)">'+
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">'+
+        '<span class="tag" style="background:var(--gold);color:#171204;font-weight:800;letter-spacing:.05em">'+GIU.esc(kicker)+'</span>'+
+        (cd ? '<span id="spotCountdown" class="num" style="color:var(--gold-soft);font-weight:800;font-size:1rem">'+GIU.esc(cd)+'</span>' : "")+
+        '</div>'+
+        cardInner(spot, dir, key, folByKey[rowKey(spot, rows.indexOf(spot))])+
+        '</div>';
+      if(cd && !spotTimer){
+        spotTimer = setInterval(tickSpot, SPOT_MS);
+      }
+    } else {
+      spotEl.innerHTML = "";
+    }
+  }
+  $("predGrid").innerHTML = gridRows.map(gridCard).join("");
+}
 function load(key, my, silent){
   key = key || curKey; curKey = key;
   my = (my===undefined) ? tabSeq : my;
   clearLive(); /* tab switches and silent refreshes always reschedule */
-  if(!silent){ skel(); renderFollowStrip([]); /* no stale chips while the new tab loads */ }
+  if(!silent){ lastBoard = null; skel(); renderFollowStrip([]); renderSearchMeta(null, 0); /* no stale chips/cards while the new tab loads */ }
   /* The snapshot fetch starts now, alongside the Polymarket lookup, so a
      Polymarket failure doesn't cost the Kalshi-only fallback an extra
      round-trip. Resolves null when the league has no snapshot or it fails —
@@ -299,7 +442,9 @@ function load(key, my, silent){
       rows.push({ev:ev, mls:mls});
     });
     rows.sort(function(a,b){ return startOf(a.ev)-startOf(b.ev); });
-    rows = rows.slice(0,10);
+    /* v1.164.0: no slice here — the FULL board is cached in lastBoard and
+       paintBoard applies the 10-game cap only when no search is active,
+       so a game outside the cap is findable instead of silently absent. */
     /* Kalshi cross-check (NFL + MLB postseason): match each Polymarket game
        to the snapshot via the tested Disagree.matches; unmatchable games are
        dropped, never guessed. Only 2-way rows get a row — a clean
@@ -328,57 +473,24 @@ function load(key, my, silent){
       });
     }
     if(!rows.length){
+      lastBoard = null;
       $("predGrid").innerHTML = '<div class="empty">No upcoming game markets with clear win probabilities for this league right now — check back closer to game day.</div>';
       var ps = $("predSpot"); if(ps) ps.innerHTML = "";
       renderFollowStrip([]);
+      renderSearchMeta(null, 0);
       liveN = 0; renderLiveStatus();
       return;
     }
-    /* ---- followed teams (v1.150.0): mark this tab's followed games and
-       open the "Your teams" jump strip. Computed on the full row list —
-       before the spotlight split — so a followed game that IS the next
-       game still gets its chip (pointing at the spotlight's anchor). */
-    var fol = followedPredictions(rows, followedList(), dir, key, GIU.teamFind);
-    var folByKey = {};
-    fol.forEach(function(m){ folByKey[m.key] = m.abbr; });
-    renderFollowStrip(fol);
-    /* ---- "Next game" spotlight (v1.125.0) ----
-       The nearest upcoming game gets a featured card above the grid: a
-       live-ticking kickoff countdown, the same Polymarket probability bars
-       and Kalshi cross-check as a normal card, and it's removed from the
-       grid so it never appears twice. Quiet when every listed game has
-       already started — the grid alone covers it. */
-    var spot = nextUpcoming(rows);
-    var gridRows = spot ? rows.filter(function(r){ return r !== spot; }) : rows;
-    var spotEl = $("predSpot");
-    if(spotEl){
-      if(spot){
-        var kicker = SPOT_KICKER[key] || "Next game";
-        var iso = spot.ev.startTime || spot.ev.eventDate || "";
-        var cd = spotCountdown(iso);
-        spotIso = iso;
-        spotEl.innerHTML =
-          '<div class="card'+(folByKey[rowKey(spot, rows.indexOf(spot))] ? " followed" : "")+'" id="pg-'+GIU.esc(rowKey(spot, rows.indexOf(spot)))+'" style="border:1px solid var(--gold-glow);box-shadow:0 0 28px rgba(240,180,41,.12)">'+
-          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">'+
-          '<span class="tag" style="background:var(--gold);color:#171204;font-weight:800;letter-spacing:.05em">'+GIU.esc(kicker)+'</span>'+
-          (cd ? '<span id="spotCountdown" class="num" style="color:var(--gold-soft);font-weight:800;font-size:1rem">'+GIU.esc(cd)+'</span>' : "")+
-          '</div>'+
-          cardInner(spot, dir, key, folByKey[rowKey(spot, rows.indexOf(spot))])+
-          '</div>';
-        if(cd && !spotTimer){
-          spotTimer = setInterval(tickSpot, SPOT_MS);
-        }
-      } else {
-        spotEl.innerHTML = "";
-      }
-    }
-    $("predGrid").innerHTML = gridRows.map(function(r){
-      var k = rowKey(r, rows.indexOf(r));
-      return '<div class="card'+(folByKey[k] ? " followed" : "")+'" id="pg-'+GIU.esc(k)+'">'+cardInner(r, dir, key, folByKey[k])+'</div>';
-    }).join("");
+    /* Cache the full board, then paint through the current query
+       (v1.164.0): spotlight, grid, follow strip and search count all
+       render in paintBoard, so a keystroke re-paints this exact pull
+       instead of fetching again. */
+    lastBoard = { rows: rows, dir: dir, key: key };
+    paintBoard();
     /* ---- live auto-refresh ----
        Refresh in-place every 90s, but only while a shown game is likely
-       in-progress — otherwise the timer would burn requests on dead pages. */
+       in-progress — otherwise the timer would burn requests on dead pages.
+       liveN describes the whole board, not the filtered view. */
     liveN = likelyLive(rows);
     lastUpdated = Date.now();
     renderLiveStatus();
@@ -393,6 +505,8 @@ function load(key, my, silent){
        honest (missing/stale snapshot), the failure box shows as before. */
     var done = function(snap){
       if(my !== tabSeq) return;
+      lastBoard = null; /* fallback cards are not the searchable board */
+      renderSearchMeta(null, 0);
       var html = null;
       try{ html = window.PredFallback ? window.PredFallback.render(snap) : null; }
       catch(e){ html = null; }
@@ -414,6 +528,20 @@ function load(key, my, silent){
     else done(null);
   });
 }
+/* Finder wiring (v1.164.0): typing re-paints the cached board — no
+   fetch, no quota burn. Escape / Clear restore the full board. Hooks
+   absent (older markup) -> the board works exactly as before. */
+(function wireSearch(){
+  var q = $("predQ"), clear = $("predClear");
+  if(q){
+    q.addEventListener("input", function(){
+      searchQ = q.value || "";
+      if(lastBoard) paintBoard(); else renderSearchMeta(null, 0);
+    });
+    q.addEventListener("keydown", function(e){ if(e && e.key === "Escape") resetSearch(); });
+  }
+  if(clear) clear.addEventListener("click", resetSearch);
+})();
 $("pauseBtn").addEventListener("click", function(){
   autoOn = !autoOn;
   if(autoOn && liveN > 0){

@@ -35,6 +35,12 @@
 .card.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
 .card:target{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,180,41,.45)}
 .tag.your-team{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.4)}
+/* v1.164.0 — find a game on Predictions (same gold-ring search language as the other boards) */
+.pred-find{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;max-width:680px}
+.pred-find input{flex:1;min-width:200px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.pred-find input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.pred-find-count{font-size:.84rem;color:var(--faint)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
@@ -64,6 +70,12 @@
     <button class="tab" data-k="nhl">NHL</button>
     <button class="tab" data-k="epl">EPL</button>
   </div>
+  <!-- v1.164.0 — find a game: live filter over team names + directory abbreviations on the board already loaded (js/predictions.js; searching lifts the 10-game cap, the query survives league switches and the 90s refresh, and is never persisted) -->
+  <div class="pred-find" role="search">
+    <input type="search" id="predQ" placeholder="Find a game — team or abbr (Chiefs, KC, Yankees…)" autocomplete="off" spellcheck="false" aria-label="Find a game on this board" aria-describedby="predCount">
+    <button class="btn btn-ghost btn-sm" id="predClear" type="button" hidden>Clear search</button>
+    <span id="predCount" class="pred-find-count" role="status" aria-live="polite"></span>
+  </div>
   <!-- v1.150.0 — "Your teams" jump strip: one chip per followed-team game on this tab (js/predictions.js renders it; hidden when nothing matches) -->
   <div id="followStrip" class="follow-strip" hidden></div>
   <div id="predSpot" style="margin-bottom:18px"></div>
@@ -84,6 +96,6 @@
 <script src="js/home-strip.js?v=1.156.0"></script>
 <script src="js/predictions-fallback.js?v=1.135.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
-<script src="js/predictions.js?v=1.150.0"></script>
+<script src="js/predictions.js?v=1.164.0"></script>
 </body>
 </html>
