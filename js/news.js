@@ -1,6 +1,14 @@
 /* GridIronUI News — ESPN league news feeds, with live auto-refresh.
    The wire re-pulls silently every 3 minutes while the tab is visible, so
-   headlines stay fresh on game days without a reload. */
+   headlines stay fresh on game days without a reload.
+   v1.152.0: headline search — each tab loads 24 headlines and a bettor
+   hunting one player, team or story ("Mahomes", "trade", "injury") had to
+   eyeball every card. Typing now filters the loaded wire live (headline +
+   description), highlights matches, and shows an honest "N of 24 <league>
+   headlines" count. The query survives tab switches and the silent
+   3-minute refresh — a refresh re-filters the new wire instead of wiping
+   the search. Nothing is fetched or invented for the search: it only
+   filters what ESPN already sent. */
 (function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
@@ -10,6 +18,46 @@ var LEAGUES = [
   ["basketball/mens-college-basketball","NCAAB"],["soccer/eng.1","EPL"]
 ];
 var cur = 0;
+
+/* ---- headline search state (v1.152.0) ---- */
+var lastArts = [], hasLoaded = false, query = "";
+
+function normQuery(q){
+  return String(q == null ? "" : q).trim().toLowerCase();
+}
+/* Pure: articles whose headline or description contains the query
+   (case-insensitive). Blank query returns every article in original
+   order. Garbage in -> []; the input array is never mutated. */
+function filterArticles(arts, q){
+  var needle = normQuery(q);
+  var src = Array.isArray(arts) ? arts : [];
+  if(!needle) return src.slice();
+  return src.filter(function(a){
+    var h = String((a && a.headline) || "").toLowerCase();
+    var d = String((a && a.description) || "").toLowerCase();
+    return h.indexOf(needle) !== -1 || d.indexOf(needle) !== -1;
+  });
+}
+/* Pure, XSS-safe: escape the raw text, then wrap every case-insensitive
+   occurrence of the query in <mark>. Escaping happens per-segment so a
+   query like "<" can never break out of the markup. */
+function hlHtml(text, q, esc){
+  var raw = String(text == null ? "" : text);
+  var e = typeof esc === "function" ? esc : function(s){ return String(s); };
+  var needle = normQuery(q);
+  if(!needle) return e(raw);
+  var low = raw.toLowerCase(), out = "", i = 0, j;
+  while((j = low.indexOf(needle, i)) !== -1){
+    out += e(raw.slice(i, j)) + "<mark>" + e(raw.slice(j, j + needle.length)) + "</mark>";
+    i = j + needle.length;
+  }
+  return out + e(raw.slice(i));
+}
+try{
+  if(typeof GIU !== "undefined" && GIU){
+    GIU.newsFilter = filterArticles; GIU.newsHl = hlHtml; GIU.newsNorm = normQuery;
+  }
+}catch(e){}
 
 /* ---- live auto-refresh machinery ----
    The news feed re-pulls silently every 3 minutes — no skeleton shimmer.
@@ -47,10 +95,27 @@ function ago(iso){
   var h = Math.floor(m/60); if(h < 24) return h+"h ago";
   return Math.floor(h/24)+"d ago";
 }
+function renderCount(shown){
+  var c = $("newsCount");
+  if(!c) return;
+  if(!normQuery(query)){ c.textContent = ""; return; }
+  c.textContent = shown === 0
+    ? "No matches in " + LEAGUES[cur][1]
+    : shown + " of " + lastArts.length + " " + LEAGUES[cur][1] + " headlines";
+}
 function renderArticles(arts){
   var box = $("newsGrid");
-  if(!arts.length){ box.innerHTML = '<div class="empty">No headlines right now.</div>'; return; }
-  box.innerHTML = arts.map(function(a){
+  lastArts = Array.isArray(arts) ? arts.slice() : [];
+  hasLoaded = true;
+  var shown = filterArticles(lastArts, query);
+  renderCount(shown.length);
+  if(!lastArts.length){ box.innerHTML = '<div class="empty">No headlines right now.</div>'; return; }
+  if(!shown.length){
+    box.innerHTML = '<div class="empty">No headlines match &ldquo;' + GIU.esc(String(query).trim()) +
+      '&rdquo; in ' + LEAGUES[cur][1] + '. Clear the search to see the full wire.</div>';
+    return;
+  }
+  box.innerHTML = shown.map(function(a){
     var img = (a.images&&a.images[0]&&a.images[0].url)
       ? '<img class="card-img" loading="lazy" src="'+a.images[0].url+'" alt="">' : "";
     var link = (a.links&&a.links.web&&a.links.web.href) || "#";
@@ -58,7 +123,7 @@ function renderArticles(arts){
     desc = desc.length>160 ? desc.slice(0,160)+"…" : desc;
     return '<a class="card" href="'+link+'" target="_blank" rel="noopener">'+img+
       '<div class="game-meta" style="margin:8px 0 6px"><span class="tag">'+LEAGUES[cur][1]+'</span><span>'+ago(a.published)+'</span></div>'+
-      '<h3>'+GIU.esc(a.headline)+'</h3><p>'+GIU.esc(desc)+'</p></a>';
+      '<h3>'+hlHtml(a.headline, query, GIU.esc)+'</h3><p>'+hlHtml(desc, query, GIU.esc)+'</p></a>';
   }).join("");
 }
 function load(silent){
@@ -74,6 +139,8 @@ function load(silent){
     if(autoOn) liveTimer = setInterval(function(){ if(!isHidden()) load(true); }, LIVE_MS);
   }).catch(function(){
     if(mySeq !== tabSeq) return;
+    lastArts = []; hasLoaded = false; /* a search keystroke must never resurrect the previous league's cards over the error */
+    var c = $("newsCount"); if(c) c.textContent = "";
     box.innerHTML = GIU.failBox("The ESPN news feed didn't respond for "+LEAGUES[cur][1]+".");
   });
 }
@@ -91,5 +158,33 @@ $("pauseBtn").addEventListener("click", function(){
   if(autoOn){ load(true); }  /* resume: refresh now, timer reschedules */
   else { clearLive(); renderLiveStatus(); }
 });
+/* ---- headline search wiring (v1.152.0) ----
+   Typing filters the already-loaded wire; the query is state, so tab
+   switches and the silent refresh re-apply it via renderArticles. Before
+   the first successful load there is nothing to filter — the keystroke
+   just records the query and the arriving wire renders filtered. */
+(function(){
+  var searchEl = $("newsSearch"), clearEl = $("newsClear");
+  if(!searchEl || !searchEl.addEventListener) return;
+  function syncClear(){ if(clearEl) clearEl.hidden = !normQuery(query); }
+  function apply(){
+    query = searchEl.value;
+    syncClear();
+    if(hasLoaded) renderArticles(lastArts);
+  }
+  function reset(){
+    searchEl.value = "";
+    query = "";
+    syncClear();
+    if(hasLoaded) renderArticles(lastArts);
+    if(typeof searchEl.focus === "function") searchEl.focus();
+  }
+  searchEl.addEventListener("input", apply);
+  searchEl.addEventListener("keydown", function(ev){
+    if(ev && ev.key === "Escape") reset();
+  });
+  if(clearEl && clearEl.addEventListener) clearEl.addEventListener("click", reset);
+  syncClear();
+})();
 load();
 })();

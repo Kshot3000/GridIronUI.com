@@ -22,6 +22,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
+<style>
+/* news wire headline search (v1.152.0) — page-scoped so no shared CSS changes */
+.news-search{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;max-width:640px}
+.news-search input{flex:1;min-width:200px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.news-search input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.news-search button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;
+  padding:11px 16px;font-weight:700;font-size:.9rem;cursor:pointer;white-space:nowrap}
+.news-search button:hover{color:var(--gold);border-color:var(--gold)}
+.news-count{font-size:.85rem;color:var(--muted);min-height:1.3em}
+#newsGrid mark{background:rgba(240,180,41,.30);color:inherit;border-radius:3px;padding:0 1px}
+</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body data-feedcheck>
@@ -43,6 +55,13 @@
     <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
     <button class="btn btn-ghost btn-sm" id="pauseBtn" aria-pressed="false" style="display:none">⏸ Pause live</button>
   </div>
+  <div class="news-search" role="search">
+    <label class="sr-only" for="newsSearch">Search headlines</label>
+    <input id="newsSearch" type="search" autocomplete="off" spellcheck="false" aria-describedby="newsCount"
+           placeholder="Search headlines — a player, a team, “trade”, “injury”…">
+    <button id="newsClear" type="button" hidden>Clear</button>
+    <span class="news-count" id="newsCount" role="status" aria-live="polite"></span>
+  </div>
   <div class="tabs" id="newsTabs"></div>
   <div class="grid grid-2" id="newsGrid"></div>
 
@@ -52,6 +71,6 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
-<script src="js/news.js?v=1.23.0"></script>
+<script src="js/news.js?v=1.152.0"></script>
 </body>
 </html>
