@@ -52,6 +52,55 @@ function matchupHTML(away, home){
 GIU.wxMatchupHTML = matchupHTML;
 GIU.wxWindowHTML = windowHTML;
 
+/* ---- Weather watch ----
+   Pure: from the games whose forecasts actually resolved, the ones where
+   weather moves the number — i.e. the impact model flagged at least one
+   note. Entries are {id (card anchor), label ("GB @ CHI"), notes} as built
+   by the page bootstraps from GIU.wxImpactNotes / GIU.wxImpactNotesBsb.
+   Red-flagged games (strong Under leans, kicking nightmares) sort first,
+   then most notes; ties keep kickoff order (stable sort). Garbage in -> []:
+   a game with no resolved forecast or no flags never appears, so a calm
+   slate leaves the strip hidden instead of manufacturing concern. */
+function watchEntries(entries){
+  if(!Array.isArray(entries)) return [];
+  var out = [];
+  entries.forEach(function(e){
+    if(!e || !e.id || !e.label || !Array.isArray(e.notes)) return;
+    var notes = e.notes.filter(function(n){ return n && n.text; });
+    if(!notes.length) return;
+    var red = notes.some(function(n){ return String(n.cls||"").indexOf("red") !== -1; });
+    out.push({id: String(e.id), label: String(e.label), notes: notes, red: red});
+  });
+  out.sort(function(a, b){
+    return (b.red ? 1 : 0) - (a.red ? 1 : 0) || b.notes.length - a.notes.length;
+  });
+  return out;
+}
+/* Strip HTML: one jump chip per flagged game — matchup label, the game's
+   top impact note, and a "+N more" hint when the window flagged more.
+   Everything source-derived is escaped; ids are anchor-sanitized by the
+   callers before they get here and escaped again on the way out. */
+function watchHTML(items){
+  var chips = items.map(function(it){
+    var first = it.notes[0];
+    var more = it.notes.length > 1
+      ? ' <span style="color:var(--faint);font-size:.78rem">+'+(it.notes.length-1)+' more</span>' : "";
+    return '<a class="wx-watch-chip" href="#'+GIU.esc(it.id)+'"><b>'+GIU.esc(it.label)+'</b> '+
+      '<span class="'+GIU.esc(first.cls||"tag")+'">'+GIU.esc(first.text)+'</span>'+more+'</a>';
+  }).join("");
+  return '<span class="wx-watch-label">🌦 Weather watch — where weather moves the number:</span>'+chips;
+}
+function renderWatch(boxId, entries){
+  var box = $(boxId);
+  if(!box) return;
+  var items = watchEntries(entries);
+  if(!items.length){ box.hidden = true; box.innerHTML = ""; return; }
+  box.innerHTML = watchHTML(items);
+  box.hidden = false;
+}
+GIU.wxWatchEntries = watchEntries;
+GIU.wxWatchHTML = watchHTML;
+
 /* The scoreboard fetch survives ESPN's week rollover: between the week's last
    game and the Tuesday rollover the default board is all-post, so without
    the fallback this page would sit empty on exactly the mornings bettors
@@ -77,7 +126,8 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
     try{ var dt=new Date(ev.date);
       when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
     }catch(e){}
-    return '<div class="card" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
+    return '<div class="card" id="wxg-'+GIU.esc(String(ev.id).replace(/[^A-Za-z0-9_-]/g,""))+'" data-game="'+ev.id+'" data-kick="'+ev.date+'"'+
+      ' data-away="'+GIU.esc((away&&away.team&&away.team.abbreviation)||"")+'" data-home="'+GIU.esc((home&&home.team&&home.team.abbreviation)||"")+'"'+
       (st ? ' data-sname="'+GIU.esc(st[1])+'" data-scity="'+GIU.esc(st[2])+'" data-slat="'+st[3]+'" data-slon="'+st[4]+'" data-sroof="'+st[5]+'"' : "")+'>'+
       '<div class="game-meta"><span>'+when+'</span>'+(v.neutral?'<span class="tag" style="margin-left:8px">neutral site</span>':"")+'</div>'+
       matchupHTML(away, home)+
@@ -85,6 +135,7 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
           : '<p style="color:var(--faint)">Stadium data unavailable</p>')+
       '<div class="wx-body"><div class="skel" style="height:60px"></div></div></div>';
   }).join("");
+  var watchJobs = [];
   Array.prototype.forEach.call(box.querySelectorAll("[data-game]"), function(card){
     var ds = card.dataset;
     var st = ds.sname ? [ds.sname, ds.sname, ds.scity, parseFloat(ds.slat), parseFloat(ds.slon), ds.sroof] : null;
@@ -96,12 +147,19 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
         (st[5]==="retractable" ? 'If the roof opens, conditions apply — check the team\'s official gameday report.' : '')+'</div>';
       return;
     }
-    forecast(st, card.getAttribute("data-kick")).then(function(hrs){
+    watchJobs.push(forecast(st, card.getAttribute("data-kick")).then(function(hrs){
       body.innerHTML = windowHTML(hrs)+GIU.wxImpact(hrs);
+      return { id: "wxg-"+String(card.getAttribute("data-game")||"").replace(/[^A-Za-z0-9_-]/g,""),
+               label: (ds.away||"")+" @ "+(ds.home||""),
+               notes: GIU.wxImpactNotes(hrs) };
     }).catch(function(){
       body.innerHTML = '<p style="color:var(--faint)">Forecast unavailable for this game.</p>';
-    });
+      return null;
+    }));
   });
+  /* Weather watch strip: fills in once every open-air forecast has settled —
+     flagged games only; a calm slate (or all domes) leaves it hidden. */
+  Promise.all(watchJobs).then(function(list){ renderWatch("wxWatch", list); });
 
 
 }).catch(function(){
@@ -130,13 +188,14 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
       try{ var dt=new Date(ev.date);
         when = dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
       }catch(e){}
-      return '<div class="card" data-game="'+ev.id+'" data-kick="'+ev.date+'">'+
+      return '<div class="card" id="wxb-'+GIU.esc(String(ev.id).replace(/[^A-Za-z0-9_-]/g,""))+'" data-game="'+ev.id+'" data-kick="'+ev.date+'">'+
         '<div class="game-meta"><span>'+when+'</span><span class="tag" style="margin-left:8px">MLB postseason</span></div>'+
         matchupHTML(away, home)+
         (bp ? '<p style="font-size:.86rem;color:var(--muted);margin:0 0 10px">🏟️ '+GIU.esc(bp[1])+' · '+GIU.esc(bp[2])+(bp[5]==="open"?"":' · <span class="tag blue">'+bp[5]+' roof</span>')+'</p>'
             : '<p style="color:var(--faint)">Ballpark data unavailable</p>')+
         '<div class="wx-body" data-bp="'+(bp ? GIU.esc(bp[0]) : "")+'"><div class="skel" style="height:60px"></div></div></div>';
     }).join("");
+    var watchJobs = [];
     Array.prototype.forEach.call(grid.querySelectorAll("[data-game]"), function(card){
       var evId = card.getAttribute("data-game");
       var ev = null;
@@ -146,6 +205,7 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
       var c = ev ? (ev.competitions[0]||{}) : {};
       var comps = c.competitors || [];
       var home = comps.filter(function(t){return t.homeAway==="home";})[0];
+      var away = comps.filter(function(t){return t.homeAway==="away";})[0];
       var bp = (ev && home && home.team) ? GIU.wxBallparkVenueFor(ev, home.team.abbreviation) : (abbr ? GIU.wxBallparkFor(abbr) : null);
       if(!bp){ body.innerHTML = '<p style="color:var(--faint)">No ballpark data.</p>'; return; }
       if(bp[5] !== "open"){
@@ -154,12 +214,17 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
           (bp[5]==="retractable" ? ' <em>if</em> it\'s closed — an open roof with wind blowing out is a very different game. Check the club\'s official gameday report before first pitch.' : '.')+'</div>';
         return;
       }
-      forecast(bp, card.getAttribute("data-kick")).then(function(hrs){
+      watchJobs.push(forecast(bp, card.getAttribute("data-kick")).then(function(hrs){
         body.innerHTML = windowHTML(hrs, "1st pitch")+GIU.wxImpactBsb(hrs);
+        return { id: "wxb-"+String(evId||"").replace(/[^A-Za-z0-9_-]/g,""),
+                 label: ((away&&away.team&&away.team.abbreviation)||"")+" @ "+((home&&home.team&&home.team.abbreviation)||""),
+                 notes: GIU.wxImpactNotesBsb(hrs) };
       }).catch(function(){
         body.innerHTML = '<p style="color:var(--faint)">Forecast unavailable for this game.</p>';
-      });
+        return null;
+      }));
     });
+    Promise.all(watchJobs).then(function(list){ renderWatch("mlbWxWatch", list); });
   }).catch(function(){
     /* Feed failed: leave the section hidden rather than showing an error
        box for a bonus section — the NFL grid above carries the page. */
