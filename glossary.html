@@ -23,6 +23,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+<style>
+/* glossary instant search (v1.144.0) — page-scoped so no shared CSS changes */
+.gloss-search{display:flex;gap:10px;margin:20px 0 4px;max-width:540px}
+.gloss-search input{flex:1;min-width:0;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:11px 13px;font-size:.95rem;font-family:var(--font-body)}
+.gloss-search input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
+.gloss-search button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;
+  padding:0 16px;font-weight:700;font-size:.9rem;cursor:pointer;white-space:nowrap}
+.gloss-search button:hover{color:var(--gold);border-color:var(--gold)}
+.gloss-count{margin:8px 0 0;font-size:.85rem;color:var(--muted);min-height:1.3em}
+#glossary mark{background:rgba(240,180,41,.30);color:inherit;border-radius:3px;padding:0 1px}
+.gloss-empty{padding:28px 0;color:var(--muted)}
+.gloss-empty h3{color:var(--text);margin:0 0 6px}
+.gloss-empty p{margin:0}
+</style>
 </head>
 <body>
 <script>window.GIU_BASE=".";</script>
@@ -33,6 +48,13 @@
   <span class="kicker">Reference</span>
   <h1>Betting glossary</h1>
   <p class="lede">Every term you'll meet at the sportsbook, defined in plain English. No jargon about the jargon.</p>
+  <div class="gloss-search" role="search">
+    <label class="sr-only" for="glossQ">Search the glossary</label>
+    <input id="glossQ" type="search" autocomplete="off" spellcheck="false" aria-describedby="glossCount"
+           placeholder="Search the glossary…">
+    <button id="glossClear" type="button" hidden>Clear</button>
+  </div>
+  <p id="glossCount" class="gloss-count" role="status" aria-live="polite"></p>
   <div class="alpha-nav" id="alphaNav"></div>
 </div></section>
 
@@ -40,6 +62,7 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
+<script src="js/glossary.js?v=1.139.0"></script>
 <script>
 var TERMS = [
 ["Action","Any live, graded bet. 'I have action on the Chiefs' = I bet on the Chiefs."],
@@ -116,20 +139,27 @@ var TERMS = [
 ["Wire","Slang for the latest news/odds feed. You've got a good one right here."]
 ];
 (function(){
-  var g = document.getElementById("glossary"), nav = document.getElementById("alphaNav");
-  var letters = {};
-  TERMS.forEach(function(t){
-    var L = t[0].replace(/^[^A-Za-z]*/,"").charAt(0).toUpperCase();
-    (letters[L] = letters[L]||[]).push(t);
+  /* Instant search mounts here; the browse render lives in js/glossary.js so
+     it stays unit-testable. If the module or any hook is missing, the page
+     keeps the TERMS data and the alpha nav renders nothing rather than
+     throwing — but GlosSearch.mount degrades to a plain browse render. */
+  var ok = window.GlosSearch && window.GlosSearch.mount({
+    list: document.getElementById("glossary"),
+    nav: document.getElementById("alphaNav"),
+    search: document.getElementById("glossQ"),
+    clear: document.getElementById("glossClear"),
+    count: document.getElementById("glossCount"),
+    terms: TERMS,
+    esc: (window.GIU && window.GIU.esc) || function(s){
+      return String(s).replace(/[&<>"']/g, function(c){
+        return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+      });
+    }
   });
-  var abc = Object.keys(letters).sort();
-  nav.innerHTML = abc.map(function(L){ return '<a href="#L-'+L+'">'+L+'</a>'; }).join("");
-  g.innerHTML = abc.map(function(L){
-    return '<h2 id="L-'+L+'" style="margin-top:1.6em">'+L+'</h2>' +
-      letters[L].map(function(t){
-        return '<div class="gloss-term"><h3>'+GIU.esc(t[0])+'</h3><p>'+GIU.esc(t[1])+'</p></div>';
-      }).join("");
-  }).join("");
+  if(ok === false && window.GlosSearch){
+    window.GlosSearch.renderBrowse(document.getElementById("glossary"),
+      document.getElementById("alphaNav"), TERMS, window.GIU.esc);
+  }
 })();
 </script>
 </body>
