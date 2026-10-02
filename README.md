@@ -158,6 +158,8 @@ node tests/test-fairline.js    # no-vig fair moneyline math (vig removal, orient
 node tests/test-fairline-dom.js  # fair line wiring in shipped odds.js (render, hold figure, quiet-when-one-sided)
 node tests/test-odds-alerts.js # line-move alert candidates (threshold gating, baseline seeding, started-game skip, no re-fire)
 node tests/test-odds-alerts-dom.js # alert wiring in shipped odds.js (seed-quiet first pull, toast content/jump/dismiss, off stops all)
+node tests/test-team-follow.js # team-follow pure logic (add dedupes, remove, corrupt JSON -> [], case normalization, storage key, move matcher)
+node tests/test-team-follow-dom.js # team-follow wiring in shipped odds.js (toggles, manage bar, first-follow permission, followed-team steam -> Notification, denied fallback)
 node tests/test-odds-pm.js     # market-check logic (Polymarket live moneylines, no-vig fair probs, 5-pt gap flag, pinned-market exclusion)
 node tests/test-odds-pm-dom.js # market-check wiring in shipped odds.js (hidden slot, live-price reveal, pinned silence, no NBA fetches)
 node tests/test-predictions-kalshi-dom.js  # Kalshi row wiring in shipped predictions.js (NFL snapshot fetch, matched-game row, gap chip, snapshot-failure degrade)
