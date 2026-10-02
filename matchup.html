@@ -22,6 +22,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
+<style>
+/* v1.158.0 — followed teams on the matchup hub: gold rail on the header
+   card + ★ toggles, in the odds board's visual language (odds.html) */
+#hubHead.followed{border-color:rgba(240,180,41,.55);box-shadow:inset 3px 0 0 var(--gold)}
+.follow-ctl{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.follow-ctl-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.follow-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--line-soft);border-radius:8px;color:var(--faint);font-size:.85rem;font-weight:700;line-height:1;padding:5px 10px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.follow-btn:hover{color:var(--gold-soft);border-color:var(--gold-soft)}
+.follow-btn.on{color:var(--gold);border-color:var(--gold);background:rgba(240,180,41,.1)}
+.tag.your-team{background:rgba(240,180,41,.14);color:var(--gold-soft);border:1px solid rgba(240,180,41,.4)}
+</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body data-feedcheck>
@@ -67,7 +78,8 @@
 <script src="js/home-wx.js?v=1.126.0"></script>
 <script src="js/odds-logic.js?v=1.140.0"></script>
 <script src="js/odds-pm.js?v=1.38.0"></script>
-<script src="js/matchup.js?v=1.139.0"></script>
+<script src="js/team-follow.js?v=1.142.0"></script>
+<script src="js/matchup.js?v=1.158.0"></script>
 <script>
 (function(){
 "use strict";
@@ -90,6 +102,55 @@ if(!P.league || !P.event){
 var leaguePath = M.leaguePath(P.league);
 var leagueLabel = P.league.toUpperCase();
 var info = null;
+
+/* ---------- followed teams (v1.158.0) ----------
+   The odds board's ★ follows (js/team-follow.js) come to the hub: the
+   header card gets the boards' gold rail + "★ Your team" tag when either
+   side is followed, and — unlike the read-only consumer pages — the hub
+   carries ★ toggles of its own, so a bettor who landed here from a
+   scores card can follow this game without leaving for the odds board.
+   The follow list is re-read on every render, so an unfollow anywhere
+   shows up here on the next visit, and a toggle here lands everywhere. */
+function teamFollow(){ try{ return (window.GIU && window.GIU.TeamFollow) || null; }catch(e){ return null; } }
+var hubPermKey = "giu_followed_perm_asked";
+function hubPermAsked(){ try{ return localStorage.getItem(hubPermKey) === "1"; }catch(e){ return true; } }
+function hubSetPermAsked(){ try{ localStorage.setItem(hubPermKey, "1"); }catch(e){} }
+/* Same one-time permission ask as the odds board (shared asked-flag key):
+   the first follow ever in this browser, on this explicit gesture only,
+   and only while permission is still "default". */
+function hubRequestNotify(){
+  try{
+    if("Notification" in window && window.Notification &&
+       window.Notification.permission === "default"){
+      var p = window.Notification.requestPermission();
+      if(p && p.catch) p.catch(function(){});
+    }
+  }catch(e){}
+}
+function renderFollow(){
+  var T = teamFollow(), host = $("hubFollow"), head = $("hubHead");
+  if(!host) return;
+  if(!T || !info){ host.innerHTML = ""; return; }
+  var fol = T.load();
+  var sides = M.followedSides(info, fol);
+  if(head && head.classList) head.classList.toggle("followed", !!(sides.away || sides.home));
+  host.innerHTML = M.followHTML(info, fol, esc);
+}
+function toggleHubFollow(b){
+  var T = teamFollow();
+  if(!T) return;
+  var before = T.load();
+  var r = T.toggle(b.getAttribute("data-follow"));
+  if(before.length === 0 && r.list.length === 1 && !hubPermAsked()){
+    hubSetPermAsked();
+    hubRequestNotify();
+  }
+  renderFollow();
+}
+document.addEventListener("click", function(e){
+  var b = e.target && e.target.closest ? e.target.closest(".follow-btn") : null;
+  if(b) toggleHubFollow(b);
+});
 
 /* ---------- header ---------- */
 function statusBadge(){
@@ -119,7 +180,9 @@ function renderHead(){
     '<h2 style="margin:0 0 4px">'+esc(info.away.name)+' <span style="color:var(--faint)">@</span> '+esc(info.home.name)+'</h2>'+
     '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">'+rec(info.away)+rec(info.home)+'</div>'+score+
     '<div class="game-meta"><span>'+esc(kickText())+'</span><span>'+esc(info.venue)+'</span></div>'+
+    '<div id="hubFollow" style="margin-top:10px"></div>'+
     '<div id="hubVs" style="margin-top:8px"></div>';
+  renderFollow();
   GIU.teamDir().then(function(dir){
     var vh = GIU.vsHeader(dir, P.league, info.away.abbr, info.home.abbr);
     if(vh){ var el = $("hubVs"); if(el) el.innerHTML = vh; }

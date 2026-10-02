@@ -392,6 +392,76 @@ M.moverNowFmt = function(e){
   return (e.kind === "spread" && now > 0 ? "+" : "") + String(now);
 };
 
+/* ---- followed teams (v1.158.0) ----
+   The ★ follows (js/team-follow.js, localStorage "giu-followed-teams")
+   mark every other game surface — odds, scores, predictions, injuries,
+   weather, markets, the homepage and the news wire — but the hub, the
+   one page that is entirely about ONE game, neither showed the mark nor
+   offered a toggle: a bettor who landed here from a scores card and
+   wanted this team followed had to leave for the odds board to do it.
+   ESPN abbreviations both sides: gameInfo carries the summary payload's
+   own team.abbreviation and the follow list is built from the same ESPN
+   namespace, so the comparison is direct — no name resolution, no
+   guessing. Normalization mirrors team-follow.js list() (trim/upper,
+   2–4 letters, deduped); garbage in -> no side matches. */
+function followNormList(followed){
+  var out = [], seen = {};
+  if(!followed || typeof followed === "string" || typeof followed.length !== "number") return out;
+  for(var i = 0; i < followed.length; i++){
+    if(typeof followed[i] !== "string") continue;
+    var n = followed[i].trim().toUpperCase();
+    if(!/^[A-Z]{2,4}$/.test(n) || seen[n]) continue;
+    seen[n] = 1; out.push(n);
+  }
+  return out;
+}
+function sideAbbr(side){
+  var a = String((side && side.abbr) || "").trim().toUpperCase();
+  return /^[A-Z]{2,4}$/.test(a) ? a : null;
+}
+/* Which of this game's sides are followed: {away, home, first} with the
+   matched abbreviation or null per side; first is the first followed
+   side in away-then-home order (the card's gold mark names one team). */
+M.followedSides = function(info, followed){
+  var none = {away: null, home: null, first: null};
+  if(!info) return none;
+  var f = followNormList(followed);
+  if(!f.length) return none;
+  var aa = sideAbbr(info.away), ha = sideAbbr(info.home);
+  var away = (aa && f.indexOf(aa) !== -1) ? aa : null;
+  var home = (ha && f.indexOf(ha) !== -1) ? ha : null;
+  return {away: away, home: home, first: away || home};
+};
+/* The header follow row: one ★ toggle per side (the odds board's button
+   language — ★ + abbreviation, .on when followed, aria-pressed mirrored,
+   the label spells out the line-move-alert benefit exactly like the
+   board's) plus the boards' "★ Your team" tag when either side is
+   followed. "" when the game has no usable abbreviation on either side —
+   unresolvable teams get no toggle, never a guessed one. All
+   team-supplied strings pass through the caller's esc. */
+M.followHTML = function(info, followed, esc){
+  esc = esc || function(s){ return String(s == null ? "" : s); };
+  if(!info) return "";
+  var fol = M.followedSides(info, followed);
+  function btn(side, matched){
+    var abbr = sideAbbr(side);
+    if(!abbr) return "";
+    var on = !!matched;
+    var name = String((side && side.name) || abbr);
+    var verb = on ? "Unfollow " : "Follow ";
+    var lbl = verb + name + " — line-move alerts";
+    return '<button type="button" class="follow-btn'+(on ? " on" : "")+'"'+
+      ' data-follow="'+esc(abbr)+'" data-name="'+esc(name)+'"'+
+      ' aria-pressed="'+on+'" aria-label="'+esc(lbl)+'" title="'+esc(lbl)+'">'+
+      '<span aria-hidden="true">★</span> '+esc(abbr)+'</button>';
+  }
+  var h = btn(info.away, fol.away) + btn(info.home, fol.home);
+  if(!h) return "";
+  return '<div class="follow-ctl"><span class="follow-ctl-label" aria-hidden="true">Follow</span>'+
+    '<span role="group" aria-label="Follow teams for line-move alerts">'+h+'</span>'+
+    (fol.first ? ' <span class="tag your-team">★ Your team</span>' : "")+'</div>';
+};
+
 var api = {
   LEAGUE_PATHS: LEAGUE_PATHS, ODDS_SPORTS: ODDS_SPORTS,
   leaguePath: M.leaguePath, oddsSport: M.oddsSport,
@@ -405,7 +475,8 @@ var api = {
   injurySummary: M.injurySummary, normName: M.normName,
   dayOf: M.dayOf, matchOddsEvent: M.matchOddsEvent,
   bestBookRows: M.bestBookRows, moveBadgesHtml: M.moveBadgesHtml,
-  moverNow: M.moverNow, moverNowFmt: M.moverNowFmt
+  moverNow: M.moverNow, moverNowFmt: M.moverNowFmt,
+  followedSides: M.followedSides, followHTML: M.followHTML
 };
 if(typeof module !== "undefined" && module.exports){ module.exports = api; }
 else if(typeof window !== "undefined"){ window.Matchup = api; }
