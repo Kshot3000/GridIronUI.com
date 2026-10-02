@@ -56,8 +56,8 @@ assert(snap.games.every(function(g){ return Array.isArray(g.markets) && g.market
 
 /* ---- cache key ---- */
 var keyMatch = marketsHtml.match(/js\/markets\.js\?v=([\d.]+)/);
-assert(keyMatch && keyMatch[1] === "1.141.0",
-  "markets.html cache key for markets.js is v1.141.0 (Kalshi snapshot-to-snapshot move badges + new-market tags)");
+assert(keyMatch && keyMatch[1] === "1.147.0",
+  "markets.html cache key for markets.js is v1.147.0 (Kalshi snapshot-to-snapshot move badges + new-market tags)");
 
 if(failures){ console.error(failures + " failure(s)"); process.exit(1); }
 console.log("all kalshi-snapshot checks passed");

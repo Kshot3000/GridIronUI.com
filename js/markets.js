@@ -415,6 +415,77 @@ function drawKalshiSparks(box){
     drawSparkLine(ctx, dog, blue, false);
   });
 }
+/* ---- "Market pulse": biggest Kalshi movers above the cards ----
+   Thirty NFL cards (twelve MLB) make the per-card ▲/▼ badges easy to miss,
+   so the tab opens with the largest snapshot-to-snapshot moves as
+   jump-to-game chips. All numbers come from the baked snapshot diff via
+   K.topMoves — the strip can never show a move the cards don't badge.
+   Chips for games hidden behind "Show all N games" expand the list before
+   scrolling (their card isn't in the DOM until the re-render); an empty
+   board gets an honest quiet note, never a hidden section. pulseScrollTo
+   carries the landing target across the expand re-render. */
+var pulseScrollTo = null;
+function pulseStrip(games, shown, moveMap, prevAt, newSet, cfg){
+  var K = window.Kalshi;
+  if(!K || !K.topMoves || !GIU || !GIU.esc) return "";
+  var esc = GIU.esc;
+  var top = K.topMoves(games, moveMap, 5);
+  var shownSet = {};
+  (shown || []).forEach(function(g){ if(g && g.ticker) shownSet[g.ticker] = 1; });
+  var prevWhen = (prevAt && K.fmtWhen) ? K.fmtWhen(Date.parse(prevAt)) : "";
+  var base = prevWhen ? "since the " + prevWhen + " snapshot" : "since the previous snapshot";
+  var head = '<section class="card pulse-card" aria-label="Biggest Kalshi price moves on the ' + esc(cfg.name) + ' tab">' +
+    '<span class="tag gold">Market pulse</span>';
+  if(!top.length){
+    return head +
+      '<h3 style="margin:10px 0 4px">The crowd is sitting still</h3>' +
+      '<p class="pulse-note">No Kalshi game moved 2¢ or more ' + esc(base) +
+      ' — every price below is steady as of the snapshot.</p></section>';
+  }
+  var chips = top.map(function(m){
+    var cls = m.delta > 0 ? "mv-up" : "mv-dn";
+    var glyph = m.delta > 0 ? "▲ +" : "▼ −";
+    var tip = (m.delta > 0 ? "Up " : "Down ") + Math.abs(m.delta) +
+      " cents " + base + " — jump to the " + m.title + " card.";
+    return '<a class="mover-chip ' + cls + '" href="#km-' + esc(m.ticker) + '"' +
+      ' data-ticker="' + esc(m.ticker) + '"' +
+      ' data-shown="' + (shownSet[m.ticker] ? "1" : "0") + '"' +
+      ' title="' + esc(tip) + '">' +
+      '<span class="num">' + glyph + Math.abs(m.delta) + '¢</span>' +
+      '<b>' + esc(m.team) + '</b>' +
+      '<span class="mover-game">' + esc(m.title) + '</span></a>';
+  }).join("");
+  var newN = newSet ? Object.keys(newSet).length : 0;
+  var note = "Biggest snapshot-to-snapshot moves " + base +
+    " — only 2¢+ moves make the cut, and every chip jumps to its game's card." +
+    (newN ? " " + newN + (newN > 1 ? " new markets" : " new market") + " on the board this snapshot." : "");
+  return head +
+    '<h3 style="margin:10px 0 4px">Biggest moves ' + esc(base) + '</h3>' +
+    '<div class="movers-row">' + chips + '</div>' +
+    '<p class="pulse-note">' + esc(note) + '</p></section>';
+}
+/* Chips for games hidden behind "Show all N games" expand the list first,
+   then land on the card (it isn't in the DOM until the re-render). One
+   delegated listener on the stable grid element — re-renders replace only
+   innerHTML — bound once; missing card support degrades to the anchor. */
+function bindPulseChips(box){
+  if(!box || box._pulseBound || !box.addEventListener) return;
+  box._pulseBound = true;
+  box.addEventListener("click", function(ev){
+    var t = ev.target, chip = null;
+    while(t && t !== box){
+      if(t.classList && t.classList.contains && t.classList.contains("mover-chip")){ chip = t; break; }
+      t = t.parentNode;
+    }
+    if(!chip || chip.getAttribute("data-shown") === "1") return;
+    if(ev.preventDefault) ev.preventDefault();
+    var ticker = chip.getAttribute("data-ticker");
+    if(!kalshiTab || !ticker) return;
+    pulseScrollTo = "km-" + ticker;
+    kalshiShowAll[kalshiTab] = true;
+    loadKalshi(tabSeq, true, kalshiTab);
+  });
+}
 function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt){
   var ab = kalshiAbbrs(g);
   /* Kalshi's abbreviations don't always match ESPN's (CWS vs CHW) — run them
@@ -442,7 +513,7 @@ function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt){
        prediction — no probability bars, no book line. */
     var win = (g.teams && g.teams[0]) || null;
     var vol = win && win.vol ? GIU.esc(win.vol) : "";
-    return '<div class="card"><span class="tag">Settled</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+head+meta+
+    return '<div class="card" id="km-'+GIU.esc(g.ticker)+'"><span class="tag">Settled</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+head+meta+
       '<div style="margin:4px 0 12px"><span style="font-size:1.05rem">'+GIU.esc(win ? win.name : "Game")+'</span> '+
       '<span class="tag green">won · final</span></div>'+
       '<div style="font-size:.8rem;color:var(--faint);margin-bottom:8px">This game is over — the price reflects the final result, not a prediction. '+(vol ? vol : "")+'</div>'+
@@ -458,7 +529,7 @@ function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt){
       '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:6px" role="img" aria-label="'+GIU.esc(t.name)+' priced at '+t.price+' cents"><div style="height:100%;width:'+t.price+'%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'+
       '<div style="font-size:.76rem;color:var(--faint)">'+(t.vol ? GIU.esc(t.vol) : "No volume reported")+book+'</div></div>';
   }).join("");
-  return '<div class="card"><span class="tag green">Kalshi</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+
+  return '<div class="card" id="km-'+GIU.esc(g.ticker)+'"><span class="tag green">Kalshi</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+
     '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+newTag+
     head+meta+
     rows+
@@ -510,7 +581,9 @@ function loadKalshi(my, silent, league){
     });
     (snap.new_games || []).forEach(function(et){ if(et) newSet[et] = 1; });
     var prevAt = snap.prev_at || null;
-    box.innerHTML = stale + shown.map(function(g){
+    box.innerHTML = stale +
+      pulseStrip(games, shown, moveMap, prevAt, newSet, cfg) +
+      shown.map(function(g){
       return kalshiCard(g, dir, cfg, moveMap[g.ticker], !!newSet[g.ticker], prevAt, hist, snap.updated_at);
     }).join("") +
       (games.length > KALSHI_PAGE
@@ -518,6 +591,19 @@ function loadKalshi(my, silent, league){
           (showAll ? "Show fewer games" : "Show all "+games.length+" games")+'</button></div>'
         : "");
     drawKalshiSparks(box); /* paint the price-history canvases just rendered */
+    bindPulseChips(box); /* pulse chips for hidden games expand-then-scroll */
+    if(pulseScrollTo){
+      /* a pulse chip on a hidden card expanded the list — land on the card
+         now that the re-render put it in the DOM. */
+      var land = null;
+      try{ land = document.getElementById(pulseScrollTo); }catch(e){ land = null; }
+      pulseScrollTo = null;
+      if(land && land.scrollIntoView){
+        var reduce = false;
+        try{ reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }catch(e2){}
+        try{ land.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"}); }catch(e3){}
+      }
+    }
     var tgl = $("kalshiShowAll");
     if(tgl) tgl.addEventListener("click", function(){      kalshiShowAll[league] = !kalshiShowAll[league];
       loadKalshi(tabSeq, true, league); /* silent re-render keeps the toggle state */

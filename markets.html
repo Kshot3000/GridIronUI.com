@@ -22,6 +22,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
+<style>
+/* v1.147.0 — market-pulse strip: biggest Kalshi movers above the cards */
+.pulse-card{border-color:var(--gold-glow)}
+.movers-row{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 4px}
+.mover-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--line-soft);border-radius:99px;background:rgba(255,255,255,.03);text-decoration:none;font-size:.83rem;line-height:1.25;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.mover-chip:hover{transform:translateY(-1px);border-color:var(--gold);box-shadow:0 6px 16px rgba(240,180,41,.16)}
+.mover-chip b{color:var(--text);font-weight:700}
+.mover-chip .mover-game{color:var(--faint);font-size:.74rem}
+.pulse-note{font-size:.78rem;color:var(--faint);margin:8px 0 0}
+/* a card reached from a pulse chip: brief gold ring so the eye lands on it (global reduced-motion rule zeroes it) */
+#marketGrid .card:target{animation:pulse-land 2.4s ease}
+@keyframes pulse-land{0%{box-shadow:0 0 0 3px var(--gold-glow)}100%{box-shadow:0 0 0 0 rgba(240,180,41,0)}}
+</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
 </head>
 <body data-feedcheck>
@@ -50,7 +63,7 @@
   <div class="grid grid-3" id="marketGrid"></div>
 
   <div class="notice" style="margin:30px 0">
-    <strong>How to read these.</strong> Each market is binary — Yes/No, Team A/Team B — and the two prices always sum to ~100¢. When a price disagrees with your own number, that's a potential edge; when it agrees with the sportsbooks, that's confirmation. The <b class="num">7d</b> badge shows how far the price has moved in the last week (reported by Polymarket), and the book line shows the live bid/ask spread — momentum and liquidity worth knowing before you bet. On the Kalshi tabs, <span class="mv-up">▲</span>/<span class="mv-dn">▼</span> badges mark prices that moved 2¢ or more since the previous snapshot — the crowd's freshest lean, straight from the order book. Never treat a market price as a prediction <i>about</i> the game — it <i>is</i> the crowd's probability estimate, with real money behind it.
+    <strong>How to read these.</strong> Each market is binary — Yes/No, Team A/Team B — and the two prices always sum to ~100¢. When a price disagrees with your own number, that's a potential edge; when it agrees with the sportsbooks, that's confirmation. The <b class="num">7d</b> badge shows how far the price has moved in the last week (reported by Polymarket), and the book line shows the live bid/ask spread — momentum and liquidity worth knowing before you bet. On the Kalshi tabs, <span class="mv-up">▲</span>/<span class="mv-dn">▼</span> badges mark prices that moved 2¢ or more since the previous snapshot — the crowd's freshest lean, straight from the order book. The <b style="color:var(--text)">Market pulse</b> strip above the Kalshi cards names the tab's biggest snapshot-to-snapshot moves in one glance; each chip jumps to its game's card. Never treat a market price as a prediction <i>about</i> the game — it <i>is</i> the crowd's probability estimate, with real money behind it.
   </div>
 
   <!-- v1.29.0 — referral slots (render only when referral links are configured) -->
@@ -68,9 +81,9 @@
 
 <div id="site-footer"></div>
 <script src="js/site.js?v=1.104.0"></script>
-<script src="js/kalshi-logic.js?v=1.141.0"></script>
+<script src="js/kalshi-logic.js?v=1.147.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/disagree-logic.js?v=1.129.1"></script>
-<script src="js/markets.js?v=1.141.0"></script>
+<script src="js/markets.js?v=1.147.0"></script>
 </body>
 </html>

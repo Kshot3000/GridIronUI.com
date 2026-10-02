@@ -105,6 +105,7 @@ node tests/test-scores-detail-dom.js  # game-detail expander wiring (toggle, cac
 node tests/test-winprob.js  # win-probability series, biggest swing, Matchup Predictor, chart/predictor markup
 node tests/test-winprob-dom.js  # win-prob canvas paint + scores.js paint wiring (fetch, cache reopen, pregame toggle)
 node tests/test-markets-live.js  # markets page live auto-refresh (90s Polymarket tick on likely-live games, 5-min Kalshi snapshot tick, hidden-tab skip, pause/resume, no stacking)
+node tests/test-markets-movers.js  # markets page "Market pulse" strip (v1.147.0): K.topMoves contract (order/cap/join rules), chip ordering/anchors/expand-on-click for hidden cards, quiet-board note, escaping, shipped cache-key + CSS pins
 node tests/test-disagree-snapshot.js  # cross-book-edge card: snapshot age named in the note, Kalshi figures tagged "snapshot" + frozen-at-snapshot tooltip (shipped js/markets.js)
 node tests/test-disagree.js  # disagree-logic unit tests: Polymarket moneyline vs Kalshi snapshot pairing, gap flags
 node tests/test-disagree-mlb.js  # disagree-logic MLB series disambiguation: Game 1/Game 2 same-day matching, Game 3 dropped when no same-day Kalshi entry, league arg, backward-compat default

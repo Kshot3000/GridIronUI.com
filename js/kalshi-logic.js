@@ -233,6 +233,37 @@ K.moveIndex = function(snap, abbrOf){
   return out;
 };
 
+/* "Market pulse" top movers: the strip the markets page's Kalshi tabs show
+   above the cards — the N largest snapshot-to-snapshot price moves, so the
+   crowd's freshest lean is one glance instead of a 30-card scroll. Takes
+   K.games() output plus the moveMap the page builds from snap.moves
+   ({ticker: {team: delta}} — the same 2c+ bar as the badges). Exact
+   team-name joins only: a move whose team doesn't match a priced team on
+   its own card earns nothing, never a guess; settled games are excluded
+   (a result's 99c side is not a move). Sorted by |delta| desc, capped at
+   n (default 5). Returns [{ticker, team, delta, title, sub}] — all raw
+   text, the caller escapes. Garbage in -> [], never junk. */
+K.topMoves = function(games, moveMap, n){
+  var out = [];
+  if(!Array.isArray(games) || !moveMap || typeof moveMap !== "object") return out;
+  n = (typeof n === "number" && n > 0) ? Math.floor(n) : 5;
+  games.forEach(function(g){
+    if(!g || g.settled || !g.ticker) return;
+    var mm = moveMap[g.ticker];
+    if(!mm || typeof mm !== "object") return;
+    var names = {};
+    (Array.isArray(g.teams) ? g.teams : []).forEach(function(t){ if(t && t.name) names[t.name] = 1; });
+    Object.keys(mm).forEach(function(team){
+      var d = Number(mm[team]);
+      if(!names[team] || !isFinite(d) || Math.abs(d) < 2) return;
+      out.push({ticker: g.ticker, team: team, delta: Math.round(d),
+                title: g.title || "", sub: g.sub || ""});
+    });
+  });
+  out.sort(function(a, b){ return Math.abs(b.delta) - Math.abs(a.delta); });
+  return out.slice(0, n);
+};
+
 /* Compact "Kalshi says" line for the predictions page: the snapshot's two
    prices for one game, labeled with the snapshot time, plus the gap versus
    the Polymarket price (pmA, whole cents) when supplied — two real-money
