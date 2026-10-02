@@ -41,6 +41,182 @@ var KALSHI_TABS = {
 var KALSHI_PAGE = 12;
 var kalshiShowAll = {nfl: false, mlb: false};
 
+/* ---- followed teams (v1.155.0) ----
+   The odds board's ★ follows (js/team-follow.js, localStorage
+   "giu-followed-teams") already mark odds, scores, predictions, injuries
+   and weather; this page was the last board they meant nothing on. Both
+   sources here now mark followed-team games (gold rail + "★ Your team"
+   tag) and a "Your teams" jump strip above the grid carries one chip per
+   followed game on the active tab:
+   - Polymarket tabs: game titles resolve through GIU.teamFind against
+     the ESPN-sourced directory (the predictions.js v1.150.0 approach), so
+     abbreviations compare in the follow list's ESPN namespace; a side
+     that doesn't resolve simply can't match — never a fuzzy guess.
+     Every card gains a #pm-<slug> anchor.
+   - Kalshi tabs: the snapshot's own sub abbreviations ("CHI vs GB")
+     normalize through Disagree.normAbbr (Kalshi WAS->ESPN WSH, CWS->CHW,
+     JAC->JAX) before comparing. Settled games never match — a result is
+     not a market. Every Kalshi card already carries #km-<ticker>; a
+     followed game hidden behind "Show all N games" gets a chip that
+     expands the list first, then lands on the card (the pulse-chip
+     mechanism, shared via pulseScrollTo below).
+   No follows, or no followed team on this tab: the strip stays hidden
+   and the cards render exactly as before. */
+function teamFollow(){ try{ return (window.GIU && window.GIU.TeamFollow) || null; }catch(e){ return null; } }
+function followedList(){
+  var T = teamFollow();
+  try{ return T ? T.load() : []; }catch(e){ return []; }
+}
+function cleanFollow(followed){
+  var f = [], seen = {};
+  (Array.isArray(followed) ? followed : []).forEach(function(x){
+    if(typeof x !== "string") return;
+    var n = x.trim().toUpperCase();
+    if(/^[A-Z]{2,4}$/.test(n) && !seen[n]){ seen[n] = 1; f.push(n); }
+  });
+  return f;
+}
+/* pmKey: the Polymarket card anchor key — the event's slug (URL-safe by
+   construction), else its id, else a slugified title, else a positional
+   key. Sanitized regardless of source so a hostile slug can never break
+   out of the id attribute. (Same contract as predictions.js rowKey.) */
+function pmKey(ev, idx){
+  ev = ev || {};
+  var raw = String(ev.slug || ev.id || "").trim().toLowerCase();
+  var k = raw.replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "");
+  if(k) return k;
+  var t = String(ev.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return t || ("game-" + (idx || 0));
+}
+/* followedPM: pure matcher over the Polymarket tab's internal games
+   ({ev:{title, slug, ...}}). Returns one record per game a followed team
+   plays in: {key, abbr (the followed side), abbrA, abbrB ("" when a side
+   doesn't resolve), aName, bName}. First followed entry wins when both
+   sides are followed. Garbage in -> []. Exported for tests. */
+function followedPM(games, followed, dir, league, find){
+  var f = cleanFollow(followed);
+  if(!f.length || !Array.isArray(games) || typeof find !== "function") return [];
+  var out = [];
+  games.forEach(function(g, idx){
+    var ev = (g && g.ev) || {};
+    var tp = String(ev.title || "").split(/\s+vs\.?\s+/);
+    if(tp.length !== 2 || !tp[0].trim() || !tp[1].trim()) return;
+    var ta = null, tb = null;
+    try{ ta = find(dir, league, tp[0].trim()); }catch(e){ ta = null; }
+    try{ tb = find(dir, league, tp[1].trim()); }catch(e){ tb = null; }
+    var aa = (ta && ta.abbr) ? String(ta.abbr).trim().toUpperCase() : "";
+    var bb = (tb && tb.abbr) ? String(tb.abbr).trim().toUpperCase() : "";
+    if(!aa && !bb) return;
+    var hit = null, i;
+    for(i = 0; i < f.length; i++){ if(f[i] === aa || f[i] === bb){ hit = f[i]; break; } }
+    if(!hit) return;
+    out.push({ key: pmKey(ev, idx), abbr: hit, abbrA: aa, abbrB: bb,
+               aName: tp[0].trim(), bName: tp[1].trim() });
+  });
+  return out;
+}
+/* followedKalshi: pure matcher over K.games() output ({ticker, sub,
+   title, teams, settled}). Abbreviations come from the game's own sub
+   and pass through the caller's norm (Disagree.normAbbr in the browser)
+   before comparing against the follow list. Settled games and games
+   whose sub carries no abbreviations never match. Chip labels prefer
+   the title's two sides ("IND Colts" / "WAS Commanders"), falling back
+   to the priced team names. Garbage in -> []. Exported for tests. */
+function followedKalshi(games, followed, norm){
+  var f = cleanFollow(followed);
+  if(!f.length || !Array.isArray(games)) return [];
+  var nf = (typeof norm === "function") ? norm : function(a){ return a; };
+  var out = [];
+  games.forEach(function(g){
+    if(!g || g.settled || !g.ticker) return;
+    var ab = kalshiAbbrs(g);
+    if(!ab) return;
+    var aa = "", bb = "";
+    try{ aa = String(nf(ab[0]) || "").trim().toUpperCase(); }catch(e){ aa = ""; }
+    try{ bb = String(nf(ab[1]) || "").trim().toUpperCase(); }catch(e){ bb = ""; }
+    if(!aa && !bb) return;
+    var hit = null, i;
+    for(i = 0; i < f.length; i++){ if(f[i] === aa || f[i] === bb){ hit = f[i]; break; } }
+    if(!hit) return;
+    var tp = String(g.title || "").split(/\s+vs\.?\s+/);
+    var aName = (tp.length === 2 && tp[0].trim()) ? tp[0].trim()
+      : ((g.teams && g.teams[0] && g.teams[0].name) || "");
+    var bName = (tp.length === 2 && tp[1].trim()) ? tp[1].trim()
+      : ((g.teams && g.teams[1] && g.teams[1].name) || "");
+    out.push({ ticker: String(g.ticker), abbr: hit, abbrA: aa, abbrB: bb,
+               aName: aName, bName: bName });
+  });
+  return out;
+}
+/* The "Your teams" jump strip (a stable element above the grid, so tab
+   renders only ever rewrite its contents): one chip per followed game
+   on the active tab, anchor-linked to the card. A Kalshi chip whose
+   game sits behind "Show all" carries data-expand=<ticker>; the click
+   handler expands the list and lands on the card. Empty match list ->
+   strip hidden and emptied, so tab switches, empty boards and feed
+   errors never leave a stale strip behind. */
+function renderFollowStrip(chips){
+  var el = $("followStrip");
+  if(!el) return;
+  if(!chips || !chips.length){ el.innerHTML = ""; el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '<span class="follow-strip-label">★ Your teams</span>' +
+    chips.map(function(c){
+      return '<a class="follow-chip-link" href="#'+GIU.esc(c.id)+'"'+
+        (c.expand ? ' data-expand="'+GIU.esc(c.expand)+'"' : '')+'>'+
+        '<b>★ '+GIU.esc(c.abbr)+'</b> '+GIU.esc(c.aText)+' vs '+GIU.esc(c.bText)+'</a>';
+    }).join("");
+}
+function pmChips(matches){
+  return (matches || []).map(function(m){
+    return { id: "pm-" + m.key, abbr: m.abbr,
+             aText: m.abbrA || m.aName || "", bText: m.abbrB || m.bName || "",
+             expand: null };
+  });
+}
+function kalshiChips(matches, shownSet){
+  return (matches || []).map(function(m){
+    return { id: "km-" + m.ticker, abbr: m.abbr,
+             aText: m.abbrA || m.aName || "", bText: m.abbrB || m.bName || "",
+             expand: (shownSet && shownSet[m.ticker]) ? null : m.ticker };
+  });
+}
+/* One delegated listener on the stable strip element, bound once:
+   a chip for a Kalshi game hidden behind "Show all" expands the list
+   first, then lands via the shared pulseScrollTo hand-off in
+   loadKalshi. Chips whose card is already in the DOM keep the plain
+   anchor behavior (and the gold :target ring). */
+function bindFollowStrip(){
+  var el = $("followStrip");
+  if(!el || el._followBound || !el.addEventListener) return;
+  el._followBound = true;
+  el.addEventListener("click", function(ev){
+    var t = ev.target, chip = null;
+    while(t && t !== el){
+      if(t.classList && t.classList.contains && t.classList.contains("follow-chip-link")){ chip = t; break; }
+      t = t.parentNode;
+    }
+    if(!chip) return;
+    var ticker = chip.getAttribute("data-expand");
+    if(!ticker || !kalshiTab) return;
+    /* data-expand is stamped at render time only when the game was NOT
+       among the shown cards — the flag is the source of truth, exactly
+       like the pulse chips' data-shown. */
+    if(ev.preventDefault) ev.preventDefault();
+    pulseScrollTo = "km-" + ticker;
+    kalshiShowAll[kalshiTab] = true;
+    loadKalshi(tabSeq, true, kalshiTab);
+  });
+}
+try{
+  if(typeof window !== "undefined"){
+    window.GIU = window.GIU || {};
+    window.GIU.marketsFollowedPM = followedPM;
+    window.GIU.marketsFollowedKalshi = followedKalshi;
+    window.GIU.marketsPmKey = pmKey;
+  }
+}catch(e){}
+
 function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
 function clearLive(){ if(liveTimer){ clearInterval(liveTimer); liveTimer = null; } }
 /* Polymarket events expose startTime but no explicit in-progress flag; a game
@@ -225,6 +401,7 @@ function load(my, silent){
   if(!silent){
     box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
     $("marketNote").textContent = "Loading live markets — this is a large data feed, one moment…";
+    renderFollowStrip([]); /* a fresh tab never inherits the last tab's strip */
   }
   var lname = LEAGUES[cur][0], lkey = LEAGUES[cur][1];
   seriesFor(lkey).then(function(sid){
@@ -258,11 +435,16 @@ function load(my, silent){
     if(!games.length){
       box.innerHTML = '<div class="empty">No upcoming '+GIU.esc(lname)+' game markets on Polymarket right now. Markets cluster around game days — check back mid-week.</div>';
       $("marketNote").textContent = "";
+      renderFollowStrip([]);
       liveN = 0; renderLiveStatus();
       return;
     }
     $("marketNote").textContent = games.length+" games · prices live from Polymarket · volume in $";
-    box.innerHTML = games.map(function(g){
+    /* ---- followed teams (v1.155.0): mark this tab's followed games ---- */
+    var folPM = followedPM(games, followedList(), dir, lkey, (GIU && GIU.teamFind) || null);
+    var folByKey = {};
+    folPM.forEach(function(m){ folByKey[m.key] = m; });
+    box.innerHTML = games.map(function(g, gi){
       var t = fmtT(g.ev.startTime || g.ev.eventDate);
       var slug = g.ev.slug||"";
       var body = g.mls.map(marketRow).join("") +
@@ -270,12 +452,15 @@ function load(my, silent){
                  (g.total ? marketRow(g.total) : "");
       var head = vsFor(g.ev.title, lkey, dir) ||
         '<h3 style="margin:10px 0 4px">'+GIU.esc(g.ev.title)+'</h3>';
-      return '<div class="card"><span class="tag green">Live market</span>'+
+      var fk = pmKey(g.ev, gi), fm = folByKey[fk];
+      return '<div class="card'+(fm ? " followed" : "")+'" id="pm-'+GIU.esc(fk)+'"><span class="tag green">Live market</span>'+
+        (fm ? ' <span class="tag your-team">★ Your team</span>' : '')+
         head+
         (t ? '<div class="game-meta" style="margin-bottom:12px"><span>'+t+'</span></div>' : '<div style="height:8px"></div>')+
         body+
         '<div class="game-meta"><a href="https://polymarket.com/event/'+GIU.esc(slug)+'" target="_blank" rel="noopener">Trade on Polymarket →</a></div></div>';
     }).join("");
+    renderFollowStrip(pmChips(folPM));
     /* ---- cross-book disagreement (NFL and MLB tabs) ----
        Each tab's Kalshi snapshot prices the same game-winners as Polymarket;
        when the two books differ by 3c+ on a side, that gap is a real edge
@@ -304,6 +489,7 @@ function load(my, silent){
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     box.innerHTML = GIU.failBox("Polymarket's API didn't respond. No prices are shown rather than stale ones.");
     $("marketNote").textContent = "";
+    renderFollowStrip([]);
     liveN = 0; renderLiveStatus();
   });
 }
@@ -486,7 +672,7 @@ function bindPulseChips(box){
     loadKalshi(tabSeq, true, kalshiTab);
   });
 }
-function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt){
+function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt, folAbbr){
   var ab = kalshiAbbrs(g);
   /* Kalshi's abbreviations don't always match ESPN's (CWS vs CHW) — run them
      through the shared alias map so the header keeps full team identity. */
@@ -529,8 +715,9 @@ function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt){
       '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:6px" role="img" aria-label="'+GIU.esc(t.name)+' priced at '+t.price+' cents"><div style="height:100%;width:'+t.price+'%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'+
       '<div style="font-size:.76rem;color:var(--faint)">'+(t.vol ? GIU.esc(t.vol) : "No volume reported")+book+'</div></div>';
   }).join("");
-  return '<div class="card" id="km-'+GIU.esc(g.ticker)+'"><span class="tag green">Kalshi</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+
+  return '<div class="card'+(folAbbr ? " followed" : "")+'" id="km-'+GIU.esc(g.ticker)+'"><span class="tag green">Kalshi</span> <span class="tag blue">'+GIU.esc(cfg.name)+'</span> '+
     '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\'s API blocks browser requests.">snapshot</span>'+newTag+
+    (folAbbr ? ' <span class="tag your-team">★ Your team</span>' : '')+
     head+meta+
     rows+
     kalshiSpark(g, hist, snapAt)+
@@ -545,6 +732,7 @@ function loadKalshi(my, silent, league){
   if(!silent){
     box.innerHTML = '<div class="card"><div class="skel" style="height:120px"></div></div>'.repeat(3);
     $("marketNote").textContent = "Loading the Kalshi snapshot…";
+    renderFollowStrip([]); /* a fresh tab never inherits the last tab's strip */
   }
   Promise.all([
     GIU.fetchJSON(cfg.file),
@@ -560,6 +748,7 @@ function loadKalshi(my, silent, league){
     if(!games.length){
       box.innerHTML = '<div class="empty">'+GIU.esc(cfg.empty)+'</div>';
       $("marketNote").textContent = "";
+      renderFollowStrip([]);
       liveN = 0; renderLiveStatus();
       return;
     }
@@ -581,10 +770,18 @@ function loadKalshi(my, silent, league){
     });
     (snap.new_games || []).forEach(function(et){ if(et) newSet[et] = 1; });
     var prevAt = snap.prev_at || null;
+    /* ---- followed teams (v1.155.0): mark this tab's followed games ---- */
+    var folK = followedKalshi(games, followedList(),
+      (window.Disagree && window.Disagree.normAbbr) || null);
+    var folByTicker = {};
+    folK.forEach(function(m){ folByTicker[m.ticker] = m; });
+    var shownSet = {};
+    shown.forEach(function(g){ if(g && g.ticker) shownSet[g.ticker] = 1; });
     box.innerHTML = stale +
       pulseStrip(games, shown, moveMap, prevAt, newSet, cfg) +
       shown.map(function(g){
-      return kalshiCard(g, dir, cfg, moveMap[g.ticker], !!newSet[g.ticker], prevAt, hist, snap.updated_at);
+      return kalshiCard(g, dir, cfg, moveMap[g.ticker], !!newSet[g.ticker], prevAt, hist, snap.updated_at,
+        folByTicker[g.ticker] ? folByTicker[g.ticker].abbr : null);
     }).join("") +
       (games.length > KALSHI_PAGE
         ? '<div style="margin:8px 0 34px;text-align:center"><button class="btn btn-ghost" id="kalshiShowAll" aria-expanded="'+showAll+'">'+
@@ -592,6 +789,7 @@ function loadKalshi(my, silent, league){
         : "");
     drawKalshiSparks(box); /* paint the price-history canvases just rendered */
     bindPulseChips(box); /* pulse chips for hidden games expand-then-scroll */
+    renderFollowStrip(kalshiChips(folK, shownSet));
     if(pulseScrollTo){
       /* a pulse chip on a hidden card expanded the list — land on the card
          now that the re-render put it in the DOM. */
@@ -623,6 +821,7 @@ function loadKalshi(my, silent, league){
     if(my !== tabSeq) return; /* user moved to another tab meanwhile */
     box.innerHTML = GIU.failBox("The Kalshi snapshot couldn't be loaded. Kalshi's API blocks browser requests, so this page depends on the server-side snapshot — nothing is shown rather than stale prices.");
     $("marketNote").textContent = "";
+    renderFollowStrip([]);
     liveN = 0; renderLiveStatus();
   });
 }
@@ -647,5 +846,6 @@ $("pauseBtn").addEventListener("click", function(){
     if(kalshiTab) loadKalshi(tabSeq, true, kalshiTab); else load(tabSeq, true);
   } else { clearLive(); renderLiveStatus(); }
 });
+bindFollowStrip(); /* "Your teams" chips for hidden Kalshi games expand-then-scroll */
 load(++tabSeq);
 })();
