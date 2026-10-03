@@ -158,9 +158,9 @@ assert(marketsHtml.indexOf("2¢ or more") !== -1,
 assert(/js\/markets\.js\?v=2.0.4/.test(marketsHtml), "markets.html keys markets.js at v2.0.4");
 assert(/js\/kalshi-logic\.js\?v=1.147.0/.test(marketsHtml), "markets.html keys kalshi-logic.js at v1.147.0");
 var oddsHtml = read("odds.html");
-assert(/js\/odds-logic\.js\?v=1\.163\.0/.test(oddsHtml), "odds.html keys odds-logic.js at v1.163.0");
+assert(/js\/odds-logic\.js\?v=2\.0\.5/.test(oddsHtml), "odds.html keys odds-logic.js at v2.0.5");
 assert(/js\/kalshi-logic\.js\?v=1\.147\.0/.test(oddsHtml), "odds.html keys kalshi-logic.js at v1.147.0");
-assert(/js\/odds\.js\?v=1\.163\.0/.test(oddsHtml), "odds.html keys odds.js at v1.163.0");
+assert(/js\/odds\.js\?v=2\.0\.5/.test(oddsHtml), "odds.html keys odds.js at v2.0.5");
 
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }
 console.log("\nAll kalshi-moves assertions passed.");

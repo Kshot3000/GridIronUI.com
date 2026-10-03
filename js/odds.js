@@ -98,6 +98,10 @@ function applySearch(){
     el = cards[i];
     var txt = el.getAttribute ? (el.getAttribute("data-find") || "") : "";
     var ok = !active || terms.every(function(t){ return txt.indexOf(t) !== -1; });
+    /* v2.0.5: cards past the market line's first-page cap stay hidden
+       while no search is active and the board isn't expanded; an active
+       search lifts the cap, so the finder covers the whole snapshot. */
+    if(ok && !active && !marketExpanded && el.getAttribute && el.getAttribute("data-cap-extra")) ok = false;
     if(el.style) el.style.display = ok ? "" : "none";
     if(ok){ shown++; if(el.id) vis[el.id] = 1; }
   }
@@ -451,19 +455,29 @@ function noKeyBoardHtml(withMarket){
 }
 
 /* No-key "market line": for the sports with a server-side Kalshi snapshot
-   (NFL, MLB), the board shows real prediction-market prices even without an
-   Odds API key — every visitor sees genuine numbers instead of a dead board.
-   The setup card above still pitches the key for sportsbook lines; nothing
-   here is ever presented as a book line. Stale snapshots withhold prices
-   (same honesty rule as the predictions page); a failed fetch degrades to
-   the plain no-key state. */
+   (NFL, MLB, NCAAF), the board shows real prediction-market prices even
+   without an Odds API key — every visitor sees genuine numbers instead of
+   a dead board. The setup card above still pitches the key for sportsbook
+   lines; nothing here is ever presented as a book line. Stale snapshots
+   withhold prices (same honesty rule as the predictions page); a failed
+   fetch degrades to the plain no-key state. NCAAF joined in v2.0.5 once
+   its snapshot existed (v2.0.4): its 257-game slate renders behind the
+   first-page cap below instead of flooding the board. The with-key
+   per-game market annotations stay NFL-only — no college mapping there. */
 var MARKET_SNAP = {
   americanfootball_nfl: "kalshi-nfl",
-  baseball_mlb: "kalshi-mlb"
+  baseball_mlb: "kalshi-mlb",
+  americanfootball_ncaaf: "kalshi-ncaaf"
 };
+/* First-page caps per snapshot file: only slates far larger than a board
+   page get one. marketExpanded is DOM state for the section's Show-all
+   toggle — reset on every fallback render, never persisted. */
+var MARKET_CAP = { "kalshi-ncaaf": 12 };
+var marketExpanded = false;
 function renderMarketFallback(){
   var board = $("oddsBoard");
   var snap = MARKET_SNAP[sport];
+  marketExpanded = false;
   if(!snap || !window.Kalshi || !window.OddsLogic){
     board.innerHTML = noKeyBoardHtml();
     applySearch();
@@ -477,7 +491,8 @@ function renderMarketFallback(){
     var games = window.Kalshi.games(d).filter(function(g){ return !g.settled; });
     var html = window.OddsLogic.marketSectionHtml(games, d && d.updated_at,
                                                   window.Kalshi.stale(d && d.updated_at),
-                                                  d && d.moves, d && d.prev_at);
+                                                  d && d.moves, d && d.prev_at,
+                                                  MARKET_CAP[snap]);
     board.innerHTML = html + noKeyBoardHtml(!!html);
     applySearch(); /* v1.163.0: an active find-a-game query survives the tab switch */
   }).catch(function(){
@@ -1429,6 +1444,22 @@ $("oddsBoard").addEventListener("click", function(e){
     var su = $("oddsSetup"), ki = $("keyInput");
     if(su && su.scrollIntoView) su.scrollIntoView({behavior:"smooth", block:"start"});
     if(ki && ki.focus) setTimeout(function(){ try{ ki.focus({preventScroll:true}); }catch(x){} }, 420);
+    return;
+  }
+  /* v2.0.5: market line Show-all toggle — flips the cap state and lets
+     applySearch re-govern card visibility (an active search already
+     lifts the cap, so this only changes the un-searched board). */
+  var mb = e.target && e.target.closest ? e.target.closest("#marketMoreBtn") : null;
+  if(mb){
+    marketExpanded = !marketExpanded;
+    mb.setAttribute("aria-expanded", marketExpanded ? "true" : "false");
+    var tot = mb.getAttribute("data-total") || "", capN = mb.getAttribute("data-cap") || "";
+    mb.textContent = marketExpanded ? "Show fewer games" : ("Show all "+tot+" games");
+    var note = $("marketMoreNote");
+    if(note) note.textContent = marketExpanded
+      ? ("Showing all "+tot+" games.")
+      : ("Showing the "+capN+" soonest of "+tot+" games — the find-a-game search above covers all "+tot+".");
+    applySearch();
     return;
   }
   var b = e.target && e.target.closest ? e.target.closest(".pick-btn") : null;

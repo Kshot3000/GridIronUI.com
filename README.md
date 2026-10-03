@@ -220,6 +220,7 @@ node tests/test-middle.js      # middling math (both-win payout, split outcomes,
 node tests/test-middle-dom.js  # middling calculator wiring in shipped tools.js (math, verdicts, formats, label XSS, errors)
 node tests/test-middle-static.js  # middle card wiring in tools.html (New tag, Sixteen counts, v1.65.0 cache keys)
 node tests/test-odds-market-fallback.js # no-key "market line" on the odds board: Kalshi cents -> American moneyline, snapshot-labeled section HTML, stale-snapshot price withholding, settled-game exclusion, odds.html wiring
+node tests/test-odds-ncaaf-market.js # NCAAF on the no-key market line (v2.0.5): cap contract (12 visible + flagged extras + honest count + Show-all toggle), stale withholding, real-snapshot integration, shipped wiring pins
 node tests/test-matchup.js # matchup hub logic: param parsing, ESPN summary scheme, header/records/ESPN line, Kalshi match via withKalshi, Polymarket favorite extraction, per-team injury filter, Odds API event match, best-book rows, move badges
 node tests/test-matchup-dom.js # matchup hub wiring in shipped files: matchup.html chrome/meta/sections, script keys, home-strip + scores Matchup links, sitemap, cache-key pins
 ```

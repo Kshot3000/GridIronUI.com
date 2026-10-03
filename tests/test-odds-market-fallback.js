@@ -100,12 +100,12 @@ assert(mixedHtml.indexOf("Done Game") === -1, "settled game excluded from the bo
 /* ---- odds.html wiring guards ---- */
 var oddsHtml = fs.readFileSync(path.join(__dirname, "..", "odds.html"), "utf8");
 assert(/js\/kalshi-logic\.js\?v=1.147.0/.test(oddsHtml), "odds.html loads kalshi-logic.js keyed");
-assert(/js\/odds-logic\.js\?v=1\.163\.0/.test(oddsHtml), "odds.html bumps odds-logic.js key");
-assert(/js\/odds\.js\?v=1\.163\.0/.test(oddsHtml), "odds.html bumps odds.js key");
+assert(/js\/odds-logic\.js\?v=2\.0\.5/.test(oddsHtml), "odds.html bumps odds-logic.js key (v2.0.5)");
+assert(/js\/odds\.js\?v=2\.0\.5/.test(oddsHtml), "odds.html bumps odds.js key (v2.0.5)");
 var oddsJs = fs.readFileSync(path.join(__dirname, "..", "js", "odds.js"), "utf8");
 assert(oddsJs.indexOf("renderMarketFallback") !== -1, "odds.js has the fallback renderer");
-assert(/MARKET_SNAP\s*=\s*\{[^}]*americanfootball_nfl[^}]*baseball_mlb/.test(oddsJs),
-       "fallback covers NFL and MLB snapshot sports");
+assert(/MARKET_SNAP\s*=\s*\{[^}]*americanfootball_nfl[^}]*baseball_mlb[^}]*americanfootball_ncaaf/.test(oddsJs),
+       "fallback covers NFL, MLB and NCAAF snapshot sports");
 
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }
 console.log("all assertions passed");

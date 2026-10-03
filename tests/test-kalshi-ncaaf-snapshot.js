@@ -99,13 +99,16 @@ assert(/Kalshi · NCAAF/.test(marketsHtml),
   "markets.html names the Kalshi · NCAAF tab");
 assert(marketsHtml.indexOf("js/markets.js?v=2.0.4") !== -1,
   "markets.html keys markets.js at v2.0.4");
-/* Honest gating: the predictions page has no college tab and the odds
-   board's market line has no college mapping, so neither may reference
-   the NCAAF snapshot — a half-wired surface would mislabel prices. */
+/* Honest gating, updated v2.0.5: the predictions page still has no
+   college tab and no ESPN<->Kalshi college matching, so it must NOT
+   reference the NCAAF snapshot. The odds board's no-key market line is
+   different — it renders the snapshot directly (no per-game mapping),
+   so v2.0.5 wires it there behind a first-page cap; the with-key
+   per-game annotations stay NFL-only. */
 assert(!/kalshi-ncaaf/.test(read("js/predictions.js")),
   "js/predictions.js deliberately does NOT wire the NCAAF snapshot (no college tab there)");
-assert(!/kalshi-ncaaf/.test(read("js/odds.js")),
-  "js/odds.js deliberately does NOT wire the NCAAF snapshot (no college market-line mapping)");
+assert(/americanfootball_ncaaf:\s*"kalshi-ncaaf"/.test(read("js/odds.js")),
+  "js/odds.js wires the NCAAF snapshot into the no-key market line (v2.0.5)");
 
 /* ---- DOM wiring: boot markets.js, click the NCAAF tab ---- */
 function escStub(s){

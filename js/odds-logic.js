@@ -80,7 +80,7 @@ var L = {
     for(var i = 0; i < terms.length; i++){ if(hay.indexOf(terms[i]) === -1) return false; }
     return true;
   },
-  marketGameCard: function(g, when, moveMap, prevAt){
+  marketGameCard: function(g, when, moveMap, prevAt, capExtra){
     /* moveMap is an optional {teamName: delta} for this game, from the
        snapshot's baked snapshot-to-snapshot diff (K.diffMoves contract).
        kalshi-logic.js loads after this module on odds.html, so the badge
@@ -96,7 +96,12 @@ var L = {
        the market close_time, which Kalshi sets days after kickoff (in-play
        trading window), so formatting it as the game time would mislead. */
     var t = g.sub ? L.mkEsc(g.sub) : "";
-    return '<div class="card game-card" data-find="'+L.mkEsc(L.marketSearchText(g))+'">'+
+    /* capExtra (v2.0.5): a card past the section's first-page cap renders
+       hidden and flagged, so the caller's Show-all toggle and find-a-game
+       can govern it — the card is in the DOM with its data-find text, so
+       search covers the whole snapshot, never just the visible page. */
+    return '<div class="card game-card" data-find="'+L.mkEsc(L.marketSearchText(g))+'"'+
+      (capExtra ? ' data-cap-extra="1" style="display:none"' : "")+'>'+
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">'+
         '<h3 style="margin:0;font-size:1rem">'+L.mkEsc(g.title)+'</h3><span class="tag green">Kalshi</span></div>'+
       '<div class="game-meta" style="margin-bottom:4px">'+
@@ -107,7 +112,7 @@ var L = {
         "\u00a2 contract pays $1 if that team wins — the price is the market's implied chance.</p>"+
     "</div>";
   },
-  marketSectionHtml: function(games, updatedAt, isStale, moves, prevAt){
+  marketSectionHtml: function(games, updatedAt, isStale, moves, prevAt, cap){
     games = (games||[]).filter(function(g){ return g && g.teams && g.teams.length >= 2; });
     if(!games.length) return "";
     var when = L.mkWhen(Date.parse(updatedAt || ""));
@@ -124,8 +129,23 @@ var L = {
       if(!mv || !mv.event_ticker) return;
       (moveMap[mv.event_ticker] = moveMap[mv.event_ticker] || {})[mv.team] = mv.delta;
     });
-    var cards = games.map(function(g){ return L.marketGameCard(g, when, moveMap[g.ticker], prevAt); }).join("");
+    /* First-page cap (v2.0.5): a 257-game college snapshot rendered whole
+       would flood the board. When the caller passes a positive cap below
+       the game count, games past the cap render hidden (data-cap-extra)
+       behind an honest count + Show-all toggle — the same discipline as
+       the markets page. No cap (NFL/MLB) renders exactly as before. */
+    cap = (typeof cap === "number" && isFinite(cap) && cap > 0) ? Math.floor(cap) : 0;
+    var capped = cap > 0 && games.length > cap;
+    var cards = games.map(function(g, i){ return L.marketGameCard(g, when, moveMap[g.ticker], prevAt, capped && i >= cap); }).join("");
     if(!cards) return "";
+    var more = "";
+    if(capped){
+      more = '<div class="market-more" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px">'+
+        '<p id="marketMoreNote" role="status" style="margin:0;color:var(--muted);font-size:.88rem">Showing the '+cap+
+          " soonest of "+games.length+" games — the find-a-game search above covers all "+games.length+".</p>"+
+        '<button class="btn btn-ghost btn-sm" id="marketMoreBtn" type="button" aria-expanded="false" data-total="'+games.length+
+          '" data-cap="'+cap+'">Show all '+games.length+" games</button></div>";
+    }
     return '<div style="margin-bottom:26px">'+
       '<div class="section-head" style="margin-bottom:10px"><div>'+
         '<span class="kicker">Market line · no key needed</span><h2>Real prices, right now</h2></div>'+
@@ -134,7 +154,7 @@ var L = {
         "prediction-market prices — real money on both sides — from our server snapshot"+
         (when ? ", updated "+L.mkEsc(when) : "")+
         ". Add your free Odds API key above to stack sportsbook lines against the market.</p>"+
-      '<div class="grid grid-2">'+cards+"</div></div>";
+      '<div class="grid grid-2">'+cards+"</div>"+more+"</div>";
   },
   fmtPt: function(p){ return (p>0?"+":"")+p; },
   shortName: function(name){ return String(name).split(" ").pop(); },
