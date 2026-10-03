@@ -108,10 +108,17 @@ F.cardHtml = function(g, snap, mi){
       '<div style="font-size:.76rem;color:var(--faint);margin-bottom:12px">'+esc(t.vol || "No volume reported")+book+'</div></div>';
   }).join("");
   if(!rows) return "";
+  /* Kickoff (v2.0.11): the snapshot's real start via K.games, formatted by
+     K.fmtWhen in the visitor's timezone; "" when the snapshot has none. */
+  var kick = "";
+  try{ kick = K.fmtWhen(g.start); }catch(e){ kick = ""; }
   return '<div class="card"><span class="tag green">Kalshi</span> '+
     '<span class="tag" title="Prices come from a server-side snapshot because Kalshi\u2019s API blocks browser requests.">snapshot</span>'+
     '<h3 style="margin:10px 0 4px;font-size:1.02rem">'+esc(g.title)+'</h3>'+
-    (g.sub ? '<div class="game-meta" style="margin-bottom:12px"><span>'+esc(g.sub)+'</span></div>' : '<div style="height:8px"></div>')+
+    ((g.sub || kick) ? '<div class="game-meta" style="margin-bottom:12px">'
+      + (g.sub ? '<span>'+esc(g.sub)+'</span>' : '')
+      + (kick ? '<span>Kickoff '+esc(kick)+'</span>' : '')
+      + '</div>' : '<div style="height:8px"></div>')+
     rows+
     '<div class="game-meta"><span>Source: Kalshi snapshot'+(when ? ' \u00b7 '+esc(when) : '')+'</span>'+
     '<a href="https://kalshi.com/browse" target="_blank" rel="noopener">Trade on Kalshi \u2192</a></div></div>';

@@ -51,7 +51,9 @@ K.vol = function(m){
   return "";
 };
 
-/* Earliest close time across a game's markets, or null. */
+/* Earliest close time across a game's markets, or null. NOTE: close_time
+   is Kalshi's market close (~2 days after kickoff, the in-play window) —
+   an ordering proxy only, never the game time. See K.startMs. */
 K.gameTime = function(g){
   var t = null;
   (g.markets || []).forEach(function(m){
@@ -59,6 +61,16 @@ K.gameTime = function(g){
     if(isFinite(d) && (t === null || d < t)) t = d;
   });
   return t;
+};
+
+/* The game's real kickoff, in ms: the snapshot's start field, which the
+   fetcher takes from Kalshi's occurrence_datetime (every market of a game
+   carries the same one — verified live 2026-10-03 across NFL/MLB/NCAAF).
+   Null when the snapshot carries none (older snapshots) or it doesn't
+   parse — callers then show no kickoff rather than a guessed one. */
+K.startMs = function(g){
+  var t = Date.parse((g && g.start) || "");
+  return isFinite(t) ? t : null;
 };
 
 /* A game is settled when the market has decided the outcome: two or more
@@ -81,7 +93,10 @@ K.settled = function(g){
 /* Normalize the snapshot into priced games, soonest first. Games without two
    priced teams are dropped (stale/settled listings), never fabricated.
    Settled games (see K.settled) sort last so finished results never crowd
-   out live markets. */
+   out live markets. "Soonest" is the real kickoff (K.startMs) when the
+   snapshot carries it, falling back to the close-time proxy for older
+   snapshots — the two order identically on fresh snapshots, because
+   Kalshi sets close a fixed window after each game's start. */
 K.games = function(snap){
   var out = [];
   ((snap && snap.games) || []).forEach(function(g){
@@ -94,12 +109,14 @@ K.games = function(snap){
     teams.sort(function(a, b){ return b.price - a.price; });
     out.push({
       title: g.title, sub: g.sub_title, ticker: g.event_ticker,
+      start: K.startMs(g),
       close: K.gameTime(g), teams: teams, tickers: tickers, settled: K.settled(g)
     });
   });
   out.sort(function(a, b){
     if(!!a.settled !== !!b.settled) return a.settled ? 1 : -1; /* settled last */
-    var x = a.close === null ? Infinity : a.close, y = b.close === null ? Infinity : b.close;
+    var ka = a.start !== null ? a.start : a.close, kb = b.start !== null ? b.start : b.close;
+    var x = ka === null ? Infinity : ka, y = kb === null ? Infinity : kb;
     return x - y;
   });
   return out;

@@ -292,10 +292,21 @@ def main(argv=None):
                 "close_time": m.get("close_time"),
             })
         markets.sort(key=lambda m: (m["team"] or ""))
+        # Real kickoff: every market of a game carries the same
+        # occurrence_datetime — Kalshi's scheduled start (verified live
+        # 2026-10-03 across NFL/MLB/NCAAF: every game, exactly one value).
+        # The earliest is the game's start; None when Kalshi stamps none,
+        # and the pages then show no kickoff rather than guessing one.
+        # close_time is NOT this: Kalshi sets it ~2 days after kickoff
+        # for the in-play trading window, so it must never be rendered
+        # as the game time (it only orders the board, as a proxy).
+        starts = [m.get("occurrence_datetime") for m in ms
+                  if m.get("occurrence_datetime")]
         games.append({
             "event_ticker": et,
             "title": e.get("title"),
             "sub_title": e.get("sub_title"),
+            "start": min(starts) if starts else None,
             "markets": markets,
         })
         time.sleep(0.25)  # stay well under Kalshi's 20 reads/s tier

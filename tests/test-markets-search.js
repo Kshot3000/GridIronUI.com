@@ -273,7 +273,7 @@ settle(function(){
       assert(html.indexOf('id="marketClear"') !== -1 && html.indexOf('id="marketCount"') !== -1,
              "markets.html ships Clear + count hooks");
       assert(html.indexOf(".market-find{") !== -1, "markets.html ships page-scoped finder styles");
-      assert(html.indexOf("js/markets.js?v=2.0.4") !== -1, "markets.html keys markets.js at v2.0.4");
+      assert(html.indexOf("js/markets.js?v=2.0.11") !== -1, "markets.html keys markets.js at v2.0.11");
       assert(src.indexOf("marketsPmMatchesSearch") !== -1 && src.indexOf("function renderPM") !== -1 &&
              src.indexOf("function renderKalshi") !== -1, "markets.js ships the search core + render split");
 

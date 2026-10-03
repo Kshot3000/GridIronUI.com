@@ -261,10 +261,10 @@ function fakeCard(id, text){
   assert(html.indexOf('id="oddsClear"') !== -1 && html.indexOf('id="oddsCount"') !== -1 &&
          html.indexOf('id="oddsFindEmpty"') !== -1, "odds.html ships Clear + count + empty-state hooks");
   assert(html.indexOf("js/odds.js?v=2.0.5") !== -1, "odds.html bumps odds.js to ?v=2.0.5");
-  assert(html.indexOf("js/odds-logic.js?v=2.0.5") !== -1, "odds.html bumps odds-logic.js to ?v=2.0.5");
+  assert(html.indexOf("js/odds-logic.js?v=2.0.11") !== -1, "odds.html bumps odds-logic.js to ?v=2.0.5");
   assert(html.indexOf(".odds-find") !== -1, "odds.html carries the page-scoped finder styles");
   var matchupHtml = fs.readFileSync(path.join(ROOT, "matchup.html"), "utf8");
-  assert(matchupHtml.indexOf("js/odds-logic.js?v=2.0.5") !== -1,
+  assert(matchupHtml.indexOf("js/odds-logic.js?v=2.0.11") !== -1,
     "matchup.html bumps the shared odds-logic.js to ?v=2.0.5");
   var src = fs.readFileSync(path.join(ROOT, "js/odds.js"), "utf8");
   assert(src.indexOf("gameMatchesSearch") !== -1 && src.indexOf("applySearch") !== -1,

@@ -260,21 +260,21 @@ settle(function(){
 
         /* ---------- Part C: shipped-file pins ---------- */
         var mkHtml = fs.readFileSync(path.join(ROOT, "markets.html"), "utf8");
-        ok("markets.html pins js/markets.js?v=2.0.4",
-           mkHtml.indexOf('js/markets.js?v=2.0.4') !== -1);
-        ok("markets.html pins js/kalshi-logic.js?v=1.147.0",
-           mkHtml.indexOf('js/kalshi-logic.js?v=1.147.0') !== -1);
+        ok("markets.html pins js/markets.js?v=2.0.11",
+           mkHtml.indexOf('js/markets.js?v=2.0.11') !== -1);
+        ok("markets.html pins js/kalshi-logic.js?v=2.0.11",
+           mkHtml.indexOf('js/kalshi-logic.js?v=2.0.11') !== -1);
         ok("markets.html carries the pulse-card styles",
            mkHtml.indexOf(".pulse-card") !== -1 && mkHtml.indexOf(".mover-chip") !== -1 &&
            mkHtml.indexOf("pulse-land") !== -1);
         ok("markets.html notice explains the Market pulse strip",
            mkHtml.indexOf("Market pulse") !== -1);
         var odHtml = fs.readFileSync(path.join(ROOT, "odds.html"), "utf8");
-        ok("odds.html kalshi-logic.js key -> v1.147.0",
-           odHtml.indexOf('js/kalshi-logic.js?v=1.147.0') !== -1);
+        ok("odds.html kalshi-logic.js key -> v2.0.11",
+           odHtml.indexOf('js/kalshi-logic.js?v=2.0.11') !== -1);
         var prHtml = fs.readFileSync(path.join(ROOT, "predictions.html"), "utf8");
-        ok("predictions.html kalshi-logic.js key -> v1.147.0",
-           prHtml.indexOf('js/kalshi-logic.js?v=1.147.0') !== -1);
+        ok("predictions.html kalshi-logic.js key -> v2.0.11",
+           prHtml.indexOf('js/kalshi-logic.js?v=2.0.11') !== -1);
         var mkJs = fs.readFileSync(path.join(ROOT, "js/markets.js"), "utf8");
         ok("markets.js builds the strip + binds chips + lands on expand",
            mkJs.indexOf("pulseStrip(") !== -1 && mkJs.indexOf("bindPulseChips(") !== -1 &&

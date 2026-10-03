@@ -100,7 +100,7 @@ assert(/kalshiShowAll = \{[^}]*ncaaf: false/.test(marketsJs),
 var marketsHtml = read("markets.html");
 assert(/Kalshi · NCAAF/.test(marketsHtml),
   "markets.html names the Kalshi · NCAAF tab");
-assert(marketsHtml.indexOf("js/markets.js?v=2.0.4") !== -1,
+assert(marketsHtml.indexOf("js/markets.js?v=2.0.11") !== -1,
   "markets.html keys markets.js at v2.0.4");
 /* Honest gating, updated v2.0.6: predictions.js must NOT reference the
    NCAAF snapshot — there is still no ESPN<->Kalshi college matching for

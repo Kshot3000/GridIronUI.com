@@ -127,7 +127,7 @@ ok("badge team names are escaped", xss.indexOf("<img") === -1);
 
 /* ---- shipped wiring pins ---- */
 var html = src("predictions.html");
-ok("predictions.html pins kalshi-logic.js?v=1.147.0", html.indexOf("js/kalshi-logic.js?v=1.147.0") > -1);
+ok("predictions.html pins kalshi-logic.js?v=2.0.11", html.indexOf("js/kalshi-logic.js?v=2.0.11") > -1);
 ok("predictions.html pins disagree-logic.js?v=1.129.0", html.indexOf("js/disagree-logic.js?v=1.129.0") > -1);
 ok("predictions.html pins predictions.js?v=2.0.6", html.indexOf("js/predictions.js?v=2.0.6") > -1);
 var pj = src("js/predictions.js");

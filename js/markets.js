@@ -830,7 +830,18 @@ function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt, folAbbr){
     ab = [window.Disagree.normAbbr(ab[0]), window.Disagree.normAbbr(ab[1])];
   var head = (ab && window.GIU.vsHeader(dir, cfg.dirKey, ab[0], ab[1])) ||
     '<h3 style="margin:10px 0 4px">'+GIU.esc(g.title)+'</h3>';
-  var meta = g.sub ? '<div class="game-meta" style="margin-bottom:12px"><span>'+GIU.esc(g.sub)+'</span></div>' : '<div style="height:8px"></div>';
+  /* Kickoff (v2.0.11): the snapshot's real start time (Kalshi's
+     occurrence_datetime, via K.games' start) in the visitor's timezone —
+     before this, a Kalshi card named only the date ("(Oct 3)") while the
+     Polymarket cards beside it showed the start time. No start in the
+     snapshot -> no kickoff span, never a guessed one. */
+  var kick = (window.Kalshi && window.Kalshi.fmtWhen) ? window.Kalshi.fmtWhen(g.start) : "";
+  var meta = (g.sub || kick)
+    ? '<div class="game-meta" style="margin-bottom:12px">'
+      + (g.sub ? '<span>'+GIU.esc(g.sub)+'</span>' : "")
+      + (kick ? '<span>Kickoff '+GIU.esc(kick)+'</span>' : "")
+      + '</div>'
+    : '<div style="height:8px"></div>';
   /* Snapshot-to-snapshot price moves, baked into the file by the fetch
      script (see K.diffMoves): a badge on the team whose price moved 2c+
      since the previous snapshot. moveBadge returns "" for anything below

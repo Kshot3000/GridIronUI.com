@@ -94,8 +94,12 @@ var L = {
     if(!rows) return "";
     /* The date line uses Kalshi's own sub_title ("PIT vs CLE (Oct 1)") — NOT
        the market close_time, which Kalshi sets days after kickoff (in-play
-       trading window), so formatting it as the game time would mislead. */
+       trading window), so formatting it as the game time would mislead.
+       The kickoff beside it (v2.0.11) is the snapshot's real start
+       (Kalshi's occurrence_datetime via K.games) — absent on older
+       snapshots, and then no kickoff renders rather than a wrong one. */
     var t = g.sub ? L.mkEsc(g.sub) : "";
+    var kick = g.start ? L.mkWhen(g.start) : "";
     /* capExtra (v2.0.5): a card past the section's first-page cap renders
        hidden and flagged, so the caller's Show-all toggle and find-a-game
        can govern it — the card is in the DOM with its data-find text, so
@@ -106,6 +110,7 @@ var L = {
         '<h3 style="margin:0;font-size:1rem">'+L.mkEsc(g.title)+'</h3><span class="tag green">Kalshi</span></div>'+
       '<div class="game-meta" style="margin-bottom:4px">'+
         (t ? "<span>"+t+"</span>" : "")+
+        (kick ? "<span>Kickoff "+L.mkEsc(kick)+"</span>" : "")+
         (when ? "<span>snapshot "+L.mkEsc(when)+"</span>" : "")+"</div>"+
       rows+
       '<p style="margin:10px 0 0;font-size:.75rem;color:var(--faint)">A '+L.mkEsc(String((g.teams[0]||{}).price||""))+
