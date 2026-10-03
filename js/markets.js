@@ -26,20 +26,29 @@ var tabSeq = 0;
 var PM_MS = 90000, KAL_MS = 300000, LIVE_WINDOW_MS = 4*3600*1000;
 var liveTimer = null, autoOn = true, liveN = 0, snapN = 0, lastUpdated = null, kalshiTab = null;
 /* Kalshi snapshot tabs: the NFL tab reads data/kalshi-nfl.json, the MLB tab
-   reads data/kalshi-mlb.json (postseason game-winners, rebuilt by the same
-   server-side script). kalshiTab holds the active league key or null. */
+   reads data/kalshi-mlb.json (postseason game-winners), and the NCAAF tab
+   reads data/kalshi-ncaaf.json (college football game-winners — v2.0.4;
+   Kalshi lists 250+ college games a week, the Saturday slate included),
+   all rebuilt by the same server-side script. kalshiTab holds the active
+   league key or null. */
 var KALSHI_TABS = {
   nfl: {file: "data/kalshi-nfl.json", name: "NFL", dirKey: "nfl",
         empty: "No priced Kalshi NFL game markets in the current snapshot. Markets cluster around game days — check back mid-week."},
   mlb: {file: "data/kalshi-mlb.json", name: "MLB", dirKey: "mlb",
-        empty: "No priced Kalshi MLB game markets in the current snapshot. The MLB tab tracks the postseason — check back in October."}
+        empty: "No priced Kalshi MLB game markets in the current snapshot. The MLB tab tracks the postseason — check back in October."},
+  /* dirKey "ncaaf" is deliberately NOT in the team directory (data/teams.json
+     covers the pro leagues + EPL only): vsHeader resolves neither side and
+     the card falls back to its plain title, which for college games carries
+     the full school names — honest identity, never a guessed logo/color. */
+  ncaaf: {file: "data/kalshi-ncaaf.json", name: "NCAAF", dirKey: "ncaaf",
+        empty: "No priced Kalshi college football game markets in the current snapshot. Markets cluster around game days — the big slate lands on Saturdays."}
 };
 /* The snapshot often lists far more games than fit comfortably above the
    fold (31 NFL games = two game weeks). Render the first page of cards and
    offer the rest behind an honest per-league "Show all N games" toggle, so
    later weeks are reachable instead of invisible. */
 var KALSHI_PAGE = 12;
-var kalshiShowAll = {nfl: false, mlb: false};
+var kalshiShowAll = {nfl: false, mlb: false, ncaaf: false};
 
 /* ---- find-a-game (v1.162.0) ----
    Every OTHER game board on the site has a finder (scores v1.161.0,
@@ -635,7 +644,8 @@ function renderPM(){
    rejects browser cross-origin calls, so the improvement-loop script
    scripts/fetch-kalshi.py fetches it server-side and commits timestamped
    snapshots (data/kalshi-nfl.json for the NFL tab, data/kalshi-mlb.json for
-   the MLB postseason tab), refreshed regularly. This
+   the MLB postseason tab, data/kalshi-ncaaf.json for the NCAAF tab),
+   refreshed regularly. This
    tab renders that snapshot honestly: a "snapshot" tag, the refresh time, and
    a stale warning if the snapshot goes cold — never presented as live. */
 function agoShort(iso){
@@ -647,8 +657,11 @@ function agoShort(iso){
   return Math.floor(h / 24) + "d ago";
 }
 function kalshiAbbrs(g){
-  /* sub looks like "CAR vs CLE (Sep 27)" — abbreviations are the reliable key */
-  var m = String((g&&g.sub)||"").match(/^([A-Z]{2,3})\s+vs\s+([A-Z]{2,3})\b/);
+  /* sub looks like "CAR vs CLE (Sep 27)" — abbreviations are the reliable
+     key. Pro codes run 2-3 letters; college codes run longer (NAVY, MSST,
+     CLMB, CONN), so the pattern allows up to 5 — a pro sub never carries a
+     4-5 letter code, so the wider net changes nothing on the NFL/MLB tabs. */
+  var m = String((g&&g.sub)||"").match(/^([A-Z]{2,5})\s+vs\s+([A-Z]{2,5})\b/);
   return m ? [m[1], m[2]] : null;
 }
 /* Kalshi price-history sparkline: a per-game canvas chart of the yes-price
@@ -1002,7 +1015,7 @@ function renderKalshi(){
 
 $("marketTabs").innerHTML = LEAGUES.map(function(q,i){
   return '<button class="tab'+(i===0?" active":"")+'" data-i="'+i+'">'+q[0]+'</button>';
-}).join("")+'<button class="tab" data-kalshi="nfl">Kalshi · NFL</button><button class="tab" data-kalshi="mlb">Kalshi · MLB</button>';
+}).join("")+'<button class="tab" data-kalshi="nfl">Kalshi · NFL</button><button class="tab" data-kalshi="mlb">Kalshi · MLB</button><button class="tab" data-kalshi="ncaaf">Kalshi · NCAAF</button>';
 Array.prototype.forEach.call($("marketTabs").querySelectorAll(".tab"), function(t){
   t.addEventListener("click", function(){
     Array.prototype.forEach.call($("marketTabs").querySelectorAll(".tab"), function(x){x.classList.remove("active");});

@@ -155,7 +155,7 @@ assert(/d && d\.moves/.test(oddsJs), "odds.js passes the baked diff into the mar
 var marketsHtml = read("markets.html");
 assert(marketsHtml.indexOf("2¢ or more") !== -1,
        "markets.html notice explains the move badges");
-assert(/js\/markets\.js\?v=1.162.0/.test(marketsHtml), "markets.html keys markets.js at v1.162.0");
+assert(/js\/markets\.js\?v=2.0.4/.test(marketsHtml), "markets.html keys markets.js at v2.0.4");
 assert(/js\/kalshi-logic\.js\?v=1.147.0/.test(marketsHtml), "markets.html keys kalshi-logic.js at v1.147.0");
 var oddsHtml = read("odds.html");
 assert(/js\/odds-logic\.js\?v=1\.163\.0/.test(oddsHtml), "odds.html keys odds-logic.js at v1.163.0");

@@ -207,6 +207,7 @@ node tests/test-predictions-moves.js # predictions-page Kalshi "what moved" badg
 node tests/test-predictions-fallback.js # predictions-page Kalshi-only fallback when Polymarket fails (usable/stale guards, settled exclusion, 10-game cap, honesty contract, XSS, move badges, shipped wiring pins)
 node tests/test-kalshi-snapshot.js # Kalshi snapshot honesty (no minute-specific cadence promises, loop refresh rule, snapshot shape, markets.js cache key)
 node tests/test-kalshi-mlb-snapshot.js # Kalshi MLB postseason snapshot honesty (KXMLBGAME series, 2-winner-markets shape, fetcher --series/--out args, markets + predictions wiring)
+node tests/test-kalshi-ncaaf-snapshot.js # Kalshi NCAAF snapshot honesty (KXNCAAFGAME series, 2-winner-markets shape, markets tab wiring, college-length sub abbreviations, predictions deliberately NOT wired)
 node tests/test-kalshi-settled.js # settled-game detection in js/kalshi-logic.js (99c/1c signature, settled games flagged + sorted last)
 node tests/test-kalshi-showall.js # Kalshi tab "Show all N games" pagination (first page of 12, expand/collapse, state survives silent refresh, no toggle under a page)
 node tests/test-kalshi-moves.js # Kalshi "what moved" badges (K.diffMoves spec: 2c bar, settled exclusion, new-game tags; K.moveBadge HTML; OL badge rendering; baked snapshot shape; shipped wiring pins)
@@ -233,16 +234,18 @@ Team colors/logos are stable, so this is refreshed rarely:
 python3 scripts/fetch-teams.py    # writes data/teams.json (NFL/NBA/MLB/NHL/EPL)
 ```
 
-### Kalshi NFL + MLB snapshots
+### Kalshi NFL + MLB + NCAAF snapshots
 
 Kalshi's public API rejects browser cross-origin requests, so the Markets
-page's "Kalshi · NFL" and "Kalshi · MLB" (postseason) tabs render server-side
-snapshots instead of a live feed. Refresh both on every push — loop runs do
-this when a snapshot is older than about two hours:
+page's "Kalshi · NFL", "Kalshi · MLB" (postseason) and "Kalshi · NCAAF"
+(college football, added v2.0.4) tabs render server-side snapshots instead
+of a live feed. Refresh all three on every push — loop runs do this when a
+snapshot is older than about two hours:
 
 ```bash
 python3 scripts/fetch-kalshi.py                                    # writes data/kalshi-nfl.json (timestamped)
 python3 scripts/fetch-kalshi.py --series KXMLBGAME --out data/kalshi-mlb.json  # writes data/kalshi-mlb.json
+python3 scripts/fetch-kalshi.py --series KXNCAAFGAME --out data/kalshi-ncaaf.json  # writes data/kalshi-ncaaf.json
 ```
 
 The page labels the tab as a snapshot, shows when it was captured, and warns

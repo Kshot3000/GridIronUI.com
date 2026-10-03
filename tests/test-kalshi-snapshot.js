@@ -56,8 +56,8 @@ assert(snap.games.every(function(g){ return Array.isArray(g.markets) && g.market
 
 /* ---- cache key ---- */
 var keyMatch = marketsHtml.match(/js\/markets\.js\?v=([\d.]+)/);
-assert(keyMatch && keyMatch[1] === "1.162.0",
-  "markets.html cache key for markets.js is v1.162.0 (find-a-game on Markets; followed teams on Markets before that; Kalshi move badges + new-market tags before that)");
+assert(keyMatch && keyMatch[1] === "2.0.4",
+  "markets.html cache key for markets.js is v2.0.4 (Kalshi NCAAF tab; find-a-game on Markets before that; followed teams on Markets before that; Kalshi move badges + new-market tags before that)");
 
 if(failures){ console.error(failures + " failure(s)"); process.exit(1); }
 console.log("all kalshi-snapshot checks passed");
