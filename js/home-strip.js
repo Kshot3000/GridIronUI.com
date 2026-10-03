@@ -21,15 +21,16 @@ function scoreUrl(path){
    live or kicking off. ESPN's default college-football scoreboard is the
    ranked slate (the same endpoint the scores board's NCAAF tab reads),
    which is the right editorial size for a 6-card strip. The pro-only
-   extras degrade honestly for college rows, never by guessing: no Kalshi
-   snapshot exists for NCAAF (withKalshi annotates NFL/MLB only), the
-   weather-chip resolver ignores non-NFL/MLB rows, and the matchup hub
-   has no college mapping — hubKey below is what keeps a "Matchup ->"
-   button off cards the hub cannot open (the scores board's HUBKEY
-   discipline, one league over). */
+   extras degrade honestly for college rows, never by guessing: withKalshi
+   annotates NFL/MLB only (the NCAAF Kalshi snapshot feeds the odds board
+   and markets page, not this strip), and the weather-chip resolver
+   ignores non-NFL/MLB rows. The matchup hub gained its college mapping
+   in v2.0.8 — hubKey below is what puts a "Matchup ->" button only on
+   cards the hub can actually open (the scores board's HUBKEY discipline,
+   one league over). */
 /* League label -> matchup-hub league key, or null when the hub has no
    mapping for that league. Pure; garbage in -> null. */
-var HUBKEYS = {NFL: "nfl", NBA: "nba", MLB: "mlb", NHL: "nhl"};
+var HUBKEYS = {NFL: "nfl", NBA: "nba", MLB: "mlb", NHL: "nhl", NCAAF: "ncaaf"};
 function hubKey(leagueLabel){
   var l = String(leagueLabel == null ? "" : leagueLabel).trim().toUpperCase();
   return Object.prototype.hasOwnProperty.call(HUBKEYS, l) ? HUBKEYS[l] : null;

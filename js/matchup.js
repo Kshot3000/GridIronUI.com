@@ -21,11 +21,13 @@ var M = {};
    lives, so a bad league value can't point the fetch anywhere unexpected. */
 var LEAGUE_PATHS = {
   nfl: "football/nfl", nba: "basketball/nba",
-  mlb: "baseball/mlb", nhl: "hockey/nhl"
+  mlb: "baseball/mlb", nhl: "hockey/nhl",
+  ncaaf: "football/college-football"
 };
 var ODDS_SPORTS = {
   nfl: "americanfootball_nfl", nba: "basketball_nba",
-  mlb: "baseball_mlb", nhl: "icehockey_nhl"
+  mlb: "baseball_mlb", nhl: "icehockey_nhl",
+  ncaaf: "americanfootball_ncaaf"
 };
 M.leaguePath = function(league){
   var l = String(league == null ? "" : league).toLowerCase();
@@ -73,15 +75,24 @@ M.headerOf = function(summary){
     return ((summary && summary.header && summary.header.competitions) || [])[0] || null;
   }catch(e){ return null; }
 };
-/* Overall record from a competitor's records array — first entry carrying a
-   summary wins ("3-1-0"); anything else (missing, shape drift) is null,
-   never invented. */
+/* Overall record from a competitor's record list — the entry typed
+   "total" (name "overall" in the older shape) wins; anything else with a
+   summary is the fallback. The live ESPN summary payload carries the list
+   as `record` (verified 2026-10-03 against NFL + NCAAF summaries); the
+   older `records` field is still accepted so nothing regresses if ESPN
+   serves the other shape. Missing entirely -> null, never invented. */
 M.overallRecord = function(comp){
-  var out = null;
-  ((comp && comp.records) || []).forEach(function(r){
-    if(!out && r && r.summary) out = String(r.summary);
+  if(!comp) return null;
+  var lists = [comp.record, comp.records], first = null, overall = null;
+  lists.forEach(function(list){
+    (Array.isArray(list) ? list : []).forEach(function(r){
+      if(!r || !r.summary) return;
+      if(!first) first = String(r.summary);
+      if(!overall && (r.type === "total" || r.name === "overall"))
+        overall = String(r.summary);
+    });
   });
-  return out;
+  return overall || first;
 };
 /* Normalized game info for the hub header. Returns null when the payload
    has no usable competition or no clean away/home pair — the page renders
@@ -107,9 +118,20 @@ M.gameInfo = function(summary){
     };
   }
   var st = (((c.status || {}).type) || {}).state || "";
-  var venue = c.venue || {};
-  var odds = (c.odds && c.odds[0]) || null;
-  var bc = (((c.broadcasts || [])[0]) || {}).names;
+  /* Venue / line / broadcast live in different corners of the summary
+     payload by shape (verified live 2026-10-03, NFL + NCAAF, pre + post):
+     the competition object itself carries none of them in the current
+     summary shape — the venue is at summary.gameInfo.venue, ESPN's free
+     line at summary.pickcenter[0] (same details/overUnder fields), and a
+     broadcast entry names its network at media.shortName, not names[].
+     The older competition-level fields are still read first so a payload
+     in that shape renders exactly as before; every fallback is the same
+     ESPN data for the same game, never a guess. */
+  var venue = c.venue || ((summary && summary.gameInfo && summary.gameInfo.venue) || {});
+  var odds = (c.odds && c.odds[0]) ||
+             ((summary && summary.pickcenter && summary.pickcenter[0]) || null);
+  var bc0 = ((c.broadcasts || [])[0]) || {};
+  var bc = bc0.names || (bc0.media && bc0.media.shortName) || "";
   var kickoff = c.date || "";
   return {
     state: String(st),

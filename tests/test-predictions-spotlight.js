@@ -179,7 +179,7 @@ runCase({
       const html = fs.readFileSync(path.join(ROOT, "predictions.html"), "utf8");
       ok("predictions.html has the #predSpot slot", html.indexOf('id="predSpot"') > -1);
       ok("predictions.js cache key bumped to v2.0.6", html.indexOf("js/predictions.js?v=2.0.6") > -1);
-      ok("home-strip.js included for kickoffIn reuse", html.indexOf("js/home-strip.js?v=2.0.3") > -1);
+      ok("home-strip.js included for kickoffIn reuse", html.indexOf("js/home-strip.js?v=2.0.8") > -1);
       ok("home-strip.js loads before predictions.js",
          html.indexOf('src="js/home-strip.js') < html.indexOf('src="js/predictions.js'));
 

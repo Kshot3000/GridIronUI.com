@@ -228,8 +228,8 @@ settle(function(){
       var html = fs.readFileSync(path.join(ROOT, "matchup.html"), "utf8");
       assert(html.indexOf('src="js/team-follow.js?v=1.142.0"') !== -1,
              "pin: matchup.html loads team-follow.js at its content version v1.142.0");
-      assert(html.indexOf('src="js/matchup.js?v=1.158.0"') !== -1,
-             "pin: matchup.html keys matchup.js at v1.158.0");
+      assert(html.indexOf('src="js/matchup.js?v=2.0.8"') !== -1,
+             "pin: matchup.html keys matchup.js at v2.0.8");
       assert(html.indexOf('id="hubFollow"') !== -1, "pin: header markup carries the #hubFollow host");
       assert(html.indexOf("M.followHTML(info, fol, esc)") !== -1 &&
              html.indexOf("M.followedSides(info, fol)") !== -1,
@@ -240,7 +240,7 @@ settle(function(){
       assert(html.indexOf("#hubHead.followed") !== -1 && html.indexOf(".tag.your-team") !== -1 &&
              html.indexOf(".follow-btn.on") !== -1,
              "pin: page-scoped gold styles for the followed card, tag and toggle");
-      var order = html.indexOf("js/team-follow.js") < html.indexOf("js/matchup.js?v=1.158.0");
+      var order = html.indexOf("js/team-follow.js") < html.indexOf("js/matchup.js?v=2.0.8");
       assert(order, "pin: team-follow.js loads before matchup.js");
 
       console.log(failures ? "\n" + failures + " FAILURES" : "\nALL MATCHUP-FOLLOW TESTS PASSED");

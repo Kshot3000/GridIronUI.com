@@ -77,12 +77,12 @@
 <script src="js/site.js?v=2.0.0"></script>
 <script src="js/team-brand.js?v=1.18.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/home-strip.js?v=2.0.3"></script>
+<script src="js/home-strip.js?v=2.0.8"></script>
 <script src="js/home-wx.js?v=1.126.0"></script>
 <script src="js/odds-logic.js?v=2.0.5"></script>
 <script src="js/odds-pm.js?v=1.38.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
-<script src="js/matchup.js?v=1.158.0"></script>
+<script src="js/matchup.js?v=2.0.8"></script>
 <script>
 (function(){
 "use strict";
@@ -367,7 +367,7 @@ function renderInj(){
 function renderKalshi(){
   var box = $("hubKalshiBody");
   if(P.league !== "nfl" && P.league !== "mlb"){
-    box.innerHTML = '<div class="game-meta"><span>Kalshi snapshots cover NFL and MLB games.</span></div>';
+    box.innerHTML = '<div class="game-meta"><span>Kalshi crowd prices on this hub cover NFL and MLB games — college crowd prices live on the <a href="markets.html">markets page</a>.</span></div>';
     return;
   }
   var snapFile = P.league === "nfl" ? "kalshi-nfl" : "kalshi-mlb";
@@ -403,7 +403,7 @@ function renderKalshi(){
 function renderPm(){
   var box = $("hubPmBody");
   if(P.league !== "nfl" || !PM){
-    box.innerHTML = '<div class="game-meta"><span>Polymarket moneylines cover NFL games.</span></div>';
+    box.innerHTML = '<div class="game-meta"><span>Live Polymarket prices on this hub cover NFL games — college markets live on the <a href="predictions.html">predictions board</a>.</span></div>';
     return;
   }
   box.innerHTML = '<div class="game-meta"><span>Fetching live Polymarket prices…</span></div>';

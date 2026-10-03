@@ -44,6 +44,11 @@ ok("leaguePath unknown -> null", M.leaguePath("xfl") === null);
 ok("oddsSport nfl", M.oddsSport("nfl") === "americanfootball_nfl");
 ok("oddsSport mlb", M.oddsSport("mlb") === "baseball_mlb");
 ok("oddsSport unknown -> null", M.oddsSport("epl") === null);
+ok("leaguePath ncaaf", M.leaguePath("ncaaf") === "football/college-football");
+ok("oddsSport ncaaf", M.oddsSport("ncaaf") === "americanfootball_ncaaf");
+ok("parseParams: ncaaf link parses",
+  (function(){ var q = M.parseParams("?league=ncaaf&event=401858250");
+    return q.league === "ncaaf" && q.event === "401858250"; })());
 
 /* ---- URLs ---- */
 ok("summaryUrl scheme (scores-detail compatible)",
@@ -97,6 +102,57 @@ ok("gameInfo: no records -> null record, not a guess",
 ok("overallRecord: first summary wins",
   M.overallRecord({records: [{name: "overall", summary: "2-2-0"}]}) === "2-2-0");
 ok("overallRecord: no records -> null", M.overallRecord({}) === null);
+
+/* ---- gameInfo against the LIVE summary shape (v2.0.8) ----
+   Verified 2026-10-03 against real ESPN summary payloads (NFL pre/post,
+   NCAAF pre): the competition object carries NO venue/odds, the record
+   list is competitor.record[] typed "total"/"home"/"vsconf", the free
+   line sits at summary.pickcenter[0], the venue at
+   summary.gameInfo.venue, and a broadcast entry names its network at
+   media.shortName. The old fixture above (competition-level fields) must
+   keep working too — both shapes are the same ESPN data for the game. */
+function liveComp(homeAway, abbr, name, record){
+  return {homeAway: homeAway,
+          team: {abbreviation: abbr, displayName: name, shortDisplayName: name.split(" ").pop()},
+          record: record};
+}
+var liveSummary = {
+  header: {competitions: [{
+    date: "2026-10-04T17:00:00Z",
+    status: {type: {state: "pre", shortDetail: "Sun, Oct 4"}},
+    competitors: [
+      liveComp("away", "DAL", "Dallas Cowboys",
+        [{type: "home", summary: "1-0"}, {type: "total", summary: "1-2"}, {type: "vsconf", summary: "0-1"}]),
+      liveComp("home", "HOU", "Houston Texans",
+        [{type: "total", summary: "0-3"}, {type: "home", summary: "0-2"}])
+    ],
+    broadcasts: [{media: {shortName: "FOX"}}]
+  }]},
+  gameInfo: {venue: {fullName: "Reliant Stadium"}},
+  pickcenter: [{details: "HOU -3", overUnder: 48.5}]
+};
+var live = M.gameInfo(liveSummary);
+ok("live shape: not null", !!live);
+ok("live shape: record[] total entry wins over home split",
+  live.away.record === "1-2" && live.home.record === "0-3",
+  live.away.record + "/" + live.home.record);
+ok("live shape: pickcenter line", live.espnSpread === "HOU -3" && live.espnTotal === "48.5");
+ok("live shape: gameInfo venue", live.venue === "Reliant Stadium");
+ok("live shape: broadcast media.shortName", live.broadcast === "FOX");
+ok("overallRecord: record[] total preferred even when not first",
+  M.overallRecord({record: [{type: "home", summary: "2-0"}, {type: "total", summary: "3-1"}]}) === "3-1");
+ok("overallRecord: record[] without a total falls back to first summary",
+  M.overallRecord({record: [{type: "home", summary: "2-0"}]}) === "2-0");
+ok("gameInfo: competition line beats pickcenter when both are present",
+  (function(){ var s3 = JSON.parse(JSON.stringify(liveSummary));
+    s3.header.competitions[0].odds = [{details: "HOU -3.5", overUnder: 49.5}];
+    var i3 = M.gameInfo(s3);
+    return i3.espnSpread === "HOU -3.5" && i3.espnTotal === "49.5"; })());
+ok("gameInfo: no line anywhere -> empty strings, not a guess",
+  (function(){ var s4 = JSON.parse(JSON.stringify(liveSummary));
+    delete s4.pickcenter;
+    var i4 = M.gameInfo(s4);
+    return i4 && i4.espnSpread === "" && i4.espnTotal === ""; })());
 
 /* ---- stripRowForGame ---- */
 var row = M.stripRowForGame(info, "nfl");

@@ -23,8 +23,8 @@ ok("hub has <footer id=\"site-footer\">", hub.indexOf('<div id="site-footer"></d
 ok("hub sets window.GIU_BASE", hub.indexOf('window.GIU_BASE=".') !== -1);
 
 /* ---- script keys ---- */
-ok("hub keys matchup.js at v1.158.0", hub.indexOf('js/matchup.js?v=1.158.0') !== -1);
-ok("hub keys home-strip.js at v2.0.3", hub.indexOf('js/home-strip.js?v=2.0.3') !== -1);
+ok("hub keys matchup.js at v2.0.8", hub.indexOf('js/matchup.js?v=2.0.8') !== -1);
+ok("hub keys home-strip.js at v2.0.8", hub.indexOf('js/home-strip.js?v=2.0.8') !== -1);
 ok("hub loads odds-logic.js (movers + best prices)",
   hub.indexOf("js/odds-logic.js") !== -1 && hub.indexOf("window.OddsLogic") !== -1);
 ok("hub loads odds-pm.js (live Polymarket matching)",
@@ -93,11 +93,17 @@ ok("scores hub link covers the four US leagues",
   ["football/nfl","basketball/nba","baseball/mlb","hockey/nhl"].every(function(k){
     return scoresJs.indexOf('"'+k+'":"') !== -1;
   }));
+ok("scores hub link covers NCAAF (v2.0.8)",
+  scoresJs.indexOf('"football/college-football":"ncaaf"') !== -1);
+ok("hub Kalshi gate for college points at the markets page (v2.0.8)",
+  hub.indexOf('college crowd prices live on the <a href="markets.html">markets page</a>') !== -1);
+ok("hub Polymarket gate for college points at the predictions board (v2.0.8)",
+  hub.indexOf('college markets live on the <a href="predictions.html">predictions board</a>') !== -1);
 var scoresHtml = read("scores.html");
-ok("scores.html keys scores.js at v1.161.0", scoresHtml.indexOf("js/scores.js?v=1.161.0") !== -1);
+ok("scores.html keys scores.js at v2.0.8", scoresHtml.indexOf("js/scores.js?v=2.0.8") !== -1);
 var preds = read("predictions.html");
-ok("index.html keys home-strip.js at v2.0.3", index.indexOf("js/home-strip.js?v=2.0.3") !== -1);
-ok("predictions.html keys home-strip.js at v2.0.3", preds.indexOf("js/home-strip.js?v=2.0.3") !== -1);
+ok("index.html keys home-strip.js at v2.0.8", index.indexOf("js/home-strip.js?v=2.0.8") !== -1);
+ok("predictions.html keys home-strip.js at v2.0.8", preds.indexOf("js/home-strip.js?v=2.0.8") !== -1);
 
 console.log(failures ? "\n" + failures + " FAILURES" : "\nALL MATCHUP-DOM TESTS PASSED");
 process.exit(failures ? 1 : 0);

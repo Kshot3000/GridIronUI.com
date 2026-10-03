@@ -4,10 +4,11 @@
    ranked college slate played all day. v2.0.3 adds ESPN's default
    college-football scoreboard (the ranked slate — the same endpoint the
    scores board's NCAAF tab reads) as a fifth feed. The pro-only extras
-   must degrade honestly for college rows: no Kalshi annotation (no NCAAF
-   snapshot exists), no weather chip (the resolver is NFL/MLB only), and
-   NO Matchup button — the hub has no college mapping, so HS.hubKey is
-   what index.html gates the button on.
+   must degrade honestly for college rows: no Kalshi annotation (withKalshi
+   indexes NFL/MLB only), and no weather chip (the resolver is NFL/MLB
+   only). The Matchup button was withheld in v2.0.3 (the hub had no
+   college mapping); v2.0.8 added the hub's NCAAF mapping, so HS.hubKey
+   now returns "ncaaf" and index.html's gate lets the button through.
    Run: node tests/test-home-ncaaf.js */
 "use strict";
 var fs = require("fs");
@@ -25,12 +26,12 @@ var ncaaf = HS.LEAGUES.filter(function(p){ return p[1] === "NCAAF"; });
 assert(ncaaf.length === 1 && ncaaf[0][0] === "football/college-football",
        "NCAAF maps to football/college-football (same path as the scores tab)");
 
-/* --- hubKey: the hub supports the four pro leagues, never college --- */
+/* --- hubKey: the four pro leagues + NCAAF (hub mapping added v2.0.8) --- */
 assert(HS.hubKey("NFL") === "nfl", "hubKey: NFL -> nfl");
 assert(HS.hubKey("NBA") === "nba", "hubKey: NBA -> nba");
 assert(HS.hubKey("MLB") === "mlb", "hubKey: MLB -> mlb");
 assert(HS.hubKey("NHL") === "nhl", "hubKey: NHL -> nhl");
-assert(HS.hubKey("NCAAF") === null, "hubKey: NCAAF -> null (hub has no college mapping)");
+assert(HS.hubKey("NCAAF") === "ncaaf", "hubKey: NCAAF -> ncaaf (hub gained its college mapping in v2.0.8)");
 assert(HS.hubKey(" nfl ") === "nfl", "hubKey trims + uppercases the label");
 assert(HS.hubKey("EPL") === null, "hubKey: EPL -> null");
 assert(HS.hubKey("") === null && HS.hubKey(null) === null &&
@@ -107,12 +108,12 @@ assert(Array.isArray(wxJobs) && wxJobs.length === 0,
 var html = fs.readFileSync(__dirname + "/../index.html", "utf8");
 assert(html.indexOf("HS.hubKey") !== -1 && html.indexOf("hubLink") !== -1,
        "index.html gates the Matchup button on HS.hubKey");
-assert(html.indexOf("js/home-strip.js?v=2.0.3") !== -1,
-       "index.html pins home-strip.js?v=2.0.3");
+assert(html.indexOf("js/home-strip.js?v=2.0.8") !== -1,
+       "index.html pins home-strip.js?v=2.0.8");
 ["matchup.html", "predictions.html"].forEach(function(p){
   var h = fs.readFileSync(__dirname + "/../" + p, "utf8");
-  assert(h.indexOf("js/home-strip.js?v=2.0.3") !== -1,
-         p + " re-pins the shared home-strip.js at v2.0.3");
+  assert(h.indexOf("js/home-strip.js?v=2.0.8") !== -1,
+         p + " re-pins the shared home-strip.js at v2.0.8");
 });
 
 console.log(failures ? "\n" + failures + " FAILURES" : "\nALL HOME-NCAAF TESTS PASSED");
