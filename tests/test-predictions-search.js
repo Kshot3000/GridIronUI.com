@@ -242,7 +242,7 @@ function gridCards(html){ return (html.match(/class="card/g) || []).length; }
   assert(html.indexOf('id="predQ"') !== -1, "predictions.html ships the predQ input");
   assert(html.indexOf('id="predClear"') !== -1 && html.indexOf('id="predCount"') !== -1,
     "predictions.html ships the Clear button + count live region");
-  assert(html.indexOf("js/predictions.js?v=1.164.0") !== -1, "predictions.html bumps predictions.js to ?v=1.164.0");
+  assert(html.indexOf("js/predictions.js?v=2.0.6") !== -1, "predictions.html bumps predictions.js to ?v=2.0.6");
   assert(html.indexOf(".pred-find") !== -1, "predictions.html carries the page-scoped finder styles");
   var src = fs.readFileSync(path.join(ROOT, "js/predictions.js"), "utf8");
   assert(src.indexOf("predMatchesSearch") !== -1 && src.indexOf("paintBoard") !== -1 && src.indexOf("lastBoard") !== -1,

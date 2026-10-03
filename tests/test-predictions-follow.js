@@ -209,7 +209,7 @@ function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
   assert(html.indexOf('id="followStrip"') !== -1, "predictions.html ships the followStrip container");
   assert(html.indexOf("js/team-follow.js?v=1.142.0") !== -1, "predictions.html loads team-follow.js (content unchanged since v1.142.0)");
   assert(html.indexOf('src="js/team-follow.js') < html.indexOf('src="js/predictions.js'), "team-follow.js script loads before predictions.js");
-  assert(html.indexOf("js/predictions.js?v=1.164.0") !== -1, "predictions.html bumps predictions.js to ?v=1.164.0");
+  assert(html.indexOf("js/predictions.js?v=2.0.6") !== -1, "predictions.html bumps predictions.js to ?v=2.0.6");
   assert(html.indexOf(".card.followed") !== -1 && html.indexOf(".follow-chip-link") !== -1 &&
          html.indexOf(".card:target") !== -1, "predictions.html carries the page-scoped followed styles");
   var src = fs.readFileSync(path.join(ROOT, "js/predictions.js"), "utf8");

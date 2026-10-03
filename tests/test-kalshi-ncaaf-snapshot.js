@@ -10,8 +10,11 @@
    subs, which would have silently killed follow marks on this tab), that
    the tab renders end-to-end in a fake DOM (first-page cap, Show-all,
    a seeded NAVY follow marking its card via the 4-letter code), and that
-   the surfaces with no college mapping (predictions rows, odds market
-   line) deliberately stay UNwired rather than half-wired.
+   the Kalshi joins with no college mapping (predictions Kalshi rows +
+   fallback, odds with-key annotations) deliberately stay UNwired rather
+   than half-wired. (The odds no-key market line joined in v2.0.5 — it
+   renders the snapshot directly; the predictions NCAAF tab joined in
+   v2.0.6 — Polymarket-only, no snapshot join.)
    Run: node tests/test-kalshi-ncaaf-snapshot.js */
 "use strict";
 var fs = require("fs"), vm = require("vm"), path = require("path");
@@ -99,14 +102,18 @@ assert(/Kalshi · NCAAF/.test(marketsHtml),
   "markets.html names the Kalshi · NCAAF tab");
 assert(marketsHtml.indexOf("js/markets.js?v=2.0.4") !== -1,
   "markets.html keys markets.js at v2.0.4");
-/* Honest gating, updated v2.0.5: the predictions page still has no
-   college tab and no ESPN<->Kalshi college matching, so it must NOT
-   reference the NCAAF snapshot. The odds board's no-key market line is
-   different — it renders the snapshot directly (no per-game mapping),
-   so v2.0.5 wires it there behind a first-page cap; the with-key
-   per-game annotations stay NFL-only. */
+/* Honest gating, updated v2.0.6: predictions.js must NOT reference the
+   NCAAF snapshot — there is still no ESPN<->Kalshi college matching for
+   the per-game Kalshi rows or the Kalshi-only fallback, so SNAP stays
+   NFL/MLB-only. (v2.0.6 adds a predictions NCAAF tab, but it is
+   Polymarket-only — the live CFB series lookup, exactly like the
+   NBA/NHL/EPL tabs; the snapshot join stays deliberately unwired.)
+   The odds board's no-key market line is different — it renders the
+   snapshot directly (no per-game mapping), so v2.0.5 wires it there
+   behind a first-page cap; the with-key per-game annotations stay
+   NFL-only. */
 assert(!/kalshi-ncaaf/.test(read("js/predictions.js")),
-  "js/predictions.js deliberately does NOT wire the NCAAF snapshot (no college tab there)");
+  "js/predictions.js deliberately does NOT wire the NCAAF snapshot (Kalshi join stays NFL/MLB-only)");
 assert(/americanfootball_ncaaf:\s*"kalshi-ncaaf"/.test(read("js/odds.js")),
   "js/odds.js wires the NCAAF snapshot into the no-key market line (v2.0.5)");
 

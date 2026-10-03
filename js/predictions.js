@@ -1,10 +1,21 @@
 /* GridIronUI Predictions — market-implied probabilities, honestly labeled.
    These are NOT our picks. They are live Polymarket prices converted to probabilities.
-   Series are looked up live per league so the page survives series rotation. */
+   Series are looked up live per league so the page survives series rotation.
+   v2.0.6: an NCAAF tab joins the board — Polymarket lists a real College
+   Football series (sport key "cfb", verified live against gamma /sports;
+   the markets page's CFB tab already reads it), and on a college Saturday
+   this page was the last board without the college slate. The tab rides
+   the identical live series lookup and moneyline filter as every other
+   league. Honest limits, same discipline as the home strip (v2.0.3): the
+   Kalshi cross-check and the Kalshi-only fallback stay NFL/MLB-only —
+   SNAP gains no cfb entry, because there is still no honest
+   ESPN<->Kalshi college join for the per-game rows, and the team
+   directory has no college namespace, so followed-team marks simply
+   never resolve on this tab instead of being guessed. */
 (function(){
 "use strict";
 var $ = function(id){ return document.getElementById(id); };
-var LEAGUES = [["NFL","nfl"],["NBA","nba"],["MLB","mlb"],["NHL","nhl"],["EPL","epl"]];
+var LEAGUES = [["NFL","nfl"],["NBA","nba"],["MLB","mlb"],["NHL","nhl"],["NCAAF","cfb"],["EPL","epl"]];
 var curKey = "nfl";
 /* Kalshi snapshot file per league: NFL game-winners + MLB postseason
    game-winners, both rebuilt server-side by scripts/fetch-kalshi.py. */
@@ -255,7 +266,7 @@ function skel(){
 }
 /* League-aware "next game" label for the spotlight kicker. */
 var SPOT_KICKER = {nfl:"Next kickoff", nba:"Next tip-off", mlb:"Next first pitch",
-                   nhl:"Next puck drop", epl:"Next kick-off"};
+                   nhl:"Next puck drop", cfb:"Next kickoff", epl:"Next kick-off"};
 /* The nearest upcoming game with a real future kickoff, or null. Rows are
    pre-sorted by start time; dateless rows (Infinity) are skipped, never
    featured. */
