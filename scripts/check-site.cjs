@@ -12,7 +12,7 @@ for(const file of walk(root)){
    const target=ref.split(/[?#]/)[0];if(!target)continue;refs++;
    if(!fs.existsSync(path.resolve(path.dirname(file),target)))issues.push(`${path.relative(root,file)}: missing ${target}`);
   }
-  for(const expected of ['css/upgrade.css?v=2.0.0','js/upgrade.js?v=2.0.0','js/site.js?v=2.0.0'])if(!html.includes(expected))issues.push(`${file}: missing release asset ${expected}`);
+  for(const expected of ['css/upgrade.css?v=2.0.0','js/upgrade.js?v=2.0.1','js/site.js?v=2.0.0'])if(!html.includes(expected))issues.push(`${file}: missing release asset ${expected}`);
  }
  if(file.endsWith('.js')&&!file.includes(path.sep+'tests'+path.sep)&&!file.includes(path.sep+'worker'+path.sep)){
   const r=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});if(r.status!==0)issues.push(r.stderr);
