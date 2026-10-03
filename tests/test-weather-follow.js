@@ -226,7 +226,7 @@ async function settle(){ for(var i = 0; i < 30; i++) await new Promise(function(
   var html = fs.readFileSync(path.join(ROOT, "weather.html"), "utf8");
   assert(html.indexOf('id="wxFollow"') !== -1, "weather.html ships the wxFollow strip container");
   assert(html.indexOf("js/team-follow.js?v=1.142.0") !== -1, "weather.html loads team-follow.js (content unchanged since v1.142.0)");
-  assert(html.indexOf('src="js/weather.js?v=1.165.0"') !== -1, "weather.html pins weather.js at v1.165.0");
+  assert(html.indexOf('src="js/weather.js?v=2.0.7"') !== -1, "weather.html pins weather.js at v2.0.7");
   assert(html.indexOf(".follow-chip-link") !== -1 && html.indexOf(".card.followed") !== -1 &&
          html.indexOf(".tag-yourteam") !== -1, "weather.html carries the page-scoped followed styles");
   var src = fs.readFileSync(path.join(ROOT, "js/weather.js"), "utf8");

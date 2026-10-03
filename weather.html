@@ -68,6 +68,11 @@
 </div></section>
 
 <div class="wrap" style="margin-top:30px">
+  <!-- v2.0.7 — live status: both slates silently re-pull every 15 min while the page stays open (js/weather.js; pause/resume + updated clock, same contract as the injury wire) -->
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+    <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
+    <button class="btn btn-ghost btn-sm" id="pauseBtn" aria-pressed="false" style="display:none">⏸ Pause live</button>
+  </div>
   <div class="notice green">
     <strong>Why bettors care: wind moves totals more than rain.</strong> Sustained winds above ~15 mph suppress the passing game and field goals — historically pushing games under. Rain matters too, but mostly by pushing teams to run. Dome and retractable-roof games are marked so you don't handicap weather that isn't there.
   </div>
@@ -105,6 +110,6 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/weather.js?v=1.165.0"></script>
+<script src="js/weather.js?v=2.0.7"></script>
 </body>
 </html>

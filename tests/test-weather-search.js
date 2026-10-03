@@ -303,7 +303,7 @@ function disp(card){ return card.style.display || ""; }
   assert(html.indexOf('id="wxQ"') !== -1 && html.indexOf('id="wxClear"') !== -1 &&
          html.indexOf('id="wxCount"') !== -1 && html.indexOf('id="wxFindEmpty"') !== -1,
     "weather.html ships the finder hooks (wxQ/wxClear/wxCount/wxFindEmpty)");
-  assert(html.indexOf('src="js/weather.js?v=1.165.0"') !== -1, "weather.html pins weather.js at v1.165.0");
+  assert(html.indexOf('src="js/weather.js?v=2.0.7"') !== -1, "weather.html pins weather.js at v2.0.7");
   assert(html.indexOf(".wx-find") !== -1 && html.indexOf(".wx-find-count") !== -1,
     "weather.html carries the page-scoped finder styles");
   var src = fs.readFileSync(path.join(ROOT, "js/weather.js"), "utf8");

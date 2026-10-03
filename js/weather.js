@@ -309,21 +309,114 @@ function resetWxSearch(){
   }catch(e){ /* no DOM (tests/imports): the finder simply never wires */ }
 })();
 
+/* ---- live auto-refresh (v2.0.7) ----
+   Every other live-data page silently re-pulls while it stays open
+   (scores 60s, news/injuries 3 min, predictions 90s, markets, odds) —
+   the weather page was the last one frozen at whatever the forecast
+   said when it was opened, on exactly the page a bettor leaves open
+   on game morning while the hourly model updates and kickoff
+   forecasts sharpen. Both slates now re-pull silently every 15
+   minutes: Open-Meteo's data is hourly and ESPN's slate moves on
+   game-day timescales, so a faster cadence would burn calls without
+   fresher numbers. A refresh clears the forecast cache (a re-pull
+   that replayed cached hours would be theatre), preserves the
+   find-a-game query and the followed-team marks (both re-apply as
+   each slate re-renders), skips ticks while the tab is hidden, and
+   never blanks the board: a failed silent re-pull keeps the cards
+   already on screen, and the live-status pill carries the honest
+   updated clock with a pause/resume control — the same contract as
+   the injury wire. Garbage-DOM safe: with no pill or no timers
+   (test sandboxes) every hook quietly no-ops. */
+var LIVE_MS = 15*60*1000;
+var liveTimer = null, autoOn = true, lastUpdated = null;
+var nflSeq = 0, mlbSeq = 0; /* render generations: a slow earlier re-pull never overwrites a newer one */
+function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+function clearLive(){
+  if(liveTimer && typeof clearInterval === "function"){ try{ clearInterval(liveTimer); }catch(e){} }
+  liveTimer = null;
+}
+function fmtClock(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function renderLiveStatus(){
+  var s = null, b = null;
+  try{ s = $("liveStatus"); b = $("pauseBtn"); }catch(e){}
+  if(!s) return;
+  if(autoOn){
+    s.className = "live-status live";
+    s.innerHTML = '<span class="live-dot" aria-hidden="true"></span>'+
+      'auto-refresh every 15 min'+
+      (lastUpdated ? ' · updated '+fmtClock(lastUpdated) : "");
+    if(b){ b.style.display = ""; b.innerHTML = "⏸ Pause live"; b.setAttribute("aria-pressed","false"); }
+  } else {
+    s.className = "live-status paused";
+    s.textContent = "auto-refresh paused";
+    if(b){ b.style.display = ""; b.innerHTML = "▶ Resume live"; b.setAttribute("aria-pressed","true"); }
+  }
+}
+function scheduleLive(){
+  clearLive();
+  if(!autoOn || typeof setInterval !== "function") return;
+  liveTimer = setInterval(function(){ if(!isHidden()) refreshWx(); }, LIVE_MS);
+}
+function refreshWx(){
+  wxCache = {}; /* forecasts must actually re-pull, not replay the cache */
+  loadNflWx(true);
+  loadMlbWx(true);
+}
+(function wireWxLive(){
+  try{
+    var b = $("pauseBtn");
+    if(!b || !b.addEventListener) return;
+    b.addEventListener("click", function(){
+      autoOn = !autoOn;
+      if(autoOn){ refreshWx(); scheduleLive(); } /* resume: refresh now; the timer reschedules */
+      else clearLive();
+      renderLiveStatus();
+    });
+  }catch(e){ /* no DOM (tests/imports): the control simply never wires */ }
+})();
+/* The week-rollover notice is a single element the page owns: a silent
+   re-pull replaces it (never stacks a second copy), and a slate that
+   stops being a fallback takes it back down. */
+var wxNoteEl = null;
+function clearFallbackNote(){
+  try{
+    if(wxNoteEl && wxNoteEl.parentNode && wxNoteEl.parentNode.removeChild)
+      wxNoteEl.parentNode.removeChild(wxNoteEl);
+  }catch(e){}
+  wxNoteEl = null;
+}
+function showFallbackNote(box, week){
+  clearFallbackNote();
+  try{
+    var note = document.createElement("div");
+    note.innerHTML = GIU.wxFallbackNoticeHTML(week, GIU.esc);
+    var el = note.firstChild;
+    box.parentNode.insertBefore(el, box);
+    wxNoteEl = el;
+  }catch(e){}
+}
+
 /* The scoreboard fetch survives ESPN's week rollover: between the week's last
    game and the Tuesday rollover the default board is all-post, so without
    the fallback this page would sit empty on exactly the mornings bettors
    start handicapping the weekend. upcomingNfl() pulls next week's slate
    explicitly in that window; the notice names the week so nobody mistakes
    it for this week's games. */
+function loadNflWx(silent){
+var mySeq = ++nflSeq;
 GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
+  if(mySeq !== nflSeq) return; /* a newer load already won — discard */
   var evs = res.events.slice(0,16);
   var box = $("wxGrid");
   if(res.isFallback && evs.length && GIU.wxFallbackNoticeHTML){
-    var note = document.createElement("div");
-    note.innerHTML = GIU.wxFallbackNoticeHTML(res.week, GIU.esc);
-    box.parentNode.insertBefore(note.firstChild, box);
+    showFallbackNote(box, res.week);
+  } else if(!res.isFallback){
+    clearFallbackNote();
   }
-  if(!evs.length){ box.innerHTML = '<div class="empty">No upcoming NFL games on the board.</div>'; applyWxSearch(); return; }
+  if(!evs.length){ box.innerHTML = '<div class="empty">No upcoming NFL games on the board.</div>'; lastUpdated = Date.now(); renderLiveStatus(); applyWxSearch(); return; }
   /* v1.154.0 — followed-team marks for this slate (strip + card rail/tag) */
   var nflGames = evs.map(function(ev){
     var c0 = ev.competitions[0];
@@ -362,6 +455,7 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
   }).join("");
   renderFollowStrip();
   applyWxSearch();
+  lastUpdated = Date.now(); renderLiveStatus(); /* the slate landed; forecasts stream into the cards below */
   var watchJobs = [];
   Array.prototype.forEach.call(box.querySelectorAll("[data-game]"), function(card){
     var ds = card.dataset;
@@ -390,21 +484,31 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
 
 
 }).catch(function(){
+  if(mySeq !== nflSeq) return; /* a newer load already won — discard */
+  if(silent) return; /* a failed silent re-pull keeps the cards already on screen */
   $("wxGrid").innerHTML = GIU.failBox("The ESPN schedule feed didn't respond, so there's nothing to attach weather to.");
   applyWxSearch();
 });
+}
 
 /* ---- MLB postseason weather (October baseball) ----
    Runs independently of the NFL fetch. Outside the postseason the
    seasontype=3 board has no pre games and this section stays hidden —
-   no dead section, no manufactured slate. */
-(function mlbPostseason(){
+   no dead section, no manufactured slate. On a silent re-pull an
+   emptied slate (the last game went final) takes the section back
+   down with it rather than leaving finished games on screen. */
+function loadMlbWx(silent){
   if(!GIU.wxUpcomingMlbPostseason) return;
+  var mySeq = ++mlbSeq;
   GIU.wxUpcomingMlbPostseason(GIU.fetchJSON).then(function(res){
+    if(mySeq !== mlbSeq) return; /* a newer load already won — discard */
     var wrap = $("mlbWxWrap"), grid = $("mlbWxGrid");
     if(!wrap || !grid) return;
     var evs = (res.events||[]).slice(0, 12);
-    if(!evs.length) return; /* stays hidden outside October */
+    if(!evs.length){
+      if(silent){ wrap.hidden = true; grid.innerHTML = ""; wxFollowGames.mlb = []; renderFollowStrip(); }
+      return; /* stays hidden outside October */
+    }
     wrap.hidden = false;
     /* v1.154.0 — followed-team marks for the postseason slate */
     var mlbGames = evs.map(function(ev){
@@ -475,8 +579,16 @@ GIU.wxUpcomingNfl(GIU.fetchJSON).then(function(res){
     Promise.all(watchJobs).then(function(list){ renderWatch("mlbWxWatch", list); applyWxSearch(); });
   }).catch(function(){
     /* Feed failed: leave the section hidden rather than showing an error
-       box for a bonus section — the NFL grid above carries the page. */
+       box for a bonus section — the NFL grid above carries the page. On a
+       silent re-pull the games already on screen stay, untouched. */
   });
-})();
+}
+
+/* ---- bootstrap: both slates load independently, then the 15-minute
+   silent re-pull arms (a no-op where timers don't exist). ---- */
+loadNflWx(false);
+loadMlbWx(false);
+try{ renderLiveStatus(); }catch(e){}
+scheduleLive();
 
 })();
