@@ -24,7 +24,7 @@ ok("hub sets window.GIU_BASE", hub.indexOf('window.GIU_BASE=".') !== -1);
 
 /* ---- script keys ---- */
 ok("hub keys matchup.js at v1.158.0", hub.indexOf('js/matchup.js?v=1.158.0') !== -1);
-ok("hub keys home-strip.js at v1.156.0", hub.indexOf('js/home-strip.js?v=1.156.0') !== -1);
+ok("hub keys home-strip.js at v2.0.3", hub.indexOf('js/home-strip.js?v=2.0.3') !== -1);
 ok("hub loads odds-logic.js (movers + best prices)",
   hub.indexOf("js/odds-logic.js") !== -1 && hub.indexOf("window.OddsLogic") !== -1);
 ok("hub loads odds-pm.js (live Polymarket matching)",
@@ -84,7 +84,8 @@ var index = read("index.html");
 ok("home strip cards link to the hub",
   index.indexOf('href="matchup.html?league=') !== -1 && index.indexOf("&amp;event=") !== -1);
 ok("home strip hub link carries the league key + event id",
-  index.indexOf("matchup.html?league='+GIU.esc(String(r.league||\"\").toLowerCase())+'&amp;event='+GIU.esc(r.id)") !== -1);
+  index.indexOf("matchup.html?league='+hub+'&amp;event='+GIU.esc(r.id)") !== -1 &&
+  index.indexOf("HS.hubKey(r.league)") !== -1);
 var scoresJs = read("js/scores.js");
 ok("scores cards link to the hub (HUBKEY wiring)",
   scoresJs.indexOf("HUBKEY") !== -1 && scoresJs.indexOf("matchup.html?league=") !== -1);
@@ -95,8 +96,8 @@ ok("scores hub link covers the four US leagues",
 var scoresHtml = read("scores.html");
 ok("scores.html keys scores.js at v1.161.0", scoresHtml.indexOf("js/scores.js?v=1.161.0") !== -1);
 var preds = read("predictions.html");
-ok("index.html keys home-strip.js at v1.156.0", index.indexOf("js/home-strip.js?v=1.156.0") !== -1);
-ok("predictions.html keys home-strip.js at v1.156.0", preds.indexOf("js/home-strip.js?v=1.156.0") !== -1);
+ok("index.html keys home-strip.js at v2.0.3", index.indexOf("js/home-strip.js?v=2.0.3") !== -1);
+ok("predictions.html keys home-strip.js at v2.0.3", preds.indexOf("js/home-strip.js?v=2.0.3") !== -1);
 
 console.log(failures ? "\n" + failures + " FAILURES" : "\nALL MATCHUP-DOM TESTS PASSED");
 process.exit(failures ? 1 : 0);

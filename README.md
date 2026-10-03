@@ -159,6 +159,7 @@ node tests/test-odds-spark-dom.js  # sparkline wiring in shipped odds.js (render
 node tests/test-odds-nokey.js   # no-key empty state in shipped odds.js (in-place #oddsNoKey panel + honesty line + CTA scroll/focus, no fetch burned, key-save transition to spinner)
 node tests/test-odds-honesty.js  # odds-board honesty: homepage card names the free API-key requirement + never-sample-lines line, combined-odds decimal parenthesized in shipped odds.js
 node tests/test-home-strip.js  # homepage "Today's games" strip (post-game drop, malformed-event skip, live-first + kickoff ranking, top-6 cap)
+node tests/test-home-ncaaf.js  # NCAAF on the homepage strip (v2.0.3): fifth scoreboard feed on the scores board's college-football endpoint, hubKey gate keeps the Matchup button off leagues the hub can't open, Kalshi/weather extras stay pro-only, shipped wiring pins
 node tests/test-home-kalshi.js  # Kalshi crowd prices on the home strip (abbreviation-pair match, JAC/WAS aliases, midpoint pricing, NFL+MLB snapshots, series-game date disambiguation, stale/malformed snapshots annotate nothing, no input mutation)
 node tests/test-home-strip-kickoff.js  # home strip watch info (ESPN broadcast network chip, live nearest-kickoff countdown, kickoffIn formatting/boundaries, shipped wiring pins)
 node tests/test-home-strip-live.js  # home strip live freshness (needsRefresh: live rows or passed kickoffs re-pull; future/malformed rows stay quiet; silent-refresh wiring pins incl. chip-cache restore)

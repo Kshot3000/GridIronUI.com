@@ -108,7 +108,7 @@ assert(chiRow.followed === "CHI" && chiRow.kp && chiRow.kp.hPct === 59,
 
 /* ---- shipped wiring pins ---- */
 var html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-assert(html.indexOf("js/home-strip.js?v=1.156.0") !== -1, "index.html pins home-strip.js?v=1.156.0");
+assert(html.indexOf("js/home-strip.js?v=2.0.3") !== -1, "index.html pins home-strip.js?v=2.0.3");
 assert(html.indexOf("js/team-follow.js?v=1.142.0") !== -1, "index.html loads team-follow.js?v=1.142.0");
 assert(html.indexOf("js/team-follow.js") < html.indexOf("HS.topFollowed"),
   "index.html loads team-follow.js before the strip script uses it");
@@ -122,8 +122,8 @@ assert(html.indexOf(".game-card.followed") !== -1 && html.indexOf(".tag.your-tea
   "index.html carries the page-scoped gold follow styles");
 ["matchup.html", "predictions.html"].forEach(function(p){
   var h = fs.readFileSync(path.join(__dirname, "..", p), "utf8");
-  assert(h.indexOf("js/home-strip.js?v=1.156.0") !== -1,
-    p + " re-pins the shared home-strip.js at v1.156.0");
+  assert(h.indexOf("js/home-strip.js?v=2.0.3") !== -1,
+    p + " re-pins the shared home-strip.js at v2.0.3");
 });
 
 console.log(failures ? "\n" + failures + " FAILURES" : "\nALL HOME-FOLLOW TESTS PASSED");

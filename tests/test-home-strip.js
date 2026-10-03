@@ -65,9 +65,13 @@ assert(HS.top(HS.collect("NFL", P(many)), 6).length === 6, "top() caps at n rows
 assert(HS.top(HS.collect("NFL", P(many))).length === 6, "top() defaults to 6 rows");
 
 /* --- scoreUrl / LEAGUES --- */
-assert(HS.LEAGUES.length === 4, "four leagues covered");
+assert(HS.LEAGUES.length === 5, "five leagues covered (v2.0.3 adds NCAAF)");
+assert(HS.LEAGUES.some(function(p){ return p[0] === "football/college-football" && p[1] === "NCAAF"; }),
+       "NCAAF reads ESPN's college-football scoreboard");
 assert(HS.scoreUrl("football/nfl") === "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
        "scoreUrl builds the ESPN scoreboard URL");
+assert(HS.scoreUrl("football/college-football") === "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard",
+       "scoreUrl builds the NCAAF scoreboard URL");
 
 console.log(failures ? "\n"+failures+" FAILURES" : "\nALL HOME-STRIP TESTS PASSED");
 process.exit(failures ? 1 : 0);

@@ -165,7 +165,7 @@
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/hero-pulse.js?v=1.47.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
-<script src="js/home-strip.js?v=1.156.0"></script>
+<script src="js/home-strip.js?v=2.0.3"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/home-wx.js?v=1.126.0"></script>
 <script>
@@ -217,7 +217,7 @@
     }catch(e){ /* chips stay off; the strip already rendered */ }
   }
 
-  /* "Happening now": the four US-league scoreboards in parallel, finished
+  /* "Happening now": the pro + NCAAF scoreboards in parallel, finished
      games dropped, live games ranked first, then earliest kickoff. Each
      league failing alone never sinks the strip — only a total blackout does.
      silent=true is the game-night refresh: re-pulls score data without
@@ -285,12 +285,16 @@
             '<span>'+side(k.aAbbr, k.aPct, k.aPct >= k.hPct)+' · '+side(k.hAbbr, k.hPct, k.hPct > k.aPct)+'</span>'+
             '<span>snapshot '+GIU.esc(HS.snapWhen(k.updatedAt))+'</span></div>';
         }
+        /* v2.0.3 — per-game matchup hub: one tap from any strip card whose
+           league the hub supports (HS.hubKey). NCAAF rows get no button:
+           the hub has no college mapping, so a link would land on its
+           invalid-link state — the scores board's HUBKEY discipline. */
+        var hub = HS.hubKey ? HS.hubKey(r.league) : null;
+        var hubLink = hub ? '<a class="btn btn-ghost btn-sm" style="margin-left:auto" href="matchup.html?league='+hub+'&amp;event='+GIU.esc(r.id)+'" aria-label="Open the matchup hub for this game">Matchup →</a>' : "";
         return '<div class="game-card'+(r.followed ? " followed" : "")+'"><div class="game-meta" style="margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
           '<span class="tag">'+GIU.esc(r.league)+'</span>'+badge+tv+(r.followed ? '<span class="tag your-team">★ Your team</span>' : "")+'</div>'+cd+
           GIU.teamRow(r.away,false)+GIU.teamRow(r.home,false)+
-          '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span>'+
-          /* v1.139.0 — per-game matchup hub: one tap from any strip card. */
-          '<a class="btn btn-ghost btn-sm" style="margin-left:auto" href="matchup.html?league='+GIU.esc(String(r.league||"").toLowerCase())+'&amp;event='+GIU.esc(r.id)+'" aria-label="Open the matchup hub for this game">Matchup →</a></div>'+
+          '<div class="game-meta"><span>'+GIU.esc(r.venue||"")+'</span>'+hubLink+'</div>'+
           /* v1.126.0 — game-day weather chips paint here for outdoor NFL/MLB
              rows with noteworthy conditions; hidden until a forecast says so. */
           '<div class="game-meta" data-wxchip="'+GIU.esc(r.league+":"+r.id)+'" hidden style="margin-top:8px;align-items:center"></div>'+kp+'</div>';

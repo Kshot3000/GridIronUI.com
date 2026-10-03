@@ -1,16 +1,38 @@
 /* GridIronUI homepage strip — "Happening now / Today's games".
-   Collects the ESPN scoreboards for the four US leagues in parallel, drops
-   finished games, and ranks live games first, then by kickoff time. Pure
-   logic lives here for node tests; the DOM wiring stays in index.html.
+   Collects the ESPN scoreboards for the four US pro leagues plus NCAAF in
+   parallel, drops finished games, and ranks live games first, then by
+   kickoff time. Pure logic lives here for node tests; the DOM wiring stays
+   in index.html.
    Browser: window.GIU.homeStrip · node: module.exports */
 (function(){
 "use strict";
 var LEAGUES = [
-  ["football/nfl","NFL"],["baseball/mlb","MLB"],
-  ["basketball/nba","NBA"],["hockey/nhl","NHL"]
+  ["football/nfl","NFL"],["football/college-football","NCAAF"],
+  ["baseball/mlb","MLB"],["basketball/nba","NBA"],["hockey/nhl","NHL"]
 ];
 function scoreUrl(path){
   return "https://site.api.espn.com/apis/site/v2/sports/"+path+"/scoreboard";
+}
+/* ---- NCAAF on the strip (v2.0.3) ----
+   The strip carried only the four pro leagues, so on a college football
+   Saturday — the biggest betting day of the fall — the homepage's
+   "Happening now" band could sit nearly empty (NFL idle until Sunday,
+   NBA/NHL in preseason or not yet started) while 50+ college games were
+   live or kicking off. ESPN's default college-football scoreboard is the
+   ranked slate (the same endpoint the scores board's NCAAF tab reads),
+   which is the right editorial size for a 6-card strip. The pro-only
+   extras degrade honestly for college rows, never by guessing: no Kalshi
+   snapshot exists for NCAAF (withKalshi annotates NFL/MLB only), the
+   weather-chip resolver ignores non-NFL/MLB rows, and the matchup hub
+   has no college mapping — hubKey below is what keeps a "Matchup ->"
+   button off cards the hub cannot open (the scores board's HUBKEY
+   discipline, one league over). */
+/* League label -> matchup-hub league key, or null when the hub has no
+   mapping for that league. Pure; garbage in -> null. */
+var HUBKEYS = {NFL: "nfl", NBA: "nba", MLB: "mlb", NHL: "nhl"};
+function hubKey(leagueLabel){
+  var l = String(leagueLabel == null ? "" : leagueLabel).trim().toUpperCase();
+  return Object.prototype.hasOwnProperty.call(HUBKEYS, l) ? HUBKEYS[l] : null;
 }
 /* Flatten one league's scoreboard payload into strip rows. Finished ("post")
    games are dropped — the strip is for what's happening or coming up.
@@ -385,7 +407,7 @@ function needsRefresh(rows, nowMs){
   return false;
 }
 
-var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, collect: collect,
+var api = {LEAGUES: LEAGUES, scoreUrl: scoreUrl, hubKey: hubKey, collect: collect,
            rankRows: rankRows, top: top,
            followList: followList, followedAbbr: followedAbbr,
            withFollowed: withFollowed, rankFollowed: rankFollowed,
