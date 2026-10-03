@@ -316,5 +316,18 @@ ok("moverNowFmt: spread signed", M.moverNowFmt({openFmt: "2.5", delta: -1, kind:
 ok("moverNowFmt: total plain", M.moverNowFmt({openFmt: "44.5", delta: 0.5, kind: "total"}) === "45");
 ok("moverNowFmt: garbage -> repeats open", M.moverNowFmt({openFmt: "soon", delta: 1, kind: "spread"}) === "soon");
 
+
+/* ---- live auto-refresh contract (v2.0.9) ---- */
+ok("refreshDelay: live game -> 60s", M.refreshDelay({state: "in"}) === 60000);
+ok("refreshDelay: pre game -> 5 min", M.refreshDelay({state: "pre"}) === 5*60*1000);
+ok("refreshDelay: final -> stopped", M.refreshDelay({state: "post"}) === 0);
+ok("refreshDelay: null info -> stopped", M.refreshDelay(null) === 0);
+ok("refreshDelay: garbage state -> stopped, never guessed", M.refreshDelay({state: "soon"}) === 0 && M.refreshDelay({}) === 0 && M.refreshDelay("in") === 0);
+ok("live cadence constants exported", M.LIVE_MS === 60000 && M.PRE_MS === 300000 && M.SLOW_MS === 300000);
+ok("slowDue: never pulled -> due", M.slowDue(null, 1000000) === true && M.slowDue(undefined, 1000000) === true);
+ok("slowDue: inside the 5-min bucket -> not due", M.slowDue(1000000, 1000000 + 299999) === false);
+ok("slowDue: at the bucket edge -> due", M.slowDue(1000000, 1000000 + 300000) === true);
+ok("slowDue: garbage timestamps -> due, never throws", M.slowDue("x", 5) === true && M.slowDue(5, "x") === true);
+
 console.log(failures ? "\n" + failures + " FAILURES" : "\nALL MATCHUP TESTS PASSED");
 process.exit(failures ? 1 : 0);

@@ -56,6 +56,11 @@
   <div id="hubBoot"><div class="spinner" aria-hidden="true"></div>
     <p style="text-align:center;color:var(--faint)">Loading the matchup…</p></div>
   <div id="hubBody" hidden>
+    <!-- v2.0.9 — live status: the hub silently re-pulls while the game is live (60s) or upcoming (5 min), with pause/resume + updated clock, same contract as the scores board; a final stops it -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
+      <button class="btn btn-ghost btn-sm" id="pauseBtn" aria-pressed="false" style="display:none">⏸ Pause live</button>
+    </div>
     <div class="card" id="hubHead" style="margin-bottom:18px"></div>
     <div class="grid grid-2">
       <div class="card" id="hubLines"><h2 style="margin-top:0">Spread &amp; total</h2><div id="hubLinesBody"></div></div>
@@ -68,7 +73,7 @@
       <div class="card" id="hubPm"><h2 style="margin-top:0">Polymarket</h2><div id="hubPmBody"></div></div>
     </div>
     <div class="notice" style="margin:26px 0">
-      <strong>Where these numbers come from.</strong> Team, kickoff, venue and the free line are ESPN's. Weather is the Open-Meteo forecast for the stadium's coordinates on game day. Kalshi prices are our server-side snapshot, timestamped where shown. Polymarket prices are fetched live in your browser when you load this page. Book prices and line moves need your free Odds API key — <a href="odds.html">set it up on the odds board</a>.
+      <strong>Where these numbers come from.</strong> Team, kickoff, venue and the free line are ESPN's. Weather is the Open-Meteo forecast for the stadium's coordinates on game day. Kalshi prices are our server-side snapshot, timestamped where shown. Polymarket prices are fetched live in your browser and re-fetched on the hub's auto-refresh while this page stays open. Book prices and line moves need your free Odds API key — <a href="odds.html">set it up on the odds board</a>.
     </div>
   </div>
 </div>
@@ -82,7 +87,7 @@
 <script src="js/odds-logic.js?v=2.0.5"></script>
 <script src="js/odds-pm.js?v=1.38.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
-<script src="js/matchup.js?v=2.0.8"></script>
+<script src="js/matchup.js?v=2.0.9"></script>
 <script>
 (function(){
 "use strict";
@@ -193,32 +198,44 @@ function renderHead(){
 }
 
 /* ---------- spread & total ---------- */
-function renderLines(){
-  var box = $("hubLinesBody");
-  var espn = "";
+function espnLineHtml(){
   if(info.espnSpread || info.espnTotal){
-    espn = '<div class="game-meta" style="margin-bottom:6px"><span class="tag blue">ESPN</span>'+
+    return '<div class="game-meta" style="margin-bottom:6px"><span class="tag blue">ESPN</span>'+
       '<span>free line, no key needed</span></div>'+
       '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px">'+
       (info.espnSpread ? '<div><div style="font-size:.75rem;color:var(--faint)">SPREAD</div><div class="num" style="font-size:1.35rem;font-weight:800">'+esc(info.espnSpread)+'</div></div>' : "")+
       (info.espnTotal ? '<div><div style="font-size:.75rem;color:var(--faint)">TOTAL</div><div class="num" style="font-size:1.35rem;font-weight:800">'+esc(info.espnTotal)+'</div></div>' : "")+
       '</div>';
-  } else {
-    espn = '<div class="game-meta" style="margin-bottom:14px"><span>ESPN isn\u2019t carrying a spread or total for this game right now.</span></div>';
   }
+  return '<div class="game-meta" style="margin-bottom:14px"><span>ESPN isn\u2019t carrying a spread or total for this game right now.</span></div>';
+}
+/* The book section renders once into bookHtml; a live tick re-composes the
+   (fresh) ESPN line over the cached book section and only re-fetches the
+   Odds API when the caller says the 5-minute slow bucket is due — the
+   visitor's 500-request monthly quota is never burned on a 60s tick. */
+var bookHtml = null;
+function renderLines(allowBookFetch){
+  var box = $("hubLinesBody");
+  var espn = espnLineHtml();
   var key = "";
   try{ key = localStorage.getItem("giu_odds_key") || ""; }catch(e){}
   if(!key){
-    box.innerHTML = espn +
+    bookHtml =
       '<div class="empty" role="status" style="padding:28px 16px">'+
       '<div class="card-icon" aria-hidden="true" style="font-size:1.8rem">🔌</div>'+
       '<h3 style="margin:6px 0;color:var(--text)">Best book prices need your free key</h3>'+
       '<p style="max-width:520px;margin:0 auto 10px;color:var(--muted);font-size:.9rem">The Odds API is free for 500 requests/month, no credit card — your key stays in this browser. '+
       'Connect it once on the odds board and every matchup hub shows live best prices per side.</p>'+
       '<a class="btn btn-gold btn-sm" href="odds.html">Connect my key on the odds board →</a></div>';
+    box.innerHTML = espn + bookHtml;
     return;
   }
-  box.innerHTML = espn + '<div class="game-meta" style="margin-bottom:8px"><span>Loading live book prices…</span></div>';
+  if(bookHtml !== null && !allowBookFetch){
+    box.innerHTML = espn + bookHtml;
+    return;
+  }
+  box.innerHTML = espn + (bookHtml !== null ? bookHtml :
+    '<div class="game-meta" style="margin-bottom:8px"><span>Loading live book prices…</span></div>');
   var sport = M.oddsSport(P.league);
   var url = "https://api.the-odds-api.com/v4/sports/"+sport+"/odds/?apiKey="+encodeURIComponent(key)+
             "&regions=us&markets=h2h,spreads,totals&oddsFormat=decimal";
@@ -231,20 +248,23 @@ function renderLines(){
       [info.away.abbr, info.away.name, info.away.short],
       [info.home.abbr, info.home.name, info.home.short], info.date);
     if(!ev){
+      if(bookHtml !== null){ box.innerHTML = espnLineHtml() + bookHtml; return; }
       box.innerHTML = espn + '<div class="game-meta"><span>The Odds API didn\u2019t pair this game — it may not be listed yet. The ESPN line above is the free read.</span></div>';
       return;
     }
     var rows = (OL && OL.dec2am) ? M.bestBookRows(ev, OL, esc) : "";
-    box.innerHTML = espn +
+    bookHtml =
       '<div class="game-meta" style="margin-bottom:6px"><span class="tag gold">Best prices</span><span>across '+
       esc(String((ev.bookmakers || []).length))+' books · live</span></div>'+
       (rows || '<div class="game-meta"><span>No book prices posted for this game yet.</span></div>')+
       '<p style="margin:10px 0 0;font-size:.75rem;color:var(--faint)">Best available price per side — the book paying the most. American odds in parentheses where the price is decimal from the feed.</p>';
+    box.innerHTML = espnLineHtml() + bookHtml;
     renderMoves(ev, sport);
   }).catch(function(e){
     var msg = (e && e.message === "invalid-key")
       ? "That API key didn\u2019t work. Double-check it on the <a href=\"odds.html\">odds board</a>."
       : "The Odds API didn\u2019t respond. The ESPN line above is still the free read.";
+    if(bookHtml !== null){ box.innerHTML = espnLineHtml() + bookHtml; return; }
     box.innerHTML = espn + '<div class="notice">'+msg+'</div>';
   });
 }
@@ -435,6 +455,102 @@ function renderPm(){
   });
 }
 
+/* ---------- live auto-refresh (v2.0.9) ----------
+   The hub was the last game page that froze at load: every sibling
+   re-pulls while open, but a live hub kept its opening score, clock,
+   ESPN line and Polymarket price (labeled "fetched just now") for as
+   long as the tab stayed open. The cadence is M.refreshDelay's: 60s
+   while the game is live, 5 min while it is upcoming, and nothing
+   once it is final — a finished game's numbers never move again.
+   Each tick re-pulls the ESPN summary (header/score/line), the injury
+   lists and the live Polymarket price; the quota'd book prices and
+   the Kalshi snapshot file re-pull only on the 5-minute slow bucket
+   (M.slowDue), so a live game never burns the visitor's Odds API
+   quota at 60s pace. The weather section is deliberately not re-run:
+   it is a pre-game forecast read whose own gates retire it once the
+   game starts. Ticks skip while the tab is hidden; a generation
+   guard stops a slow earlier tick overwriting a newer one; a failed
+   silent re-pull keeps the hub already on screen (no error box, the
+   updated clock does not advance) and the next tick retries. The
+   pill + pause/resume carry the sibling live-status contract. */
+var liveTimer = null, autoOn = true, lastUpdated = null, hubSeq = 0;
+var lastSlowAt = null;
+function isHidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+function clearLive(){
+  if(liveTimer && typeof clearInterval === "function"){ try{ clearInterval(liveTimer); }catch(e){} }
+  liveTimer = null;
+}
+function fmtClock(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",second:"2-digit"}); }
+  catch(e){ return ""; }
+}
+function renderLiveStatus(){
+  var s = $("liveStatus"), b = $("pauseBtn");
+  if(!s || !info) return;
+  if(info.state === "post"){
+    s.className = "live-status";
+    s.textContent = "Final \u2014 auto-refresh off";
+    if(b) b.style.display = "none";
+    return;
+  }
+  if(!M.refreshDelay(info)){
+    s.className = "live-status"; s.textContent = "";
+    if(b) b.style.display = "none";
+    return;
+  }
+  if(autoOn){
+    s.className = "live-status live";
+    s.innerHTML = '<span class="live-dot" aria-hidden="true"></span>'+
+      (info.state === "in" ? "Live \u2014 auto-refresh every 60s" : "auto-refresh every 5 min")+
+      (lastUpdated ? ' \u00b7 updated '+esc(fmtClock(lastUpdated)) : "");
+    if(b){ b.style.display = ""; b.innerHTML = "\u23f8 Pause live"; b.setAttribute("aria-pressed","false"); }
+  } else {
+    s.className = "live-status paused";
+    s.textContent = "auto-refresh paused";
+    if(b){ b.style.display = ""; b.innerHTML = "\u25b6 Resume live"; b.setAttribute("aria-pressed","true"); }
+  }
+}
+function scheduleLive(){
+  clearLive();
+  if(!autoOn || !info || typeof setInterval !== "function") return;
+  var delay = M.refreshDelay(info);
+  if(!delay) return;
+  liveTimer = setInterval(function(){ if(!isHidden()) refreshHub(); }, delay);
+}
+function refreshHub(){
+  if(!info) return;
+  var seq = ++hubSeq;
+  GIU.fetchJSON(M.summaryUrl(leaguePath, P.event), 15000).then(function(summary){
+    if(seq !== hubSeq) return; /* a newer tick already won */
+    var next = M.gameInfo(summary);
+    if(!next) return; /* unusable payload: keep the hub on screen */
+    next.leagueKey = P.league;
+    info = next;
+    lastUpdated = Date.now();
+    var slow = M.slowDue(lastSlowAt, lastUpdated);
+    if(slow) lastSlowAt = lastUpdated;
+    renderHead();
+    renderLines(slow);
+    renderInj();
+    renderPm();
+    if(slow) renderKalshi();
+    renderLiveStatus();
+    scheduleLive(); /* cadence follows the new state; a final stops it */
+  }).catch(function(){ /* silent: keep the hub on screen; next tick retries */ });
+}
+(function wireHubLive(){
+  try{
+    var b = $("pauseBtn");
+    if(!b || !b.addEventListener) return;
+    b.addEventListener("click", function(){
+      autoOn = !autoOn;
+      if(autoOn){ refreshHub(); scheduleLive(); } /* resume: refresh now; the tick reschedules */
+      else clearLive();
+      renderLiveStatus();
+    });
+  }catch(e){ /* no button (markup drift): the hub simply never pauses */ }
+})();
+
 /* ---------- boot ---------- */
 GIU.fetchJSON(M.summaryUrl(leaguePath, P.event), 15000).then(function(summary){
   info = M.gameInfo(summary);
@@ -448,12 +564,16 @@ GIU.fetchJSON(M.summaryUrl(leaguePath, P.event), 15000).then(function(summary){
   info.leagueKey = P.league;
   hide("hubBoot"); show("hubBody");
   renderHead();
-  renderLines();
+  renderLines(true);
   renderMoves(null, null); /* honest "needs key" state until the book fetch lands */
   renderWeather();
   renderInj();
   renderKalshi();
   renderPm();
+  lastSlowAt = Date.now();
+  lastUpdated = lastSlowAt;
+  renderLiveStatus();
+  scheduleLive();
 }).catch(function(){
   $("hubBoot").innerHTML = GIU.failBox("The ESPN game feed didn't respond.");
 });

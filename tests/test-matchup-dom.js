@@ -23,7 +23,7 @@ ok("hub has <footer id=\"site-footer\">", hub.indexOf('<div id="site-footer"></d
 ok("hub sets window.GIU_BASE", hub.indexOf('window.GIU_BASE=".') !== -1);
 
 /* ---- script keys ---- */
-ok("hub keys matchup.js at v2.0.8", hub.indexOf('js/matchup.js?v=2.0.8') !== -1);
+ok("hub keys matchup.js at v2.0.9", hub.indexOf('js/matchup.js?v=2.0.9') !== -1);
 ok("hub keys home-strip.js at v2.0.8", hub.indexOf('js/home-strip.js?v=2.0.8') !== -1);
 ok("hub loads odds-logic.js (movers + best prices)",
   hub.indexOf("js/odds-logic.js") !== -1 && hub.indexOf("window.OddsLogic") !== -1);

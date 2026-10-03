@@ -484,8 +484,42 @@ M.followHTML = function(info, followed, esc){
     (fol.first ? ' <span class="tag your-team">★ Your team</span>' : "")+'</div>';
 };
 
+/* ---- live auto-refresh contract (v2.0.9) ----
+   Every sibling live-data page re-pulls while it stays open (scores
+   60s, predictions 90s, news/injuries 3 min, weather 15 min) — the hub
+   froze at load: a live game's score/clock, the ESPN free line, the
+   injury lists and the Polymarket price labeled "fetched just now"
+   all went stale on exactly the page a bettor leaves open during a
+   game. The cadence follows the game, never a flat timer: live games
+   move play-by-play (60s, the scores board's beat); a pre-game line
+   and injury report move on the odds board's 5-minute beat; a final
+   never moves again, so refreshDelay returns 0 and the page stops
+   instead of performing freshness. slowDue gates the quota'd / static
+   sections (Odds API book prices, the Kalshi snapshot file) to the
+   same 5-minute bucket on live ticks — a 60s book re-pull would burn
+   a visitor's 500-request monthly quota in one game. Garbage-in ->
+   0 / due, never a throw: an unknown state stops refreshing rather
+   than guessing, and a slow section with no timestamp is due. */
+M.LIVE_MS = 60*1000;
+M.PRE_MS = 5*60*1000;
+M.SLOW_MS = 5*60*1000;
+M.refreshDelay = function(info){
+  if(!info) return 0;
+  if(info.state === "in") return M.LIVE_MS;
+  if(info.state === "pre") return M.PRE_MS;
+  return 0;
+};
+M.slowDue = function(lastMs, nowMs){
+  if(lastMs === null || lastMs === undefined) return true;
+  var last = Number(lastMs), now = Number(nowMs);
+  if(!isFinite(last) || !isFinite(now)) return true;
+  return now - last >= M.SLOW_MS;
+};
+
 var api = {
   LEAGUE_PATHS: LEAGUE_PATHS, ODDS_SPORTS: ODDS_SPORTS,
+  LIVE_MS: M.LIVE_MS, PRE_MS: M.PRE_MS, SLOW_MS: M.SLOW_MS,
+  refreshDelay: M.refreshDelay, slowDue: M.slowDue,
   leaguePath: M.leaguePath, oddsSport: M.oddsSport,
   parseParams: M.parseParams, summaryUrl: M.summaryUrl,
   injuriesUrl: M.injuriesUrl, headerOf: M.headerOf,

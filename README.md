@@ -225,6 +225,7 @@ node tests/test-odds-market-fallback.js # no-key "market line" on the odds board
 node tests/test-odds-ncaaf-market.js # NCAAF on the no-key market line (v2.0.5): cap contract (12 visible + flagged extras + honest count + Show-all toggle), stale withholding, real-snapshot integration, shipped wiring pins
 node tests/test-matchup.js # matchup hub logic: param parsing (incl. NCAAF identity key, v2.0.8), ESPN summary scheme, header/records/ESPN line against BOTH payload shapes (competition-level fields and the live shape verified 2026-10-03: record[] totals, summary.pickcenter line, summary.gameInfo venue, media.shortName broadcasts), Kalshi match via withKalshi, Polymarket favorite extraction, per-team injury filter, Odds API event match (incl. americanfootball_ncaaf), best-book rows, move badges
 node tests/test-matchup-dom.js # matchup hub wiring in shipped files: matchup.html chrome/meta/sections, script keys, home-strip + scores Matchup links (incl. the NCAAF HUBKEY entry + college gate copy, v2.0.8), sitemap, cache-key pins
+node tests/test-matchup-live.js # live auto-refresh on the matchup hub (v2.0.9): 60s cadence while live / 5 min pre-game / stopped at final (pure M.refreshDelay contract), silent summary+injuries+Polymarket re-pull with the Odds API + Kalshi snapshot held to the 5-min slow bucket (quota guard), hidden-tab skip, failed tick preserving the hub, pause/resume + updated-clock pill, shipped matchup.html pins
 ```
 
 ### Team identity directory
