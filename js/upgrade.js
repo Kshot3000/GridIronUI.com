@@ -8,6 +8,7 @@ var CATALOG = [
   ["Odds board","odds.html","Compare spreads, moneylines and totals across sportsbooks; requires your API key","Workspace","chart"],
   ["Prediction markets","markets.html","Polymarket and Kalshi crowd prices","Workspace","market"],
   ["Win probabilities","predictions.html","Market-implied predictions and methodology","Workspace","trend"],
+  ["Matchup hub","matchup.html","One game in full — spread, total, weather, injuries, Kalshi and Polymarket prices","Workspace","score"],
   ["DFS Lab","dfs.html","DraftKings and FanDuel lineup optimizer, CSV import and export","Tools","flask"],
   ["AI Coach","ai-coach.html","Chat with Grid about your DFS player pool","Tools","spark"],
   ["Betting calculators","tools.html","17 calculators for sportsbook math","Tools","calculator"],

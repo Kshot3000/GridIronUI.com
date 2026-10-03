@@ -19,7 +19,7 @@ This ZIP is the complete upgraded repository. It is ready for your existing GitH
 
 - One cohesive dark design across all **31 pages**, with a lime accent, football photography, improved spacing, forms, tables and cards.
 - Organized desktop sidebar; phone navigation bar and a scrollable full menu.
-- Global search for **47 destinations**, including all 17 tools. Open it from the search button, `Ctrl+K` / `⌘K`, or `/`. Use arrows, Enter and Escape.
+- Global search for **48 destinations**, including all 17 tools. Open it from the search button, `Ctrl+K` / `⌘K`, or `/`. Use arrows, Enter and Escape.
 - A new game-room homepage with quick links, real upcoming/live games, an instant payout calculator and your locally saved journal totals.
 - A searchable NFL team picker that writes to the existing favorites list. Homepage highlights refresh immediately; other boards show a reminder to reload after changing teams.
 - Clear feed-outage, retry and empty-schedule messages. Unavailable feeds are not presented as a valid empty schedule. Hidden tabs pause homepage refreshes.

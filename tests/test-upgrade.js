@@ -20,6 +20,16 @@ for (const entry of ui.catalog) {
   assert(fs.existsSync(path.join(root, file)), `Catalog page exists: ${file}`);
   if (hash) assert(fs.readFileSync(path.join(root, file), 'utf8').includes(`id="${hash}"`), `Anchor exists: ${entry[1]}`);
 }
+// Coverage guard (v2.0.1): every page in the sitemap must be findable via
+// global search. The Matchup Hub shipped in v1.139.0 but was missing from
+// the v2.0.0 catalog — search is only trustworthy if this stays exhaustive.
+const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+const catalogFiles = new Set(ui.catalog.map(e => e[1].split('#')[0]));
+for (const m of sitemap.matchAll(/<loc>https:\/\/gridironui\.xyz\/([^<]*)<\/loc>/g)) {
+  const file = m[1] === '' ? 'index.html' : m[1];
+  assert(catalogFiles.has(file), `Sitemap page is in the search catalog: ${file}`);
+}
+assert.equal(ui.search('matchup')[0][1], 'matchup.html');
 const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 assert(home.includes('failedFeeds === HS.LEAGUES.length'), 'Feed outages stay distinct from valid empty schedules');
 assert(home.includes('if(document.hidden) return;'), 'Hidden homepage pauses refresh');
