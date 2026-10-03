@@ -147,7 +147,7 @@ ok("finder count shipped (live region)",
    html.indexOf('id="toolCount"') !== -1 && html.indexOf('aria-live="polite"') !== -1);
 ok("finder empty state shipped", html.indexOf('id="toolEmpty"') !== -1);
 ok("tools-find.js cache key is v1.159.0", html.indexOf("js/tools-find.js?v=1.159.0") !== -1);
-ok("tools.js pin untouched at v1.67.0", html.indexOf("js/tools.js?v=1.67.0") !== -1);
+ok("tools.js pin untouched at v1.67.0", html.indexOf("js/tools.js?v=2.0.0") !== -1);
 
 var ids = [], m, re = /class="card calc" id="([a-z0-9-]+)"/g;
 while((m = re.exec(html)) !== null) ids.push(m[1]);

@@ -43,9 +43,12 @@
 .score-find-count{font-size:.84rem;color:var(--faint)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+<meta name="theme-color" content="#111516">
+<link rel="stylesheet" href="css/upgrade.css?v=2.0.0">
+<script defer src="js/upgrade.js?v=2.0.0"></script>
 </head>
 <body data-feedcheck>
-<script>window.GIU_BASE=".";</script>
+<script>window.GIU_V2=true;window.GIU_BASE=".";</script>
 <div id="site-header"></div>
 
 <section class="page-hero">
@@ -62,9 +65,9 @@
   <div class="section-head">
     <div class="tabs" id="leagueTabs" style="margin:0"></div>
     <div class="day-nav">
-      <button class="btn btn-ghost btn-sm" id="prevDay">←</button>
+      <button class="btn btn-ghost btn-sm" id="prevDay" aria-label="Previous day">←</button>
       <button class="btn btn-ghost btn-sm" id="todayBtn">Today</button>
-      <button class="btn btn-ghost btn-sm" id="nextDay">→</button>
+      <button class="btn btn-ghost btn-sm" id="nextDay" aria-label="Next day">→</button>
       <span id="dayLabel"></span>
       <span id="liveStatus" class="live-status" role="status" aria-live="polite"></span>
       <button class="btn btn-ghost btn-sm" id="pauseBtn" style="display:none" aria-pressed="false">⏸ Pause live</button>
@@ -85,7 +88,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="js/site.js?v=1.104.0"></script>
+<script src="js/site.js?v=2.0.0"></script>
 <script src="js/team-brand.js?v=1.17.0"></script>
 <script src="js/team-follow.js?v=1.142.0"></script>
 <script src="js/scores-detail.js?v=1.57.0"></script>

@@ -46,9 +46,12 @@
 .odds-find input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.18)}
 .odds-find-count{font-size:.84rem;color:var(--faint)}
 </style>
+<meta name="theme-color" content="#111516">
+<link rel="stylesheet" href="css/upgrade.css?v=2.0.0">
+<script defer src="js/upgrade.js?v=2.0.0"></script>
 </head>
 <body data-feedcheck>
-<script>window.GIU_BASE=".";</script>
+<script>window.GIU_V2=true;window.GIU_BASE=".";</script>
 <div id="site-header"></div>
 
 <section class="page-hero">
@@ -67,7 +70,7 @@
     <h3 style="margin-top:10px">Connect your free odds API key</h3>
     <p style="color:var(--muted);font-size:.93rem">Live odds come from <a href="https://the-odds-api.com" target="_blank" rel="noopener">The Odds API</a>, which is free for 500 requests/month — no credit card. Your key is stored <b style="color:var(--text)">only in this browser</b> (localStorage); it never touches our servers, because there are no servers — this site is 100% static.</p>
     <div class="form-row" style="max-width:640px">
-      <div class="field"><label>Your Odds API key</label><input type="text" id="keyInput" placeholder="paste key here" autocomplete="off"></div>
+      <div class="field"><label for="keyInput">Your Odds API key</label><input type="password" spellcheck="false" autocapitalize="off" id="keyInput" placeholder="paste key here" autocomplete="off"></div>
       <div class="field"><label>&nbsp;</label><div style="display:flex;gap:10px"><button class="btn btn-gold btn-sm" id="saveKey">Save &amp; load odds</button><button class="btn btn-ghost btn-sm" id="clearKey">Forget key</button></div></div>
     </div>
     <p style="font-size:.85rem;color:var(--faint)">No key? <a href="https://the-odds-api.com" target="_blank" rel="noopener">Get one free at the-odds-api.com →</a> Until then, everything below stays empty — we never show sample or stale lines as if they were live.</p>
@@ -111,7 +114,7 @@
 <aside id="slipPanel" class="slip" aria-label="Bet slip" hidden></aside>
 
 <div id="site-footer"></div>
-<script src="js/site.js?v=1.104.0"></script>
+<script src="js/site.js?v=2.0.0"></script>
 <script src="js/team-brand.js?v=1.18.0"></script>
 <script src="js/odds-logic.js?v=1.163.0"></script>
 <script src="js/kalshi-logic.js?v=1.147.0"></script>

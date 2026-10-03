@@ -18,7 +18,7 @@ var read = function(p){ return fs.readFileSync(path.join(ROOT, p), "utf8"); };
 var hub = read("matchup.html");
 
 /* ---- shared chrome ---- */
-ok("hub includes js/site.js", hub.indexOf('src="js/site.js?v=1.104.0"') !== -1);
+ok("hub includes js/site.js", hub.indexOf('src="js/site.js?v=2.0.0"') !== -1);
 ok("hub has <footer id=\"site-footer\">", hub.indexOf('<div id="site-footer"></div>') !== -1);
 ok("hub sets window.GIU_BASE", hub.indexOf('window.GIU_BASE=".') !== -1);
 

@@ -31,9 +31,12 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=1.104.0">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+<meta name="theme-color" content="#111516">
+<link rel="stylesheet" href="css/upgrade.css?v=2.0.0">
+<script defer src="js/upgrade.js?v=2.0.0"></script>
 </head>
 <body>
-<script>window.GIU_BASE=".";</script>
+<script>window.GIU_V2=true;window.GIU_BASE=".";</script>
 <div id="site-header"></div>
 
 <section class="page-hero">
@@ -42,13 +45,13 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
     <a class="back-link" href="index.html" style="position:relative;z-index:2">← Home</a>
     <span class="kicker">Interactive lab</span>
     <h1>DFS Lab</h1>
-    <p class="lede">A real lineup optimizer for DraftKings &amp; FanDuel, NFL &amp; NBA, cash games &amp; tournaments. Greedy value fill plus hill-climbing swaps — every lineup hard-validated for cap, positions, stacks and exposure.</p>
+    <p class="lede">Build DraftKings &amp; FanDuel lineups for NFL and NBA. Import your player pool, set your strategy, and compare lineups before you export.</p>
   </div>
 </section>
 
 <div class="wrap" style="margin-top:30px">
   <div class="card" style="margin-bottom:20px;border-color:rgba(23,201,100,.35)">
-    <div class="section-head" style="margin-bottom:6px"><h3 style="margin:0">🤖 Talk to Grid, the AI Lineup Coach</h3><a class="btn btn-green btn-sm" href="ai-coach.html">Open AI Coach</a></div>
+    <div class="section-head" style="margin-bottom:6px"><h3 style="margin:0">Talk to Grid, your lineup coach</h3><a class="btn btn-green btn-sm" href="ai-coach.html">Open AI Coach</a></div>
     <p style="color:var(--muted);font-size:.9rem;margin:0">Chat with Grid to build lineups conversationally — "build me 3 GPP lineups with a Chiefs stack" — powered by a free LLM and this same optimizer. No account needed.</p>
   </div>
   <div class="card" style="margin-bottom:20px">
@@ -63,7 +66,7 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
   <div class="grid grid-2">
     <div class="card">
       <h3>1 · Build your player pool</h3>
-      <div class="field"><label>Import CSV — DraftKings &amp; FanDuel salary exports auto-detected</label><input type="file" id="csvFile" accept=".csv"></div>
+      <div class="field"><label for="csvFile">Import CSV — DraftKings &amp; FanDuel salary exports auto-detected</label><input type="file" id="csvFile" accept=".csv"></div>
       <div id="mapWrap" style="display:none">
         <div class="grid grid-2" id="mapBox"></div>
         <p id="importInfo" style="font-size:.84rem;color:var(--muted)"></p>
@@ -72,24 +75,24 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
       <hr class="divider" style="margin:18px 0">
       <p style="font-size:.86rem;color:var(--muted)"><b style="color:var(--text)">Add manually</b></p>
       <div class="form-row">
-        <div class="field"><label>Name</label><input type="text" id="mName" placeholder="J. Allen"></div>
-        <div class="field"><label>Positions (PG/SG)</label><input type="text" id="mPos" placeholder="QB"></div>
+        <div class="field"><label for="mName">Name</label><input type="text" id="mName" placeholder="J. Allen"></div>
+        <div class="field"><label for="mPos">Positions (PG/SG)</label><input type="text" id="mPos" placeholder="QB"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Team</label><input type="text" id="mTeam" placeholder="BUF"></div>
-        <div class="field"><label>Opp</label><input type="text" id="mOpp" placeholder="KC"></div>
+        <div class="field"><label for="mTeam">Team</label><input type="text" id="mTeam" placeholder="BUF"></div>
+        <div class="field"><label for="mOpp">Opp</label><input type="text" id="mOpp" placeholder="KC"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Salary</label><input type="number" id="mSalary" placeholder="7800"></div>
-        <div class="field"><label>Projection</label><input type="number" id="mProj" step="any" placeholder="22.5"></div>
+        <div class="field"><label for="mSalary">Salary</label><input type="number" id="mSalary" placeholder="7800"></div>
+        <div class="field"><label for="mProj">Projection</label><input type="number" id="mProj" step="any" placeholder="22.5"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Floor (opt)</label><input type="number" id="mFloor" step="any"></div>
-        <div class="field"><label>Ceiling (opt)</label><input type="number" id="mCeil" step="any"></div>
+        <div class="field"><label for="mFloor">Floor (opt)</label><input type="number" id="mFloor" step="any"></div>
+        <div class="field"><label for="mCeil">Ceiling (opt)</label><input type="number" id="mCeil" step="any"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Ownership % (opt)</label><input type="number" id="mOwn" step="any" placeholder="15"></div>
-        <div class="field"><label>Site ID (opt) — DK/FD player ID</label><input type="text" id="mId" placeholder="81234"></div>
+        <div class="field"><label for="mOwn">Ownership % (opt)</label><input type="number" id="mOwn" step="any" placeholder="15"></div>
+        <div class="field"><label for="mId">Site ID (opt) — DK/FD player ID</label><input type="text" id="mId" placeholder="81234"></div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" id="addPlayer">+ Add player</button>
@@ -101,12 +104,12 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
     <div class="card">
       <h3>2 · Optimize</h3>
       <div class="form-row">
-        <div class="field"><label>Lineups (cash: 1–3, GPP: up to 20)</label><input type="number" id="numLineups" value="3" min="1" max="3"></div>
-        <div class="field"><label>Max exposure % per player</label><input type="number" id="maxExp" value="60" min="5" max="100"></div>
+        <div class="field"><label for="numLineups">Lineups (cash: 1–3, GPP: up to 20)</label><input type="number" id="numLineups" value="3" min="1" max="3"></div>
+        <div class="field"><label for="maxExp">Max exposure % per player</label><input type="number" id="maxExp" value="60" min="5" max="100"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Min unique players between lineups</label><input type="number" id="minUni" value="3" min="1" max="9"></div>
-        <div class="field"><label>Cash volatility penalty</label><input type="number" id="volPen" value="0.5" min="0" max="2" step="0.1"></div>
+        <div class="field"><label for="minUni">Min unique players between lineups</label><input type="number" id="minUni" value="3" min="1" max="9"></div>
+        <div class="field"><label for="volPen">Cash volatility penalty</label><input type="number" id="volPen" value="0.5" min="0" max="2" step="0.1"></div>
       </div>
       <div class="form-row" id="bringBackRow" style="display:none">
         <div class="field" style="margin:0">
@@ -116,7 +119,7 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
           </label>
         </div>
       </div>
-      <button class="btn btn-gold" id="runOpt">⚙️ Generate lineups</button>
+      <button class="btn btn-gold" id="runOpt">Generate lineups</button>
       <div class="notice" style="margin:16px 0 0;font-size:.85rem">
         <strong>How it works.</strong> Cash lineups maximize projection minus a volatility penalty (high floors win). GPP lineups maximize ceiling with NFL QB + 2 same-team pass-catcher stacks. The optional <b>game-stack bring-back</b> (NFL tournaments) seats one opposing-team pass-catcher alongside every QB stack — shootout upside on both sides. Then hill-climbing swaps improve every lineup until no single swap helps. <b>🔒 Locks</b> appear in every lineup (and ignore the exposure cap); <b>🚫 exclusions</b> appear in none. The <b>exposure summary</b> under your results shows each player's share of lineups, so you can spot when you're overweight on a play. A <b>🌬️ game-conditions strip</b> shows real stadium forecasts (wind, rain, roof status) for the NFL games your pool plays in — wind moves totals and the passing game, so check it before you lock pass-catchers and kickers. The pool table has a <b>Value</b> column (projected points per $1k of salary, <span class="val-star">★</span> marks the top-3) plus a search box, position filter and clickable column sorting — handy once an imported CSV puts 100+ players in the pool. <b>No AI, no magic</b> — just math you can audit. <b>Export CSV</b> writes the sites' bulk-uploader cell format — DraftKings gets <i>Name (ID)</i> using the player IDs captured from your salary export, FanDuel gets the FD player ID — so generated lineups drop straight into the site's uploader instead of being retyped. Players with no captured ID export as plain names; always sanity-check one lineup against the site's Download Template for your contest before uploading.
       </div>
@@ -157,7 +160,7 @@ table.data th[aria-sort="ascending"] .th-sort .sort-arrow,table.data th[aria-sor
 </div>
 
 <div id="site-footer"></div>
-<script src="js/site.js?v=1.104.0"></script>
+<script src="js/site.js?v=2.0.0"></script>
 <script src="js/wx-shared.js?v=1.91.0"></script>
 <script src="js/dfs-opt.js?v=1.132.0"></script>
 <script src="js/dfs-injuries.js?v=1.36.0"></script>

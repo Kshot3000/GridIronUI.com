@@ -118,8 +118,8 @@ ok("costs-you-money verdict", out.innerHTML.includes("costs you money"));
 
 /* profit boost: $50, -110 -> +100, default prob -> extra $2.50-ish, per-dollar cents */
 mode("boost");
-$("pStake").value = "50"; $("pOrig").value = "-110"; $("pBoost").value = "+100";
-$("pFmt").value = "american"; $("pProb").value = "";
+$("pPromoStake").value = "50"; $("pOrig").value = "-110"; $("pBoost").value = "+100";
+$("pPromoFmt").value = "american"; $("pProb").value = "";
 $("bGo").fire("click");
 out = $("bOut");
 ok("boost value row", out.innerHTML.includes("Boost value"));

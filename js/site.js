@@ -254,10 +254,9 @@ function mount(){
   var c = document.getElementById("copyBtc");
   if(c) c.addEventListener("click", function(){
     var txt = document.getElementById("btcAddr").textContent;
-    if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ c.textContent="Copied ✓"; setTimeout(function(){c.textContent="Copy address";},1600); });
+    if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ c.textContent="Copied ✓"; setTimeout(function(){c.textContent="Copy address";},1600); }).catch(function(){ c.textContent="Select the address to copy"; });
   });
-  startTicker();
-  startHeadlines();
+  if(!window.GIU_V2){ startTicker(); startHeadlines(); }
   initReveal();
   window.GIU.initAds();
   window.GIU.initReferrals();
@@ -524,16 +523,36 @@ window.GIU.tabA11y = { enhance: enhanceTabs, enhanceOne: enhanceTablist,
 window.GIU.el = function(tag, cls, html){
   var e = document.createElement(tag); if(cls) e.className = cls; if(html!==undefined) e.innerHTML = html; return e;
 };
+/* Timeout covers headers AND JSON decoding; abort the actual request rather
+   than only rejecting the wrapper. Failed requests always clear their timer. */
 window.GIU.fetchJSON = function(url, ms){
   ms = ms || 12000;
-  return new Promise(function(res, rej){
-    var to = setTimeout(function(){ rej(new Error("timeout")); }, ms);
-    fetch(url, {cache:"no-store"}).then(function(r){
-      clearTimeout(to);
+  var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  return new Promise(function(resolve, reject){
+    var finished = false;
+    function done(error, data){
+      if(finished) return;
+      finished = true;
+      clearTimeout(timer);
+      if(error) reject(error); else resolve(data);
+    }
+    var timer = setTimeout(function(){
+      done(new Error("timeout"));
+      if(controller) controller.abort();
+    }, ms);
+    var options = {cache:"no-store"};
+    if(controller) options.signal = controller.signal;
+    Promise.resolve().then(function(){ return fetch(url, options); }).then(function(r){
       if(!r.ok) throw new Error("HTTP "+r.status);
       return r.json();
-    }).then(res).catch(rej);
+    }).then(function(data){ done(null, data); }, function(error){ done(error); });
   });
+};
+/* Only http(s) URLs from external feeds may become clickable links or images. */
+window.GIU.safeURL = function(value){
+  if(typeof value !== "string") return "";
+  try{ var u = new URL(value); return /^https?:$/.test(u.protocol) ? u.href : ""; }
+  catch(e){ return ""; }
 };
 /* Polymarket game-event feed URL. Orders by TRUE game time (startTime),
    soonest first — never by startDate, which is the event's CREATION date,

@@ -15,7 +15,7 @@ var m = html.match(/<div class="card calc" id="tickethedge">([\s\S]*?)<div class
 ok("tickethedge card found", !!m);
 var card = m ? m[1] : "";
 ok("pays label is the short form that fits its column",
-  card.indexOf("<label>Ticket pays in full ($)</label>") !== -1);
+  /<label[^>]*>Ticket pays in full \(\$\)<\/label>/.test(card));
 ok("overflowing long label is gone",
   card.indexOf("Ticket pays in full ($), stake included</label>") === -1);
 ok("stake-included meaning preserved in the card hint",

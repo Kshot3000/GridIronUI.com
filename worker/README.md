@@ -18,7 +18,7 @@ the site quietly uses the on-device AI / Gemini-key options instead.
    (Workers AI free tier: 10,000 neurons/day — plenty for a chat widget.)
 5. (Optional, later) **Settings** → **Variables** → add
    `ALLOWED_ORIGINS` = `https://www.your-domain.com` when you buy a custom
-   domain. `https://kshot3000.github.io` is always allowed.
+   domain. `https://kshot3000.github.io`, `https://gridironui.xyz` and `https://www.gridironui.xyz` are allowed by default.
 
 ## Option B — wrangler CLI
 

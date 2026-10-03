@@ -1,4 +1,18 @@
-# GridIronUI.com
+# GridIronUI · The Game Room
+
+**Version 2.0.0** · Static HTML/CSS/JavaScript · No build step or production dependencies.
+
+![GridIronUI game room](docs/preview-desktop.png)
+
+Start with [UPGRADE.md](UPGRADE.md) for ZIP installation, deployment, verification and service configuration. The 2.0 release brings a unified design across all 31 pages, global keyboard search, responsive sidebar/mobile navigation, a homepage payout calculator, a personal journal summary, team selection, clearer feed failures and accessible input labels.
+
+```bash
+npm test                        # every regression suite + local reference checks
+python3 -m http.server 8080      # visit http://localhost:8080
+```
+
+No `npm install` is required for the site or the Node tests. The optional AI Worker is separate from the static site. Your existing custom domain, ad configuration, referral links and saved browser data are preserved.
+
 
 The sharpest free sports betting knowledge hub — guides, calculators, live odds, prediction markets, scores, news, injuries, weather, video, and a DFS lineup lab.
 
@@ -14,7 +28,7 @@ The sharpest free sports betting knowledge hub — guides, calculators, live odd
 
 ## Tech
 
-Static site. Vanilla HTML/CSS/JS, no build step, no backend. Live data is fetched in the visitor's browser from public APIs (ESPN, Polymarket, Open-Meteo) — nothing is proxied.
+Static site. Vanilla HTML/CSS/JS, no build step. Sports data is fetched in the visitor's browser from public APIs (ESPN, Polymarket, Open-Meteo); the optional AI Worker is described in `worker/README.md`.
 
 ## Honesty rules (enforced)
 
@@ -28,6 +42,9 @@ Static site. Vanilla HTML/CSS/JS, no build step, no backend. Live data is fetche
 ```bash
 cd ~/workspace/gridironui
 python3 -m http.server 8080   # serve locally
+node tests/test-upgrade.js    # dashboard math, global search and page catalog
+node tests/test-fetch-json.js # real abort, whole-request timeout and safe feed URLs
+node tests/test-worker.js     # production CORS, malformed bodies and UTF-8 size cap
 node tests/test-betmath.js    # bet math tests
 node tests/test-roundrobin.js   # round-robin combinations + payout/scenario math
 node tests/test-roundrobin-dom.js  # round-robin wiring in shipped tools.js (leg rows, size boxes, results, empty/bad-input states)

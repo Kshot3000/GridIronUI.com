@@ -69,8 +69,8 @@ assert(ariaHidden, "decorative .hero-bg layers are aria-hidden");
 
 /* ---- homepage hero atmosphere ---- */
 var indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-assert(indexHtml.indexOf('class="hero-bokeh"') !== -1, "homepage hero has the bokeh atmosphere layer");
-assert(indexHtml.indexOf('hero-bokeh" aria-hidden="true"') !== -1, "bokeh layer is aria-hidden");
+assert(indexHtml.indexOf('class="home-hero"') !== -1, "homepage has the new photo hero");
+assert(indexHtml.indexOf('aria-labelledby="homeTitle"') !== -1, "homepage hero has an accessible name");
 assert(css.indexOf(".hero::before") !== -1, "CSS has the hero floodlight/vignette ::before layer");
 assert(css.indexOf(".hero-bokeh") !== -1, "CSS has the .hero-bokeh rules");
 assert(css.indexOf("hero-bokeh-drift") !== -1, "CSS has the bokeh drift keyframes");

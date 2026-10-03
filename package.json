@@ -1,0 +1,11 @@
+{
+  "name": "gridironui",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Independent sports intelligence, calculators and DFS tools. Static GitHub Pages site.",
+  "scripts": {
+    "test": "node scripts/run-tests.cjs && node scripts/check-site.cjs",
+    "check": "node scripts/check-site.cjs"
+  },
+  "engines": { "node": ">=20" }
+}

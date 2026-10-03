@@ -19,7 +19,7 @@ const card = (tools.match(/<div class="card calc" id="bonus">([\s\S]*?)<div clas
 ok("bonus card found", !!card);
 ["bType","bBonus","bPrice","bFmt","bHedge","bProb",
  "rBonus","rMult","rHold",
- "pStake","pOrig","pBoost","pFmt","pProb",
+ "pPromoStake","pOrig","pBoost","pPromoFmt","pProb",
  "bBonusFields","bRolloverFields","bBoostFields","bGo","bOut"]
   .forEach(id => ok("bonus card has #" + id, card.indexOf('id="' + id + '"') !== -1));
 ok("bonus card carries the New tag", /<span class="tag">New<\/span>/.test(card));
@@ -40,7 +40,7 @@ ok("index hero counts 17 tools", /<b>17<\/b><span>betting tools<\/span>/.test(in
   const h = read(f);
   ok(f + " betmath.js key is v1.87.0", h.indexOf("betmath.js?v=1.87.0") !== -1);
 });
-ok("tools.html tools.js key is v1.67.0", tools.indexOf("tools.js?v=1.67.0") !== -1);
+ok("tools.html tools.js key is v1.67.0", tools.indexOf("tools.js?v=2.0.0") !== -1);
 
 if(fail){ console.log(fail + " FAILURES"); process.exit(1); }
 console.log("test-bonus-static: " + pass + " assertions passed");

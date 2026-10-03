@@ -38,9 +38,12 @@
 .tool-empty p{margin:0}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3316742664595468" crossorigin="anonymous"></script>
+<meta name="theme-color" content="#111516">
+<link rel="stylesheet" href="css/upgrade.css?v=2.0.0">
+<script defer src="js/upgrade.js?v=2.0.0"></script>
 </head>
 <body>
-<script>window.GIU_BASE=".";</script>
+<script>window.GIU_V2=true;window.GIU_BASE=".";</script>
 <div id="site-header"></div>
 
 <section class="page-hero sport-nba"><div class="wrap hero-inner">
@@ -69,8 +72,8 @@
       <h3>Odds converter</h3>
       <p class="hint">Enter odds in any format — get all three plus the implied probability.</p>
       <div class="form-row">
-        <div class="field"><label>Odds</label><input type="text" id="cIn" placeholder="-110" value="-110"></div>
-        <div class="field"><label>Format</label><select id="cFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="cIn">Odds</label><input type="text" id="cIn" placeholder="-110" value="-110"></div>
+        <div class="field"><label for="cFmt">Format</label><select id="cFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
       <button class="btn btn-gold btn-sm" id="cGo">Convert</button>
       <div class="result-box" id="cOut" style="display:none"></div>
@@ -80,8 +83,8 @@
       <h3>Implied probability</h3>
       <p class="hint">What win chance is the market actually assigning at this price?</p>
       <div class="form-row">
-        <div class="field"><label>Odds</label><input type="text" id="iIn" placeholder="+150"></div>
-        <div class="field"><label>Format</label><select id="iFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="iIn">Odds</label><input type="text" id="iIn" placeholder="+150"></div>
+        <div class="field"><label for="iFmt">Format</label><select id="iFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
       <button class="btn btn-gold btn-sm" id="iGo">Calculate</button>
       <div class="result-box" id="iOut" style="display:none"></div>
@@ -91,10 +94,10 @@
       <h3>Payout calculator</h3>
       <p class="hint">Stake in — profit and total return out.</p>
       <div class="form-row">
-        <div class="field"><label>Stake ($)</label><input type="number" id="pStake" placeholder="100" min="0" step="any"></div>
-        <div class="field"><label>Odds</label><input type="text" id="pOdds" placeholder="-110"></div>
+        <div class="field"><label for="pStake">Stake ($)</label><input type="number" id="pStake" placeholder="100" min="0" step="any"></div>
+        <div class="field"><label for="pOdds">Odds</label><input type="text" id="pOdds" placeholder="-110"></div>
       </div>
-      <div class="field"><label>Odds format</label><select id="pFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+      <div class="field"><label for="pFmt">Odds format</label><select id="pFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       <button class="btn btn-gold btn-sm" id="pGo">Calculate</button>
       <div class="result-box" id="pOut" style="display:none"></div>
     </div>
@@ -104,7 +107,7 @@
       <p class="hint">Add each leg's odds — see the true combined price before you lock it in.</p>
       <div id="legRows"></div>
       <button class="btn btn-ghost btn-sm" id="addLeg" style="margin-bottom:12px">+ Add leg</button>
-      <div class="field"><label>Stake ($) — optional</label><input type="number" id="plStake" placeholder="10" min="0" step="any"></div>
+      <div class="field"><label for="plStake">Stake ($) — optional</label><input type="number" id="plStake" placeholder="10" min="0" step="any"></div>
       <button class="btn btn-gold btn-sm" id="plGo">Calculate parlay</button>
       <div class="result-box" id="plOut" style="display:none"></div>
     </div>
@@ -115,7 +118,7 @@
       <div id="rrLegRows"></div>
       <button class="btn btn-ghost btn-sm" id="rrAddLeg" style="margin-bottom:12px">+ Add leg</button>
       <div class="field"><label>Parlay sizes</label><div id="rrSizes" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px"></div></div>
-      <div class="field" style="margin-top:12px"><label>Stake per parlay ($)</label><input type="number" id="rrStake" placeholder="10" min="0" step="any" value="10"></div>
+      <div class="field" style="margin-top:12px"><label for="rrStake">Stake per parlay ($)</label><input type="number" id="rrStake" placeholder="10" min="0" step="any" value="10"></div>
       <button class="btn btn-gold btn-sm" id="rrGo">Calculate round robin</button>
       <div class="result-box" id="rrOut" style="display:none"></div>
     </div>
@@ -124,12 +127,12 @@
       <h3>Kelly stake calculator</h3>
       <p class="hint">Size your bet to your edge. Be honest about your win probability — Kelly punishes optimism.</p>
       <div class="form-row">
-        <div class="field"><label>Your estimated win probability (%)</label><input type="number" id="kProb" placeholder="55" min="0" max="100" step="any"></div>
-        <div class="field"><label>Odds (decimal)</label><input type="text" id="kOdds" placeholder="2.10"></div>
+        <div class="field"><label for="kProb">Your estimated win probability (%)</label><input type="number" id="kProb" placeholder="55" min="0" max="100" step="any"></div>
+        <div class="field"><label for="kOdds">Odds (decimal)</label><input type="text" id="kOdds" placeholder="2.10"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Kelly fraction</label><select id="kFrac"><option value="1">Full Kelly</option><option value="0.5" selected>Half Kelly (recommended)</option><option value="0.25">Quarter Kelly (conservative)</option></select></div>
-        <div class="field"><label>Bankroll ($) — optional</label><input type="number" id="kBank" placeholder="1000" min="0" step="any"></div>
+        <div class="field"><label for="kFrac">Kelly fraction</label><select id="kFrac"><option value="1">Full Kelly</option><option value="0.5" selected>Half Kelly (recommended)</option><option value="0.25">Quarter Kelly (conservative)</option></select></div>
+        <div class="field"><label for="kBank">Bankroll ($) — optional</label><input type="number" id="kBank" placeholder="1000" min="0" step="any"></div>
       </div>
       <div class="field" style="display:none"><select id="kFmt"><option value="decimal" selected>Decimal</option></select></div>
       <button class="btn btn-gold btn-sm" id="kGo">Calculate stake</button>
@@ -141,11 +144,11 @@
       <h3>Expected value calculator</h3>
       <p class="hint">The one number sharps actually bet on. Enter <em>your</em> estimated win probability — from your model, or from the <a href="odds.html">odds board</a>'s no-vig fair line — and the best price you can get. Dollars of expected profit per bet, your edge, and the verdict: does the price beat break-even?</p>
       <div class="form-row">
-        <div class="field"><label>Your estimated win probability (%)</label><input type="number" id="evProb" placeholder="55" min="0" max="100" step="any"></div>
-        <div class="field"><label>Best price you can get</label><input type="text" id="evOdds" placeholder="+120"></div>
-        <div class="field"><label>Format</label><select id="evFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="evProb">Your estimated win probability (%)</label><input type="number" id="evProb" placeholder="55" min="0" max="100" step="any"></div>
+        <div class="field"><label for="evOdds">Best price you can get</label><input type="text" id="evOdds" placeholder="+120"></div>
+        <div class="field"><label for="evFmt">Format</label><select id="evFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
-      <div class="field"><label>Stake ($) — optional</label><input type="number" id="evStake" placeholder="100" min="0" step="any"></div>
+      <div class="field"><label for="evStake">Stake ($) — optional</label><input type="number" id="evStake" placeholder="100" min="0" step="any"></div>
       <button class="btn btn-gold btn-sm" id="evGo">Calculate EV</button>
       <div class="result-box" id="evOut" style="display:none"></div>
     </div>
@@ -154,8 +157,8 @@
       <h3>Vig remover / fair odds</h3>
       <p class="hint">Enter both sides of a two-way market — see the book's hold and the true no-vig price.</p>
       <div class="form-row">
-        <div class="field"><label>Side 1 (American)</label><input type="text" id="vA1" placeholder="-110"></div>
-        <div class="field"><label>Side 2 (American)</label><input type="text" id="vA2" placeholder="-110"></div>
+        <div class="field"><label for="vA1">Side 1 (American)</label><input type="text" id="vA1" placeholder="-110"></div>
+        <div class="field"><label for="vA2">Side 2 (American)</label><input type="text" id="vA2" placeholder="-110"></div>
       </div>
       <button class="btn btn-gold btn-sm" id="vGo">Remove the vig</button>
       <div class="result-box" id="vOut" style="display:none"></div>
@@ -166,14 +169,14 @@
       <h3>Hedge &amp; arbitrage finder</h3>
       <p class="hint">Holding a ticket and want to lock profit — or think two books have left an arb on the table? Enter both sides' prices and find out.</p>
       <div class="form-row">
-        <div class="field"><label>Side A odds (your bet)</label><input type="text" id="hA" placeholder="-110"></div>
-        <div class="field"><label>Format</label><select id="hFa"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="hA">Side A odds (your bet)</label><input type="text" id="hA" placeholder="-110"></div>
+        <div class="field"><label for="hFa">Format</label><select id="hFa"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Side B odds (hedge)</label><input type="text" id="hB" placeholder="+105"></div>
-        <div class="field"><label>Format</label><select id="hFb"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="hB">Side B odds (hedge)</label><input type="text" id="hB" placeholder="+105"></div>
+        <div class="field"><label for="hFb">Format</label><select id="hFb"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
-      <div class="field"><label>My stake on side A ($) — optional</label><input type="number" id="hStake" placeholder="100" min="0" step="any"></div>
+      <div class="field"><label for="hStake">My stake on side A ($) — optional</label><input type="number" id="hStake" placeholder="100" min="0" step="any"></div>
       <button class="btn btn-gold btn-sm" id="hGo">Check for arb</button>
       <div class="result-box" id="hOut" style="display:none"></div>
     </div>
@@ -183,14 +186,14 @@
       <h3>Ticket hedge planner</h3>
       <p class="hint">One leg left on a live ticket? Enter your original stake, what the ticket pays <em>in full</em> (stake included), and the price on the other side of the remaining leg — then lock equal profit, free-roll, or size your own plan.</p>
       <div class="form-row">
-        <div class="field"><label>Original stake ($)</label><input type="number" id="thStake" placeholder="100" min="0" step="any"></div>
-        <div class="field"><label>Ticket pays in full ($)</label><input type="number" id="thPays" placeholder="2400" min="0" step="any"></div>
+        <div class="field"><label for="thStake">Original stake ($)</label><input type="number" id="thStake" placeholder="100" min="0" step="any"></div>
+        <div class="field"><label for="thPays">Ticket pays in full ($)</label><input type="number" id="thPays" placeholder="2400" min="0" step="any"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Hedge price — other side of the last leg</label><input type="text" id="thHedge" placeholder="-110"></div>
-        <div class="field"><label>Format</label><select id="thFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="thHedge">Hedge price — other side of the last leg</label><input type="text" id="thHedge" placeholder="-110"></div>
+        <div class="field"><label for="thFmt">Format</label><select id="thFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
-      <div class="field"><label>Hedge stake ($) — optional, for your own plan</label><input type="number" id="thCustom" placeholder="500" min="0" step="any"></div>
+      <div class="field"><label for="thCustom">Hedge stake ($) — optional, for your own plan</label><input type="number" id="thCustom" placeholder="500" min="0" step="any"></div>
       <button class="btn btn-gold btn-sm" id="thGo">Plan my hedge</button>
       <div class="result-box" id="thOut" style="display:none"></div>
     </div>
@@ -199,17 +202,17 @@
       <h3>Middling calculator</h3>
       <p class="hint">The line moved after your first bet — now you hold both sides at different numbers. Enter both bets and see exactly what a middle pays, and what a split costs. The labels are just for you; the math only needs stakes and prices. Read <a href="guides/line-movement.html">the line-movement guide</a> first if you haven't.</p>
       <div class="form-row">
-        <div class="field"><label>Bet 1 — your label (optional)</label><input type="text" id="mLbl1" placeholder="Over 45.5"></div>
-        <div class="field"><label>Bet 2 — your label (optional)</label><input type="text" id="mLbl2" placeholder="Under 48.5"></div>
+        <div class="field"><label for="mLbl1">Bet 1 — your label (optional)</label><input type="text" id="mLbl1" placeholder="Over 45.5"></div>
+        <div class="field"><label for="mLbl2">Bet 2 — your label (optional)</label><input type="text" id="mLbl2" placeholder="Under 48.5"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Bet 1 stake ($)</label><input type="number" id="mStake1" placeholder="110" min="0" step="any"></div>
-        <div class="field"><label>Bet 2 stake ($)</label><input type="number" id="mStake2" placeholder="110" min="0" step="any"></div>
+        <div class="field"><label for="mStake1">Bet 1 stake ($)</label><input type="number" id="mStake1" placeholder="110" min="0" step="any"></div>
+        <div class="field"><label for="mStake2">Bet 2 stake ($)</label><input type="number" id="mStake2" placeholder="110" min="0" step="any"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Bet 1 price</label><input type="text" id="mOdds1" placeholder="-110"></div>
-        <div class="field"><label>Bet 2 price</label><input type="text" id="mOdds2" placeholder="-110"></div>
-        <div class="field"><label>Format</label><select id="mFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="mOdds1">Bet 1 price</label><input type="text" id="mOdds1" placeholder="-110"></div>
+        <div class="field"><label for="mOdds2">Bet 2 price</label><input type="text" id="mOdds2" placeholder="-110"></div>
+        <div class="field"><label for="mFmt">Format</label><select id="mFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
       <button class="btn btn-gold btn-sm" id="midGo">Evaluate my middle</button>
       <div class="result-box" id="midOut" style="display:none"></div>
@@ -219,7 +222,7 @@
       <span class="tag">New</span>
       <h3>Bonus &amp; promo value</h3>
       <p class="hint">Books hand out bonus bets, deposit matches and profit boosts — but a $100 bonus is never worth $100. Pick the promo type and price the offer like a sharp: what it converts to in real cash, after the fine print. Hedging a bonus bet? Shop both legs on the <a href="odds.html">odds board</a> first.</p>
-      <div class="field"><label>Promo type</label>
+      <div class="field"><label for="bType">Promo type</label>
         <select id="bType">
           <option value="bonus" selected>Bonus bet (stake not returned)</option>
           <option value="rollover">Deposit match with rollover</option>
@@ -228,32 +231,32 @@
       </div>
       <div id="bBonusFields">
         <div class="form-row">
-          <div class="field"><label>Bonus bet amount ($)</label><input type="number" id="bBonus" placeholder="100" min="0" step="any"></div>
-          <div class="field"><label>Price you'd use it at</label><input type="text" id="bPrice" placeholder="+150"></div>
-          <div class="field"><label>Format</label><select id="bFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+          <div class="field"><label for="bBonus">Bonus bet amount ($)</label><input type="number" id="bBonus" placeholder="100" min="0" step="any"></div>
+          <div class="field"><label for="bPrice">Price you'd use it at</label><input type="text" id="bPrice" placeholder="+150"></div>
+          <div class="field"><label for="bFmt">Format</label><select id="bFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Hedge price — other side (optional)</label><input type="text" id="bHedge" placeholder="-150"></div>
-          <div class="field"><label>Your win chance % (optional)</label><input type="number" id="bProb" placeholder="40" min="1" max="99" step="any"></div>
+          <div class="field"><label for="bHedge">Hedge price — other side (optional)</label><input type="text" id="bHedge" placeholder="-150"></div>
+          <div class="field"><label for="bProb">Your win chance % (optional)</label><input type="number" id="bProb" placeholder="40" min="1" max="99" step="any"></div>
         </div>
       </div>
       <div id="bRolloverFields" style="display:none">
         <div class="form-row">
-          <div class="field"><label>Bonus amount ($)</label><input type="number" id="rBonus" placeholder="200" min="0" step="any"></div>
-          <div class="field"><label>Rollover multiple</label><input type="number" id="rMult" placeholder="5" min="0" step="any" value="5"></div>
-          <div class="field"><label>Your hold per $1 wagered (%)</label><input type="number" id="rHold" placeholder="4.55" min="0" max="99" step="any" value="4.55"></div>
+          <div class="field"><label for="rBonus">Bonus amount ($)</label><input type="number" id="rBonus" placeholder="200" min="0" step="any"></div>
+          <div class="field"><label for="rMult">Rollover multiple</label><input type="number" id="rMult" placeholder="5" min="0" step="any" value="5"></div>
+          <div class="field"><label for="rHold">Your hold per $1 wagered (%)</label><input type="number" id="rHold" placeholder="4.55" min="0" max="99" step="any" value="4.55"></div>
         </div>
         <p class="hint" style="margin-top:-4px">The hold is what the vig costs you per dollar rolled over: <span class="num">-105/-105 ≈ 2.4%</span>, <span class="num">-110/-110 ≈ 4.55%</span>, <span class="num">-120/-120 ≈ 9.1%</span>. Be honest — it assumes you bet at ordinary prices, not arbs.</p>
       </div>
       <div id="bBoostFields" style="display:none">
         <div class="form-row">
-          <div class="field"><label>Stake ($, real money)</label><input type="number" id="pStake" placeholder="50" min="0" step="any"></div>
-          <div class="field"><label>Original price</label><input type="text" id="pOrig" placeholder="-110"></div>
-          <div class="field"><label>Boosted price</label><input type="text" id="pBoost" placeholder="+100"></div>
+          <div class="field"><label for="pPromoStake">Stake ($, real money)</label><input type="number" id="pPromoStake" placeholder="50" min="0" step="any"></div>
+          <div class="field"><label for="pOrig">Original price</label><input type="text" id="pOrig" placeholder="-110"></div>
+          <div class="field"><label for="pBoost">Boosted price</label><input type="text" id="pBoost" placeholder="+100"></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Format</label><select id="pFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
-          <div class="field"><label>Your win chance % (optional)</label><input type="number" id="pProb" placeholder="52.4" min="1" max="99" step="any"></div>
+          <div class="field"><label for="pPromoFmt">Format</label><select id="pPromoFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+          <div class="field"><label for="pProb">Your win chance % (optional)</label><input type="number" id="pProb" placeholder="52.4" min="1" max="99" step="any"></div>
         </div>
       </div>
       <button class="btn btn-gold btn-sm" id="bGo">Price my promo</button>
@@ -265,13 +268,13 @@
       <h3>Cash-out evaluator</h3>
       <p class="hint">The book flashes a cash-out number mid-game — is it a fair price, or is the book pocketing the difference? Enter your original bet, the <em>current</em> price on the same side (check the <a href="odds.html">odds board</a> for the best one), and the book's offer. Fair value, the book's cut, and the verdict — plus what hedging the other side yourself would lock in.</p>
       <div class="form-row">
-        <div class="field"><label>Original stake ($)</label><input type="number" id="coStake" placeholder="100" min="0" step="any"></div>
-        <div class="field"><label>Cash-out offer ($)</label><input type="number" id="coOffer" placeholder="140" min="0" step="any"></div>
+        <div class="field"><label for="coStake">Original stake ($)</label><input type="number" id="coStake" placeholder="100" min="0" step="any"></div>
+        <div class="field"><label for="coOffer">Cash-out offer ($)</label><input type="number" id="coOffer" placeholder="140" min="0" step="any"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Original odds</label><input type="text" id="coOrig" placeholder="+150"></div>
-        <div class="field"><label>Current price — same side</label><input type="text" id="coNow" placeholder="-110"></div>
-        <div class="field"><label>Format</label><select id="coFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
+        <div class="field"><label for="coOrig">Original odds</label><input type="text" id="coOrig" placeholder="+150"></div>
+        <div class="field"><label for="coNow">Current price — same side</label><input type="text" id="coNow" placeholder="-110"></div>
+        <div class="field"><label for="coFmt">Format</label><select id="coFmt"><option value="american">American</option><option value="decimal">Decimal</option><option value="fractional">Fractional</option></select></div>
       </div>
       <button class="btn btn-gold btn-sm" id="coGo">Evaluate the offer</button>
       <div class="result-box" id="coOut" style="display:none"></div>
@@ -283,7 +286,7 @@
       <p class="hint">Backing several outcomes where only one can win — a few golfers, a couple of division winners? Split your stake so the payout is identical whichever one lands. Name each selection (optional) and enter its price.</p>
       <div id="duLegRows"></div>
       <button class="btn btn-ghost btn-sm" id="duAddLeg" style="margin-bottom:12px">+ Add selection</button>
-      <div class="field"><label>Total stake across all selections ($)</label><input type="number" id="duStake" placeholder="100" min="0" step="any" value="100"></div>
+      <div class="field"><label for="duStake">Total stake across all selections ($)</label><input type="number" id="duStake" placeholder="100" min="0" step="any" value="100"></div>
       <button class="btn btn-gold btn-sm" id="duGo">Split my stake</button>
       <div class="result-box" id="duOut" style="display:none"></div>
     </div>
@@ -295,7 +298,7 @@
       <div id="tzLegRows"></div>
       <button class="btn btn-ghost btn-sm" id="tzAddLeg" style="margin-bottom:12px">+ Add leg</button>
       <div class="form-row">
-        <div class="field"><label>Teaser points</label>
+        <div class="field"><label for="tzPts">Teaser points</label>
           <select id="tzPts">
             <option value="4">4 points</option>
             <option value="4.5">4.5 points</option>
@@ -307,9 +310,9 @@
             <option value="13">13 points (4-team)</option>
           </select>
         </div>
-        <div class="field"><label>Book's offered price (American)</label><input type="text" id="tzPrice" placeholder="-120" value="-120"></div>
+        <div class="field"><label for="tzPrice">Book's offered price (American)</label><input type="text" id="tzPrice" placeholder="-120" value="-120"></div>
       </div>
-      <div class="field"><label>If a leg lands exactly on the teased line</label>
+      <div class="field"><label for="tzPush">If a leg lands exactly on the teased line</label>
         <select id="tzPush"><option value="push" selected>Ties push — leg voids, teaser re-grades short</option><option value="lose">Ties lose — any push kills the ticket</option></select>
       </div>
       <button class="btn btn-gold btn-sm" id="tzGo">Grade my teaser</button>
@@ -321,7 +324,7 @@
       <h3>Bankroll risk simulator</h3>
       <p class="hint">Monte Carlo: run thousands of simulated seasons at your win rate and price to see how a bankroll actually behaves — the losing streaks included. This is a model, not a prediction.</p>
       <div class="form-row">
-        <div class="field"><label>Starting bankroll ($)</label><input type="number" id="mcBank" placeholder="1000" min="1" step="any" value="1000"></div>
+        <div class="field"><label for="mcBank">Starting bankroll ($)</label><input type="number" id="mcBank" placeholder="1000" min="1" step="any" value="1000"></div>
         <div class="field"><label>Stake per bet</label>
           <div style="display:flex;gap:8px">
             <input type="number" id="mcStake" placeholder="2" min="0.01" step="any" value="2" style="flex:1;min-width:0">
@@ -333,12 +336,12 @@
         </div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Your win probability (%)</label><input type="number" id="mcProb" placeholder="55" min="1" max="99" step="any" value="55"></div>
-        <div class="field"><label>Average odds (American)</label><input type="text" id="mcOdds" placeholder="-110" value="-110"></div>
+        <div class="field"><label for="mcProb">Your win probability (%)</label><input type="number" id="mcProb" placeholder="55" min="1" max="99" step="any" value="55"></div>
+        <div class="field"><label for="mcOdds">Average odds (American)</label><input type="text" id="mcOdds" placeholder="-110" value="-110"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Bets in the run</label><input type="number" id="mcBets" placeholder="500" min="10" max="10000" step="1" value="500"></div>
-        <div class="field"><label>Simulations</label><select id="mcSims"><option value="1000">1,000</option><option value="2500">2,500</option><option value="5000" selected>5,000</option><option value="10000">10,000</option></select></div>
+        <div class="field"><label for="mcBets">Bets in the run</label><input type="number" id="mcBets" placeholder="500" min="10" max="10000" step="1" value="500"></div>
+        <div class="field"><label for="mcSims">Simulations</label><select id="mcSims"><option value="1000">1,000</option><option value="2500">2,500</option><option value="5000" selected>5,000</option><option value="10000">10,000</option></select></div>
       </div>
       <button class="btn btn-gold btn-sm" id="mcGo">Run simulation</button>
       <div class="result-box" id="mcOut" style="display:none"></div>
@@ -360,9 +363,9 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="js/site.js?v=1.104.0"></script>
+<script src="js/site.js?v=2.0.0"></script>
 <script src="js/betmath.js?v=1.87.0"></script>
-<script src="js/tools.js?v=1.67.0"></script>
+<script src="js/tools.js?v=2.0.0"></script>
 <script src="js/tools-find.js?v=1.159.0"></script>
 </body>
 </html>

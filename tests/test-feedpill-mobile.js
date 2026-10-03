@@ -73,9 +73,9 @@ htmlFiles(ROOT).forEach(function(h){
   const cssKeys = [...src.matchAll(/style\.css\?v=([0-9.]+)/g)].map(x => x[1]);
   const jsKeys = [...src.matchAll(/js\/site\.js\?v=([0-9.]+)/g)].map(x => x[1]);
   if(cssKeys.some(k => k !== "1.104.0")) bad.push(path.relative(ROOT, h) + " css=" + cssKeys.join(","));
-  if(jsKeys.some(k => k !== "1.104.0")) bad.push(path.relative(ROOT, h) + " site.js=" + jsKeys.join(","));
+  if(jsKeys.some(k => k !== "2.0.0")) bad.push(path.relative(ROOT, h) + " site.js=" + jsKeys.join(","));
 });
-ok("all pages pin style.css at 1.104.0 + site.js at 1.104.0", bad.length === 0, bad.slice(0, 5).join(" | "));
+ok("all pages pin style.css at 1.104.0 + site.js at 2.0.0", bad.length === 0, bad.slice(0, 5).join(" | "));
 
 if(fails){ console.error(fails + " FAILURES"); process.exit(1); }
 console.log("feed-pill mobile test green");

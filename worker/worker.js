@@ -31,7 +31,7 @@ var RATE_WINDOW_MS = 60 * 1000;
 var hits = new Map();
 
 function allowedOrigins(env){
-  var list = ["https://kshot3000.github.io"];
+  var list = ["https://kshot3000.github.io", "https://gridironui.xyz", "https://www.gridironui.xyz"];
   if(env && env.ALLOWED_ORIGINS){
     String(env.ALLOWED_ORIGINS).split(",").forEach(function(o){
       var t = o.trim().replace(/\/+$/, "");
@@ -64,7 +64,7 @@ function rateLimited(ip){
 }
 
 function json(data, status, corsOrigin){
-  var headers = { "Content-Type": "application/json" };
+  var headers = { "Content-Type": "application/json", "Vary": "Origin" };
   if(corsOrigin){
     headers["Access-Control-Allow-Origin"] = corsOrigin;
     headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS";
@@ -116,7 +116,7 @@ export default {
     var body;
     try{
       var raw = await request.text();
-      if(raw.length > MAX_BODY_BYTES) throw new Error("body too large");
+      if(new TextEncoder().encode(raw).length > MAX_BODY_BYTES) throw new Error("body too large");
       body = JSON.parse(raw);
     }catch(e){
       return json({ error: "bad_request",
@@ -124,6 +124,9 @@ export default {
                   400, corsOrigin);
     }
 
+    if(!body || typeof body !== "object" || Array.isArray(body)){
+      return json({ error: "bad_request", message: "Send a JSON object." }, 400, corsOrigin);
+    }
     var system = String(body.system || "").slice(0, 8000);
     var rawMsgs = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
     var messages = rawMsgs

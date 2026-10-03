@@ -44,13 +44,14 @@ function htmlFiles(dir, out){
   });
   return out;
 }
-var checked = 0;
+var checked = 0, references = 0;
 htmlFiles(ROOT).forEach(function(html){
   var src = fs.readFileSync(html, "utf8"), re = /src="([^"]*js\/([a-z0-9-]+)\.js)(\?v=([0-9.]+))?"/g, m;
   while((m = re.exec(src))){
     var jsName = m[2] + ".js", key = m[4] || null;
     var rel = path.join("js", jsName);
     if(!fs.existsSync(path.join(ROOT, rel))) continue; /* external or missing: not our problem */
+    references++;
     var changedIn = lastChangeVer(rel);
     if(!changedIn) continue; /* no versioned commit found: skip */
     checked++;
@@ -65,6 +66,7 @@ htmlFiles(ROOT).forEach(function(html){
        cmpVer(key, changedIn) >= 0, "key="+key+" content="+changedIn);
   }
 });
-ok("scanned references", checked > 0, "checked="+checked);
+ok("scanned references", references > 0, "references="+references);
+if(!checked) console.log("NOTE: no versioned commit history; structural references checked, historical version comparisons skipped.");
 console.log(fails ? "\n"+fails+" FAILURES" : "\nALL CACHE-KEY TESTS PASSED");
 process.exit(fails ? 1 : 0);

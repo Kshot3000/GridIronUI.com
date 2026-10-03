@@ -381,8 +381,8 @@ $("bGo").addEventListener("click", function(){
         '<p style="margin:10px 0 0;color:var(--muted);font-size:.85rem">Honest fine print: the hold assumes ordinary prices. Roll the bonus through two-way markets near the no-vig fair line to keep the playthrough cheap — longshots bleed the bonus through variance, and heavy favorites often don\u2019t count toward rollover at all. Withdrawal minimums and expiry dates sit in the terms; read them before you opt in.</p>');
     } else {
       /* boost */
-      if(isEmpty("pStake")||isEmpty("pOrig")||isEmpty("pBoost")){ note("bOut", "Enter your stake and both prices above, then hit Price my promo. "+EXAMPLE); return; }
-      var S = num("pStake"), d = toDecimal(val("pOrig"), val("pFmt")), db = toDecimal(val("pBoost"), val("pFmt"));
+      if(isEmpty("pPromoStake")||isEmpty("pOrig")||isEmpty("pBoost")){ note("bOut", "Enter your stake and both prices above, then hit Price my promo. "+EXAMPLE); return; }
+      var S = num("pPromoStake"), d = toDecimal(val("pOrig"), val("pPromoFmt")), db = toDecimal(val("pBoost"), val("pPromoFmt"));
       var probRaw2 = val("pProb");
       var rb = BetMath.profitBoost(S, d, db, probRaw2 === "" ? "" : probRaw2/100);
       var usedDefault = probRaw2 === "";

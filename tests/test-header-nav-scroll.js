@@ -65,7 +65,7 @@ var bad = [];
 htmlFiles(ROOT).forEach(function(h){
   var t = fs.readFileSync(h, "utf8");
   if(t.indexOf("css/style.css?v=1.104.0") === -1 && /css\/style\.css\?v=/.test(t)) bad.push(path.relative(ROOT, h)+" css");
-  if(t.indexOf("js/site.js?v=1.104.0") === -1 && /js\/site\.js\?v=/.test(t)) bad.push(path.relative(ROOT, h)+" site.js");
+  if(t.indexOf("js/site.js?v=2.0.0") === -1 && /js\/site\.js\?v=/.test(t)) bad.push(path.relative(ROOT, h)+" site.js");
 });
 ok(bad.length === 0, "all pages pin style.css and site.js at v1.104.0" + (bad.length ? " — "+bad.slice(0,5).join(", ") : ""));
 
