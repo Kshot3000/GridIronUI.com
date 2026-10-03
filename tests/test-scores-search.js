@@ -214,7 +214,7 @@ function cards(html){ return (html.match(/class="game-card/g) || []).length; }
   assert(html.indexOf('id="scoreQ"') !== -1, "scores.html ships the scoreQ input");
   assert(html.indexOf('id="scoreClear"') !== -1 && html.indexOf('id="scoreCount"') !== -1,
     "scores.html ships the Clear button + count live region");
-  assert(html.indexOf("js/scores.js?v=2.0.8") !== -1, "scores.html bumps scores.js to ?v=2.0.8");
+  assert(html.indexOf("js/scores.js?v=2.0.10") !== -1, "scores.html bumps scores.js to ?v=2.0.10");
   assert(html.indexOf(".score-find") !== -1, "scores.html carries the page-scoped finder styles");
   var src = fs.readFileSync(path.join(ROOT, "js/scores.js"), "utf8");
   assert(src.indexOf("gameMatchesSearch") !== -1 && src.indexOf("renderSearchMeta") !== -1,

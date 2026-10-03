@@ -100,7 +100,7 @@ ok("hub Kalshi gate for college points at the markets page (v2.0.8)",
 ok("hub Polymarket gate for college points at the predictions board (v2.0.8)",
   hub.indexOf('college markets live on the <a href="predictions.html">predictions board</a>') !== -1);
 var scoresHtml = read("scores.html");
-ok("scores.html keys scores.js at v2.0.8", scoresHtml.indexOf("js/scores.js?v=2.0.8") !== -1);
+ok("scores.html keys scores.js at v2.0.10", scoresHtml.indexOf("js/scores.js?v=2.0.10") !== -1);
 var preds = read("predictions.html");
 ok("index.html keys home-strip.js at v2.0.8", index.indexOf("js/home-strip.js?v=2.0.8") !== -1);
 ok("predictions.html keys home-strip.js at v2.0.8", preds.indexOf("js/home-strip.js?v=2.0.8") !== -1);

@@ -153,9 +153,26 @@ function dayLabel(){
   var d = new Date(); d.setDate(d.getDate()+dayOffset);
   return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
 }
+/* Full-slate groups for the college leagues (v2.0.10). ESPN's DEFAULT
+   college scoreboards are a ranked subset only — verified live 2026-10-03:
+   college-football returned 16 games for a 54-game FBS Saturday, and
+   mens-college-basketball returned 21 for a 145-game January Saturday —
+   while scores.html promises "Every game, every league". The group ids
+   widen the same endpoint to the full division slate: 80 = FBS (I-A)
+   football, 50 = Division I basketball (both verified live against real
+   Saturdays, counts above). The generous limit guards peak days (a
+   January NCAAB Saturday runs ~150 games); ESPN returned the identical
+   counts with and without it. Pro and EPL paths take no group param —
+   their default boards are already the full slate, byte-identical URLs. */
+var FULL_SLATE = {
+  "football/college-football": "groups=80&limit=200",
+  "basketball/mens-college-basketball": "groups=50&limit=400"
+};
 function scoreboardUrl(leaguePath, offset){
   var d = new Date(); d.setDate(d.getDate()+offset);
-  return "https://site.api.espn.com/apis/site/v2/sports/"+leaguePath+"/scoreboard?dates="+ymd(d);
+  var url = "https://site.api.espn.com/apis/site/v2/sports/"+leaguePath+"/scoreboard?dates="+ymd(d);
+  var full = Object.prototype.hasOwnProperty.call(FULL_SLATE, leaguePath) ? FULL_SLATE[leaguePath] : null;
+  return full ? url + "&" + full : url;
 }
 
 /* ---- smart default day (every league tab) ----
