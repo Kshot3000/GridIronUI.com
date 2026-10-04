@@ -250,18 +250,31 @@ $("clearPool").addEventListener("click", function(){
 });
 
 /* ---------- ESPN injury cross-check ----------
-   Flags pool players who appear on the ESPN injury report (fetched once per
-   sport per page load, after the pool renders so a feed hiccup never blocks
-   the optimizer). Chips are painted in place — no table rebuild, no lost
-   input focus. Never invents: only exact or unambiguous last-name matches. */
+   Flags pool players who appear on the ESPN injury report (first fetch after
+   the pool renders so a feed hiccup never blocks the optimizer, then a silent
+   re-check every 3 minutes — the injury wire's cadence — because inactives
+   drop ~90 minutes before each kickoff wave while a builder sits in this
+   page: a player ruled OUT after the page loaded must not stay chip-free,
+   and a player cleared must not stay flagged). Silent re-checks skip hidden
+   tabs, never flash the loading banner, and a failed re-check keeps the last
+   good flags (the banner's updated stamp then honestly shows their age).
+   Chips are painted in place — no table rebuild, no lost input focus.
+   Never invents: only exact or unambiguous last-name matches. */
 var injFlags = {};
-var injFeeds = {}; /* sport -> {state:"idle"|"loading"|"ready"|"error", entries} */
+var injFeeds = {}; /* sport -> {state:"idle"|"loading"|"ready"|"error", entries, at, refreshing} */
+var INJ_LIVE_MS = 3*60*1000;
+var injTimer = null;
 function injSport(){ return cfg().sport; }
-function injLeague(){ return injSport()==="NBA" ? "basketball/nba" : "football/nfl"; }
 function refreshInjuryFlags(){
   var f = injFeeds[injSport()];
   if(!INJ || !f || f.state!=="ready" || !f.entries) return {};
   return INJ.matchInjuries(pool, f.entries);
+}
+function injUpdatedNote(f){
+  if(!f || !f.at) return "";
+  try{
+    return " · updated " + new Date(f.at).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+  }catch(e){ return ""; }
 }
 function injChip(p){
   var fl = injFlags[p.id];
@@ -285,13 +298,15 @@ function renderInjBanner(){
   }
   if(f.state==="error"){
     b.style.display=""; b.className="inj-banner idle";
-    b.innerHTML = "🏥 <b>Injury check</b> <span>· couldn't reach the ESPN injury feed — lineups still build normally. <a href=\"injuries.html\">Open the injury report →</a></span>";
+    b.innerHTML = "🏥 <b>Injury check</b> <span>· couldn't reach the ESPN injury feed — lineups still build normally, and the check retries every 3 min while this page is open. <a href=\"injuries.html\">Open the injury report →</a></span>";
     return;
   }
   var s = INJ.summarize(injFlags), ids = Object.keys(injFlags);
   if(!ids.length){
     b.style.display=""; b.className="inj-banner ok";
-    b.innerHTML = "🏥 <b>Injury check</b> <span>· via ESPN injury report — no pool players on the report. <a href=\"injuries.html\">Full report →</a></span>";
+    b.innerHTML = "🏥 <b>Injury check</b> <span>· via ESPN injury report — no pool players on the report"+
+      OPT_esc(injUpdatedNote(f))+
+      ". Re-checks every 3 min while this page is open. <a href=\"injuries.html\">Full report →</a></span>";
     return;
   }
   var parts = [];
@@ -299,7 +314,8 @@ function renderInjBanner(){
   if(s.doubtful) parts.push(s.doubtful+" doubtful");
   if(s.questionable) parts.push(s.questionable+" questionable");
   var html = "🏥 <b>Injury check</b> <span>· via ESPN injury report — <b style=\"color:var(--text)\">"+
-    s.total+" pool player"+(s.total>1?"s":"")+"</b> flagged ("+parts.join(" · ")+").</span>";
+    s.total+" pool player"+(s.total>1?"s":"")+"</b> flagged ("+parts.join(" · ")+")"+
+    OPT_esc(injUpdatedNote(f))+". Re-checks every 3 min while this page is open.</span>";
   if(s.out) html += ' <button class="btn btn-ghost btn-sm" id="injExcludeOut">🚫 Exclude all OUT</button>';
   html += ' <a href="injuries.html" style="font-size:.82rem">Full report →</a>';
   b.style.display=""; b.className="inj-banner";
@@ -313,26 +329,62 @@ function renderInjBanner(){
     save(); renderPool();
   });
 }
-function maybeInjuryFetch(){
-  if(!INJ || !pool.length) return;
-  var sp = injSport();
+function fetchInjuries(sp, silent){
+  if(!INJ) return;
   var f = injFeeds[sp];
-  if(f && f.state!=="idle") return; /* one fetch per sport per page load */
-  injFeeds[sp] = { state:"loading", entries:null };
-  renderInjBanner();
-  GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+injLeague()+"/injuries", 12000).then(function(d){
+  if(!f) f = injFeeds[sp] = { state:"idle", entries:null, at:0, refreshing:false };
+  if(f.state==="loading" || f.refreshing) return; /* never stack fetches */
+  if(silent) f.refreshing = true;
+  else { f.state = "loading"; renderInjBanner(); }
+  GIU.fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+(sp==="NBA" ? "basketball/nba" : "football/nfl")+"/injuries", 12000).then(function(d){
     var cur = injFeeds[sp];
-    if(!cur || cur.state!=="loading") return; /* sport switched mid-flight */
+    if(!cur) return;
+    var wasRefresh = !!cur.refreshing;
+    cur.refreshing = false;
+    if(!wasRefresh && cur.state!=="loading") return; /* superseded */
     cur.entries = INJ.flattenInjuries(d);
     cur.state = "ready";
+    cur.at = Date.now();
+    if(sp !== injSport()) return; /* sport switched mid-flight: cache only */
     injFlags = refreshInjuryFlags();
     paintChipsInPlace();
     renderInjBanner();
   }).catch(function(){
     var cur = injFeeds[sp];
-    if(cur && cur.state==="loading") cur.state = "error";
-    renderInjBanner();
+    if(!cur) return;
+    var wasRefresh = !!cur.refreshing;
+    cur.refreshing = false;
+    if(wasRefresh){
+      /* silent re-check failed: keep the last good flags and their older
+         updated stamp rather than blanking a working board */
+      if(cur.state!=="ready") cur.state = "error";
+    }
+    else if(cur.state==="loading") cur.state = "error";
+    if(sp === injSport()) renderInjBanner();
   });
+}
+function maybeInjuryFetch(){
+  if(!INJ || !pool.length) return;
+  var sp = injSport();
+  var f = injFeeds[sp];
+  if(f && f.state!=="idle") return; /* first fetch per sport; the live tick owns re-checks */
+  fetchInjuries(sp, false);
+}
+/* live re-check: while this page stays open on game day, inactives land
+   between lineup edits — re-pull the current sport's report on the injury
+   wire's 3-minute cadence. Hidden tabs skip (no calls, no stale paint on
+   return beyond one cycle), and an empty pool has nothing to flag. */
+function injTick(){
+  var hidden = false;
+  try{ hidden = !!document.hidden; }catch(e){}
+  if(hidden || !pool.length) return;
+  var sp = injSport(), f = injFeeds[sp];
+  if(!f) return;
+  if(f.state==="ready" || f.state==="error") fetchInjuries(sp, true);
+}
+function armInjuriesLive(){
+  if(injTimer || typeof setInterval !== "function") return;
+  injTimer = setInterval(injTick, INJ_LIVE_MS);
 }
 /* Paint chips onto existing rows without rebuilding the table, so a feed
    response that lands while the user edits projections never steals focus. */
@@ -760,7 +812,7 @@ function initDfs(){
   var se = $("poolSearch"), pf = $("poolPosFilter");
   if(se) se.addEventListener("input", function(){ renderPool(); });
   if(pf) pf.addEventListener("change", function(){ renderPool(); });
-  loadStored(); renderPool();
+  loadStored(); renderPool(); armInjuriesLive();
 }
 /* test seam: pure import helpers for node tests (vm sandbox) */
 window.GIU = window.GIU || {};

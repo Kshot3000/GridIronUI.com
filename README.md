@@ -100,7 +100,8 @@ node tests/test-odds-slip-identity.js  # bet-slip GameDay identity (logo + team-
 node tests/test-dfs.js        # DFS optimizer tests
 node tests/test-dfs-exposure.js  # DFS exposure summary tests
 node tests/test-dfs-injuries.js  # DFS injury cross-check logic (ESPN flatten, severity ranks, conservative name+team matching)
-node tests/test-dfs-injuries-dom.js  # injury wiring in shipped dfs.js (fetch-once, chips, banner, exclude-OUT, locked-OUT warning)
+node tests/test-dfs-injuries-dom.js  # injury wiring in shipped dfs.js (first fetch, chips, banner, exclude-OUT, locked-OUT warning)
+node tests/test-dfs-injuries-live.js  # DFS injury check stays live in shipped dfs.js: silent 3-min re-check, in-place chip gain/loss as designations change, hidden-tab skip, failed re-check keeps last good flags, updated stamp
 node tests/test-dfs-value.js  # DFSOpt.value: projected points per $1k, zero-salary guard, node + browser exports
 node tests/test-dfs-filters-dom.js  # pool search + position filter + value column wiring in shipped dfs.js
 node tests/test-dfs-sort.js  # pool-table column sorting in shipped dfs.js: pure sortPool (no mutation, default directions, deterministic tie-break, zero-salary guard), sortable header buttons (aria-sort, labels, ↕/▲/▼ glyphs), toggle behavior through toggleSort, dfs.html key pin
