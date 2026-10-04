@@ -155,11 +155,11 @@ assert(/d && d\.moves/.test(oddsJs), "odds.js passes the baked diff into the mar
 var marketsHtml = read("markets.html");
 assert(marketsHtml.indexOf("2¢ or more") !== -1,
        "markets.html notice explains the move badges");
-assert(/js\/markets\.js\?v=2.0.11/.test(marketsHtml), "markets.html keys markets.js at v2.0.11");
-assert(/js\/kalshi-logic\.js\?v=2.0.11/.test(marketsHtml), "markets.html keys kalshi-logic.js at v2.0.11");
+assert(/js\/markets\.js\?v=2.0.13/.test(marketsHtml), "markets.html keys markets.js at v2.0.13");
+assert(/js\/kalshi-logic\.js\?v=2.0.13/.test(marketsHtml), "markets.html keys kalshi-logic.js at v2.0.13");
 var oddsHtml = read("odds.html");
-assert(/js\/odds-logic\.js\?v=2\.0\.11/.test(oddsHtml), "odds.html keys odds-logic.js at v2.0.11");
-assert(/js\/kalshi-logic\.js\?v=2\.0\.11/.test(oddsHtml), "odds.html keys kalshi-logic.js at v2.0.11");
+assert(/js\/odds-logic\.js\?v=2\.0\.13/.test(oddsHtml), "odds.html keys odds-logic.js at v2.0.13");
+assert(/js\/kalshi-logic\.js\?v=2\.0\.13/.test(oddsHtml), "odds.html keys kalshi-logic.js at v2.0.13");
 assert(/js\/odds\.js\?v=2\.0\.5/.test(oddsHtml), "odds.html keys odds.js at v2.0.5");
 
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }

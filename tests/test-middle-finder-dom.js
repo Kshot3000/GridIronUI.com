@@ -25,7 +25,7 @@ var oddsJsSrc = fs.readFileSync(path.join(ROOT, "js", "odds.js"), "utf8");
 var mfSrc = fs.readFileSync(path.join(ROOT, "js", "middle-finder.js"), "utf8");
 assert(oddsHtml.indexOf('src="js/middle-finder.js?v=1.140.0"') !== -1,
        "odds.html includes js/middle-finder.js?v=1.140.0");
-assert(oddsHtml.indexOf('src="js/odds-logic.js?v=2.0.11"') !== -1,
+assert(oddsHtml.indexOf('src="js/odds-logic.js?v=2.0.13"') !== -1,
        "odds.html bumps odds-logic.js to ?v=2.0.5 (v1.140.0 at ship; later releases changed it after)");
 assert(oddsHtml.indexOf('src="js/odds.js?v=2.0.5"') !== -1,
        "odds.html bumps odds.js to ?v=2.0.5 (v1.140.0 at ship; v1.142.0 team-follow, v1.143.0 journal-autofill, v1.145.0 moneyline closes, v1.163.0 find-a-game, v2.0.5 NCAAF market line changed it after)");

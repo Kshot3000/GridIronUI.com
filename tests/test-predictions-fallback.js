@@ -141,8 +141,8 @@ var pIdx = predHtml.indexOf("js/predictions.js?v=");
 assert(fbIdx !== -1 && pIdx !== -1 && fbIdx < pIdx,
   "wiring: predictions.html loads predictions-fallback.js BEFORE predictions.js");
 var keyM = predHtml.match(/js\/predictions-fallback\.js\?v=([0-9.]+)/);
-assert(keyM && keyM[1] === "2.0.11",
-  "wiring: predictions-fallback.js carries the v2.0.11 cache key (kickoff times; v1.135.0 at ship)");
+assert(keyM && keyM[1] === "2.0.13",
+  "wiring: predictions-fallback.js carries the v2.0.13 cache key (occurrence correction (no rendered kickoff); v1.135.0 at ship)");
 var pjs = fs.readFileSync(path.join(ROOT, "js", "predictions.js"), "utf8");
 assert(pjs.indexOf("window.PredFallback") !== -1,
   "wiring: predictions.js calls window.PredFallback on the Polymarket failure path");

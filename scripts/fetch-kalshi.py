@@ -292,21 +292,26 @@ def main(argv=None):
                 "close_time": m.get("close_time"),
             })
         markets.sort(key=lambda m: (m["team"] or ""))
-        # Real kickoff: every market of a game carries the same
-        # occurrence_datetime — Kalshi's scheduled start (verified live
-        # 2026-10-03 across NFL/MLB/NCAAF: every game, exactly one value).
-        # The earliest is the game's start; None when Kalshi stamps none,
-        # and the pages then show no kickoff rather than guessing one.
-        # close_time is NOT this: Kalshi sets it ~2 days after kickoff
-        # for the in-play trading window, so it must never be rendered
-        # as the game time (it only orders the board, as a proxy).
-        starts = [m.get("occurrence_datetime") for m in ms
-                  if m.get("occurrence_datetime")]
+        # Occurrence — NOT the kickoff. Every market of a game carries the
+        # same occurrence_datetime, and v2.0.11 shipped it as the game's
+        # "start"/kickoff; cross-checks on 2026-10-04 proved that wrong:
+        # occurrence is exactly the scheduled start + 3 hours in every
+        # check (all 16 NFL Week 5 games vs ESPN's scoreboard; both MLB
+        # Division Series games vs ESPN and vs the scheduled time stated
+        # in Kalshi's own rules_primary, e.g. "Oct 6, 2026 at 9:30 PM EDT"
+        # = 01:30Z vs occurrence 04:30Z). It is Kalshi's expected
+        # occurrence/expiration stamp, so it is stored as "occ" and used
+        # ONLY to order the board (a uniform +3h shift preserves
+        # chronological order) — never rendered as a game time, exactly
+        # like close_time (~2 days after the game, the in-play window).
+        # The earliest occurrence is kept; None when Kalshi stamps none.
+        occs = [m.get("occurrence_datetime") for m in ms
+                if m.get("occurrence_datetime")]
         games.append({
             "event_ticker": et,
             "title": e.get("title"),
             "sub_title": e.get("sub_title"),
-            "start": min(starts) if starts else None,
+            "occ": min(occs) if occs else None,
             "markets": markets,
         })
         time.sleep(0.25)  # stay well under Kalshi's 20 reads/s tier

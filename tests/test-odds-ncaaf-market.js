@@ -90,8 +90,8 @@ assert(oddsJs.indexOf('closest("#marketMoreBtn")') !== -1 && oddsJs.indexOf('set
 assert(!/kalshi-ncaaf/.test(read("js/predictions.js")), "predictions.js stays deliberately unwired (no college matching there)");
 var oddsHtml = read("odds.html");
 assert(oddsHtml.indexOf('src="js/odds.js?v=2.0.5"') !== -1, "odds.html keys odds.js at v2.0.5");
-assert(oddsHtml.indexOf('src="js/odds-logic.js?v=2.0.11"') !== -1, "odds.html keys odds-logic.js at v2.0.11");
-assert(read("matchup.html").indexOf('src="js/odds-logic.js?v=2.0.11"') !== -1,
+assert(oddsHtml.indexOf('src="js/odds-logic.js?v=2.0.13"') !== -1, "odds.html keys odds-logic.js at v2.0.13");
+assert(read("matchup.html").indexOf('src="js/odds-logic.js?v=2.0.13"') !== -1,
        "matchup.html keys the shared odds-logic.js at v2.0.5");
 
 if(failures){ console.error(failures + " FAILURES"); process.exit(1); }

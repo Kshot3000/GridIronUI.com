@@ -830,16 +830,16 @@ function kalshiCard(g, dir, cfg, moveMap, isNew, prevAt, hist, snapAt, folAbbr){
     ab = [window.Disagree.normAbbr(ab[0]), window.Disagree.normAbbr(ab[1])];
   var head = (ab && window.GIU.vsHeader(dir, cfg.dirKey, ab[0], ab[1])) ||
     '<h3 style="margin:10px 0 4px">'+GIU.esc(g.title)+'</h3>';
-  /* Kickoff (v2.0.11): the snapshot's real start time (Kalshi's
-     occurrence_datetime, via K.games' start) in the visitor's timezone —
-     before this, a Kalshi card named only the date ("(Oct 3)") while the
-     Polymarket cards beside it showed the start time. No start in the
-     snapshot -> no kickoff span, never a guessed one. */
-  var kick = (window.Kalshi && window.Kalshi.fmtWhen) ? window.Kalshi.fmtWhen(g.start) : "";
-  var meta = (g.sub || kick)
+  /* No clock time on a Kalshi card (v2.0.13): the snapshot's only
+     timestamp per game is Kalshi's occurrence_datetime, which runs
+     exactly 3h after the scheduled start (cross-checked 2026-10-04 vs
+     ESPN and Kalshi's own rules text) — v2.0.11 rendered it as
+     a "kickoff" time, which was wrong for every game. The card names
+     the date from Kalshi's own sub_title and nothing more; the
+     occurrence stamp only orders the board (see K.occMs). */
+  var meta = g.sub
     ? '<div class="game-meta" style="margin-bottom:12px">'
-      + (g.sub ? '<span>'+GIU.esc(g.sub)+'</span>' : "")
-      + (kick ? '<span>Kickoff '+GIU.esc(kick)+'</span>' : "")
+      + '<span>'+GIU.esc(g.sub)+'</span>'
       + '</div>'
     : '<div style="height:8px"></div>';
   /* Snapshot-to-snapshot price moves, baked into the file by the fetch

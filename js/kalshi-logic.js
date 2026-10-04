@@ -52,8 +52,8 @@ K.vol = function(m){
 };
 
 /* Earliest close time across a game's markets, or null. NOTE: close_time
-   is Kalshi's market close (~2 days after kickoff, the in-play window) —
-   an ordering proxy only, never the game time. See K.startMs. */
+   is Kalshi's market close (~2 days after the game, the in-play window) —
+   an ordering proxy only, never the game time. See K.occMs. */
 K.gameTime = function(g){
   var t = null;
   (g.markets || []).forEach(function(m){
@@ -63,13 +63,21 @@ K.gameTime = function(g){
   return t;
 };
 
-/* The game's real kickoff, in ms: the snapshot's start field, which the
-   fetcher takes from Kalshi's occurrence_datetime (every market of a game
-   carries the same one — verified live 2026-10-03 across NFL/MLB/NCAAF).
-   Null when the snapshot carries none (older snapshots) or it doesn't
-   parse — callers then show no kickoff rather than a guessed one. */
-K.startMs = function(g){
-  var t = Date.parse((g && g.start) || "");
+/* The game's Kalshi occurrence stamp, in ms: the snapshot's occ field,
+   which the fetcher takes from Kalshi's occurrence_datetime (every market
+   of a game carries the same one). WARNING — this is NOT the kickoff:
+   cross-checked live 2026-10-04, occurrence runs exactly 3 hours after
+   the scheduled start in every case (all 16 NFL Week 5 games vs ESPN;
+   MLB vs ESPN and vs the start time stated in Kalshi's own
+   rules_primary). v2.0.11 rendered it as "Kickoff <time>" and told
+   visitors a London game that kicked at 8:30 AM CT started at 11:30 AM;
+   v2.0.13 demotes it to what it honestly is — an ordering proxy (the
+   uniform +3h shift preserves chronological order), never a rendered
+   game time. Pre-rename snapshots carried the same value as "start", so
+   that legacy key is read as a fallback. Null when the snapshot carries
+   neither (or it doesn't parse) — ordering then falls back to close. */
+K.occMs = function(g){
+  var t = Date.parse((g && (g.occ || g.start)) || "");
   return isFinite(t) ? t : null;
 };
 
@@ -93,10 +101,10 @@ K.settled = function(g){
 /* Normalize the snapshot into priced games, soonest first. Games without two
    priced teams are dropped (stale/settled listings), never fabricated.
    Settled games (see K.settled) sort last so finished results never crowd
-   out live markets. "Soonest" is the real kickoff (K.startMs) when the
-   snapshot carries it, falling back to the close-time proxy for older
-   snapshots — the two order identically on fresh snapshots, because
-   Kalshi sets close a fixed window after each game's start. */
+   out live markets. "Soonest" is by the occurrence stamp (K.occMs) when
+   the snapshot carries it, falling back to the close-time proxy for
+   snapshots with neither — occurrence is kickoff + a uniform 3h, so the
+   two order identically; neither is ever shown to visitors as a time. */
 K.games = function(snap){
   var out = [];
   ((snap && snap.games) || []).forEach(function(g){
@@ -109,13 +117,13 @@ K.games = function(snap){
     teams.sort(function(a, b){ return b.price - a.price; });
     out.push({
       title: g.title, sub: g.sub_title, ticker: g.event_ticker,
-      start: K.startMs(g),
+      occ: K.occMs(g),
       close: K.gameTime(g), teams: teams, tickers: tickers, settled: K.settled(g)
     });
   });
   out.sort(function(a, b){
     if(!!a.settled !== !!b.settled) return a.settled ? 1 : -1; /* settled last */
-    var ka = a.start !== null ? a.start : a.close, kb = b.start !== null ? b.start : b.close;
+    var ka = a.occ !== null ? a.occ : a.close, kb = b.occ !== null ? b.occ : b.close;
     var x = ka === null ? Infinity : ka, y = kb === null ? Infinity : kb;
     return x - y;
   });
