@@ -163,12 +163,12 @@ ok(band.indexOf("This band shows Oct 2–5 only, then hides itself") >= 0,
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
 var mlb = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
-var g1 = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); })
-                 .map(function(g){ return g.title.replace(/^Game 1:\s*/, ""); });
-ok(g1.length >= 4, "kalshi-mlb.json carries the Division Series Game 1s (" + g1.length + " found)");
+var g1 = mlb.games.filter(function(g){ return /^Game 2:/.test(g.title); })
+                 .map(function(g){ return g.title.replace(/^Game 2:\s*/, ""); });
+ok(g1.length >= 4, "kalshi-mlb.json carries the Division Series Game 2s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
-     "spotlight names the real Game 1 pairing: " + pairing);
+     "spotlight names the real Game 2 pairing: " + pairing);
 });
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
 ok(band.indexOf(nfl.games.length + "-game") >= 0,
