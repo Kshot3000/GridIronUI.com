@@ -100,9 +100,14 @@ assert(html.indexOf("server-side snapshot") !== -1,
   "render: prices labeled as a server-side snapshot, not live");
 /* "real game content present" is derived from the snapshot itself — the
    board rotates (tonight's TNF game was PIT/CLE; after the final it left
-   the board), so hard-coding a team name kept expiring. The first game is
-   always rendered by render(), so this stays green through every rotation. */
-var firstGameTitle = (real.games[0] && real.games[0].title) || "";
+   the board), so hard-coding a team name kept expiring. The first UNSETTLED
+   game is always rendered by render(), so this stays green through every
+   rotation. (Raw file order is NOT the expectation: on 2026-10-04 the file's
+   first game, DEN vs SF, went Final and Kalshi priced it 99c/1c — settled
+   games are results, not predictions, and render() correctly excludes
+   them; F.games applies that same settled filter.) */
+var firstUnsettled = F.games(real)[0];
+var firstGameTitle = (firstUnsettled && firstUnsettled.title) || "";
 assert(firstGameTitle !== "" && html.indexOf(firstGameTitle) !== -1,
   "render: real game content present (from the current snapshot: "+firstGameTitle+")");
 assert(html.indexOf("Trade on Kalshi") !== -1, "render: Kalshi outbound link present");

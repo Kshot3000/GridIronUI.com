@@ -165,7 +165,14 @@ ok(band.indexOf("This band shows Oct 2–5 only, then hides itself") >= 0,
 var mlb = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
 var g1 = mlb.games.filter(function(g){ return /^Game 2:/.test(g.title); })
                  .map(function(g){ return g.title.replace(/^Game 2:\s*/, ""); });
-ok(g1.length >= 4, "kalshi-mlb.json carries the Division Series Game 2s (" + g1.length + " found)");
+/* Floor follows the snapshot, per the established pin discipline: all four
+   Game 2s were live when this band shipped, but settled games drop out of
+   the snapshot — San Diego vs Milwaukee went Final on Oct 4 (Milwaukee 4-3,
+   ESPN-verified) and left the file, so 3 Game 2s remain. The band still
+   names all four pairings because all four Game 2s played out inside the
+   band's Oct 2-5 window; the per-pairing loop below still requires every
+   Game 2 the snapshot DOES carry to be named in the band. */
+ok(g1.length >= 3, "kalshi-mlb.json carries the Division Series Game 2s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 2 pairing: " + pairing);
