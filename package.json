@@ -1,11 +1,13 @@
 {
   "name": "gridironui",
-  "version": "2.0.19",
+  "version": "2.0.20",
   "private": true,
   "description": "Independent sports intelligence, calculators and DFS tools. Static GitHub Pages site.",
   "scripts": {
     "test": "node scripts/run-tests.cjs && node scripts/check-site.cjs",
     "check": "node scripts/check-site.cjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
