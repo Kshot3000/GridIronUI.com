@@ -7,8 +7,11 @@ var ROOT = path.join(__dirname, ".."); /* test the repo this file is checked out
 
 function makeEl(){
   return {
-    innerHTML: "", textContent: "", style: {}, value: "",
-    addEventListener: function(){}, querySelectorAll: function(){ return []; }
+    innerHTML: "", textContent: "", style: {}, value: "", _attrs: {},
+    addEventListener: function(){}, querySelectorAll: function(){ return []; },
+    setAttribute: function(k, v){ this._attrs[k] = String(v); },
+    getAttribute: function(k){ return k in this._attrs ? this._attrs[k] : null; },
+    removeAttribute: function(k){ delete this._attrs[k]; }
   };
 }
 var els = {};
@@ -42,6 +45,11 @@ var fetchStub = function(url){
 
 var sandbox = {
   console: console,
+  /* the live branch (a stub game inside its 4h window) arms the 90s
+     refresh timer and sets aria-pressed on the pause button — both are
+     plain browser globals/element methods, stubbed here like the sibling
+     DOM tests stub them, so the live render path runs in the sandbox too */
+  setInterval: function(){ return 0; }, clearInterval: function(){},
   document: { getElementById: getEl },
   localStorage: { getItem: function(){return null;}, setItem: function(){}, removeItem: function(){} },
   window: {},
