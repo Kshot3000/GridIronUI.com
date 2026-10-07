@@ -5,7 +5,7 @@
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
    the four Division Series pairings come from data/kalshi-mlb.json and the
-   Week 5 game count from data/kalshi-nfl.json.
+   Week 6 game count from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -153,33 +153,40 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-10-02"[^>]*data-end="2026-10-05"[^>]*hidden/.test(html) ||
-   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-02"') >= 0,
-   "spotlight band ships hidden with the Oct 2-5 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-10-07"[^>]*data-end="2026-10-12"[^>]*hidden/.test(html) ||
+   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-07"') >= 0,
+   "spotlight band ships hidden with the Oct 7-12 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Oct 2–5 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Oct 7–12 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
 var mlb = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
-var g1 = mlb.games.filter(function(g){ return /^Game 2:/.test(g.title); })
-                 .map(function(g){ return g.title.replace(/^Game 2:\s*/, ""); });
+var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
+                 .map(function(g){ return g.title.replace(/^Game [34]:\s*/, ""); });
 /* Floor follows the snapshot, per the established pin discipline: all four
-   Game 2s were live when this band shipped, but settled games drop out of
-   the snapshot — San Diego vs Milwaukee went Final on Oct 4 (Milwaukee 4-3,
-   ESPN-verified) and left the file, so 3 Game 2s remain. The band still
-   names all four pairings because all four Game 2s played out inside the
-   band's Oct 2-5 window; the per-pairing loop below still requires every
-   Game 2 the snapshot DOES carry to be named in the band. */
-ok(g1.length >= 3, "kalshi-mlb.json carries the Division Series Game 2s (" + g1.length + " found)");
+   Game 3/4s were on the board when this band shipped (Oct 7 snapshot), but
+   settled games drop out of the snapshot as tonight's games go Final, so
+   the floor sits at 3. The band still names all four pairings because all
+   four games play out inside the band's Oct 7-12 window; the per-pairing
+   loop below still requires every Game 3/4 the snapshot DOES carry to be
+   named in the band. */
+ok(g1.length >= 3, "kalshi-mlb.json carries the Division Series Game 3s and 4s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
-     "spotlight names the real Game 2 pairing: " + pairing);
+     "spotlight names the real Division Series pairing: " + pairing);
 });
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
-ok(band.indexOf(nfl.games.length + "-game") >= 0,
-   "spotlight's Week 5 game count matches the Kalshi NFL snapshot (" + nfl.games.length + " games)");
+/* The band's count is the Week 6 slate only — games occurring Oct 9-13Z
+   (Thu Oct 8 night through Mon Oct 12 night, US time). The snapshot also
+   carries Week 7 openers, so the pin derives the count from the same
+   occurrence window the copy claims, not from the raw file length. */
+var week6 = nfl.games.filter(function(g){
+  return g.occ >= "2026-10-09T00:00:00Z" && g.occ < "2026-10-14T00:00:00Z";
+});
+ok(band.indexOf(week6.length + "-game") >= 0,
+   "spotlight's Week 6 game count matches the Kalshi NFL snapshot (" + week6.length + " games in the Oct 9-13Z window)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
