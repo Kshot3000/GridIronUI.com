@@ -4,8 +4,8 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the four Division Series pairings come from data/kalshi-mlb.json and the
-   Week 6 game count from data/kalshi-nfl.json.
+   the Game 3/4 pairings and the NLCS Game 1 pairing come from
+   data/kalshi-mlb.json and the Week 6 game count from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -165,17 +165,28 @@ ok(band.indexOf("This band shows Oct 7–12 only, then hides itself") >= 0,
 var mlb = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
 var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
                  .map(function(g){ return g.title.replace(/^Game [34]:\s*/, ""); });
-/* Floor follows the snapshot, per the established pin discipline: all four
-   Game 3/4s were on the board when this band shipped (Oct 7 snapshot), but
-   settled games drop out of the snapshot as tonight's games go Final, so
-   the floor sits at 3. The band still names all four pairings because all
-   four games play out inside the band's Oct 7-12 window; the per-pairing
-   loop below still requires every Game 3/4 the snapshot DOES carry to be
-   named in the band. */
-ok(g1.length >= 3, "kalshi-mlb.json carries the Division Series Game 3s and 4s (" + g1.length + " found)");
+/* Floor follows the snapshot, per the established pin discipline: when this
+   band shipped (Oct 7 snapshot) all four Division Series Game 3/4s were on
+   the board; as those games went Final (ESPN cross-check Oct 8: CLE 9-3,
+   LAD 4-1, TB 4-3, MIL 3-1) they dropped out, and the Oct 8 snapshot's
+   Game 3/4 titles are the one remaining DS game (Game 4: Cleveland vs
+   Chicago WS, tonight) plus the NLCS Games 3/4 already listed
+   (Milwaukee vs Los Angeles D, twice) — 3 in total, so the floor stays 3.
+   The per-pairing loop below still requires every Game 3/4 the snapshot
+   DOES carry to be named in the band. */
+ok(g1.length >= 3, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
-     "spotlight names the real Division Series pairing: " + pairing);
+     "spotlight names the real Game 3/4 pairing: " + pairing);
+});
+/* The band also names the NLCS opener — pin that pairing to the snapshot's
+   Game 1 titles the same way, so it can never be typed from memory. */
+var lcs1 = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); })
+                 .map(function(g){ return g.title.replace(/^Game 1:\s*/, ""); });
+ok(lcs1.length >= 1, "kalshi-mlb.json carries an NLCS Game 1 (" + lcs1.length + " found)");
+lcs1.forEach(function(pairing){
+  ok(band.indexOf(pairing) >= 0,
+     "spotlight names the real NLCS Game 1 pairing: " + pairing);
 });
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
 /* The band's count is the Week 6 slate only — games occurring Oct 9-13Z
