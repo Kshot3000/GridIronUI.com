@@ -167,14 +167,16 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
                  .map(function(g){ return g.title.replace(/^Game [34]:\s*/, ""); });
 /* Floor follows the snapshot, per the established pin discipline: when this
    band shipped (Oct 7 snapshot) all four Division Series Game 3/4s were on
-   the board; as those games went Final (ESPN cross-check Oct 8: CLE 9-3,
-   LAD 4-1, TB 4-3, MIL 3-1) they dropped out, and the Oct 8 snapshot's
-   Game 3/4 titles are the one remaining DS game (Game 4: Cleveland vs
-   Chicago WS, tonight) plus the NLCS Games 3/4 already listed
-   (Milwaukee vs Los Angeles D, twice) — 3 in total, so the floor stays 3.
+   the board; as those games went Final they dropped out — the Oct 8
+   snapshot carried 3 (the last DS Game 4 plus the NLCS Games 3/4), and the
+   Oct 9 snapshot carries 2: Cleveland's 9-5 Game 4 win at Chicago WS
+   (ESPN Final, series tied 2-2) dropped the DS Game 4 and Kalshi replaced
+   it with a deciding Game 5 (not a Game 3/4 title), leaving only the NLCS
+   Games 3/4 (Milwaukee vs Los Angeles D, twice) — so the floor is now 2.
    The per-pairing loop below still requires every Game 3/4 the snapshot
-   DOES carry to be named in the band. */
-ok(g1.length >= 3, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
+   DOES carry to be named in the band, and the decider pin after it
+   requires the Game 5 pairing to be named too. */
+ok(g1.length >= 2, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
@@ -187,6 +189,16 @@ ok(lcs1.length >= 1, "kalshi-mlb.json carries an NLCS Game 1 (" + lcs1.length + 
 lcs1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real NLCS Game 1 pairing: " + pairing);
+});
+/* The band's headline claim this run is the deciding DS Game 5 (listed by
+   Kalshi only after Game 4 went Final) — pin its full title the same way,
+   so the decider can never be typed from memory either. */
+var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
+                 .map(function(g){ return g.title; });
+ok(g5.length >= 1, "kalshi-mlb.json carries a deciding Game 5 (" + g5.length + " found)");
+g5.forEach(function(title){
+  ok(band.indexOf(title) >= 0,
+     "spotlight names the real deciding game: " + title);
 });
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
 /* The band's count is the Week 6 slate only — games occurring Oct 9-13Z
