@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-10-09T17:53:41Z",
+ "updated_at": "2026-10-10T17:50:46Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -17,8 +17,8 @@
      "yes_bid": 43,
      "yes_ask": 44,
      "last": 44,
-     "volume": "72607.99",
-     "volume_24h": "72021.00",
+     "volume": "664635.88",
+     "volume_24h": "588855.80",
      "close_time": "2026-10-14T00:00:00Z"
     },
     {
@@ -29,8 +29,8 @@
      "yes_bid": 56,
      "yes_ask": 57,
      "last": 57,
-     "volume": "114442.81",
-     "volume_24h": "114425.87",
+     "volume": "407193.99",
+     "volume_24h": "289079.49",
      "close_time": "2026-10-14T00:00:00Z"
     }
    ]
@@ -49,8 +49,8 @@
      "yes_bid": 49,
      "yes_ask": 50,
      "last": 50,
-     "volume": "97098.95",
-     "volume_24h": "95257.76",
+     "volume": "189959.48",
+     "volume_24h": "92929.32",
      "close_time": "2026-10-15T00:00:00Z"
     },
     {
@@ -61,8 +61,8 @@
      "yes_bid": 50,
      "yes_ask": 51,
      "last": 51,
-     "volume": "47663.57",
-     "volume_24h": "46522.21",
+     "volume": "108346.45",
+     "volume_24h": "61068.42",
      "close_time": "2026-10-15T00:00:00Z"
     }
    ]
@@ -81,8 +81,8 @@
      "yes_bid": 52,
      "yes_ask": 53,
      "last": 53,
-     "volume": "4730.88",
-     "volume_24h": "4496.82",
+     "volume": "13342.27",
+     "volume_24h": "8611.39",
      "close_time": "2026-10-16T00:00:00Z"
     },
     {
@@ -90,11 +90,11 @@
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 48,
-     "yes_ask": 49,
-     "last": 50,
-     "volume": "5252.45",
-     "volume_24h": "5015.86",
+     "yes_bid": 47,
+     "yes_ask": 48,
+     "last": 48,
+     "volume": "9131.41",
+     "volume_24h": "3900.53",
      "close_time": "2026-10-16T00:00:00Z"
     }
    ]
@@ -111,10 +111,10 @@
      "kind": "winner",
      "team": "Los Angeles D",
      "yes_bid": 58,
-     "yes_ask": 63,
-     "last": 63,
-     "volume": "1718.08",
-     "volume_24h": "1718.08",
+     "yes_ask": 61,
+     "last": 61,
+     "volume": "2172.50",
+     "volume_24h": "454.42",
      "close_time": "2026-10-18T00:00:00Z"
     },
     {
@@ -125,8 +125,8 @@
      "yes_bid": 39,
      "yes_ask": 42,
      "last": 42,
-     "volume": "1282.98",
-     "volume_24h": "1119.36",
+     "volume": "1624.83",
+     "volume_24h": "341.85",
      "close_time": "2026-10-18T00:00:00Z"
     }
    ]
@@ -142,11 +142,11 @@
      "title": "Los Angeles D wins",
      "kind": "winner",
      "team": "Los Angeles D",
-     "yes_bid": 60,
-     "yes_ask": 63,
-     "last": 64,
-     "volume": "989.16",
-     "volume_24h": "989.16",
+     "yes_bid": 61,
+     "yes_ask": 67,
+     "last": 65,
+     "volume": "1274.84",
+     "volume_24h": "285.68",
      "close_time": "2026-10-19T00:00:00Z"
     },
     {
@@ -154,62 +154,32 @@
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 37,
-     "yes_ask": 41,
-     "last": 39,
-     "volume": "1204.88",
-     "volume_24h": "1140.29",
+     "yes_bid": 34,
+     "yes_ask": 38,
+     "last": 40,
+     "volume": "1575.38",
+     "volume_24h": "370.50",
      "close_time": "2026-10-19T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-08T17:51:02Z",
+ "prev_at": "2026-10-09T17:53:41Z",
  "moves": [
   {
-   "event_ticker": "KXMLBGAME-26OCT122000LADMIL",
-   "team": "Los Angeles D",
-   "delta": 9,
-   "prev": 44,
-   "now": 53
-  },
-  {
-   "event_ticker": "KXMLBGAME-26OCT122000LADMIL",
-   "team": "Milwaukee",
-   "delta": -2,
-   "prev": 51,
-   "now": 49
-  },
-  {
-   "event_ticker": "KXMLBGAME-26OCT142000MILLAD",
-   "team": "Los Angeles D",
-   "delta": 6,
-   "prev": 55,
-   "now": 61
-  },
-  {
-   "event_ticker": "KXMLBGAME-26OCT142000MILLAD",
-   "team": "Milwaukee",
-   "delta": 5,
-   "prev": 36,
-   "now": 41
-  },
-  {
    "event_ticker": "KXMLBGAME-26OCT152000MILLAD",
    "team": "Los Angeles D",
-   "delta": 7,
-   "prev": 55,
-   "now": 62
+   "delta": 2,
+   "prev": 62,
+   "now": 64
   },
   {
    "event_ticker": "KXMLBGAME-26OCT152000MILLAD",
    "team": "Milwaukee",
-   "delta": 4,
-   "prev": 35,
-   "now": 39
+   "delta": -3,
+   "prev": 39,
+   "now": 36
   }
  ],
- "new_games": [
-  "KXMLBGAME-26OCT102000CWSCLE"
- ]
+ "new_games": []
 }

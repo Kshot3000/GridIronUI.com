@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-10-09T17:52:05Z",
+ "updated_at": "2026-10-10T17:50:27Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXNFLGAME",
  "games": [
@@ -16,9 +16,9 @@
      "team": "Jacksonville",
      "yes_bid": 76,
      "yes_ask": 77,
-     "last": 77,
-     "volume": "390323.94",
-     "volume_24h": "76883.65",
+     "last": 76,
+     "volume": "481526.26",
+     "volume_24h": "91177.85",
      "close_time": "2026-10-13T13:30:00Z"
     },
     {
@@ -26,11 +26,11 @@
      "title": "Philadelphia wins",
      "kind": "winner",
      "team": "Philadelphia",
-     "yes_bid": 22,
-     "yes_ask": 23,
-     "last": 23,
-     "volume": "949290.45",
-     "volume_24h": "483571.01",
+     "yes_bid": 23,
+     "yes_ask": 24,
+     "last": 24,
+     "volume": "2324381.00",
+     "volume_24h": "1377983.67",
      "close_time": "2026-10-13T13:30:00Z"
     }
    ]
@@ -46,11 +46,11 @@
      "title": "Cincinnati wins",
      "kind": "winner",
      "team": "Cincinnati",
-     "yes_bid": 74,
-     "yes_ask": 75,
+     "yes_bid": 75,
+     "yes_ask": 76,
      "last": 75,
-     "volume": "119621.32",
-     "volume_24h": "15949.99",
+     "volume": "132138.20",
+     "volume_24h": "12457.76",
      "close_time": "2026-10-13T17:00:00Z"
     },
     {
@@ -58,11 +58,11 @@
      "title": "Miami wins",
      "kind": "winner",
      "team": "Miami",
-     "yes_bid": 26,
-     "yes_ask": 27,
-     "last": 27,
-     "volume": "82213.59",
-     "volume_24h": "27395.57",
+     "yes_bid": 24,
+     "yes_ask": 25,
+     "last": 25,
+     "volume": "114434.46",
+     "volume_24h": "32229.04",
      "close_time": "2026-10-13T17:00:00Z"
     }
    ]
@@ -78,11 +78,11 @@
      "title": "Cleveland wins",
      "kind": "winner",
      "team": "Cleveland",
-     "yes_bid": 44,
-     "yes_ask": 45,
-     "last": 45,
-     "volume": "309775.04",
-     "volume_24h": "84537.81",
+     "yes_bid": 43,
+     "yes_ask": 44,
+     "last": 44,
+     "volume": "421453.57",
+     "volume_24h": "111242.21",
      "close_time": "2026-10-13T17:00:00Z"
     },
     {
@@ -90,11 +90,11 @@
      "title": "New York J wins",
      "kind": "winner",
      "team": "New York J",
-     "yes_bid": 55,
-     "yes_ask": 56,
+     "yes_bid": 56,
+     "yes_ask": 57,
      "last": 56,
-     "volume": "31119.05",
-     "volume_24h": "6353.87",
+     "volume": "40322.91",
+     "volume_24h": "9058.93",
      "close_time": "2026-10-13T17:00:00Z"
     }
    ]
@@ -110,11 +110,11 @@
      "title": "Houston wins",
      "kind": "winner",
      "team": "Houston",
-     "yes_bid": 76,
-     "yes_ask": 77,
-     "last": 77,
-     "volume": "62308.00",
-     "volume_24h": "16785.04",
+     "yes_bid": 74,
+     "yes_ask": 75,
+     "last": 75,
+     "volume": "324134.41",
+     "volume_24h": "261515.95",
      "close_time": "2026-10-13T17:00:00Z"
     },
     {
@@ -122,11 +122,11 @@
      "title": "Tennessee wins",
      "kind": "winner",
      "team": "Tennessee",
-     "yes_bid": 23,
-     "yes_ask": 24,
-     "last": 24,
-     "volume": "192106.57",
-     "volume_24h": "58757.61",
+     "yes_bid": 24,
+     "yes_ask": 25,
+     "last": 25,
+     "volume": "249683.27",
+     "volume_24h": "57554.25",
      "close_time": "2026-10-13T17:00:00Z"
     }
    ]
@@ -145,8 +145,8 @@
      "yes_bid": 41,
      "yes_ask": 42,
      "last": 42,
-     "volume": "72471.11",
-     "volume_24h": "37526.56",
+     "volume": "89080.50",
+     "volume_24h": "18072.39",
      "close_time": "2026-10-13T17:00:00Z"
     },
     {
@@ -156,9 +156,9 @@
      "team": "Pittsburgh",
      "yes_bid": 58,
      "yes_ask": 59,
-     "last": 59,
-     "volume": "56698.27",
-     "volume_24h": "9595.09",
+     "last": 58,
+     "volume": "91513.71",
+     "volume_24h": "34840.18",
      "close_time": "2026-10-13T17:00:00Z"
     }
    ]
@@ -174,11 +174,11 @@
      "title": "Las Vegas wins",
      "kind": "winner",
      "team": "Las Vegas",
-     "yes_bid": 36,
-     "yes_ask": 37,
-     "last": 37,
-     "volume": "1188447.55",
-     "volume_24h": "362583.53",
+     "yes_bid": 37,
+     "yes_ask": 38,
+     "last": 38,
+     "volume": "1644790.66",
+     "volume_24h": "457624.48",
      "close_time": "2026-10-13T17:00:00Z"
     },
     {
@@ -186,11 +186,11 @@
      "title": "New England wins",
      "kind": "winner",
      "team": "New England",
-     "yes_bid": 63,
-     "yes_ask": 64,
-     "last": 64,
-     "volume": "127507.83",
-     "volume_24h": "49270.02",
+     "yes_bid": 62,
+     "yes_ask": 63,
+     "last": 63,
+     "volume": "155992.24",
+     "volume_24h": "28739.39",
      "close_time": "2026-10-13T17:00:00Z"
     }
    ]
@@ -209,8 +209,8 @@
      "yes_bid": 55,
      "yes_ask": 56,
      "last": 56,
-     "volume": "210177.91",
-     "volume_24h": "85931.91",
+     "volume": "277142.13",
+     "volume_24h": "68185.72",
      "close_time": "2026-10-13T17:00:00Z"
     },
     {
@@ -218,11 +218,11 @@
      "title": "New Orleans wins",
      "kind": "winner",
      "team": "New Orleans",
-     "yes_bid": 44,
-     "yes_ask": 45,
-     "last": 45,
-     "volume": "65085.19",
-     "volume_24h": "18292.65",
+     "yes_bid": 43,
+     "yes_ask": 44,
+     "last": 44,
+     "volume": "87688.95",
+     "volume_24h": "22993.43",
      "close_time": "2026-10-13T17:00:00Z"
     }
    ]
@@ -241,8 +241,8 @@
      "yes_bid": 37,
      "yes_ask": 38,
      "last": 38,
-     "volume": "359153.54",
-     "volume_24h": "70272.51",
+     "volume": "447343.86",
+     "volume_24h": "88604.15",
      "close_time": "2026-10-13T17:00:00Z"
     },
     {
@@ -253,8 +253,8 @@
      "yes_bid": 62,
      "yes_ask": 63,
      "last": 63,
-     "volume": "40238.10",
-     "volume_24h": "8376.70",
+     "volume": "46829.01",
+     "volume_24h": "6576.31",
      "close_time": "2026-10-13T17:00:00Z"
     }
    ]
@@ -270,11 +270,11 @@
      "title": "Denver wins",
      "kind": "winner",
      "team": "Denver",
-     "yes_bid": 62,
-     "yes_ask": 63,
+     "yes_bid": 63,
+     "yes_ask": 64,
      "last": 63,
-     "volume": "54872.31",
-     "volume_24h": "13112.00",
+     "volume": "75996.95",
+     "volume_24h": "21129.90",
      "close_time": "2026-10-13T20:05:00Z"
     },
     {
@@ -282,11 +282,11 @@
      "title": "Los Angeles C wins",
      "kind": "winner",
      "team": "Los Angeles C",
-     "yes_bid": 37,
-     "yes_ask": 38,
-     "last": 38,
-     "volume": "56525.81",
-     "volume_24h": "20901.99",
+     "yes_bid": 36,
+     "yes_ask": 37,
+     "last": 37,
+     "volume": "96451.59",
+     "volume_24h": "40060.60",
      "close_time": "2026-10-13T20:05:00Z"
     }
    ]
@@ -305,8 +305,8 @@
      "yes_bid": 52,
      "yes_ask": 53,
      "last": 53,
-     "volume": "693937.79",
-     "volume_24h": "121964.40",
+     "volume": "1051910.34",
+     "volume_24h": "358365.84",
      "close_time": "2026-10-13T20:25:00Z"
     },
     {
@@ -314,11 +314,11 @@
      "title": "Green Bay wins",
      "kind": "winner",
      "team": "Green Bay",
-     "yes_bid": 48,
-     "yes_ask": 49,
-     "last": 48,
-     "volume": "139321.01",
-     "volume_24h": "35842.39",
+     "yes_bid": 46,
+     "yes_ask": 47,
+     "last": 47,
+     "volume": "186342.76",
+     "volume_24h": "46943.22",
      "close_time": "2026-10-13T20:25:00Z"
     }
    ]
@@ -334,11 +334,11 @@
      "title": "Arizona wins",
      "kind": "winner",
      "team": "Arizona",
-     "yes_bid": 29,
-     "yes_ask": 30,
-     "last": 30,
-     "volume": "54450.96",
-     "volume_24h": "26936.53",
+     "yes_bid": 30,
+     "yes_ask": 31,
+     "last": 31,
+     "volume": "71839.99",
+     "volume_24h": "17455.68",
      "close_time": "2026-10-13T20:25:00Z"
     },
     {
@@ -346,11 +346,11 @@
      "title": "Detroit wins",
      "kind": "winner",
      "team": "Detroit",
-     "yes_bid": 70,
-     "yes_ask": 71,
-     "last": 71,
-     "volume": "30393.45",
-     "volume_24h": "5013.63",
+     "yes_bid": 69,
+     "yes_ask": 70,
+     "last": 70,
+     "volume": "35834.01",
+     "volume_24h": "5470.34",
      "close_time": "2026-10-13T20:25:00Z"
     }
    ]
@@ -369,8 +369,8 @@
      "yes_bid": 38,
      "yes_ask": 39,
      "last": 39,
-     "volume": "1067112.26",
-     "volume_24h": "481049.21",
+     "volume": "1536377.90",
+     "volume_24h": "469866.98",
      "close_time": "2026-10-13T20:25:00Z"
     },
     {
@@ -381,8 +381,8 @@
      "yes_bid": 61,
      "yes_ask": 62,
      "last": 62,
-     "volume": "176442.36",
-     "volume_24h": "57988.29",
+     "volume": "218267.17",
+     "volume_24h": "41928.85",
      "close_time": "2026-10-13T20:25:00Z"
     }
    ]
@@ -401,8 +401,8 @@
      "yes_bid": 61,
      "yes_ask": 62,
      "last": 62,
-     "volume": "414154.93",
-     "volume_24h": "29200.98",
+     "volume": "433932.10",
+     "volume_24h": "20738.06",
      "close_time": "2026-10-14T00:20:00Z"
     },
     {
@@ -412,9 +412,9 @@
      "team": "Baltimore",
      "yes_bid": 38,
      "yes_ask": 39,
-     "last": 38,
-     "volume": "281873.88",
-     "volume_24h": "49751.00",
+     "last": 39,
+     "volume": "319166.83",
+     "volume_24h": "37724.94",
      "close_time": "2026-10-14T00:20:00Z"
     }
    ]
@@ -433,8 +433,8 @@
      "yes_bid": 38,
      "yes_ask": 39,
      "last": 39,
-     "volume": "173604.69",
-     "volume_24h": "51047.59",
+     "volume": "235250.22",
+     "volume_24h": "61368.71",
      "close_time": "2026-10-15T00:15:00Z"
     },
     {
@@ -444,9 +444,9 @@
      "team": "Los Angeles R",
      "yes_bid": 61,
      "yes_ask": 62,
-     "last": 61,
-     "volume": "57951.45",
-     "volume_24h": "9526.90",
+     "last": 62,
+     "volume": "62056.53",
+     "volume_24h": "4082.86",
      "close_time": "2026-10-15T00:15:00Z"
     }
    ]
@@ -462,11 +462,11 @@
      "title": "Denver wins",
      "kind": "winner",
      "team": "Denver",
-     "yes_bid": 45,
-     "yes_ask": 46,
-     "last": 46,
-     "volume": "2890.52",
-     "volume_24h": "1775.04",
+     "yes_bid": 44,
+     "yes_ask": 45,
+     "last": 45,
+     "volume": "4099.94",
+     "volume_24h": "1272.26",
      "close_time": "2026-10-18T00:15:00Z"
     },
     {
@@ -474,11 +474,11 @@
      "title": "Seattle wins",
      "kind": "winner",
      "team": "Seattle",
-     "yes_bid": 55,
+     "yes_bid": 56,
      "yes_ask": 57,
      "last": 57,
-     "volume": "3471.04",
-     "volume_24h": "815.07",
+     "volume": "3937.14",
+     "volume_24h": "474.61",
      "close_time": "2026-10-18T00:15:00Z"
     }
    ]
@@ -497,8 +497,8 @@
      "yes_bid": 38,
      "yes_ask": 40,
      "last": 40,
-     "volume": "1571.39",
-     "volume_24h": "585.94",
+     "volume": "1775.29",
+     "volume_24h": "203.90",
      "close_time": "2026-10-20T13:30:00Z"
     },
     {
@@ -509,8 +509,8 @@
      "yes_bid": 60,
      "yes_ask": 62,
      "last": 62,
-     "volume": "4463.08",
-     "volume_24h": "408.55",
+     "volume": "4857.57",
+     "volume_24h": "399.20",
      "close_time": "2026-10-20T13:30:00Z"
     }
    ]
@@ -526,11 +526,11 @@
      "title": "Baltimore wins",
      "kind": "winner",
      "team": "Baltimore",
-     "yes_bid": 63,
-     "yes_ask": 64,
-     "last": 64,
-     "volume": "22679.03",
-     "volume_24h": "416.88",
+     "yes_bid": 64,
+     "yes_ask": 65,
+     "last": 65,
+     "volume": "22851.53",
+     "volume_24h": "172.50",
      "close_time": "2026-10-20T17:00:00Z"
     },
     {
@@ -541,8 +541,8 @@
      "yes_bid": 36,
      "yes_ask": 37,
      "last": 37,
-     "volume": "20562.00",
-     "volume_24h": "1779.03",
+     "volume": "20936.03",
+     "volume_24h": "438.13",
      "close_time": "2026-10-20T17:00:00Z"
     }
    ]
@@ -559,10 +559,10 @@
      "kind": "winner",
      "team": "Carolina",
      "yes_bid": 48,
-     "yes_ask": 50,
+     "yes_ask": 49,
      "last": 49,
-     "volume": "18828.81",
-     "volume_24h": "3174.59",
+     "volume": "19849.17",
+     "volume_24h": "979.75",
      "close_time": "2026-10-20T17:00:00Z"
     },
     {
@@ -571,10 +571,10 @@
      "kind": "winner",
      "team": "Philadelphia",
      "yes_bid": 51,
-     "yes_ask": 52,
-     "last": 50,
-     "volume": "1315.53",
-     "volume_24h": "273.58",
+     "yes_ask": 54,
+     "last": 53,
+     "volume": "1569.52",
+     "volume_24h": "250.34",
      "close_time": "2026-10-20T17:00:00Z"
     }
    ]
@@ -593,8 +593,8 @@
      "yes_bid": 45,
      "yes_ask": 46,
      "last": 46,
-     "volume": "7733.81",
-     "volume_24h": "1258.42",
+     "volume": "8298.04",
+     "volume_24h": "564.23",
      "close_time": "2026-10-20T17:00:00Z"
     },
     {
@@ -604,9 +604,9 @@
      "team": "Chicago",
      "yes_bid": 55,
      "yes_ask": 56,
-     "last": 57,
-     "volume": "1598.67",
-     "volume_24h": "343.17",
+     "last": 56,
+     "volume": "1799.66",
+     "volume_24h": "197.87",
      "close_time": "2026-10-20T17:00:00Z"
     }
    ]
@@ -622,11 +622,11 @@
      "title": "New Orleans wins",
      "kind": "winner",
      "team": "New Orleans",
-     "yes_bid": 51,
-     "yes_ask": 53,
-     "last": 53,
-     "volume": "222.36",
-     "volume_24h": "65.32",
+     "yes_bid": 50,
+     "yes_ask": 54,
+     "last": 54,
+     "volume": "278.64",
+     "volume_24h": "56.28",
      "close_time": "2026-10-20T17:00:00Z"
     },
     {
@@ -637,8 +637,8 @@
      "yes_bid": 47,
      "yes_ask": 49,
      "last": 49,
-     "volume": "552.37",
-     "volume_24h": "326.05",
+     "volume": "823.49",
+     "volume_24h": "271.12",
      "close_time": "2026-10-20T17:00:00Z"
     }
    ]
@@ -656,9 +656,9 @@
      "team": "New England",
      "yes_bid": 73,
      "yes_ask": 76,
-     "last": 73,
-     "volume": "482.75",
-     "volume_24h": "155.99",
+     "last": 76,
+     "volume": "526.13",
+     "volume_24h": "43.38",
      "close_time": "2026-10-20T17:00:00Z"
     },
     {
@@ -667,10 +667,10 @@
      "kind": "winner",
      "team": "New York J",
      "yes_bid": 25,
-     "yes_ask": 27,
+     "yes_ask": 26,
      "last": 27,
-     "volume": "1778.12",
-     "volume_24h": "978.32",
+     "volume": "2568.41",
+     "volume_24h": "790.29",
      "close_time": "2026-10-20T17:00:00Z"
     }
    ]
@@ -686,11 +686,11 @@
      "title": "Pittsburgh wins",
      "kind": "winner",
      "team": "Pittsburgh",
-     "yes_bid": 54,
-     "yes_ask": 56,
+     "yes_bid": 53,
+     "yes_ask": 57,
      "last": 57,
-     "volume": "854.89",
-     "volume_24h": "174.64",
+     "volume": "1264.64",
+     "volume_24h": "375.69",
      "close_time": "2026-10-20T17:00:00Z"
     },
     {
@@ -700,9 +700,9 @@
      "team": "Tampa Bay",
      "yes_bid": 44,
      "yes_ask": 46,
-     "last": 44,
-     "volume": "2337.96",
-     "volume_24h": "2257.34",
+     "last": 46,
+     "volume": "2759.04",
+     "volume_24h": "425.26",
      "close_time": "2026-10-20T17:00:00Z"
     }
    ]
@@ -718,11 +718,11 @@
      "title": "Indianapolis wins",
      "kind": "winner",
      "team": "Indianapolis",
-     "yes_bid": 72,
+     "yes_bid": 71,
      "yes_ask": 74,
      "last": 74,
-     "volume": "414.60",
-     "volume_24h": "93.41",
+     "volume": "475.63",
+     "volume_24h": "61.03",
      "close_time": "2026-10-20T17:00:00Z"
     },
     {
@@ -730,11 +730,11 @@
      "title": "Tennessee wins",
      "kind": "winner",
      "team": "Tennessee",
-     "yes_bid": 27,
-     "yes_ask": 28,
-     "last": 28,
-     "volume": "709.13",
-     "volume_24h": "568.45",
+     "yes_bid": 26,
+     "yes_ask": 29,
+     "last": 29,
+     "volume": "1138.05",
+     "volume_24h": "428.92",
      "close_time": "2026-10-20T17:00:00Z"
     }
    ]
@@ -750,11 +750,11 @@
      "title": "Arizona wins",
      "kind": "winner",
      "team": "Arizona",
-     "yes_bid": 14,
-     "yes_ask": 16,
-     "last": 16,
-     "volume": "16413.60",
-     "volume_24h": "11319.62",
+     "yes_bid": 15,
+     "yes_ask": 17,
+     "last": 17,
+     "volume": "23438.02",
+     "volume_24h": "7024.42",
      "close_time": "2026-10-20T20:05:00Z"
     },
     {
@@ -763,10 +763,10 @@
      "kind": "winner",
      "team": "Los Angeles R",
      "yes_bid": 84,
-     "yes_ask": 86,
-     "last": 86,
-     "volume": "2139.95",
-     "volume_24h": "194.39",
+     "yes_ask": 85,
+     "last": 85,
+     "volume": "3515.05",
+     "volume_24h": "1375.10",
      "close_time": "2026-10-20T20:05:00Z"
     }
    ]
@@ -782,11 +782,11 @@
      "title": "Buffalo wins",
      "kind": "winner",
      "team": "Buffalo",
-     "yes_bid": 68,
-     "yes_ask": 70,
-     "last": 71,
-     "volume": "272.55",
-     "volume_24h": "73.08",
+     "yes_bid": 67,
+     "yes_ask": 71,
+     "last": 69,
+     "volume": "460.80",
+     "volume_24h": "188.25",
      "close_time": "2026-10-20T20:25:00Z"
     },
     {
@@ -794,11 +794,11 @@
      "title": "Las Vegas wins",
      "kind": "winner",
      "team": "Las Vegas",
-     "yes_bid": 30,
-     "yes_ask": 32,
-     "last": 32,
-     "volume": "3863.70",
-     "volume_24h": "1827.21",
+     "yes_bid": 31,
+     "yes_ask": 33,
+     "last": 33,
+     "volume": "6637.06",
+     "volume_24h": "2773.36",
      "close_time": "2026-10-20T20:25:00Z"
     }
    ]
@@ -814,11 +814,11 @@
      "title": "Kansas City wins",
      "kind": "winner",
      "team": "Kansas City",
-     "yes_bid": 81,
-     "yes_ask": 82,
-     "last": 82,
-     "volume": "10094.57",
-     "volume_24h": "3229.25",
+     "yes_bid": 79,
+     "yes_ask": 81,
+     "last": 79,
+     "volume": "13332.07",
+     "volume_24h": "3345.75",
      "close_time": "2026-10-20T20:25:00Z"
     },
     {
@@ -826,11 +826,11 @@
      "title": "Los Angeles C wins",
      "kind": "winner",
      "team": "Los Angeles C",
-     "yes_bid": 19,
-     "yes_ask": 21,
-     "last": 21,
-     "volume": "6146.00",
-     "volume_24h": "2480.11",
+     "yes_bid": 20,
+     "yes_ask": 22,
+     "last": 22,
+     "volume": "7925.01",
+     "volume_24h": "1779.01",
      "close_time": "2026-10-20T20:25:00Z"
     }
    ]
@@ -848,9 +848,9 @@
      "team": "Dallas",
      "yes_bid": 53,
      "yes_ask": 55,
-     "last": 53,
-     "volume": "5574.14",
-     "volume_24h": "3425.69",
+     "last": 55,
+     "volume": "7620.70",
+     "volume_24h": "2162.90",
      "close_time": "2026-10-21T00:20:00Z"
     },
     {
@@ -861,8 +861,8 @@
      "yes_bid": 46,
      "yes_ask": 48,
      "last": 48,
-     "volume": "6306.14",
-     "volume_24h": "5074.12",
+     "volume": "17613.42",
+     "volume_24h": "11297.20",
      "close_time": "2026-10-21T00:20:00Z"
     }
    ]
@@ -881,8 +881,8 @@
      "yes_bid": 77,
      "yes_ask": 80,
      "last": 80,
-     "volume": "2159.86",
-     "volume_24h": "490.98",
+     "volume": "2469.44",
+     "volume_24h": "309.58",
      "close_time": "2026-10-22T00:15:00Z"
     },
     {
@@ -893,70 +893,42 @@
      "yes_bid": 21,
      "yes_ask": 23,
      "last": 23,
-     "volume": "1773.85",
-     "volume_24h": "1026.27",
+     "volume": "2231.45",
+     "volume_24h": "416.33",
      "close_time": "2026-10-22T00:15:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-08T17:50:34Z",
+ "prev_at": "2026-10-09T17:52:05Z",
  "moves": [
   {
-   "event_ticker": "KXNFLGAME-26OCT11CHIGB",
-   "team": "Chicago",
+   "event_ticker": "KXNFLGAME-26OCT11CINMIA",
+   "team": "Miami",
    "delta": -2,
-   "prev": 55,
-   "now": 53
+   "prev": 27,
+   "now": 25
+  },
+  {
+   "event_ticker": "KXNFLGAME-26OCT11HOUTEN",
+   "team": "Houston",
+   "delta": -2,
+   "prev": 77,
+   "now": 75
   },
   {
    "event_ticker": "KXNFLGAME-26OCT11CHIGB",
    "team": "Green Bay",
-   "delta": 2,
-   "prev": 47,
-   "now": 49
-  },
-  {
-   "event_ticker": "KXNFLGAME-26OCT15SEADEN",
-   "team": "Denver",
-   "delta": 2,
-   "prev": 44,
-   "now": 46
-  },
-  {
-   "event_ticker": "KXNFLGAME-26OCT18PITTB",
-   "team": "Pittsburgh",
    "delta": -2,
-   "prev": 57,
-   "now": 55
-  },
-  {
-   "event_ticker": "KXNFLGAME-26OCT18PITTB",
-   "team": "Tampa Bay",
-   "delta": 2,
-   "prev": 43,
-   "now": 45
+   "prev": 49,
+   "now": 47
   },
   {
    "event_ticker": "KXNFLGAME-26OCT18LACKC",
    "team": "Kansas City",
-   "delta": 2,
-   "prev": 80,
-   "now": 82
-  },
-  {
-   "event_ticker": "KXNFLGAME-26OCT18DALGB",
-   "team": "Dallas",
    "delta": -2,
-   "prev": 56,
-   "now": 54
-  },
-  {
-   "event_ticker": "KXNFLGAME-26OCT18DALGB",
-   "team": "Green Bay",
-   "delta": 2,
-   "prev": 45,
-   "now": 47
+   "prev": 82,
+   "now": 80
   }
  ],
  "new_games": []
