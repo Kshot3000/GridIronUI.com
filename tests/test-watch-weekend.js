@@ -4,7 +4,7 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the Game 3/4 pairings and the NLCS Game 1 pairing come from
+   the LCS Game 1 and Game 3/4 pairings come from
    data/kalshi-mlb.json and the Week 6 game count from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
@@ -153,58 +153,64 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-10-07"[^>]*data-end="2026-10-12"[^>]*hidden/.test(html) ||
-   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-07"') >= 0,
-   "spotlight band ships hidden with the Oct 7-12 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-10-11"[^>]*data-end="2026-10-16"[^>]*hidden/.test(html) ||
+   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-11"') >= 0,
+   "spotlight band ships hidden with the Oct 11-16 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Oct 7–12 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Oct 11–16 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
 var mlb = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
 var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
                  .map(function(g){ return g.title.replace(/^Game [34]:\s*/, ""); });
-/* Floor follows the snapshot, per the established pin discipline: when this
-   band shipped (Oct 7 snapshot) all four Division Series Game 3/4s were on
-   the board; as those games went Final they dropped out — the Oct 8
-   snapshot carried 3 (the last DS Game 4 plus the NLCS Games 3/4), and the
-   Oct 9 snapshot carries 2: Cleveland's 9-5 Game 4 win at Chicago WS
-   (ESPN Final, series tied 2-2) dropped the DS Game 4 and Kalshi replaced
-   it with a deciding Game 5 (not a Game 3/4 title), leaving only the NLCS
-   Games 3/4 (Milwaukee vs Los Angeles D, twice) — so the floor is now 2.
-   The per-pairing loop below still requires every Game 3/4 the snapshot
-   DOES carry to be named in the band, and the decider pin after it
-   requires the Game 5 pairing to be named too. */
-ok(g1.length >= 2, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
+/* Floor follows the snapshot, per the established pin discipline: when the
+   previous band shipped (Oct 7 snapshot) all four Division Series Game 3/4s
+   were on the board; as those games went Final they dropped out (Oct 8: 3,
+   Oct 9: 2 — only the NLCS Games 3/4). The Oct 11 snapshot is the first of
+   the Championship Series phase and carries 4 again: the NLCS Games 3/4
+   (Milwaukee vs Los Angeles D, twice) plus the ALCS Games 3/4 (Tampa Bay
+   vs Cleveland, twice) — Cleveland's 2-0 Game 5 win at Chicago WS (ESPN
+   Final, series 3-2) set the ALCS, and Kalshi listed its Games 1-4 as new
+   games this run. So the floor is now 4. The per-pairing loop below still
+   requires every Game 3/4 the snapshot DOES carry to be named in the band,
+   and the settled-Game 5 pin after the Game 1 loop requires the band to
+   stop listing the decider as a fixture. */
+ok(g1.length >= 4, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
 });
-/* The band also names the NLCS opener — pin that pairing to the snapshot's
-   Game 1 titles the same way, so it can never be typed from memory. */
+/* The band also names both LCS openers — pin those pairings to the
+   snapshot's Game 1 titles the same way, so they can never be typed from
+   memory. The Oct 11 snapshot carries two: the NLCS (Los Angeles D vs
+   Milwaukee, tonight) and the ALCS (Cleveland vs Tampa Bay, Monday). */
 var lcs1 = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); })
                  .map(function(g){ return g.title.replace(/^Game 1:\s*/, ""); });
-ok(lcs1.length >= 1, "kalshi-mlb.json carries an NLCS Game 1 (" + lcs1.length + " found)");
+ok(lcs1.length >= 2, "kalshi-mlb.json carries both LCS Game 1s (" + lcs1.length + " found)");
 lcs1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
-     "spotlight names the real NLCS Game 1 pairing: " + pairing);
+     "spotlight names the real LCS Game 1 pairing: " + pairing);
 });
-/* The band's headline claim this run is the deciding DS Game 5 (listed by
-   Kalshi only after Game 4 went Final) — pin its full title the same way,
-   so the decider can never be typed from memory either. */
+/* The deciding DS Game 5 the previous band headlined is settled now —
+   Cleveland won it 2-0 (ESPN Final, series 3-2) — so the snapshot carries
+   no Game 5 title and the band must not list the fixture anymore. (The
+   band may still mention Game 5 as the result that set the ALCS; what is
+   pinned here is that its Kalshi fixture title is gone from the copy.) */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g5.length >= 1, "kalshi-mlb.json carries a deciding Game 5 (" + g5.length + " found)");
-g5.forEach(function(title){
-  ok(band.indexOf(title) >= 0,
-     "spotlight names the real deciding game: " + title);
-});
+ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the Division Series is settled (" + g5.length + " found)");
+ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
+   "spotlight no longer lists the settled Game 5 as a fixture");
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
-/* The band's count is the Week 6 slate only — games occurring Oct 9-13Z
-   (Thu Oct 8 night through Mon Oct 12 night, US time). The snapshot also
-   carries Week 7 openers, so the pin derives the count from the same
-   occurrence window the copy claims, not from the raw file length. */
+/* The band's count is the Week 6 slate still listed in the snapshot —
+   games occurring Oct 9-13Z (Thu Oct 8 night through Mon Oct 12 night, US
+   time). Settled games drop out of the snapshot, so the count has fallen
+   as the week played out: 14 at the Oct 10 snapshot (Thursday opener
+   settled), 13 at Oct 11 (Sunday's early Jaguars-Eagles game settled too).
+   The snapshot also carries Week 7 openers, so the pin derives the count
+   from the same occurrence window the copy claims, not the raw length. */
 var week6 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-09T00:00:00Z" && g.occ < "2026-10-14T00:00:00Z";
 });
