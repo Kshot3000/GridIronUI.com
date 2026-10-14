@@ -4,7 +4,7 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the LCS Game 2 and Game 3/4 pairings come from
+   the LCS Game 3/4 pairings and the if-needed Game 5 come from
    data/kalshi-mlb.json and the Week 7 game count from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
@@ -169,8 +169,8 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    previous band shipped (Oct 7 snapshot) all four Division Series Game 3/4s
    were on the board; as those games went Final they dropped out (Oct 8: 3,
    Oct 9: 2 — only the NLCS Games 3/4). The Oct 11 snapshot opened the
-   Championship Series phase with 4 again, and the Oct 13 snapshot still
-   carries 4: the NLCS Games 3/4 (Milwaukee vs Los Angeles D, twice) plus
+   Championship Series phase with 4 again, and the Oct 13 and Oct 14
+   snapshots still carry 4: the NLCS Games 3/4 (Milwaukee vs Los Angeles D, twice) plus
    the ALCS Games 3/4 (Tampa Bay vs Cleveland, twice) — the openers are
    settled and gone, the middle games are the board now. So the floor
    stays 4. The per-pairing loop below still requires every Game 3/4 the
@@ -182,18 +182,14 @@ g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
 });
-/* The band also names tonight's game — pin its pairing to the snapshot's
-   Game 2 titles the same way, so it can never be typed from memory. The
-   Oct 13 snapshot carries exactly one Game 2: the ALCS (Cleveland vs
-   Tampa Bay, tonight) — the NLCS Game 2 already went Final in Milwaukee
-   (7-4, ESPN) and dropped off the board. */
+/* The previous band named tonight's game — the ALCS Game 2 — but Tampa
+   Bay won it 3-1 on Oct 13 (ESPN Final) to tie the series 1-1, so the
+   Oct 14 snapshot carries no Game 2 at all: both LCS Game 2s are settled
+   and gone. The pin inverts, like the Game 1 pin below: the band reports
+   the Game 2 result as a result, never as a fixture. */
 var lcs2 = mlb.games.filter(function(g){ return /^Game 2:/.test(g.title); })
                  .map(function(g){ return g.title.replace(/^Game 2:\s*/, ""); });
-ok(lcs2.length === 1, "kalshi-mlb.json carries exactly one LCS Game 2 (" + lcs2.length + " found)");
-lcs2.forEach(function(pairing){
-  ok(band.indexOf(pairing) >= 0,
-     "spotlight names the real LCS Game 2 pairing: " + pairing);
-});
+ok(lcs2.length === 0, "kalshi-mlb.json carries no Game 2 — both LCS Game 2s are settled (" + lcs2.length + " found)");
 /* The LCS openers the previous band headlined are settled now — Milwaukee
    won NLCS Game 1 2-1 and Game 2 7-4, Cleveland won ALCS Game 1 7-3 (all
    ESPN Finals) — so the snapshot carries no Game 1 title at all and the
@@ -205,13 +201,23 @@ var g1s = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); });
 ok(g1s.length === 0, "kalshi-mlb.json carries no Game 1 — both LCS openers are settled (" + g1s.length + " found)");
 ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 1: Cleveland vs Tampa Bay") === -1 &&
-   band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1,
+   band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
+   band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1,
    "spotlight no longer lists any settled LCS game as a fixture");
+/* A Game 5 is back on the board — but it is the ALCS's if-needed game,
+   newly listed in the Oct 14 snapshot (Tampa Bay vs Cleveland), not the
+   settled Division Series decider. Pin both facts: the snapshot carries
+   exactly that one Game 5 and the band names its full fixture title,
+   while the DS decider stays gone from the copy. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the Division Series is settled (" + g5.length + " found)");
+ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — the if-needed ALCS game (" + g5.length + " found)");
+g5.forEach(function(title){
+  ok(band.indexOf(title) >= 0,
+     "spotlight names the real if-needed Game 5 fixture: " + title);
+});
 ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
-   "spotlight no longer lists the settled Game 5 as a fixture");
+   "spotlight no longer lists the settled DS Game 5 as a fixture");
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
 /* The band's count is the Week 7 slate listed in the snapshot — games
    occurring Oct 16-20Z (Thu Oct 15 night through Mon Oct 19 night, US
