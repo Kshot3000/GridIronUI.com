@@ -170,14 +170,15 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    were on the board; as those games went Final they dropped out (Oct 8: 3,
    Oct 9: 2 — only the NLCS Games 3/4). The Oct 11 snapshot opened the
    Championship Series phase with 4 again, and the Oct 13 and Oct 14
-   snapshots still carry 4: the NLCS Games 3/4 (Milwaukee vs Los Angeles D, twice) plus
-   the ALCS Games 3/4 (Tampa Bay vs Cleveland, twice) — the openers are
-   settled and gone, the middle games are the board now. So the floor
-   stays 4. The per-pairing loop below still requires every Game 3/4 the
-   snapshot DOES carry to be named in the band, and the settled-fixture
-   pins after the Game 2 loop require the band to stop listing the played
-   openers as fixtures. */
-ok(g1.length >= 4, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
+   snapshots still carried 4: the NLCS Games 3/4 (Milwaukee vs Los Angeles D, twice) plus
+   the ALCS Games 3/4 (Tampa Bay vs Cleveland, twice). The Oct 15 snapshot
+   carries 3: Milwaukee won NLCS Game 3 in Los Angeles 6-2 (ESPN Final) to
+   lead 3-0, so that game dropped out, leaving the ALCS Game 3 plus both
+   Game 4s. So the floor drops to 3. The per-pairing loop below still
+   requires every Game 3/4 the snapshot DOES carry to be named in the
+   band, and the settled-fixture pins after the Game 2 loop require the
+   band to stop listing the played games as fixtures. */
+ok(g1.length >= 3, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
@@ -193,16 +194,21 @@ ok(lcs2.length === 0, "kalshi-mlb.json carries no Game 2 — both LCS Game 2s ar
 /* The LCS openers the previous band headlined are settled now — Milwaukee
    won NLCS Game 1 2-1 and Game 2 7-4, Cleveland won ALCS Game 1 7-3 (all
    ESPN Finals) — so the snapshot carries no Game 1 title at all and the
-   band must not list any played game as a fixture anymore. (The band may
-   still report those results as results; what is pinned here is that
-   their Kalshi fixture titles are gone from the copy.) The deciding DS
+   band must not list any played game as a fixture anymore. NLCS Game 3
+   joins the settled list in the Oct 15 snapshot: Milwaukee won it 6-2 in
+   Los Angeles (ESPN Final) to lead 3-0, so its fixture title is banned
+   from the copy too — the band reports it as a result, and the only
+   Milwaukee vs Los Angeles D fixture left is Game 4. (The band may still
+   report those results as results; what is pinned here is that their
+   Kalshi fixture titles are gone from the copy.) The deciding DS
    Game 5 pin from the previous band stays for the same reason. */
 var g1s = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); });
 ok(g1s.length === 0, "kalshi-mlb.json carries no Game 1 — both LCS openers are settled (" + g1s.length + " found)");
 ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 1: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
-   band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1,
+   band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
+   band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1,
    "spotlight no longer lists any settled LCS game as a fixture");
 /* A Game 5 is back on the board — but it is the ALCS's if-needed game,
    newly listed in the Oct 14 snapshot (Tampa Bay vs Cleveland), not the
