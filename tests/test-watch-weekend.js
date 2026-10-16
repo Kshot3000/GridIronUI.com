@@ -4,7 +4,7 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the LCS Game 3/4 pairings and the if-needed Game 5 come from
+   the LCS Game 3/4 pairings and the ALCS Game 5 come from
    data/kalshi-mlb.json and the Week 7 game count from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
@@ -172,13 +172,15 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    Championship Series phase with 4 again, and the Oct 13 and Oct 14
    snapshots still carried 4: the NLCS Games 3/4 (Milwaukee vs Los Angeles D, twice) plus
    the ALCS Games 3/4 (Tampa Bay vs Cleveland, twice). The Oct 15 snapshot
-   carries 3: Milwaukee won NLCS Game 3 in Los Angeles 6-2 (ESPN Final) to
-   lead 3-0, so that game dropped out, leaving the ALCS Game 3 plus both
-   Game 4s. So the floor drops to 3. The per-pairing loop below still
+   carried 3 after Milwaukee won NLCS Game 3. The Oct 16 snapshot carries
+   just 1: Milwaukee won NLCS Game 4 in Los Angeles 6-4 (ESPN Final) to
+   sweep the NLCS 4-0, and Cleveland won ALCS Game 3 at home 3-2 (ESPN
+   Final) to lead 2-1, so both games dropped out, leaving only the ALCS
+   Game 4. So the floor drops to 1. The per-pairing loop below still
    requires every Game 3/4 the snapshot DOES carry to be named in the
    band, and the settled-fixture pins after the Game 2 loop require the
    band to stop listing the played games as fixtures. */
-ok(g1.length >= 3, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
+ok(g1.length >= 1, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
@@ -195,44 +197,51 @@ ok(lcs2.length === 0, "kalshi-mlb.json carries no Game 2 — both LCS Game 2s ar
    won NLCS Game 1 2-1 and Game 2 7-4, Cleveland won ALCS Game 1 7-3 (all
    ESPN Finals) — so the snapshot carries no Game 1 title at all and the
    band must not list any played game as a fixture anymore. NLCS Game 3
-   joins the settled list in the Oct 15 snapshot: Milwaukee won it 6-2 in
-   Los Angeles (ESPN Final) to lead 3-0, so its fixture title is banned
-   from the copy too — the band reports it as a result, and the only
-   Milwaukee vs Los Angeles D fixture left is Game 4. (The band may still
-   report those results as results; what is pinned here is that their
-   Kalshi fixture titles are gone from the copy.) The deciding DS
-   Game 5 pin from the previous band stays for the same reason. */
+   joined the settled list in the Oct 15 snapshot (Milwaukee 6-2), and
+   two more join it in the Oct 16 snapshot: Milwaukee won NLCS Game 4
+   6-4 in Los Angeles (ESPN Final) to sweep the series 4-0, and Cleveland
+   won ALCS Game 3 3-2 at home (ESPN Final) to lead 2-1, so their fixture
+   titles are banned from the copy too — the band reports them as
+   results, and no Milwaukee vs Los Angeles D fixture is left at all.
+   (The band may still report those results as results; what is pinned
+   here is that their Kalshi fixture titles are gone from the copy.) The
+   deciding DS Game 5 pin from the previous band stays for the same reason. */
 var g1s = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); });
 ok(g1s.length === 0, "kalshi-mlb.json carries no Game 1 — both LCS openers are settled (" + g1s.length + " found)");
 ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 1: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
-   band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1,
+   band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1 &&
+   band.indexOf("Game 3: Tampa Bay vs Cleveland") === -1 &&
+   band.indexOf("Game 4: Milwaukee vs Los Angeles D") === -1,
    "spotlight no longer lists any settled LCS game as a fixture");
-/* A Game 5 is back on the board — but it is the ALCS's if-needed game,
-   newly listed in the Oct 14 snapshot (Tampa Bay vs Cleveland), not the
-   settled Division Series decider. Pin both facts: the snapshot carries
-   exactly that one Game 5 and the band names its full fixture title,
-   while the DS decider stays gone from the copy. */
+/* A Game 5 is on the board — the ALCS's Game 5 (Tampa Bay vs Cleveland,
+   first listed in the Oct 14 snapshot), not the settled Division Series
+   decider. With Cleveland leading 2-1 after Game 3, Game 5 is guaranteed
+   (a best-of-seven needs four wins), so the band names it without the
+   old if-needed label. Pin both facts: the snapshot carries exactly
+   that one Game 5 and the band names its full fixture title, while the
+   DS decider stays gone from the copy. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — the if-needed ALCS game (" + g5.length + " found)");
+ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — the ALCS game (" + g5.length + " found)");
 g5.forEach(function(title){
   ok(band.indexOf(title) >= 0,
-     "spotlight names the real if-needed Game 5 fixture: " + title);
+     "spotlight names the real Game 5 fixture: " + title);
 });
 ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
    "spotlight no longer lists the settled DS Game 5 as a fixture");
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
-/* The band's count is the Week 7 slate listed in the snapshot — games
-   occurring Oct 16-20Z (Thu Oct 15 night through Mon Oct 19 night, US
-   time). Week 6 is fully settled (it closed Monday night, Buffalo 37-34
-   at the LA Rams, ESPN Final) and every Week 6 game has dropped out of
-   the snapshot, so the count is the full Week 7 slate: 14 at the Oct 13
-   snapshot. The snapshot also carries Week 8 openers, so the pin derives
-   the count from the same occurrence window the copy claims, not the
-   raw length. */
+/* The band's count is the Week 7 slate still listed in the snapshot —
+   games occurring Oct 16-20Z (Thu Oct 15 night through Mon Oct 19 night,
+   US time). The full slate was 14 at the Oct 13 snapshot, but the opener
+   is settled now: Denver beat Seattle 17-14 in overtime on Thursday
+   night (ESPN Final) and that game has dropped out of the snapshot, so
+   the count in the window is the 13-game remainder the band names (the
+   copy still calls the full slate 14-game). The snapshot also carries
+   Week 8 openers, so the pin derives the count from the same occurrence
+   window the copy claims, not the raw length. */
 var week7 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-16T00:00:00Z" && g.occ < "2026-10-21T00:00:00Z";
 });
