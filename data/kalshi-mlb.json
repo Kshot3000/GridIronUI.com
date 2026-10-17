@@ -1,12 +1,12 @@
 {
- "updated_at": "2026-10-16T17:49:52Z",
+ "updated_at": "2026-10-17T17:50:48Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
   {
    "event_ticker": "KXMLBGAME-26OCT161800TBCLE",
    "title": "Game 4: Tampa Bay vs Cleveland",
-   "sub_title": "TB vs CLE (Oct 16)",
+   "sub_title": "TB vs CLE (Oct 17)",
    "occ": "2026-10-17T01:00:00Z",
    "markets": [
     {
@@ -17,8 +17,8 @@
      "yes_bid": 49,
      "yes_ask": 50,
      "last": 50,
-     "volume": "314592.95",
-     "volume_24h": "293212.95",
+     "volume": "2079060.58",
+     "volume_24h": "1768485.82",
      "close_time": "2026-10-19T22:00:00Z"
     },
     {
@@ -29,8 +29,8 @@
      "yes_bid": 50,
      "yes_ask": 51,
      "last": 51,
-     "volume": "640193.42",
-     "volume_24h": "627543.00",
+     "volume": "3859147.13",
+     "volume_24h": "3223866.19",
      "close_time": "2026-10-19T22:00:00Z"
     }
    ]
@@ -38,7 +38,7 @@
   {
    "event_ticker": "KXMLBGAME-26OCT172000TBCLE",
    "title": "Game 5: Tampa Bay vs Cleveland",
-   "sub_title": "TB vs CLE (Oct 17)",
+   "sub_title": "TB vs CLE (Oct 18)",
    "occ": "2026-10-18T03:00:00Z",
    "markets": [
     {
@@ -46,11 +46,11 @@
      "title": "Cleveland wins",
      "kind": "winner",
      "team": "Cleveland",
-     "yes_bid": 45,
-     "yes_ask": 46,
-     "last": 46,
-     "volume": "15115.01",
-     "volume_24h": "14649.31",
+     "yes_bid": 47,
+     "yes_ask": 48,
+     "last": 48,
+     "volume": "61459.59",
+     "volume_24h": "46324.88",
      "close_time": "2026-10-21T00:00:00Z"
     },
     {
@@ -58,17 +58,32 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 54,
-     "yes_ask": 55,
-     "last": 55,
-     "volume": "8314.99",
-     "volume_24h": "7203.15",
+     "yes_bid": 52,
+     "yes_ask": 53,
+     "last": 53,
+     "volume": "69861.84",
+     "volume_24h": "61506.52",
      "close_time": "2026-10-21T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-15T17:50:15Z",
- "moves": [],
+ "prev_at": "2026-10-16T17:49:52Z",
+ "moves": [
+  {
+   "event_ticker": "KXMLBGAME-26OCT172000TBCLE",
+   "team": "Cleveland",
+   "delta": 2,
+   "prev": 46,
+   "now": 48
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT172000TBCLE",
+   "team": "Tampa Bay",
+   "delta": -2,
+   "prev": 55,
+   "now": 53
+  }
+ ],
  "new_games": []
 }

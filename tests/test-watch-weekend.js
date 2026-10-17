@@ -176,7 +176,13 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    just 1: Milwaukee won NLCS Game 4 in Los Angeles 6-4 (ESPN Final) to
    sweep the NLCS 4-0, and Cleveland won ALCS Game 3 at home 3-2 (ESPN
    Final) to lead 2-1, so both games dropped out, leaving only the ALCS
-   Game 4. So the floor drops to 1. The per-pairing loop below still
+   Game 4. So the floor drops to 1. The Oct 17 snapshot still carries
+   just that 1: ALCS Game 4 was postponed Friday for rain (ESPN
+   Postponed, "ALCS - Game 4 Rain") — no result, the series still stands
+   2-1 — and Kalshi keeps the same event, re-dated to tonight (Sat
+   Oct 17 US, sub_title "TB vs CLE (Oct 17)"), so the floor stays 1 and
+   the band must report the postponement, never a Friday result (the
+   postponement pin after the Game 5 loop). The per-pairing loop below still
    requires every Game 3/4 the snapshot DOES carry to be named in the
    band, and the settled-fixture pins after the Game 2 loop require the
    band to stop listing the played games as fixtures. */
@@ -222,7 +228,10 @@ ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    (a best-of-seven needs four wins), so the band names it without the
    old if-needed label. Pin both facts: the snapshot carries exactly
    that one Game 5 and the band names its full fixture title, while the
-   DS decider stays gone from the copy. */
+   DS decider stays gone from the copy. The Oct 17 snapshot still
+   carries exactly that one Game 5 (sub_title now "TB vs CLE (Oct 18)"):
+   with Game 4 rained out Friday, Game 5 follows on Sunday in Cleveland
+   (ESPN Scheduled), so the band's Sunday framing is the honest one. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
 ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — the ALCS game (" + g5.length + " found)");
@@ -232,6 +241,14 @@ g5.forEach(function(title){
 });
 ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
    "spotlight no longer lists the settled DS Game 5 as a fixture");
+/* ALCS Game 4 produced no result on Friday Oct 16 US — ESPN lists it
+   STATUS_POSTPONED with the note "ALCS - Game 4 Rain", and every ESPN
+   ALCS scoreboard since still reads "CLE leads series 2-1". The band
+   must say so plainly: a visitor who saw Friday's band ("tonight's
+   game") must not be left thinking a game was played. Pin the honest
+   framing so the copy can never silently drop it inside the window. */
+ok(band.indexOf("postponed Friday for rain") >= 0,
+   "spotlight reports ALCS Game 4's Friday rain postponement (ESPN Postponed), not a result");
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
 /* The band's count is the Week 7 slate still listed in the snapshot —
    games occurring Oct 16-20Z (Thu Oct 15 night through Mon Oct 19 night,
