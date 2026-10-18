@@ -185,8 +185,15 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    postponement pin after the Game 5 loop). The per-pairing loop below still
    requires every Game 3/4 the snapshot DOES carry to be named in the
    band, and the settled-fixture pins after the Game 2 loop require the
-   band to stop listing the played games as fixtures. */
-ok(g1.length >= 1, "kalshi-mlb.json carries Game 3s and 4s (" + g1.length + " found)");
+   band to stop listing the played games as fixtures. The Oct 18 snapshot
+   carries none at all: the re-dated Game 4 was played Saturday night and
+   Tampa Bay won it 7-3 in Cleveland (Reuters / USA Today Final) to tie
+   the ALCS 2-2, so it dropped out alongside the already-settled Game 3,
+   leaving only Game 5 on the board. The floor therefore falls to exactly
+   0 — the pin inverts, like the Game 1 and Game 2 pins below: the
+   snapshot must carry no Game 3/4 title and the band reports both games
+   as results, never as fixtures. */
+ok(g1.length === 0, "kalshi-mlb.json carries no Game 3/4 — both ALCS middle games are settled (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
@@ -209,6 +216,9 @@ ok(lcs2.length === 0, "kalshi-mlb.json carries no Game 2 — both LCS Game 2s ar
    won ALCS Game 3 3-2 at home (ESPN Final) to lead 2-1, so their fixture
    titles are banned from the copy too — the band reports them as
    results, and no Milwaukee vs Los Angeles D fixture is left at all.
+   ALCS Game 4 joins the ban in the Oct 18 snapshot: postponed Friday
+   for rain, played Saturday in Cleveland, Tampa Bay won 7-3 (Final) to
+   tie the series 2-2, so its fixture title is banned too.
    (The band may still report those results as results; what is pinned
    here is that their Kalshi fixture titles are gone from the copy.) The
    deciding DS Game 5 pin from the previous band stays for the same reason. */
@@ -220,7 +230,8 @@ ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1 &&
    band.indexOf("Game 3: Tampa Bay vs Cleveland") === -1 &&
-   band.indexOf("Game 4: Milwaukee vs Los Angeles D") === -1,
+   band.indexOf("Game 4: Milwaukee vs Los Angeles D") === -1 &&
+   band.indexOf("Game 4: Tampa Bay vs Cleveland") === -1,
    "spotlight no longer lists any settled LCS game as a fixture");
 /* A Game 5 is on the board — the ALCS's Game 5 (Tampa Bay vs Cleveland,
    first listed in the Oct 14 snapshot), not the settled Division Series
@@ -231,7 +242,11 @@ ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    DS decider stays gone from the copy. The Oct 17 snapshot still
    carries exactly that one Game 5 (sub_title now "TB vs CLE (Oct 18)"):
    with Game 4 rained out Friday, Game 5 follows on Sunday in Cleveland
-   (ESPN Scheduled), so the band's Sunday framing is the honest one. */
+   (ESPN Scheduled), so the band's Sunday framing is the honest one. The
+   Oct 18 snapshot still carries exactly that one Game 5: Game 4 was
+   played Saturday (Tampa Bay 7-3, Final, series tied 2-2) and dropped
+   out, and Game 5 is today in Cleveland (5 p.m. ET, per the published
+   ALCS schedule), so the band's today framing is the honest one. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
 ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — the ALCS game (" + g5.length + " found)");
@@ -246,7 +261,10 @@ ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
    ALCS scoreboard since still reads "CLE leads series 2-1". The band
    must say so plainly: a visitor who saw Friday's band ("tonight's
    game") must not be left thinking a game was played. Pin the honest
-   framing so the copy can never silently drop it inside the window. */
+   framing so the copy can never silently drop it inside the window.
+   (The game was then played Saturday: Tampa Bay won 7-3 to tie the
+   series 2-2 — the band now reports both facts, the Friday
+   postponement and the Saturday result.) */
 ok(band.indexOf("postponed Friday for rain") >= 0,
    "spotlight reports ALCS Game 4's Friday rain postponement (ESPN Postponed), not a result");
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
@@ -256,7 +274,10 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    is settled now: Denver beat Seattle 17-14 in overtime on Thursday
    night (ESPN Final) and that game has dropped out of the snapshot, so
    the count in the window is the 13-game remainder the band names (the
-   copy still calls the full slate 14-game). The snapshot also carries
+   copy still calls the full slate 14-game). The Oct 18 snapshot drops
+   one more: Houston beat Jacksonville 34-31 in London on Sunday morning
+   (Final) and that game has dropped out too, so the window count is now
+   the 12-game remainder the band names. The snapshot also carries
    Week 8 openers, so the pin derives the count from the same occurrence
    window the copy claims, not the raw length. */
 var week7 = nfl.games.filter(function(g){

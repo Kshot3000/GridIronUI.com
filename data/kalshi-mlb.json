@@ -1,40 +1,8 @@
 {
- "updated_at": "2026-10-17T17:50:48Z",
+ "updated_at": "2026-10-18T17:49:26Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
-  {
-   "event_ticker": "KXMLBGAME-26OCT161800TBCLE",
-   "title": "Game 4: Tampa Bay vs Cleveland",
-   "sub_title": "TB vs CLE (Oct 17)",
-   "occ": "2026-10-17T01:00:00Z",
-   "markets": [
-    {
-     "ticker": "KXMLBGAME-26OCT161800TBCLE-CLE",
-     "title": "Cleveland wins",
-     "kind": "winner",
-     "team": "Cleveland",
-     "yes_bid": 49,
-     "yes_ask": 50,
-     "last": 50,
-     "volume": "2079060.58",
-     "volume_24h": "1768485.82",
-     "close_time": "2026-10-19T22:00:00Z"
-    },
-    {
-     "ticker": "KXMLBGAME-26OCT161800TBCLE-TB",
-     "title": "Tampa Bay wins",
-     "kind": "winner",
-     "team": "Tampa Bay",
-     "yes_bid": 50,
-     "yes_ask": 51,
-     "last": 51,
-     "volume": "3859147.13",
-     "volume_24h": "3223866.19",
-     "close_time": "2026-10-19T22:00:00Z"
-    }
-   ]
-  },
   {
    "event_ticker": "KXMLBGAME-26OCT172000TBCLE",
    "title": "Game 5: Tampa Bay vs Cleveland",
@@ -46,11 +14,11 @@
      "title": "Cleveland wins",
      "kind": "winner",
      "team": "Cleveland",
-     "yes_bid": 47,
-     "yes_ask": 48,
-     "last": 48,
-     "volume": "61459.59",
-     "volume_24h": "46324.88",
+     "yes_bid": 45,
+     "yes_ask": 46,
+     "last": 45,
+     "volume": "769879.86",
+     "volume_24h": "703365.28",
      "close_time": "2026-10-21T00:00:00Z"
     },
     {
@@ -58,31 +26,24 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 52,
-     "yes_ask": 53,
-     "last": 53,
-     "volume": "69861.84",
-     "volume_24h": "61506.52",
+     "yes_bid": 53,
+     "yes_ask": 54,
+     "last": 54,
+     "volume": "1426111.97",
+     "volume_24h": "1346803.01",
      "close_time": "2026-10-21T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-16T17:49:52Z",
+ "prev_at": "2026-10-17T17:50:48Z",
  "moves": [
   {
    "event_ticker": "KXMLBGAME-26OCT172000TBCLE",
    "team": "Cleveland",
-   "delta": 2,
-   "prev": 46,
-   "now": 48
-  },
-  {
-   "event_ticker": "KXMLBGAME-26OCT172000TBCLE",
-   "team": "Tampa Bay",
    "delta": -2,
-   "prev": 55,
-   "now": 53
+   "prev": 48,
+   "now": 46
   }
  ],
  "new_games": []
