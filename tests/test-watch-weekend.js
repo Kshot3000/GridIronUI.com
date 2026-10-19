@@ -4,8 +4,8 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the LCS Game 3/4 pairings and the ALCS Game 5 come from
-   data/kalshi-mlb.json and the Week 7 game count from data/kalshi-nfl.json.
+   the LCS Game 3/4 pairings and the ALCS Game 6 come from
+   data/kalshi-mlb.json and the Week 8 game count from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -153,12 +153,12 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-10-13"[^>]*data-end="2026-10-19"[^>]*hidden/.test(html) ||
-   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-13"') >= 0,
-   "spotlight band ships hidden with the Oct 13-19 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-10-19"[^>]*data-end="2026-10-26"[^>]*hidden/.test(html) ||
+   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-19"') >= 0,
+   "spotlight band ships hidden with the Oct 19-26 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Oct 13–19 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Oct 19–26 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
@@ -233,26 +233,37 @@ ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 4: Milwaukee vs Los Angeles D") === -1 &&
    band.indexOf("Game 4: Tampa Bay vs Cleveland") === -1,
    "spotlight no longer lists any settled LCS game as a fixture");
-/* A Game 5 is on the board — the ALCS's Game 5 (Tampa Bay vs Cleveland,
+/* A Game 5 was on the board — the ALCS's Game 5 (Tampa Bay vs Cleveland,
    first listed in the Oct 14 snapshot), not the settled Division Series
-   decider. With Cleveland leading 2-1 after Game 3, Game 5 is guaranteed
-   (a best-of-seven needs four wins), so the band names it without the
-   old if-needed label. Pin both facts: the snapshot carries exactly
-   that one Game 5 and the band names its full fixture title, while the
-   DS decider stays gone from the copy. The Oct 17 snapshot still
-   carries exactly that one Game 5 (sub_title now "TB vs CLE (Oct 18)"):
-   with Game 4 rained out Friday, Game 5 follows on Sunday in Cleveland
-   (ESPN Scheduled), so the band's Sunday framing is the honest one. The
-   Oct 18 snapshot still carries exactly that one Game 5: Game 4 was
-   played Saturday (Tampa Bay 7-3, Final, series tied 2-2) and dropped
-   out, and Game 5 is today in Cleveland (5 p.m. ET, per the published
-   ALCS schedule), so the band's today framing is the honest one. */
+   decider. With Cleveland leading 2-1 after Game 3, Game 5 was guaranteed
+   (a best-of-seven needs four wins), so the band named it without the
+   old if-needed label. The Oct 17 snapshot still carried exactly that
+   one Game 5 (sub_title "TB vs CLE (Oct 18)"): with Game 4 rained out
+   Friday, Game 5 followed on Sunday in Cleveland (ESPN Scheduled), so
+   the band's Sunday framing was the honest one. The Oct 18 snapshot
+   still carried exactly that one Game 5: Game 4 was played Saturday
+   (Tampa Bay 7-3, Final, series tied 2-2) and dropped out, and Game 5
+   was that day in Cleveland (5 p.m. ET, per the published ALCS
+   schedule), so the band's today framing was the honest one. The
+   Oct 19 snapshot settles it: Tampa Bay won Game 5 in Cleveland 3-1
+   (Final) to lead the series 3-2, so Game 5 dropped out and the pin
+   inverts like the Game 1/2/3/4 pins — the snapshot carries no Game 5
+   and the band reports it as a result, never as a fixture. In its
+   place the board carries exactly one Game 6 (Cleveland vs Tampa Bay,
+   sub_title "CLE vs TB (Oct 19)"): the pennant can be decided tonight
+   in Tampa Bay, so the band names its full fixture title, while the
+   DS decider stays gone from the copy. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — the ALCS game (" + g5.length + " found)");
-g5.forEach(function(title){
+ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the ALCS Game 5 is settled (" + g5.length + " found)");
+ok(band.indexOf("Game 5: Tampa Bay vs Cleveland") === -1,
+   "spotlight no longer lists the settled ALCS Game 5 as a fixture");
+var g6 = mlb.games.filter(function(g){ return /^Game 6:/.test(g.title); })
+                 .map(function(g){ return g.title; });
+ok(g6.length === 1, "kalshi-mlb.json carries exactly one Game 6 — the ALCS game (" + g6.length + " found)");
+g6.forEach(function(title){
   ok(band.indexOf(title) >= 0,
-     "spotlight names the real Game 5 fixture: " + title);
+     "spotlight names the real Game 6 fixture: " + title);
 });
 ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
    "spotlight no longer lists the settled DS Game 5 as a fixture");
@@ -268,23 +279,29 @@ ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
 ok(band.indexOf("postponed Friday for rain") >= 0,
    "spotlight reports ALCS Game 4's Friday rain postponement (ESPN Postponed), not a result");
 var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
-/* The band's count is the Week 7 slate still listed in the snapshot —
+/* The band's count was the Week 7 slate still listed in the snapshot —
    games occurring Oct 16-20Z (Thu Oct 15 night through Mon Oct 19 night,
    US time). The full slate was 14 at the Oct 13 snapshot, but the opener
-   is settled now: Denver beat Seattle 17-14 in overtime on Thursday
-   night (ESPN Final) and that game has dropped out of the snapshot, so
-   the count in the window is the 13-game remainder the band names (the
-   copy still calls the full slate 14-game). The Oct 18 snapshot drops
+   settled: Denver beat Seattle 17-14 in overtime on Thursday night
+   (ESPN Final) and that game dropped out of the snapshot, so the count
+   in the window was the 13-game remainder the band named (the copy
+   still called the full slate 14-game). The Oct 18 snapshot dropped
    one more: Houston beat Jacksonville 34-31 in London on Sunday morning
-   (Final) and that game has dropped out too, so the window count is now
-   the 12-game remainder the band names. The snapshot also carries
-   Week 8 openers, so the pin derives the count from the same occurrence
-   window the copy claims, not the raw length. */
-var week7 = nfl.games.filter(function(g){
-  return g.occ >= "2026-10-16T00:00:00Z" && g.occ < "2026-10-21T00:00:00Z";
+   (Final) and that game dropped out too, so the window count was the
+   12-game remainder the band named. The Oct 19 snapshot closes Week 7:
+   the Sunday slate is final and only tonight's closer (Washington at
+   San Francisco, occ Oct 20T03:15Z) remains, which the band reports as
+   the closer without a count. The count the band now names is Week 8's
+   slate — games occurring Oct 22-27Z (Thu Oct 22 night in Chicago
+   through Mon Oct 26 night in Philadelphia, US time) — so the pin
+   derives the count from that occurrence window, not the raw length:
+   the snapshot's 15 games are tonight's closer plus the 14-game
+   Week 8 slate the band names. */
+var week8 = nfl.games.filter(function(g){
+  return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
-ok(band.indexOf(week7.length + "-game") >= 0,
-   "spotlight's Week 7 game count matches the Kalshi NFL snapshot (" + week7.length + " games in the Oct 16-20Z window)");
+ok(band.indexOf(week8.length + "-game") >= 0,
+   "spotlight's Week 8 game count matches the Kalshi NFL snapshot (" + week8.length + " games in the Oct 22-27Z window)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
