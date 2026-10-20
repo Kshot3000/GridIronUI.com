@@ -1,44 +1,143 @@
 {
- "updated_at": "2026-10-19T18:09:45Z",
+ "updated_at": "2026-10-20T17:50:34Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
   {
-   "event_ticker": "KXMLBGAME-26OCT192008CLETB",
-   "title": "Game 6: Cleveland vs Tampa Bay",
-   "sub_title": "CLE vs TB (Oct 19)",
-   "occ": "2026-10-20T03:08:00Z",
+   "event_ticker": "KXMLBGAME-26OCT232000TBMIL",
+   "title": "Game 1: Tampa Bay vs Milwaukee",
+   "sub_title": "TB vs MIL (Oct 23)",
+   "occ": "2026-10-24T03:00:00Z",
    "markets": [
     {
-     "ticker": "KXMLBGAME-26OCT192008CLETB-CLE",
-     "title": "Cleveland wins",
+     "ticker": "KXMLBGAME-26OCT232000TBMIL-MIL",
+     "title": "Milwaukee wins",
      "kind": "winner",
-     "team": "Cleveland",
-     "yes_bid": 41,
-     "yes_ask": 42,
-     "last": 42,
-     "volume": "217549.89",
-     "volume_24h": "157774.89",
-     "close_time": "2026-10-23T00:08:00Z"
+     "team": "Milwaukee",
+     "yes_bid": 60,
+     "yes_ask": 61,
+     "last": 61,
+     "volume": "111846.20",
+     "volume_24h": "111245.56",
+     "close_time": "2026-10-27T00:00:00Z"
     },
     {
-     "ticker": "KXMLBGAME-26OCT192008CLETB-TB",
+     "ticker": "KXMLBGAME-26OCT232000TBMIL-TB",
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 58,
+     "yes_bid": 40,
+     "yes_ask": 41,
+     "last": 41,
+     "volume": "38526.28",
+     "volume_24h": "38289.21",
+     "close_time": "2026-10-27T00:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT242000TBMIL",
+   "title": "Game 2: Tampa Bay vs Milwaukee",
+   "sub_title": "TB vs MIL (Oct 24)",
+   "occ": "2026-10-25T03:00:00Z",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT242000TBMIL-MIL",
+     "title": "Milwaukee wins",
+     "kind": "winner",
+     "team": "Milwaukee",
+     "yes_bid": 57,
      "yes_ask": 59,
      "last": 59,
-     "volume": "623682.59",
-     "volume_24h": "613743.55",
-     "close_time": "2026-10-23T00:08:00Z"
+     "volume": "3879.12",
+     "volume_24h": "3828.55",
+     "close_time": "2026-10-28T00:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT242000TBMIL-TB",
+     "title": "Tampa Bay wins",
+     "kind": "winner",
+     "team": "Tampa Bay",
+     "yes_bid": 44,
+     "yes_ask": 46,
+     "last": 44,
+     "volume": "1696.33",
+     "volume_24h": "1676.33",
+     "close_time": "2026-10-28T00:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT262000MILTB",
+   "title": "Game 3: Milwaukee vs Tampa Bay",
+   "sub_title": "MIL vs TB (Oct 26)",
+   "occ": "2026-10-27T03:00:00Z",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT262000MILTB-MIL",
+     "title": "Milwaukee wins",
+     "kind": "winner",
+     "team": "Milwaukee",
+     "yes_bid": 44,
+     "yes_ask": 52,
+     "last": 52,
+     "volume": "2587.31",
+     "volume_24h": "2587.31",
+     "close_time": "2026-10-30T00:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT262000MILTB-TB",
+     "title": "Tampa Bay wins",
+     "kind": "winner",
+     "team": "Tampa Bay",
+     "yes_bid": 50,
+     "yes_ask": 55,
+     "last": 57,
+     "volume": "955.50",
+     "volume_24h": "955.50",
+     "close_time": "2026-10-30T00:00:00Z"
+    }
+   ]
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT272000MILTB",
+   "title": "Game 4: Milwaukee vs Tampa Bay",
+   "sub_title": "MIL vs TB (Oct 27)",
+   "occ": "2026-10-28T03:00:00Z",
+   "markets": [
+    {
+     "ticker": "KXMLBGAME-26OCT272000MILTB-MIL",
+     "title": "Milwaukee wins",
+     "kind": "winner",
+     "team": "Milwaukee",
+     "yes_bid": 54,
+     "yes_ask": 57,
+     "last": 57,
+     "volume": "1103.76",
+     "volume_24h": "1103.76",
+     "close_time": "2026-10-31T00:00:00Z"
+    },
+    {
+     "ticker": "KXMLBGAME-26OCT272000MILTB-TB",
+     "title": "Tampa Bay wins",
+     "kind": "winner",
+     "team": "Tampa Bay",
+     "yes_bid": 40,
+     "yes_ask": 49,
+     "last": 50,
+     "volume": "492.23",
+     "volume_24h": "492.23",
+     "close_time": "2026-10-31T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-18T17:49:26Z",
+ "prev_at": "2026-10-19T18:09:45Z",
  "moves": [],
  "new_games": [
-  "KXMLBGAME-26OCT192008CLETB"
+  "KXMLBGAME-26OCT232000TBMIL",
+  "KXMLBGAME-26OCT242000TBMIL",
+  "KXMLBGAME-26OCT262000MILTB",
+  "KXMLBGAME-26OCT272000MILTB"
  ]
 }

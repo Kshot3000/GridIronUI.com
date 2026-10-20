@@ -4,7 +4,7 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the LCS Game 3/4 pairings and the ALCS Game 6 come from
+   the World Series Game 1/2/3/4 fixtures come from
    data/kalshi-mlb.json and the Week 8 game count from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
@@ -192,8 +192,16 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    leaving only Game 5 on the board. The floor therefore falls to exactly
    0 — the pin inverts, like the Game 1 and Game 2 pins below: the
    snapshot must carry no Game 3/4 title and the band reports both games
-   as results, never as fixtures. */
-ok(g1.length === 0, "kalshi-mlb.json carries no Game 3/4 — both ALCS middle games are settled (" + g1.length + " found)");
+   as results, never as fixtures. The Oct 20 snapshot opens the World
+   Series phase: Tampa Bay won ALCS Game 6 in Tampa Bay 7-3 on Monday
+   (Sportradar / USA Today Final) to beat Cleveland 4-2, so every LCS
+   game is settled and gone, and the board instead carries the World
+   Series Games 3/4 — both "Milwaukee vs Tampa Bay" (Game 3 Mon Oct 26
+   and Game 4 Tue Oct 27, both in Tampa Bay). The count therefore rises
+   to exactly 2 — both are World Series fixtures, not LCS games — and
+   the per-pairing loop below requires the band to name the pairing
+   (the band names both full fixture titles). */
+ok(g1.length === 2, "kalshi-mlb.json carries exactly two Game 3/4 — the World Series games in Tampa Bay (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
@@ -202,10 +210,18 @@ g1.forEach(function(pairing){
    Bay won it 3-1 on Oct 13 (ESPN Final) to tie the series 1-1, so the
    Oct 14 snapshot carries no Game 2 at all: both LCS Game 2s are settled
    and gone. The pin inverts, like the Game 1 pin below: the band reports
-   the Game 2 result as a result, never as a fixture. */
+   the Game 2 result as a result, never as a fixture. The Oct 20 snapshot
+   carries exactly one Game 2 again — but it is the World Series Game 2
+   (Tampa Bay vs Milwaukee, Sat Oct 24 in Milwaukee), not an LCS game:
+   the pin flips back to naming the one real fixture's full title, and
+   the settled-fixture ban below still bars both LCS Game 2 titles. */
 var lcs2 = mlb.games.filter(function(g){ return /^Game 2:/.test(g.title); })
-                 .map(function(g){ return g.title.replace(/^Game 2:\s*/, ""); });
-ok(lcs2.length === 0, "kalshi-mlb.json carries no Game 2 — both LCS Game 2s are settled (" + lcs2.length + " found)");
+                 .map(function(g){ return g.title; });
+ok(lcs2.length === 1, "kalshi-mlb.json carries exactly one Game 2 — the World Series game (" + lcs2.length + " found)");
+lcs2.forEach(function(title){
+  ok(band.indexOf(title) >= 0,
+     "spotlight names the real Game 2 fixture: " + title);
+});
 /* The LCS openers the previous band headlined are settled now — Milwaukee
    won NLCS Game 1 2-1 and Game 2 7-4, Cleveland won ALCS Game 1 7-3 (all
    ESPN Finals) — so the snapshot carries no Game 1 title at all and the
@@ -221,9 +237,22 @@ ok(lcs2.length === 0, "kalshi-mlb.json carries no Game 2 — both LCS Game 2s ar
    tie the series 2-2, so its fixture title is banned too.
    (The band may still report those results as results; what is pinned
    here is that their Kalshi fixture titles are gone from the copy.) The
-   deciding DS Game 5 pin from the previous band stays for the same reason. */
-var g1s = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); });
-ok(g1s.length === 0, "kalshi-mlb.json carries no Game 1 — both LCS openers are settled (" + g1s.length + " found)");
+   deciding DS Game 5 pin from the previous band stays for the same reason.
+   ALCS Games 5 and 6 join the settled list in the Oct 19/20 snapshots
+   (Tampa Bay won Game 5 3-1 in Cleveland on Sunday and Game 6 7-3 at
+   home on Monday, both Finals, to win the series 4-2), so their fixture
+   titles are banned in the Game 5/6 pins below. The Oct 20 snapshot
+   carries exactly one Game 1 again — the World Series opener (Tampa Bay
+   vs Milwaukee, Fri Oct 23 in Milwaukee) — so this pin flips back to
+   requiring the band to name that one fixture's full title, while the
+   ban list right below still bars both LCS Game 1 titles. */
+var g1s = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); })
+                 .map(function(g){ return g.title; });
+ok(g1s.length === 1, "kalshi-mlb.json carries exactly one Game 1 — the World Series opener (" + g1s.length + " found)");
+g1s.forEach(function(title){
+  ok(band.indexOf(title) >= 0,
+     "spotlight names the real Game 1 fixture: " + title);
+});
 ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 1: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
@@ -252,19 +281,24 @@ ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    place the board carries exactly one Game 6 (Cleveland vs Tampa Bay,
    sub_title "CLE vs TB (Oct 19)"): the pennant can be decided tonight
    in Tampa Bay, so the band names its full fixture title, while the
-   DS decider stays gone from the copy. */
+   DS decider stays gone from the copy. The Oct 20 snapshot settles
+   that too: Tampa Bay won Game 6 at home 7-3 on Monday (Sportradar /
+   USA Today Final) to beat Cleveland 4-2 and win the pennant, so
+   Game 6 dropped out, no Game 7 was ever needed or listed, and no
+   World Series Game 5/6 is listed yet (Kalshi lists the if-needed
+   games only as the Series reaches them, as in past rounds) — the
+   Game 6 pin inverts like the others: the snapshot carries no Game 6
+   at all and the band reports Game 6 as a result, never as a fixture. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the ALCS Game 5 is settled (" + g5.length + " found)");
+ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the ALCS Game 5 is settled and no World Series Game 5 is listed yet (" + g5.length + " found)");
 ok(band.indexOf("Game 5: Tampa Bay vs Cleveland") === -1,
    "spotlight no longer lists the settled ALCS Game 5 as a fixture");
 var g6 = mlb.games.filter(function(g){ return /^Game 6:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g6.length === 1, "kalshi-mlb.json carries exactly one Game 6 — the ALCS game (" + g6.length + " found)");
-g6.forEach(function(title){
-  ok(band.indexOf(title) >= 0,
-     "spotlight names the real Game 6 fixture: " + title);
-});
+ok(g6.length === 0, "kalshi-mlb.json carries no Game 6 — the ALCS Game 6 is settled and no World Series Game 6 is listed yet (" + g6.length + " found)");
+ok(band.indexOf("Game 6: Cleveland vs Tampa Bay") === -1,
+   "spotlight no longer lists the settled ALCS Game 6 as a fixture");
 ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,
    "spotlight no longer lists the settled DS Game 5 as a fixture");
 /* ALCS Game 4 produced no result on Friday Oct 16 US — ESPN lists it
@@ -296,7 +330,13 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    through Mon Oct 26 night in Philadelphia, US time) — so the pin
    derives the count from that occurrence window, not the raw length:
    the snapshot's 15 games are tonight's closer plus the 14-game
-   Week 8 slate the band names. */
+   Week 8 slate the band names. The Oct 20 snapshot settles the closer:
+   San Francisco beat Washington 23-17 on Monday night (Reuters /
+   NBC Sports Final), so that game dropped out, Week 7 is fully final,
+   and the board now carries the same 14-game Week 8 slate plus the
+   following 14-game slate (Oct 30-Nov 3Z) — 28 games in all. The pin
+   still derives the count from the Oct 22-27Z window, so the band's
+   14-game Week 8 claim stays pinned to the real slate. */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
