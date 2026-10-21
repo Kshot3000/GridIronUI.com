@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-10-20T17:50:34Z",
+ "updated_at": "2026-10-21T17:50:03Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
@@ -17,8 +17,8 @@
      "yes_bid": 60,
      "yes_ask": 61,
      "last": 61,
-     "volume": "111846.20",
-     "volume_24h": "111245.56",
+     "volume": "272388.92",
+     "volume_24h": "160943.76",
      "close_time": "2026-10-27T00:00:00Z"
     },
     {
@@ -26,11 +26,11 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 40,
-     "yes_ask": 41,
-     "last": 41,
-     "volume": "38526.28",
-     "volume_24h": "38289.21",
+     "yes_bid": 39,
+     "yes_ask": 40,
+     "last": 40,
+     "volume": "111634.66",
+     "volume_24h": "72853.14",
      "close_time": "2026-10-27T00:00:00Z"
     }
    ]
@@ -46,11 +46,11 @@
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 57,
+     "yes_bid": 58,
      "yes_ask": 59,
      "last": 59,
-     "volume": "3879.12",
-     "volume_24h": "3828.55",
+     "volume": "9911.61",
+     "volume_24h": "6083.06",
      "close_time": "2026-10-28T00:00:00Z"
     },
     {
@@ -58,11 +58,11 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 44,
-     "yes_ask": 46,
+     "yes_bid": 43,
+     "yes_ask": 44,
      "last": 44,
-     "volume": "1696.33",
-     "volume_24h": "1676.33",
+     "volume": "4382.74",
+     "volume_24h": "2697.40",
      "close_time": "2026-10-28T00:00:00Z"
     }
    ]
@@ -78,11 +78,11 @@
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 44,
-     "yes_ask": 52,
-     "last": 52,
-     "volume": "2587.31",
-     "volume_24h": "2587.31",
+     "yes_bid": 46,
+     "yes_ask": 48,
+     "last": 48,
+     "volume": "6342.76",
+     "volume_24h": "3724.74",
      "close_time": "2026-10-30T00:00:00Z"
     },
     {
@@ -90,11 +90,11 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 50,
+     "yes_bid": 52,
      "yes_ask": 55,
-     "last": 57,
-     "volume": "955.50",
-     "volume_24h": "955.50",
+     "last": 54,
+     "volume": "2940.13",
+     "volume_24h": "1984.63",
      "close_time": "2026-10-30T00:00:00Z"
     }
    ]
@@ -110,11 +110,11 @@
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 54,
-     "yes_ask": 57,
-     "last": 57,
-     "volume": "1103.76",
-     "volume_24h": "1103.76",
+     "yes_bid": 52,
+     "yes_ask": 56,
+     "last": 52,
+     "volume": "3035.88",
+     "volume_24h": "1839.88",
      "close_time": "2026-10-31T00:00:00Z"
     },
     {
@@ -122,22 +122,32 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 40,
-     "yes_ask": 49,
+     "yes_bid": 46,
+     "yes_ask": 50,
      "last": 50,
-     "volume": "492.23",
-     "volume_24h": "492.23",
+     "volume": "1247.94",
+     "volume_24h": "555.68",
      "close_time": "2026-10-31T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-19T18:09:45Z",
- "moves": [],
- "new_games": [
-  "KXMLBGAME-26OCT232000TBMIL",
-  "KXMLBGAME-26OCT242000TBMIL",
-  "KXMLBGAME-26OCT262000MILTB",
-  "KXMLBGAME-26OCT272000MILTB"
- ]
+ "prev_at": "2026-10-20T17:50:34Z",
+ "moves": [
+  {
+   "event_ticker": "KXMLBGAME-26OCT272000MILTB",
+   "team": "Milwaukee",
+   "delta": -2,
+   "prev": 56,
+   "now": 54
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT272000MILTB",
+   "team": "Tampa Bay",
+   "delta": 3,
+   "prev": 45,
+   "now": 48
+  }
+ ],
+ "new_games": []
 }
