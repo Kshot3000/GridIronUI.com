@@ -336,7 +336,12 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    and the board now carries the same 14-game Week 8 slate plus the
    following 14-game slate (Oct 30-Nov 3Z) — 28 games in all. The pin
    still derives the count from the Oct 22-27Z window, so the band's
-   14-game Week 8 claim stays pinned to the real slate. */
+   14-game Week 8 claim stays pinned to the real slate. The Oct 23
+   snapshot settles the opener: Chicago beat New England 30-24 on
+   Thursday night at Soldier Field (Sportradar / USA Today / NBC
+   Sports Final), so that game dropped out and the window count is
+   now the 13-game remainder the band names (the copy still calls
+   the full slate 14-game). */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
