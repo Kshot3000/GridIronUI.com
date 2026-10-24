@@ -200,7 +200,9 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    and Game 4 Tue Oct 27, both in Tampa Bay). The count therefore rises
    to exactly 2 — both are World Series fixtures, not LCS games — and
    the per-pairing loop below requires the band to name the pairing
-   (the band names both full fixture titles). */
+   (the band names both full fixture titles). The Oct 24 snapshot still
+   carries exactly those two (Games 3/4 in Tampa Bay, Mon/Tue), so the
+   count holds at exactly 2. */
 ok(g1.length === 2, "kalshi-mlb.json carries exactly two Game 3/4 — the World Series games in Tampa Bay (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
@@ -214,7 +216,10 @@ g1.forEach(function(pairing){
    carries exactly one Game 2 again — but it is the World Series Game 2
    (Tampa Bay vs Milwaukee, Sat Oct 24 in Milwaukee), not an LCS game:
    the pin flips back to naming the one real fixture's full title, and
-   the settled-fixture ban below still bars both LCS Game 2 titles. */
+   the settled-fixture ban below still bars both LCS Game 2 titles. The
+   Oct 24 snapshot still carries exactly that one Game 2 — it is
+   tonight's game in Milwaukee (Rasmussen vs Henderson) — so the pin
+   holds unchanged. */
 var lcs2 = mlb.games.filter(function(g){ return /^Game 2:/.test(g.title); })
                  .map(function(g){ return g.title; });
 ok(lcs2.length === 1, "kalshi-mlb.json carries exactly one Game 2 — the World Series game (" + lcs2.length + " found)");
@@ -245,15 +250,17 @@ lcs2.forEach(function(title){
    carries exactly one Game 1 again — the World Series opener (Tampa Bay
    vs Milwaukee, Fri Oct 23 in Milwaukee) — so this pin flips back to
    requiring the band to name that one fixture's full title, while the
-   ban list right below still bars both LCS Game 1 titles. */
+   ban list right below still bars both LCS Game 1 titles. The Oct 24
+   snapshot settles the opener: Milwaukee won Game 1 3-2 on Friday night
+   in Milwaukee (Sportradar / Reuters / USA Today Final) to lead the
+   Series 1-0, so Game 1 dropped out and the pin inverts again — the
+   snapshot carries no Game 1, its fixture title joins the ban list
+   below, and the band reports it as a result, never as a fixture. */
 var g1s = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g1s.length === 1, "kalshi-mlb.json carries exactly one Game 1 — the World Series opener (" + g1s.length + " found)");
-g1s.forEach(function(title){
-  ok(band.indexOf(title) >= 0,
-     "spotlight names the real Game 1 fixture: " + title);
-});
-ok(band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
+ok(g1s.length === 0, "kalshi-mlb.json carries no Game 1 — the World Series opener is settled, Milwaukee 3-2 (Final) (" + g1s.length + " found)");
+ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
+   band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 1: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
