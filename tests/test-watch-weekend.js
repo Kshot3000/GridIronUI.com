@@ -4,8 +4,8 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the World Series Game 1/2/3/4 fixtures come from
-   data/kalshi-mlb.json and the Week 8 game count from data/kalshi-nfl.json.
+   the World Series Game 3/4 fixtures come from
+   data/kalshi-mlb.json and the Week 8/9 game counts from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -153,12 +153,12 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-10-19"[^>]*data-end="2026-10-26"[^>]*hidden/.test(html) ||
-   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-19"') >= 0,
-   "spotlight band ships hidden with the Oct 19-26 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-10-25"[^>]*data-end="2026-11-02"[^>]*hidden/.test(html) ||
+   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-25"') >= 0,
+   "spotlight band ships hidden with the Oct 25-Nov 2 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Oct 19–26 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Oct 25–Nov 2 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
@@ -202,7 +202,9 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    the per-pairing loop below requires the band to name the pairing
    (the band names both full fixture titles). The Oct 24 snapshot still
    carries exactly those two (Games 3/4 in Tampa Bay, Mon/Tue), so the
-   count holds at exactly 2. */
+   count holds at exactly 2. The Oct 25 snapshot still carries exactly
+   those two (Games 3/4 in Tampa Bay, Mon/Tue) after Game 2 settled, so
+   the count holds at exactly 2. */
 ok(g1.length === 2, "kalshi-mlb.json carries exactly two Game 3/4 — the World Series games in Tampa Bay (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
@@ -219,14 +221,15 @@ g1.forEach(function(pairing){
    the settled-fixture ban below still bars both LCS Game 2 titles. The
    Oct 24 snapshot still carries exactly that one Game 2 — it is
    tonight's game in Milwaukee (Rasmussen vs Henderson) — so the pin
-   holds unchanged. */
+   holds unchanged. The Oct 25 snapshot settles it: Milwaukee rallied
+   from 4-0 down to beat Tampa Bay 5-4 on Saturday night in Milwaukee
+   (Sportradar / Reuters / USA Today Final) to lead the Series 2-0, so
+   Game 2 dropped out and the pin inverts again — the snapshot carries
+   no Game 2, its fixture title joins the ban list in the Game 1 block
+   below, and the band reports it as a result, never as a fixture. */
 var lcs2 = mlb.games.filter(function(g){ return /^Game 2:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(lcs2.length === 1, "kalshi-mlb.json carries exactly one Game 2 — the World Series game (" + lcs2.length + " found)");
-lcs2.forEach(function(title){
-  ok(band.indexOf(title) >= 0,
-     "spotlight names the real Game 2 fixture: " + title);
-});
+ok(lcs2.length === 0, "kalshi-mlb.json carries no Game 2 — the World Series Game 2 is settled, Milwaukee 5-4 (Final) (" + lcs2.length + " found)");
 /* The LCS openers the previous band headlined are settled now — Milwaukee
    won NLCS Game 1 2-1 and Game 2 7-4, Cleveland won ALCS Game 1 7-3 (all
    ESPN Finals) — so the snapshot carries no Game 1 title at all and the
@@ -255,13 +258,16 @@ lcs2.forEach(function(title){
    in Milwaukee (Sportradar / Reuters / USA Today Final) to lead the
    Series 1-0, so Game 1 dropped out and the pin inverts again — the
    snapshot carries no Game 1, its fixture title joins the ban list
-   below, and the band reports it as a result, never as a fixture. */
+   below, and the band reports it as a result, never as a fixture. The
+   Oct 25 snapshot holds that state (the band rolls to its Oct 25-Nov 2
+   window with Game 1 still reported as Friday's 3-2 result). */
 var g1s = mlb.games.filter(function(g){ return /^Game 1:/.test(g.title); })
                  .map(function(g){ return g.title; });
 ok(g1s.length === 0, "kalshi-mlb.json carries no Game 1 — the World Series opener is settled, Milwaukee 3-2 (Final) (" + g1s.length + " found)");
 ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    band.indexOf("Game 1: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 1: Cleveland vs Tampa Bay") === -1 &&
+   band.indexOf("Game 2: Tampa Bay vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1 &&
@@ -295,7 +301,10 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    World Series Game 5/6 is listed yet (Kalshi lists the if-needed
    games only as the Series reaches them, as in past rounds) — the
    Game 6 pin inverts like the others: the snapshot carries no Game 6
-   at all and the band reports Game 6 as a result, never as a fixture. */
+   at all and the band reports Game 6 as a result, never as a fixture.
+   The Oct 25 snapshot holds that state even with Milwaukee up 2-0 in
+   the World Series: no if-needed World Series Game 5 or 6 is listed
+   yet, so both pins stay at exactly 0. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
 ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the ALCS Game 5 is settled and no World Series Game 5 is listed yet (" + g5.length + " found)");
@@ -348,12 +357,27 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    Thursday night at Soldier Field (Sportradar / USA Today / NBC
    Sports Final), so that game dropped out and the window count is
    now the 13-game remainder the band names (the copy still calls
-   the full slate 14-game). */
+   the full slate 14-game). The Oct 25 snapshot drops one more:
+   Pittsburgh beat New Orleans 16-10 on Sunday morning in Paris
+   (Sportradar / Reuters / USA Today Final — the NFL's first game in
+   France; external sources label it Week 7, the site's slate calls
+   it Week 8, the same naming split as the Chicago opener), so the
+   window count is now the 12-game remainder the band names. The
+   band's new Oct 25-Nov 2 window also names Week 9's slate — games
+   occurring Oct 30-Nov 3Z (Thu Oct 29 night in Green Bay through
+   Mon Nov 2 night in Seattle, US time) — so a second pin below
+   derives that count from its occurrence window too: the Oct 25
+   snapshot carries the full 14-game Week 9 slate. */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
 ok(band.indexOf(week8.length + "-game") >= 0,
    "spotlight's Week 8 game count matches the Kalshi NFL snapshot (" + week8.length + " games in the Oct 22-27Z window)");
+var week9 = nfl.games.filter(function(g){
+  return g.occ >= "2026-10-30T00:00:00Z" && g.occ < "2026-11-04T00:00:00Z";
+});
+ok(band.indexOf(week9.length + "-game") >= 0,
+   "spotlight's Week 9 game count matches the Kalshi NFL snapshot (" + week9.length + " games in the Oct 30-Nov 3Z window)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
