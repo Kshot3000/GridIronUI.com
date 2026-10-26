@@ -204,7 +204,8 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    carries exactly those two (Games 3/4 in Tampa Bay, Mon/Tue), so the
    count holds at exactly 2. The Oct 25 snapshot still carries exactly
    those two (Games 3/4 in Tampa Bay, Mon/Tue) after Game 2 settled, so
-   the count holds at exactly 2. */
+   the count holds at exactly 2. The Oct 26 snapshot holds that state
+   on Game 3 day — Games 3/4 only, Game 3 tonight in Tampa Bay. */
 ok(g1.length === 2, "kalshi-mlb.json carries exactly two Game 3/4 — the World Series games in Tampa Bay (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
@@ -304,7 +305,8 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    at all and the band reports Game 6 as a result, never as a fixture.
    The Oct 25 snapshot holds that state even with Milwaukee up 2-0 in
    the World Series: no if-needed World Series Game 5 or 6 is listed
-   yet, so both pins stay at exactly 0. */
+   yet, so both pins stay at exactly 0. The Oct 26 snapshot holds it
+   too, on Game 3 day. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
 ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the ALCS Game 5 is settled and no World Series Game 5 is listed yet (" + g5.length + " found)");
@@ -367,7 +369,13 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    occurring Oct 30-Nov 3Z (Thu Oct 29 night in Green Bay through
    Mon Nov 2 night in Seattle, US time) — so a second pin below
    derives that count from its occurrence window too: the Oct 25
-   snapshot carries the full 14-game Week 9 slate. */
+   snapshot carries the full 14-game Week 9 slate. The Oct 26
+   snapshot settles Sunday's 11 games — including Seattle's 20-3
+   Sunday-night win over Kansas City (Reuters / Sportradar /
+   USA Today Final, the Chiefs' first loss of the season) — so the
+   Oct 22-27Z window count is now the 1-game remainder the band
+   names: tonight's Monday-night closer, Dallas at Philadelphia.
+   Week 9's window count holds at the full 14. */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
