@@ -205,8 +205,14 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    count holds at exactly 2. The Oct 25 snapshot still carries exactly
    those two (Games 3/4 in Tampa Bay, Mon/Tue) after Game 2 settled, so
    the count holds at exactly 2. The Oct 26 snapshot holds that state
-   on Game 3 day — Games 3/4 only, Game 3 tonight in Tampa Bay. */
-ok(g1.length === 2, "kalshi-mlb.json carries exactly two Game 3/4 — the World Series games in Tampa Bay (" + g1.length + " found)");
+   on Game 3 day — Games 3/4 only, Game 3 tonight in Tampa Bay.
+   The Oct 27 snapshot settles Game 3: Milwaukee won it 10-1 on
+   Monday night in Tampa Bay (Sportradar / USA Today Final) to lead
+   the Series 3-0, so Game 3 dropped out and only Game 4 remains —
+   the count falls to exactly 1, Game 4 is tonight in Tampa Bay with
+   Milwaukee one win from its first title, and Game 3's fixture
+   title joins the settled ban list in the Game 1 block below. */
+ok(g1.length === 1, "kalshi-mlb.json carries exactly one Game 3/4 — World Series Game 4 in Tampa Bay, Game 3 settled Milwaukee 10-1 (Final) (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
@@ -271,6 +277,7 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Tampa Bay vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
+   band.indexOf("Game 3: Milwaukee vs Tampa Bay") === -1 &&
    band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1 &&
    band.indexOf("Game 3: Tampa Bay vs Cleveland") === -1 &&
    band.indexOf("Game 4: Milwaukee vs Los Angeles D") === -1 &&
@@ -306,7 +313,9 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    The Oct 25 snapshot holds that state even with Milwaukee up 2-0 in
    the World Series: no if-needed World Series Game 5 or 6 is listed
    yet, so both pins stay at exactly 0. The Oct 26 snapshot holds it
-   too, on Game 3 day. */
+   too, on Game 3 day. The Oct 27 snapshot holds it again even with
+   Milwaukee up 3-0 and a sweep possible tonight: no if-needed
+   World Series Game 5 or 6 is listed yet, so both pins stay 0. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
 ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the ALCS Game 5 is settled and no World Series Game 5 is listed yet (" + g5.length + " found)");
@@ -375,12 +384,22 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    USA Today Final, the Chiefs' first loss of the season) — so the
    Oct 22-27Z window count is now the 1-game remainder the band
    names: tonight's Monday-night closer, Dallas at Philadelphia.
-   Week 9's window count holds at the full 14. */
+   Week 9's window count holds at the full 14. The Oct 27 snapshot
+   closes Week 8: Dallas beat Philadelphia 38-21 on Monday night
+   (Sportradar / NBC Sports / Reuters / USA Today Final), so that
+   closer dropped out and NO game remains in the Oct 22-27Z window.
+   The pin inverts, following the Week 7 closer precedent: the
+   snapshot count is pinned at exactly 0, the band reports Week 8
+   as closed with the MNF result and names no Week 8 remainder
+   count at all (a "0-game" claim would be nonsense copy), and the
+   "-game" count the band does name is Week 9's, pinned below. */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
-ok(band.indexOf(week8.length + "-game") >= 0,
-   "spotlight's Week 8 game count matches the Kalshi NFL snapshot (" + week8.length + " games in the Oct 22-27Z window)");
+ok(week8.length === 0,
+   "kalshi-nfl.json carries no Week 8 game — the slate closed with Dallas 38-21 at Philadelphia on Monday night (Final) (" + week8.length + " games in the Oct 22-27Z window)");
+ok(band.indexOf("Week 8 closed Monday night") >= 0,
+   "spotlight reports Week 8 as closed, with no remainder count");
 var week9 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-30T00:00:00Z" && g.occ < "2026-11-04T00:00:00Z";
 });

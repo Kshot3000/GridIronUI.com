@@ -1,40 +1,8 @@
 {
- "updated_at": "2026-10-26T17:49:46Z",
+ "updated_at": "2026-10-27T17:50:03Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
-  {
-   "event_ticker": "KXMLBGAME-26OCT262000MILTB",
-   "title": "Game 3: Milwaukee vs Tampa Bay",
-   "sub_title": "MIL vs TB (Oct 26)",
-   "occ": "2026-10-27T03:00:00Z",
-   "markets": [
-    {
-     "ticker": "KXMLBGAME-26OCT262000MILTB-MIL",
-     "title": "Milwaukee wins",
-     "kind": "winner",
-     "team": "Milwaukee",
-     "yes_bid": 47,
-     "yes_ask": 48,
-     "last": 48,
-     "volume": "1118591.66",
-     "volume_24h": "796133.26",
-     "close_time": "2026-10-30T00:00:00Z"
-    },
-    {
-     "ticker": "KXMLBGAME-26OCT262000MILTB-TB",
-     "title": "Tampa Bay wins",
-     "kind": "winner",
-     "team": "Tampa Bay",
-     "yes_bid": 52,
-     "yes_ask": 53,
-     "last": 53,
-     "volume": "713524.06",
-     "volume_24h": "572343.34",
-     "close_time": "2026-10-30T00:00:00Z"
-    }
-   ]
-  },
   {
    "event_ticker": "KXMLBGAME-26OCT272000MILTB",
    "title": "Game 4: Milwaukee vs Tampa Bay",
@@ -46,11 +14,11 @@
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 50,
-     "yes_ask": 51,
-     "last": 51,
-     "volume": "62908.74",
-     "volume_24h": "23052.29",
+     "yes_bid": 53,
+     "yes_ask": 54,
+     "last": 54,
+     "volume": "2271350.05",
+     "volume_24h": "2184828.84",
      "close_time": "2026-10-31T00:00:00Z"
     },
     {
@@ -58,24 +26,31 @@
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 51,
-     "yes_ask": 53,
-     "last": 51,
-     "volume": "18542.72",
-     "volume_24h": "9855.28",
+     "yes_bid": 46,
+     "yes_ask": 47,
+     "last": 47,
+     "volume": "746791.94",
+     "volume_24h": "716549.83",
      "close_time": "2026-10-31T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-25T17:49:37Z",
+ "prev_at": "2026-10-26T17:49:46Z",
  "moves": [
   {
    "event_ticker": "KXMLBGAME-26OCT272000MILTB",
+   "team": "Milwaukee",
+   "delta": 3,
+   "prev": 51,
+   "now": 54
+  },
+  {
+   "event_ticker": "KXMLBGAME-26OCT272000MILTB",
    "team": "Tampa Bay",
-   "delta": 4,
-   "prev": 48,
-   "now": 52
+   "delta": -5,
+   "prev": 52,
+   "now": 47
   }
  ],
  "new_games": []
