@@ -1,57 +1,44 @@
 {
- "updated_at": "2026-10-27T17:50:03Z",
+ "updated_at": "2026-10-28T17:50:05Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [
   {
-   "event_ticker": "KXMLBGAME-26OCT272000MILTB",
-   "title": "Game 4: Milwaukee vs Tampa Bay",
-   "sub_title": "MIL vs TB (Oct 27)",
-   "occ": "2026-10-28T03:00:00Z",
+   "event_ticker": "KXMLBGAME-26OCT282000MILTB",
+   "title": "Game 5: Milwaukee vs Tampa Bay",
+   "sub_title": "MIL vs TB (Oct 28)",
+   "occ": "2026-10-29T03:00:00Z",
    "markets": [
     {
-     "ticker": "KXMLBGAME-26OCT272000MILTB-MIL",
+     "ticker": "KXMLBGAME-26OCT282000MILTB-MIL",
      "title": "Milwaukee wins",
      "kind": "winner",
      "team": "Milwaukee",
-     "yes_bid": 53,
-     "yes_ask": 54,
-     "last": 54,
-     "volume": "2271350.05",
-     "volume_24h": "2184828.84",
-     "close_time": "2026-10-31T00:00:00Z"
+     "yes_bid": 59,
+     "yes_ask": 60,
+     "last": 60,
+     "volume": "1036929.66",
+     "volume_24h": "1021921.25",
+     "close_time": "2026-11-01T00:00:00Z"
     },
     {
-     "ticker": "KXMLBGAME-26OCT272000MILTB-TB",
+     "ticker": "KXMLBGAME-26OCT282000MILTB-TB",
      "title": "Tampa Bay wins",
      "kind": "winner",
      "team": "Tampa Bay",
-     "yes_bid": 46,
-     "yes_ask": 47,
-     "last": 47,
-     "volume": "746791.94",
-     "volume_24h": "716549.83",
-     "close_time": "2026-10-31T00:00:00Z"
+     "yes_bid": 40,
+     "yes_ask": 41,
+     "last": 41,
+     "volume": "387824.58",
+     "volume_24h": "383382.30",
+     "close_time": "2026-11-01T00:00:00Z"
     }
    ]
   }
  ],
- "prev_at": "2026-10-26T17:49:46Z",
- "moves": [
-  {
-   "event_ticker": "KXMLBGAME-26OCT272000MILTB",
-   "team": "Milwaukee",
-   "delta": 3,
-   "prev": 51,
-   "now": 54
-  },
-  {
-   "event_ticker": "KXMLBGAME-26OCT272000MILTB",
-   "team": "Tampa Bay",
-   "delta": -5,
-   "prev": 52,
-   "now": 47
-  }
- ],
- "new_games": []
+ "prev_at": "2026-10-27T17:50:03Z",
+ "moves": [],
+ "new_games": [
+  "KXMLBGAME-26OCT282000MILTB"
+ ]
 }

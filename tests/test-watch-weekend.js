@@ -4,7 +4,7 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the World Series Game 3/4 fixtures come from
+   the World Series Game 5 fixture comes from
    data/kalshi-mlb.json and the Week 8/9 game counts from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
@@ -211,8 +211,18 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    the Series 3-0, so Game 3 dropped out and only Game 4 remains —
    the count falls to exactly 1, Game 4 is tonight in Tampa Bay with
    Milwaukee one win from its first title, and Game 3's fixture
-   title joins the settled ban list in the Game 1 block below. */
-ok(g1.length === 1, "kalshi-mlb.json carries exactly one Game 3/4 — World Series Game 4 in Tampa Bay, Game 3 settled Milwaukee 10-1 (Final) (" + g1.length + " found)");
+   title joins the settled ban list in the Game 1 block below.
+   The Oct 28 snapshot settles Game 4: Tampa Bay won it 4-3 in 12
+   innings on Tuesday night in Tampa Bay (Sportradar / Reuters /
+   USA Today Final) to cut Milwaukee's lead to 3-1, so Game 4
+   dropped out too and the count falls to exactly 0 — the pin
+   inverts: the snapshot must carry no Game 3/4 title, Game 4's
+   fixture title joins the settled ban list in the Game 1 block
+   below, and the band reports Game 4 as a result (Pratt's 12th-
+   inning homer answered by DeLuca's tying single and Williamson's
+   walk-off), never as a fixture. The one fixture on the board is
+   Game 5, pinned in the Game 5 block below. */
+ok(g1.length === 0, "kalshi-mlb.json carries no Game 3/4 — World Series Game 4 is settled, Tampa Bay 4-3 in 12 innings (Final), and Game 3 settled Milwaukee 10-1 (Final) (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
      "spotlight names the real Game 3/4 pairing: " + pairing);
@@ -278,6 +288,7 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Los Angeles D vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 3: Milwaukee vs Tampa Bay") === -1 &&
+   band.indexOf("Game 4: Milwaukee vs Tampa Bay") === -1 &&
    band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1 &&
    band.indexOf("Game 3: Tampa Bay vs Cleveland") === -1 &&
    band.indexOf("Game 4: Milwaukee vs Los Angeles D") === -1 &&
@@ -315,10 +326,22 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    yet, so both pins stay at exactly 0. The Oct 26 snapshot holds it
    too, on Game 3 day. The Oct 27 snapshot holds it again even with
    Milwaukee up 3-0 and a sweep possible tonight: no if-needed
-   World Series Game 5 or 6 is listed yet, so both pins stay 0. */
+   World Series Game 5 or 6 is listed yet, so both pins stay 0.
+   The Oct 28 snapshot flips the Game 5 pin: Tampa Bay won Game 4
+   4-3 in 12 innings on Tuesday night (Final) to stay alive at 3-1,
+   so Game 5 is real and Kalshi lists exactly one — "Game 5:
+   Milwaukee vs Tampa Bay" (sub_title "MIL vs TB (Oct 28)"), tonight
+   in Tampa Bay with Misiorowski starting for Milwaukee and Tampa
+   Bay's starter unannounced. The pin flips to exactly 1 and the
+   band must name its full fixture title; the Game 6 pin below
+   stays at 0 (Game 6 is listed only if Tampa Bay wins tonight). */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — the ALCS Game 5 is settled and no World Series Game 5 is listed yet (" + g5.length + " found)");
+ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — World Series Game 5 in Tampa Bay tonight, the ALCS Game 5 settled (" + g5.length + " found)");
+g5.forEach(function(title){
+  ok(band.indexOf(title) >= 0,
+     "spotlight names the real Game 5 fixture: " + title);
+});
 ok(band.indexOf("Game 5: Tampa Bay vs Cleveland") === -1,
    "spotlight no longer lists the settled ALCS Game 5 as a fixture");
 var g6 = mlb.games.filter(function(g){ return /^Game 6:/.test(g.title); })
