@@ -16,7 +16,12 @@
    NYY@TB, SD@MIL) are the board. Pinning the fixture by pair would keep
    expiring; deriving it from whatever is actually on the board survives
    every rotation, and the test fails loudly if the board ever has nothing
-   live to exercise.
+   live to exercise. The 2026 MLB season ended Oct 28 (Milwaukee won the
+   World Series in Game 5), so the Oct 29 MLB snapshot is honestly EMPTY:
+   the fixture source rotates to the in-season NFL board below — the
+   settled-filter behaviour under test is league-agnostic (the directory
+   is built from the fixture's own markets), and the MLB board resumes
+   as the source the moment it lists games again.
    Run: node tests/test-disagree-settled.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -47,12 +52,21 @@ assert(card.indexOf("(snap.games||[])") !== -1,
    the test. */
 var snap = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-mlb.json"), "utf8"));
 var live = (snap.games||[]).filter(function(g){ return !K.settled(g); });
+var fixtureSource = "MLB";
+if(!live.length){
+  /* Offseason rotation (Oct 29): the MLB board is empty because the
+     season is over, so derive the fixture from the in-season NFL board
+     instead of failing on an honest empty snapshot. */
+  var nflSnap = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"), "utf8"));
+  live = (nflSnap.games||[]).filter(function(g){ return !K.settled(g); });
+  fixtureSource = "NFL (MLB offseason — board empty, season ended Oct 28)";
+}
 /* One live game is enough: the fixture below is cloned from it and the clone
    supplies the settled entry, so the scenario never needed two distinct
    games. The >= 2 floor was written while the snapshot carried several LCS
    games; the Oct 18 snapshot carries exactly one — ALCS Game 5, the last
    game before the World Series — so the floor honestly drops to 1. */
-assert(live.length >= 1, "MLB snapshot has live games to work with (got "+live.length+")");
+assert(live.length >= 1, "Kalshi snapshot has live games to work with — source: " + fixtureSource + " (got "+live.length+")");
 assert(live.every(function(g){ return !K.settled(g); }),
   "no real live game is flagged settled");
 function liveWinners(g){

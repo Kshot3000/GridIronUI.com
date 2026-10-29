@@ -32,8 +32,17 @@ assert(ageH >= 0 && ageH < 48,
   "data/kalshi-mlb.json is fresh (captured " + ageH.toFixed(1) + "h ago)");
 assert(snap.series_ticker === "KXMLBGAME",
   "snapshot series_ticker is KXMLBGAME");
-assert(Array.isArray(snap.games) && snap.games.length > 0,
-  "snapshot has a non-empty games array (" + snap.games.length + " games)");
+/* Season-state pin, following the snapshot: while the postseason runs the
+   board is non-empty, but Milwaukee beat Tampa Bay 4-1 in World Series
+   Game 5 on Oct 28 (Reuters / USA Today Final) to win its first title, so
+   the Oct 29 snapshot honestly carries ZERO games — Kalshi delisted the
+   decided series. The pin inverts to exactly 0 for the offseason; the
+   per-game shape checks below apply to whatever games a future snapshot
+   carries (vacuously true on an empty board), and the next postseason
+   refresh re-pins this count. An empty array is real data here, never a
+   reason to invent games. */
+assert(Array.isArray(snap.games) && snap.games.length === 0,
+  "snapshot games array is empty — the 2026 postseason is over, Milwaukee won the World Series 4-1 on Oct 28 (" + snap.games.length + " games)");
 var bad = snap.games.filter(function(g){
   return typeof g.event_ticker !== "string" || g.event_ticker.indexOf("KXMLBGAME-") !== 0 ||
          !Array.isArray(g.markets) || g.markets.length !== 2 ||

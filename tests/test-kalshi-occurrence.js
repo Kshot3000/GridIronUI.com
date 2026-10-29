@@ -118,7 +118,13 @@ assert(!/Kickoff/.test(predFbJs), "predictions-fallback.js contains no Kickoff r
 /* ---- shipped snapshots: every game carries an occ, never a "start" ---- */
 ["data/kalshi-nfl.json", "data/kalshi-mlb.json", "data/kalshi-ncaaf.json"].forEach(function(rel){
   var s = JSON.parse(read(rel));
-  assert(Array.isArray(s.games) && s.games.length > 0, rel + " has games");
+  /* The MLB board may honestly be empty in the offseason: Milwaukee won
+     the 2026 World Series on Oct 28 and Kalshi delisted the series, so
+     the Oct 29 MLB snapshot carries 0 games. NFL/NCAAF must be non-empty
+     in season; every per-game occ check below is vacuously true on an
+     empty board. */
+  assert(Array.isArray(s.games) && (s.games.length > 0 || rel.indexOf("kalshi-mlb") !== -1),
+    rel + " has games" + (s.games.length === 0 ? " (MLB offseason: board empty, season over)" : ""));
   assert(s.games.every(function(g){ return K.occMs(g) !== null; }),
     rel + ": every game carries a parseable occ");
   assert(s.games.every(function(g){ return !("start" in g); }),
@@ -141,7 +147,7 @@ function key(html, file){
   return m && m[1];
 }
 assert(key(read("markets.html"), "kalshi-logic.js") === "2.0.13", "markets.html kalshi-logic key is v2.0.13");
-assert(key(read("markets.html"), "markets.js") === "2.0.13", "markets.html markets.js key is v2.0.13");
+assert(key(read("markets.html"), "markets.js") === "2.0.44", "markets.html markets.js key is v2.0.44");
 assert(key(read("odds.html"), "kalshi-logic.js") === "2.0.13", "odds.html kalshi-logic key is v2.0.13");
 assert(key(read("odds.html"), "odds-logic.js") === "2.0.13", "odds.html odds-logic key is v2.0.13");
 assert(key(read("matchup.html"), "odds-logic.js") === "2.0.13", "matchup.html odds-logic key is v2.0.13");

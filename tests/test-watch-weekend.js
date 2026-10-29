@@ -4,8 +4,9 @@
    #weekend-spotlight band (shown only inside its data-start/data-end window,
    removes itself outside it). Also pins the editorial claims in the spotlight
    against the real data files so the copy can never drift from the snapshot:
-   the World Series Game 5 fixture comes from
-   data/kalshi-mlb.json and the Week 8/9 game counts from data/kalshi-nfl.json.
+   the World Series state comes from data/kalshi-mlb.json (empty since
+   Milwaukee won the Series in Game 5 on Oct 28) and the Week 8/9 game
+   counts from data/kalshi-nfl.json.
    Run: node tests/test-watch-weekend.js */
 "use strict";
 var fs = require("fs"), path = require("path");
@@ -220,8 +221,10 @@ var g1 = mlb.games.filter(function(g){ return /^Game [34]:/.test(g.title); })
    fixture title joins the settled ban list in the Game 1 block
    below, and the band reports Game 4 as a result (Pratt's 12th-
    inning homer answered by DeLuca's tying single and Williamson's
-   walk-off), never as a fixture. The one fixture on the board is
-   Game 5, pinned in the Game 5 block below. */
+   walk-off), never as a fixture. The one fixture then on the
+   board was Game 5, pinned in the Game 5 block below — and the
+   Oct 29 snapshot settles Game 5 too (Milwaukee 4-1, champions),
+   leaving the MLB board empty; see the Game 5 block. */
 ok(g1.length === 0, "kalshi-mlb.json carries no Game 3/4 — World Series Game 4 is settled, Tampa Bay 4-3 in 12 innings (Final), and Game 3 settled Milwaukee 10-1 (Final) (" + g1.length + " found)");
 g1.forEach(function(pairing){
   ok(band.indexOf(pairing) >= 0,
@@ -289,6 +292,7 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    band.indexOf("Game 2: Cleveland vs Tampa Bay") === -1 &&
    band.indexOf("Game 3: Milwaukee vs Tampa Bay") === -1 &&
    band.indexOf("Game 4: Milwaukee vs Tampa Bay") === -1 &&
+   band.indexOf("Game 5: Milwaukee vs Tampa Bay") === -1 &&
    band.indexOf("Game 3: Milwaukee vs Los Angeles D") === -1 &&
    band.indexOf("Game 3: Tampa Bay vs Cleveland") === -1 &&
    band.indexOf("Game 4: Milwaukee vs Los Angeles D") === -1 &&
@@ -334,19 +338,33 @@ ok(band.indexOf("Game 1: Tampa Bay vs Milwaukee") === -1 &&
    in Tampa Bay with Misiorowski starting for Milwaukee and Tampa
    Bay's starter unannounced. The pin flips to exactly 1 and the
    band must name its full fixture title; the Game 6 pin below
-   stays at 0 (Game 6 is listed only if Tampa Bay wins tonight). */
+   stays at 0 (Game 6 is listed only if Tampa Bay wins tonight).
+   The Oct 29 snapshot settles it the other way: Milwaukee won
+   Game 5 on Wednesday night 4-1 (Sportradar / Reuters / USA
+   Today Final) to win the Series 4-1 and the first World Series
+   title in franchise history — Misiorowski 5 2/3 scoreless
+   innings, Pratt two hits and two RBIs, Contreras the Series
+   MVP — so Game 5 dropped out, Kalshi's MLB board is EMPTY
+   (0 games), the pin inverts to exactly 0 like every settled
+   pin before it, Game 5's fixture title joins the ban list in
+   the Game 1 block above, and the band reports the championship
+   as a result (with the MVP line), never as a fixture. No Game 6
+   was ever listed or needed; the Game 6 pin stays at 0. */
 var g5 = mlb.games.filter(function(g){ return /^Game 5:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g5.length === 1, "kalshi-mlb.json carries exactly one Game 5 — World Series Game 5 in Tampa Bay tonight, the ALCS Game 5 settled (" + g5.length + " found)");
+ok(g5.length === 0, "kalshi-mlb.json carries no Game 5 — World Series Game 5 is settled, Milwaukee 4-1 (Final) to win its first title 4-1, and the ALCS Game 5 settled long ago (" + g5.length + " found)");
 g5.forEach(function(title){
   ok(band.indexOf(title) >= 0,
      "spotlight names the real Game 5 fixture: " + title);
 });
+ok(band.indexOf("won Game 5 4–1") >= 0 && band.indexOf("World Series MVP") >= 0 &&
+   band.indexOf("no Games 6 or 7 are needed") >= 0,
+   "spotlight reports the World Series championship as a result: Milwaukee won Game 5 4-1, Contreras MVP, no Games 6/7 needed");
 ok(band.indexOf("Game 5: Tampa Bay vs Cleveland") === -1,
    "spotlight no longer lists the settled ALCS Game 5 as a fixture");
 var g6 = mlb.games.filter(function(g){ return /^Game 6:/.test(g.title); })
                  .map(function(g){ return g.title; });
-ok(g6.length === 0, "kalshi-mlb.json carries no Game 6 — the ALCS Game 6 is settled and no World Series Game 6 is listed yet (" + g6.length + " found)");
+ok(g6.length === 0, "kalshi-mlb.json carries no Game 6 — the ALCS Game 6 is settled and no World Series Game 6 was ever listed or needed, Milwaukee having won the Series in five (" + g6.length + " found)");
 ok(band.indexOf("Game 6: Cleveland vs Tampa Bay") === -1,
    "spotlight no longer lists the settled ALCS Game 6 as a fixture");
 ok(band.indexOf("Game 5: Chicago WS vs Cleveland") === -1,

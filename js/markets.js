@@ -35,7 +35,7 @@ var KALSHI_TABS = {
   nfl: {file: "data/kalshi-nfl.json", name: "NFL", dirKey: "nfl",
         empty: "No priced Kalshi NFL game markets in the current snapshot. Markets cluster around game days — check back mid-week."},
   mlb: {file: "data/kalshi-mlb.json", name: "MLB", dirKey: "mlb",
-        empty: "No priced Kalshi MLB game markets in the current snapshot. The MLB tab tracks the postseason — check back in October."},
+        empty: "No priced Kalshi MLB game markets in the current snapshot. The MLB tab tracks the postseason, which ended with Milwaukee's World Series win on Oct 28 — it returns next October."},
   /* dirKey "ncaaf" is deliberately NOT in the team directory (data/teams.json
      covers the pro leagues + EPL only): vsHeader resolves neither side and
      the card falls back to its plain title, which for college games carries

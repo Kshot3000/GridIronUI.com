@@ -260,8 +260,8 @@ settle(function(){
 
         /* ---------- Part C: shipped-file pins ---------- */
         var mkHtml = fs.readFileSync(path.join(ROOT, "markets.html"), "utf8");
-        ok("markets.html pins js/markets.js?v=2.0.13",
-           mkHtml.indexOf('js/markets.js?v=2.0.13') !== -1);
+        ok("markets.html pins js/markets.js?v=2.0.44",
+           mkHtml.indexOf('js/markets.js?v=2.0.44') !== -1);
         ok("markets.html pins js/kalshi-logic.js?v=2.0.13",
            mkHtml.indexOf('js/kalshi-logic.js?v=2.0.13') !== -1);
         ok("markets.html carries the pulse-card styles",

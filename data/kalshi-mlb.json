@@ -1,44 +1,9 @@
 {
- "updated_at": "2026-10-28T17:50:05Z",
+ "updated_at": "2026-10-29T17:51:09Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
- "games": [
-  {
-   "event_ticker": "KXMLBGAME-26OCT282000MILTB",
-   "title": "Game 5: Milwaukee vs Tampa Bay",
-   "sub_title": "MIL vs TB (Oct 28)",
-   "occ": "2026-10-29T03:00:00Z",
-   "markets": [
-    {
-     "ticker": "KXMLBGAME-26OCT282000MILTB-MIL",
-     "title": "Milwaukee wins",
-     "kind": "winner",
-     "team": "Milwaukee",
-     "yes_bid": 59,
-     "yes_ask": 60,
-     "last": 60,
-     "volume": "1036929.66",
-     "volume_24h": "1021921.25",
-     "close_time": "2026-11-01T00:00:00Z"
-    },
-    {
-     "ticker": "KXMLBGAME-26OCT282000MILTB-TB",
-     "title": "Tampa Bay wins",
-     "kind": "winner",
-     "team": "Tampa Bay",
-     "yes_bid": 40,
-     "yes_ask": 41,
-     "last": 41,
-     "volume": "387824.58",
-     "volume_24h": "383382.30",
-     "close_time": "2026-11-01T00:00:00Z"
-    }
-   ]
-  }
- ],
- "prev_at": "2026-10-27T17:50:03Z",
+ "games": [],
+ "prev_at": "2026-10-28T17:50:05Z",
  "moves": [],
- "new_games": [
-  "KXMLBGAME-26OCT282000MILTB"
- ]
+ "new_games": []
 }
