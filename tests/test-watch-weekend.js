@@ -433,7 +433,21 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    snapshot count is pinned at exactly 0, the band reports Week 8
    as closed with the MNF result and names no Week 8 remainder
    count at all (a "0-game" claim would be nonsense copy), and the
-   "-game" count the band does name is Week 9's, pinned below. */
+   "-game" count the band does name is Week 9's, pinned below.
+   The Oct 30 snapshot settles the Week 9 opener: Green Bay beat
+   Carolina 27-19 on Thursday night at Lambeau Field (Sportradar /
+   Reuters / USA Today Final — Jordan Love 288 yards and three
+   touchdowns, Christian Watson 113 receiving yards despite a
+   mid-game hospital trip, six sacks of Bryce Young; the champion
+   Brewers were honored at Lambeau with the World Series trophy
+   before the game), so that game dropped out and the Oct 30-Nov 3Z
+   window count is now the 13-game remainder the band names — the
+   generic pin below therefore requires "13-game" in the copy, and
+   the explicit pin after it requires the band to report the opener
+   as a result, never as a fixture left to play. External sources
+   label this slate Week 8; the site's slate naming (Week 9, from
+   its Oct 30-Nov 3Z occurrence window) is unchanged, the same
+   naming split noted for the Paris game above. */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
@@ -446,6 +460,9 @@ var week9 = nfl.games.filter(function(g){
 });
 ok(band.indexOf(week9.length + "-game") >= 0,
    "spotlight's Week 9 game count matches the Kalshi NFL snapshot (" + week9.length + " games in the Oct 30-Nov 3Z window)");
+ok(band.indexOf("Green Bay beat Carolina 27–19 (Final)") >= 0 &&
+   band.indexOf("Jordan Love threw for 288 yards and three touchdowns") >= 0,
+   "spotlight reports the Week 9 opener as a result: Green Bay beat Carolina 27-19 (Final), Love 288 yards and three touchdowns (Reuters)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
