@@ -447,7 +447,15 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    as a result, never as a fixture left to play. External sources
    label this slate Week 8; the site's slate naming (Week 9, from
    its Oct 30-Nov 3Z occurrence window) is unchanged, the same
-   naming split noted for the Paris game above. */
+   naming split noted for the Paris game above. The Oct 31 snapshot
+   holds that state exactly: no NFL game has been played since the
+   Thursday opener (the Sunday slate is tomorrow, Nov 1 US), so the
+   window count stays the 13-game remainder, the band copy is
+   unchanged, and both pins below hold as written. (Friday's NCAAF
+   finals — Dartmouth 24-14 over previously unbeaten Harvard, Tulane
+   38-31 in overtime at Charlotte, Baylor 41-9 at UCF and Sacramento
+   State 31-10 over Kent State, all Finals — dropped those four
+   games out of the NCAAF snapshot; the band never carried them.) */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
