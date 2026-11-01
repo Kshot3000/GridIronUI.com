@@ -75,7 +75,11 @@ assert(count(realHtml, 'data-cap-extra="1"') === real.length - 12,
        "real section hides exactly games 13..N behind the cap");
 assert(realHtml.indexOf('data-total="' + real.length + '"') !== -1, "toggle total matches the real slate size");
 var lastTitle = real[real.length - 1].title;
-assert(realHtml.indexOf(lastTitle.replace(/&/g, "&amp;")) !== -1,
+/* Search with the renderer's own escaper (OL.mkEsc), not just & → &amp;:
+   the Nov 1, 2026 snapshot's latest game is North Dakota St. vs Hawai'i,
+   whose apostrophe renders as &#39; — an &-only escape made this check
+   fail on a correctly rendered card. */
+assert(realHtml.indexOf(OL.mkEsc(lastTitle)) !== -1,
        "the latest game of the slate is in the section (find-a-game covers the whole snapshot)");
 
 /* ---- shipped wiring pins ---- */

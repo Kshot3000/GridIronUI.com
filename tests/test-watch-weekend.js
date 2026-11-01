@@ -455,7 +455,25 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    finals — Dartmouth 24-14 over previously unbeaten Harvard, Tulane
    38-31 in overtime at Charlotte, Baylor 41-9 at UCF and Sacramento
    State 31-10 over Kent State, all Finals — dropped those four
-   games out of the NCAAF snapshot; the band never carried them.) */
+   games out of the NCAAF snapshot; the band never carried them.)
+   The Nov 1 snapshot (fetched 18:49Z, ahead of the Sunday slate's
+   21:00Z kickoffs) holds the Week 9 state exactly again: no NFL
+   game has been played since the Thursday opener, so the Oct
+   30-Nov 3Z window count stays the 13-game remainder and the band
+   copy is unchanged — both pins below hold as written. (Saturday's
+   103-game NCAAF slate settled and dropped out of the NCAAF
+   snapshot — headline Finals, USA Today / SI: No. 25 USC 30-18
+   over No. 2 Ohio State, the Buckeyes without injured QB Julian
+   Sayin; No. 1 Miami 38-35 at North Carolina after two Tar Heel
+   onside recoveries were called back on penalties; No. 3 Georgia
+   27-8 over No. 20 Florida; No. 4 Indiana 23-16 over Minnesota in
+   overtime; No. 9 BYU 27-20 over Arizona State; No. 12 Ole Miss
+   45-15 over Auburn; Syracuse 30-27 over No. 16 SMU — and 107 new
+   games for the coming week arrived, slate head Ball St. vs UMass
+   on Tuesday Nov 4. The band never carried any of them. The band's
+   Oct 25-Nov 2 window expires after Monday night's closer: the
+   next run on/after Nov 3 must roll the band to a new window with
+   the Week 9 Sunday/Monday results or it removes itself.) */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
