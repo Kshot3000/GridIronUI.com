@@ -473,7 +473,29 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    on Tuesday Nov 4. The band never carried any of them. The band's
    Oct 25-Nov 2 window expires after Monday night's closer: the
    next run on/after Nov 3 must roll the band to a new window with
-   the Week 9 Sunday/Monday results or it removes itself.) */
+   the Week 9 Sunday/Monday results or it removes itself.)
+   The Nov 2 snapshot (fetched 18:49Z, ahead of tonight's Monday-
+   night closer) settles Sunday's 12 games, so the Oct 30-Nov 3Z
+   window count falls to the 1-game remainder — tonight's closer,
+   Chicago at Seattle — and the band now reports Sunday's Finals
+   and names that 1-game remainder, so both pins below hold as
+   written. Headline: Washington beat Philadelphia 27-10 on Sunday
+   night (NBC Sports / USA Today Final), scoring 27 unanswered
+   points after trailing 10-0, Jayden Daniels 217 yards and a
+   touchdown, Philadelphia's sixth straight loss. The rest of
+   Sunday (all Finals, Sportradar / AP recaps): Cincinnati 43-36
+   over Tennessee in overtime (Burrow five TD passes plus the
+   winning OT rushing score), Arizona 33-30 at Dallas in overtime,
+   Buffalo 36-10 over Baltimore, Denver 28-24 over Kansas City,
+   Tampa Bay 16-0 over Atlanta, Jacksonville 42-7 over
+   Indianapolis, Pittsburgh 27-6 over Cleveland, Rams 24-9 over
+   the Chargers, Detroit 19-15 over Minnesota, New England 24-19
+   at Miami, Las Vegas 38-33 over the Jets. External sources label
+   this slate Week 8; the site's Week 9 naming is unchanged. The
+   band's Oct 25-Nov 2 window expires after tonight's closer: the
+   next run on/after Nov 3 MUST roll the band to a new window
+   (Week 9 results plus the next slate opening Thu Nov 5 US,
+   Jacksonville at Baltimore, occ Nov 6Z) or it removes itself. */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });

@@ -77,7 +77,14 @@ assert(section.indexOf("Market line") !== -1, "section header present");
 assert(section.indexOf("no key needed") !== -1, "section says no key needed");
 assert(section.indexOf("server snapshot") !== -1, "section is labeled as a snapshot");
 assert(section.indexOf("markets.html") !== -1, "section links to the full markets page");
-assert(section.indexOf("Pittsburgh") !== -1 || section.indexOf("Steelers") !== -1,
+/* The team-name pin must follow the live slate, not a fixed team: the
+   original v1.101.0 pin hardcoded Pittsburgh from that day's snapshot,
+   and it broke on the Nov 2 2026 snapshot when Pittsburgh's Week 9 game
+   (Cleveland vs Pittsburgh, a Sunday Final — Pittsburgh won 27-6) settled
+   and dropped off the board. Derive the expected name from the snapshot
+   itself, searched with the renderer's own escaper. */
+var firstTeam = games[0] && games[0].teams && games[0].teams[0] && games[0].teams[0].name;
+assert(!!firstTeam && section.indexOf(OL.mkEsc(firstTeam)) !== -1,
        "section carries real snapshot team names");
 assert(/[-+]\d{2,}/.test(section), "section carries American moneylines");
 
