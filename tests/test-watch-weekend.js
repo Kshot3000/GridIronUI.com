@@ -154,12 +154,11 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-10-25"[^>]*data-end="2026-11-02"[^>]*hidden/.test(html) ||
-   /id="weekend-spotlight"[^>]*hidden/.test(html) && html.indexOf('data-start="2026-10-25"') >= 0,
-   "spotlight band ships hidden with the Oct 25-Nov 2 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-11-03"[^>]*data-end="2026-11-09"[^>]*hidden/.test(html),
+   "spotlight band ships hidden with the Nov 3-Nov 9 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Oct 25–Nov 2 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Nov 3–Nov 9 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
@@ -495,7 +494,33 @@ var nfl = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-nfl.json"),
    band's Oct 25-Nov 2 window expires after tonight's closer: the
    next run on/after Nov 3 MUST roll the band to a new window
    (Week 9 results plus the next slate opening Thu Nov 5 US,
-   Jacksonville at Baltimore, occ Nov 6Z) or it removes itself. */
+   Jacksonville at Baltimore, occ Nov 6Z) or it removes itself.
+   The Nov 3 snapshot (fetched 18:50Z) settles that closer:
+   Chicago beat Seattle 34-17 on Monday night at Lumen Field
+   (Sportradar / Reuters / NBC Sports / USA Today Final) —
+   D'Andre Swift rushed for three second-half touchdowns,
+   Caleb Williams was 24-of-34 for 247 yards and a touchdown
+   as Chicago (6-2) won its third straight, Seattle pulled
+   within 20-17 early in the fourth on Darnold's touchdown
+   pass to Cooper Kupp plus a two-point conversion to Tory
+   Horton before Chicago scored the final 14, and Darnold
+   finished 17-of-34 for 188 yards with two touchdowns and
+   an interception (Jaxon Smith-Njigba 6-118-1). The closer
+   dropped out, so the Oct 30-Nov 3Z window count falls to
+   exactly 0 — the Week 9 pin below INVERTS, following the
+   Week 7/8 closer precedent: the band reports Week 9 as
+   closed with the MNF result and names no Week 9 remainder
+   count, and the "-game" count the band does name is the
+   new slate's, pinned after it. The band rolls to a NEW
+   Nov 3-Nov 9 window: Week 9 reported closed, and the new
+   slate — games occurring Nov 6-10Z (Thu Nov 5 night in
+   Baltimore through Mon Nov 9 night in Minnesota, US
+   time), the site's Week 10 naming (external sources call
+   the MNF slate Week 9) — is named at its full count from
+   that window. External sources label the closer's slate
+   Week 8; the site's Week 9 naming is unchanged. The same
+   snapshot adds the following 14-game slate (Nov 13-17Z),
+   outside the band's window and not named in the band. */
 var week8 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-22T00:00:00Z" && g.occ < "2026-10-28T00:00:00Z";
 });
@@ -506,8 +531,19 @@ ok(band.indexOf("Week 8 closed Monday night") >= 0,
 var week9 = nfl.games.filter(function(g){
   return g.occ >= "2026-10-30T00:00:00Z" && g.occ < "2026-11-04T00:00:00Z";
 });
-ok(band.indexOf(week9.length + "-game") >= 0,
-   "spotlight's Week 9 game count matches the Kalshi NFL snapshot (" + week9.length + " games in the Oct 30-Nov 3Z window)");
+ok(week9.length === 0,
+   "kalshi-nfl.json carries no Week 9 game — the slate closed with Chicago 34-17 at Seattle on Monday night (Final) (" + week9.length + " games in the Oct 30-Nov 3Z window)");
+ok(band.indexOf("Week 9 closed Monday night") >= 0,
+   "spotlight reports Week 9 as closed, with no remainder count");
+var week10 = nfl.games.filter(function(g){
+  return g.occ >= "2026-11-06T00:00:00Z" && g.occ < "2026-11-11T00:00:00Z";
+});
+ok(band.indexOf(week10.length + "-game") >= 0,
+   "spotlight's Week 10 game count matches the Kalshi NFL snapshot (" + week10.length + " games in the Nov 6-10Z window)");
+ok(band.indexOf("Chicago beat Seattle 34–17 (Final)") >= 0 &&
+   band.indexOf("three second-half touchdowns") >= 0 &&
+   band.indexOf("Caleb Williams was 24-of-34 for 247 yards") >= 0,
+   "spotlight reports the Week 9 closer as a result: Chicago beat Seattle 34-17 (Final), Swift three second-half TDs, Williams 247 yards (Reuters)");
 ok(band.indexOf("Green Bay beat Carolina 27–19 (Final)") >= 0 &&
    band.indexOf("Jordan Love threw for 288 yards and three touchdowns") >= 0,
    "spotlight reports the Week 9 opener as a result: Green Bay beat Carolina 27-19 (Final), Love 288 yards and three touchdowns (Reuters)");
