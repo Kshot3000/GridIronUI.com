@@ -547,6 +547,51 @@ ok(band.indexOf("Chicago beat Seattle 34–17 (Final)") >= 0 &&
 ok(band.indexOf("Green Bay beat Carolina 27–19 (Final)") >= 0 &&
    band.indexOf("Jordan Love threw for 288 yards and three touchdowns") >= 0,
    "spotlight reports the Week 9 opener as a result: Green Bay beat Carolina 27-19 (Final), Love 288 yards and three touchdowns (Reuters)");
+/* The Nov 4 snapshot (fetched 18:49Z NFL / 18:55Z NCAAF) settles
+   Tuesday night's two MACtion games. Kalshi groups all five midweek
+   MAC games at occ Nov 4 03:00Z, but the real schedule splits them
+   2/3 (Sportradar / NCAA / Akron Beacon Journal): Buffalo at Miami
+   (OH) and Ohio at Akron were Tuesday Nov 3 US, while Ball St. at
+   UMass, Central Michigan vs Eastern Michigan (Ford Field, Detroit)
+   and Toledo at Sacramento St. are Wednesday Nov 4 US. The snapshot
+   confirms the split exactly — the two Tuesday event tickers dropped
+   out and the three Wednesday games remain, now heading the board.
+   Tuesday's Finals (both cross-checked): Buffalo rallied from 31-16
+   down in the fourth quarter to beat Miami (OH) 34-31 in overtime
+   (AP — Jason Wright 358 passing yards, four total touchdowns,
+   Oliver Hautanen's 27-yard OT field goal won it after Miami's tying
+   attempt hit the upright; Buffalo 6-3, fourth straight win), and
+   Ohio beat Akron 28-20 (Akron Beacon Journal — Akron led 17-14 in
+   the fourth; Nick Poulos hit Dom Dorwart for a 60-yard touchdown,
+   Duncan Brune broke a 91-yard touchdown run and finished with 111
+   yards on 10 carries; Ohio 7-2, 5-0 MAC, recovered Akron's onside
+   kick with 1:53 left). The band (same Nov 3-Nov 9 window) now
+   reports both as results and names tonight's three Wednesday
+   fixtures; the stale "opens tonight, Tuesday Nov 3" framing is
+   banned below. NFL state is unchanged: 29 games, the Week 10
+   window (Nov 6-10Z) still holds the full 15-game slate above. */
+var ncaaf = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-ncaaf.json"), "utf8"));
+var ncaafTickers = ncaaf.games.map(function(g){ return g.event_ticker; });
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV03BUFFMOH") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03OHIOAKR") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03BALLMASS") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03CMUEMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03TOLSAC") >= 0,
+   "kalshi-ncaaf.json settles Tuesday's MACtion pair (Buffalo/Miami OH, Ohio/Akron gone) and keeps tonight's Wednesday trio (Ball St./UMass, CMU/EMU, Toledo/Sacramento St.)");
+ok(band.indexOf("Buffalo rallied from 31–16 down") >= 0 &&
+   band.indexOf("34–31 in overtime (Final)") >= 0 &&
+   band.indexOf("Jason Wright threw for 358 yards") >= 0,
+   "spotlight reports Tuesday's MACtion OT result: Buffalo rallied from 31-16 down to beat Miami (OH) 34-31 in overtime (Final), Wright 358 yards (AP)");
+ok(band.indexOf("Ohio beat Akron 28–20 (Final)") >= 0 &&
+   band.indexOf("91-yard touchdown run") >= 0 &&
+   band.indexOf("5–0 in the MAC") >= 0,
+   "spotlight reports Tuesday's other MACtion result: Ohio beat Akron 28-20 (Final), Brune 91-yard TD run, Ohio 5-0 in the MAC (Akron Beacon Journal)");
+ok(band.indexOf("Wednesday Nov 4") >= 0 &&
+   band.indexOf("Central Michigan vs Eastern Michigan") >= 0 &&
+   band.indexOf("Toledo at Sacramento St.") >= 0,
+   "spotlight names tonight's Wednesday MACtion trio (Ball St. at UMass, CMU vs EMU in Detroit, Toledo at Sacramento St.)");
+ok(band.indexOf("opens tonight, Tuesday Nov 3, with MACtion") === -1,
+   "spotlight no longer frames the settled Tuesday MACtion slate as tonight's opener");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
