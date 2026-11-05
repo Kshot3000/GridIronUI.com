@@ -573,11 +573,8 @@ ok(band.indexOf("Green Bay beat Carolina 27–19 (Final)") >= 0 &&
 var ncaaf = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "kalshi-ncaaf.json"), "utf8"));
 var ncaafTickers = ncaaf.games.map(function(g){ return g.event_ticker; });
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV03BUFFMOH") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03OHIOAKR") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03BALLMASS") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03CMUEMU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03TOLSAC") >= 0,
-   "kalshi-ncaaf.json settles Tuesday's MACtion pair (Buffalo/Miami OH, Ohio/Akron gone) and keeps tonight's Wednesday trio (Ball St./UMass, CMU/EMU, Toledo/Sacramento St.)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03OHIOAKR") === -1,
+   "kalshi-ncaaf.json settles Tuesday's MACtion pair (Buffalo/Miami OH, Ohio/Akron gone) — the Wednesday trio this pin kept on Nov 4 settled that night and is pinned as gone in the Nov 5 block below");
 ok(band.indexOf("Buffalo rallied from 31–16 down") >= 0 &&
    band.indexOf("34–31 in overtime (Final)") >= 0 &&
    band.indexOf("Jason Wright threw for 358 yards") >= 0,
@@ -586,12 +583,66 @@ ok(band.indexOf("Ohio beat Akron 28–20 (Final)") >= 0 &&
    band.indexOf("91-yard touchdown run") >= 0 &&
    band.indexOf("5–0 in the MAC") >= 0,
    "spotlight reports Tuesday's other MACtion result: Ohio beat Akron 28-20 (Final), Brune 91-yard TD run, Ohio 5-0 in the MAC (Akron Beacon Journal)");
-ok(band.indexOf("Wednesday Nov 4") >= 0 &&
-   band.indexOf("Central Michigan vs Eastern Michigan") >= 0 &&
-   band.indexOf("Toledo at Sacramento St.") >= 0,
-   "spotlight names tonight's Wednesday MACtion trio (Ball St. at UMass, CMU vs EMU in Detroit, Toledo at Sacramento St.)");
+ok(band.indexOf("Wednesday night with three Finals") >= 0 &&
+   band.indexOf("Central Michigan beat Eastern Michigan") >= 0 &&
+   band.indexOf("Toledo beat Sacramento St.") >= 0,
+   "spotlight now reports the Wednesday MACtion trio it named as fixtures on Nov 4 as Finals (detailed result pins in the Nov 5 block below)");
 ok(band.indexOf("opens tonight, Tuesday Nov 3, with MACtion") === -1,
    "spotlight no longer frames the settled Tuesday MACtion slate as tonight's opener");
+/* The Nov 5 snapshot (fetched 18:50Z NFL / 18:56Z NCAAF) settles
+   Wednesday night's three MACtion games — the Wednesday trio the
+   Nov 4 block kept now drops out, and tonight's Thursday trio
+   (South Carolina St. vs Howard, James Madison vs Southern Miss,
+   UTSA vs Florida Atlantic, all occ Nov 6Z) heads the board.
+   Wednesday's Finals (all cross-checked): UMass beat Ball St.
+   31-30 in overtime (RANT Sports / The Star Press — Ball St.
+   scored first in OT on Bonds' 1-yard run but Boehm missed the
+   extra point wide left; Watson ran in from 13 yards and Morris
+   made the winner; Watson 302 passing yards, three total TDs;
+   UMass 5-4, four-game losing streak snapped), Central Michigan
+   beat Eastern Michigan 35-7 at Ford Field (Chat Sports /
+   By The Belt — 35 unanswered points, Woodford 123 rushing
+   yards and three TDs, EMU 4-6 avoided the shutout on Stuckey's
+   6-yard TD pass to Mack with 10 seconds left), and Toledo beat
+   Sacramento St. 20-17 at Hornet Stadium (Yahoo Sports / Covers
+   — Toledo 7-2, 4-1 MAC trailed 10-7 at the half and scored 13
+   in the second half; Miller 135 rushing yards, Ison 101 and a
+   TD; Sacramento St.'s late TD cut it to three with 2:20 left).
+   The snapshot also adds two Nov 18 MAC games (Akron vs UMass,
+   Central Michigan vs Buffalo). NFL state is unchanged in shape:
+   29 games, 12 moves, the Week 10 window (Nov 6-10Z) still holds
+   the full 15-game slate and its Thursday opener (Jacksonville
+   at Baltimore) is tonight — reported as a fixture, never a
+   result. The band (same Nov 3-Nov 9 window) now reports all
+   three Wednesday Finals and names tonight's Thursday trio; the
+   stale "continues tonight, Wednesday Nov 4" framing is banned
+   below. */
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV03BALLMASS") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03CMUEMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03TOLSAC") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05SCSTHOW") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05JMUUSM") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05UTSAFAU") >= 0,
+   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Ball St./UMass, CMU/EMU, Toledo/Sacramento St. gone) and heads tonight's Thursday trio (SC St./Howard, JMU/Southern Miss, UTSA/FAU)");
+ok(band.indexOf("UMass beat Ball St. 31–30 in overtime (Final)") >= 0 &&
+   band.indexOf("William Watson III ran in from 13 yards") >= 0 &&
+   band.indexOf("302 passing yards and three total touchdowns") >= 0,
+   "spotlight reports Wednesday's MACtion OT result: UMass beat Ball St. 31-30 in overtime (Final), Watson 13-yard OT run and 302 passing yards (RANT Sports / Star Press)");
+ok(band.indexOf("Central Michigan beat Eastern Michigan 35–7 (Final)") >= 0 &&
+   band.indexOf("Nick Woodford ran for 123 yards and three touchdowns") >= 0 &&
+   band.indexOf("35 unanswered points") >= 0,
+   "spotlight reports Wednesday's Motor City MACtion result: Central Michigan beat Eastern Michigan 35-7 (Final) at Ford Field, Woodford 123 yards and three TDs (Chat Sports)");
+ok(band.indexOf("Toledo beat Sacramento St. 20–17 (Final)") >= 0 &&
+   band.indexOf("CJ Miller ran for 135 yards") >= 0 &&
+   band.indexOf("4–1 in the MAC") >= 0,
+   "spotlight reports Wednesday's other MACtion result: Toledo beat Sacramento St. 20-17 (Final), Miller 135 rushing yards, Toledo 4-1 in the MAC (Yahoo Sports)");
+ok(band.indexOf("Thursday Nov 5") >= 0 &&
+   band.indexOf("South Carolina St. vs Howard") >= 0 &&
+   band.indexOf("James Madison vs Southern Miss") >= 0 &&
+   band.indexOf("UTSA vs Florida Atlantic") >= 0,
+   "spotlight names tonight's Thursday college trio (South Carolina St. vs Howard, James Madison vs Southern Miss, UTSA vs Florida Atlantic)");
+ok(band.indexOf("MACtion continues tonight, Wednesday Nov 4") === -1,
+   "spotlight no longer frames the settled Wednesday MACtion slate as tonight's fixtures");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
