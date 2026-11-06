@@ -619,11 +619,8 @@ ok(band.indexOf("opens tonight, Tuesday Nov 3, with MACtion") === -1,
    below. */
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV03BALLMASS") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV03CMUEMU") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03TOLSAC") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05SCSTHOW") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05JMUUSM") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05UTSAFAU") >= 0,
-   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Ball St./UMass, CMU/EMU, Toledo/Sacramento St. gone) and heads tonight's Thursday trio (SC St./Howard, JMU/Southern Miss, UTSA/FAU)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV03TOLSAC") === -1,
+   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Ball St./UMass, CMU/EMU, Toledo/Sacramento St. gone) — the Thursday trio this pin kept on Nov 5 settled that night and is pinned as gone in the Nov 6 block below");
 ok(band.indexOf("UMass beat Ball St. 31–30 in overtime (Final)") >= 0 &&
    band.indexOf("William Watson III ran in from 13 yards") >= 0 &&
    band.indexOf("302 passing yards and three total touchdowns") >= 0,
@@ -636,13 +633,90 @@ ok(band.indexOf("Toledo beat Sacramento St. 20–17 (Final)") >= 0 &&
    band.indexOf("CJ Miller ran for 135 yards") >= 0 &&
    band.indexOf("4–1 in the MAC") >= 0,
    "spotlight reports Wednesday's other MACtion result: Toledo beat Sacramento St. 20-17 (Final), Miller 135 rushing yards, Toledo 4-1 in the MAC (Yahoo Sports)");
-ok(band.indexOf("Thursday Nov 5") >= 0 &&
-   band.indexOf("South Carolina St. vs Howard") >= 0 &&
-   band.indexOf("James Madison vs Southern Miss") >= 0 &&
-   band.indexOf("UTSA vs Florida Atlantic") >= 0,
-   "spotlight names tonight's Thursday college trio (South Carolina St. vs Howard, James Madison vs Southern Miss, UTSA vs Florida Atlantic)");
+ok(band.indexOf("Thursday night with three Finals") >= 0 &&
+   band.indexOf("South Carolina St. beat Howard") >= 0 &&
+   band.indexOf("James Madison beat Southern Miss") >= 0 &&
+   band.indexOf("Florida Atlantic beat UTSA") >= 0,
+   "spotlight now reports the Thursday trio it named as fixtures on Nov 5 as Finals (detailed result pins in the Nov 6 block below)");
 ok(band.indexOf("MACtion continues tonight, Wednesday Nov 4") === -1,
    "spotlight no longer frames the settled Wednesday MACtion slate as tonight's fixtures");
+/* The Nov 6 snapshot (fetched 18:50Z NFL / 18:56Z NCAAF) settles
+   Thursday night's Week 10 opener and Thursday's
+   college trio — all four games the Nov 5 band named as fixtures
+   now drop out, and tonight's Friday college quintet (Virginia
+   Tech vs SMU, South Florida vs East Carolina, Nebraska vs
+   Illinois, New Mexico vs Nevada, TCU vs Arizona, all occ Nov 7Z)
+   heads the NCAAF board. Thursday's Finals (all cross-checked):
+   Jacksonville beat Baltimore 33-10 (Reuters — Lawrence 242 yards
+   and one TD, a 50-yard scoring pass to Washington just before
+   halftime; Little four field goals; Tuten and Rodriguez Jr.
+   rushing TDs; three forced turnovers and 227 total yards allowed;
+   Jaguars 6-2, fifth win in six; Baltimore 4-5, fourth straight
+   loss, Jackson (right thumb) and Huntley (right toe) injured,
+   rookie Fagnano's first start, Hill's 65-yard run the only TD),
+   South Carolina St. beat Howard 35-28 (South Carolina State
+   Athletics — Brown season-high 143 rushing yards and two TDs,
+   the winner from 9 yards with 17 seconds left capping a
+   seven-play, 74-yard drive after Howard tied it at 28 with 1:31
+   left; SC St. 8-2, 3-0 MEAC, MEAC streak 13), James Madison beat
+   Southern Miss 54-23 (AP — Evans four total TDs, three rushing
+   and one passing, 251 passing yards in his first start since the
+   opener; JMU 8-2, 5-2 Sun Belt, 38 second-half points; Southern
+   Miss 3-6, White 266 yards in his first start), and Florida
+   Atlantic beat UTSA 60-29 (Palm Beach Post / UTSA Athletics —
+   Messer four TDs, three receiving and one passing, eight catches
+   for 85 yards and 12 TDs in his last three games; FAU 6-3, 3-2
+   American, 339 rushing yards, bowl-eligible for the first time
+   since 2020, snapped UTSA's five-game winning streak; UTSA 7-2).
+   NFL state: 28 games, 9 moves, 0 new — the Week 10 window
+   (Nov 6-10Z) falls to the 14-game remainder pinned dynamically
+   above. NCAAF state: 253 games, 195 moves, 3 new (Nov 19:
+   Northwestern St. vs Stephen F. Austin, Southeastern Louisiana
+   vs Nicholls St., Rice vs Temple). The band (same Nov 3-Nov 9
+   window) now reports all four
+   Thursday Finals and names tonight's Friday quintet; the stale
+   Thursday-fixture framing is banned below. */
+var nflTickers = nfl.games.map(function(g){ return g.event_ticker; });
+ok(nflTickers.indexOf("KXNFLGAME-26NOV05JACBAL") === -1,
+   "kalshi-nfl.json settles the Week 10 opener (Jacksonville at Baltimore gone) — Jacksonville won 33-10 (Final)");
+ok(band.indexOf("Jacksonville beat Baltimore 33–10 (Final)") >= 0 &&
+   band.indexOf("Trevor Lawrence passed for 242 yards and a touchdown") >= 0 &&
+   band.indexOf("Cam Little kicked four field goals") >= 0,
+   "spotlight reports the Week 10 opener as a result: Jacksonville beat Baltimore 33-10 (Final), Lawrence 242 yards and a TD, Little four field goals (Reuters)");
+ok(band.indexOf("held Baltimore to 227 total yards") >= 0 &&
+   band.indexOf("Justice Hill's 65-yard run") >= 0 &&
+   band.indexOf("rookie Joe Fagnano made his first NFL start") >= 0,
+   "spotlight reports the opener detail: Jacksonville held Baltimore to 227 yards, Fagnano's first start, Hill's 65-yard run Baltimore's only TD (Reuters)");
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV05SCSTHOW") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05JMUUSM") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05UTSAFAU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06VTSMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06USFECU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06NEBILL") >= 0,
+   "kalshi-ncaaf.json settles Thursday's trio (SC St./Howard, JMU/Southern Miss, UTSA/FAU gone) and heads tonight's Friday slate (Virginia Tech/SMU, South Florida/East Carolina, Nebraska/Illinois)");
+ok(band.indexOf("South Carolina St. beat Howard 35–28 (Final)") >= 0 &&
+   band.indexOf("Ricorian Brown ran for a season-high 143 yards and two touchdowns") >= 0 &&
+   band.indexOf("17 seconds left") >= 0,
+   "spotlight reports Thursday's MEAC result: South Carolina St. beat Howard 35-28 (Final), Brown 143 yards and two TDs including the winner with 17 seconds left (South Carolina State Athletics)");
+ok(band.indexOf("James Madison beat Southern Miss 54–23 (Final)") >= 0 &&
+   band.indexOf("JC Evans accounted for four touchdowns") >= 0 &&
+   band.indexOf("throwing for 251 yards") >= 0,
+   "spotlight reports Thursday's Sun Belt result: James Madison beat Southern Miss 54-23 (Final), Evans four total TDs and 251 passing yards (AP)");
+ok(band.indexOf("Florida Atlantic beat UTSA 60–29 (Final)") >= 0 &&
+   band.indexOf("Easton Messer scored four touchdowns") >= 0 &&
+   band.indexOf("12 touchdowns in his last three games") >= 0,
+   "spotlight reports Thursday's American result: Florida Atlantic beat UTSA 60-29 (Final), Messer four TDs and 12 in his last three games (Palm Beach Post)");
+ok(band.indexOf("Friday Nov 6") >= 0 &&
+   band.indexOf("Virginia Tech vs SMU") >= 0 &&
+   band.indexOf("South Florida vs East Carolina") >= 0 &&
+   band.indexOf("Nebraska vs Illinois") >= 0 &&
+   band.indexOf("New Mexico vs Nevada") >= 0 &&
+   band.indexOf("TCU vs Arizona") >= 0,
+   "spotlight names tonight's Friday college quintet (Virginia Tech vs SMU, South Florida vs East Carolina, Nebraska vs Illinois, New Mexico vs Nevada, TCU vs Arizona)");
+ok(band.indexOf("College football continues tonight, Thursday Nov 5") === -1 &&
+   band.indexOf("15-game") === -1 &&
+   band.indexOf("opens Thursday night, Nov 5, in Baltimore (Jacksonville at Baltimore)") === -1,
+   "spotlight no longer frames the settled Thursday opener or Thursday college trio as tonight's fixtures, and no longer counts the full 15-game Week 10 slate");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
