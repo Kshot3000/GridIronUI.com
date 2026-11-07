@@ -689,11 +689,8 @@ ok(band.indexOf("held Baltimore to 227 total yards") >= 0 &&
    "spotlight reports the opener detail: Jacksonville held Baltimore to 227 yards, Fagnano's first start, Hill's 65-yard run Baltimore's only TD (Reuters)");
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV05SCSTHOW") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV05JMUUSM") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05UTSAFAU") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06VTSMU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06USFECU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06NEBILL") >= 0,
-   "kalshi-ncaaf.json settles Thursday's trio (SC St./Howard, JMU/Southern Miss, UTSA/FAU gone) and heads tonight's Friday slate (Virginia Tech/SMU, South Florida/East Carolina, Nebraska/Illinois)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV05UTSAFAU") === -1,
+   "kalshi-ncaaf.json settles Thursday's trio (SC St./Howard, JMU/Southern Miss, UTSA/FAU gone) — the Friday quintet this pin kept on Nov 6 settled that night and is pinned as gone in the Nov 7 block below");
 ok(band.indexOf("South Carolina St. beat Howard 35–28 (Final)") >= 0 &&
    band.indexOf("Ricorian Brown ran for a season-high 143 yards and two touchdowns") >= 0 &&
    band.indexOf("17 seconds left") >= 0,
@@ -706,17 +703,87 @@ ok(band.indexOf("Florida Atlantic beat UTSA 60–29 (Final)") >= 0 &&
    band.indexOf("Easton Messer scored four touchdowns") >= 0 &&
    band.indexOf("12 touchdowns in his last three games") >= 0,
    "spotlight reports Thursday's American result: Florida Atlantic beat UTSA 60-29 (Final), Messer four TDs and 12 in his last three games (Palm Beach Post)");
-ok(band.indexOf("Friday Nov 6") >= 0 &&
-   band.indexOf("Virginia Tech vs SMU") >= 0 &&
-   band.indexOf("South Florida vs East Carolina") >= 0 &&
-   band.indexOf("Nebraska vs Illinois") >= 0 &&
-   band.indexOf("New Mexico vs Nevada") >= 0 &&
-   band.indexOf("TCU vs Arizona") >= 0,
-   "spotlight names tonight's Friday college quintet (Virginia Tech vs SMU, South Florida vs East Carolina, Nebraska vs Illinois, New Mexico vs Nevada, TCU vs Arizona)");
+ok(band.indexOf("Friday night with five Finals") >= 0 &&
+   band.indexOf("SMU beat Virginia Tech") >= 0 &&
+   band.indexOf("East Carolina beat South Florida") >= 0 &&
+   band.indexOf("Illinois beat Nebraska") >= 0 &&
+   band.indexOf("New Mexico beat Nevada") >= 0 &&
+   band.indexOf("Arizona beat TCU") >= 0,
+   "spotlight now reports the Friday quintet it named as fixtures on Nov 6 as Finals (detailed result pins in the Nov 7 block below)");
 ok(band.indexOf("College football continues tonight, Thursday Nov 5") === -1 &&
    band.indexOf("15-game") === -1 &&
    band.indexOf("opens Thursday night, Nov 5, in Baltimore (Jacksonville at Baltimore)") === -1,
    "spotlight no longer frames the settled Thursday opener or Thursday college trio as tonight's fixtures, and no longer counts the full 15-game Week 10 slate");
+/* The Nov 7 snapshot (fetched 18:49Z NFL / 18:54Z NCAAF) settles
+   Friday night's college quintet — all five games the Nov 6 band
+   named as fixtures now drop out, and today's Saturday slate
+   (85 games occ Nov 7Z, headed by BYU vs Utah) takes over the
+   NCAAF board. Friday's Finals (all cross-checked): SMU beat
+   Virginia Tech 51-28 (AP — Jennings 350 yards and four TDs,
+   three to Knight, SMU scored on its first eight drives and
+   piled up 569 yards; SMU 7-2, 5-2 ACC; Virginia Tech 6-3),
+   East Carolina beat South Florida 20-17 (247Sports / USF
+   Athletics — Conrad's 55-yard field goal as time expired;
+   ECU 5-4, 3-2 American, fourth straight win over USF; USF
+   6-3), Illinois beat Nebraska 24-13 (AP — Dixon two TD catches
+   from Houser including the record-breaking score for the most
+   single-season receiving TDs in Illinois history; Illinois
+   6-3, 4-2 Big Ten, bowl-eligible on a fourth straight win;
+   Nebraska 5-4, fourth straight loss, Colandrea season-high
+   284 passing yards), New Mexico beat Nevada 31-3 (AP — the
+   No. 22 Lobos won the first game in the AP poll in school
+   history; Humphrey 107 yards and two TDs; New Mexico 8-1,
+   5-0 Mountain West, held Nevada to minus-9 rushing yards and
+   97 total yards; Nevada 3-6), and Arizona beat TCU 29-28
+   (Arizona Sports / USA Today — No. 22 Arizona trailed 28-20
+   with 6:35 left; Fifita 24-of-37 for 313 yards and two TDs,
+   the Craig TD with 1:43 left, the failed two-point try,
+   Watson's recovered pooch onside kick, Salgado-Medina's
+   37-yard field goal with 38 seconds left, Boss's sealing
+   interception; Arizona 7-2, 4-2 Big 12; TCU 4-5). NFL state:
+   28 games, 4 moves, 0 new — the Week 10 window (Nov 6-10Z)
+   stays the 14-game remainder pinned dynamically above, Sunday
+   head Cincinnati vs Atlanta. NCAAF state: 271 games, 280
+   moves, 23 new (Nov 20: Iowa St. vs UCF, Bowling Green vs
+   Toledo, Clemson vs Duke, Oregon vs Michigan St., UTEP vs
+   Air Force, New Mexico vs Wyoming; Nov 21: 17 FCS games).
+   The band (same Nov 3-Nov 9 window) now reports all five
+   Friday Finals and names today's Saturday slate; the stale
+   Friday-fixture framing is banned below. */
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV06VTSMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06USFECU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06NEBILL") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06UNMNEV") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV06TCUARIZ") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV07BYUUTAH") >= 0,
+   "kalshi-ncaaf.json settles Friday's quintet (Virginia Tech/SMU, South Florida/East Carolina, Nebraska/Illinois, New Mexico/Nevada, TCU/Arizona gone) and heads today's Saturday slate (BYU vs Utah)");
+ok(band.indexOf("SMU beat Virginia Tech 51–28 (Final)") >= 0 &&
+   band.indexOf("Kevin Jennings threw for 350 yards and four touchdowns") >= 0 &&
+   band.indexOf("scored on each of its first eight drives") >= 0,
+   "spotlight reports Friday's ACC result: SMU beat Virginia Tech 51-28 (Final), Jennings 350 yards and four TDs, scored on its first eight drives (AP)");
+ok(band.indexOf("East Carolina beat South Florida 20–17 (Final)") >= 0 &&
+   band.indexOf("Andrew Conrad kicked a 55-yard field goal as time expired") >= 0 &&
+   band.indexOf("fourth straight time") >= 0,
+   "spotlight reports Friday's American result: East Carolina beat South Florida 20-17 (Final) on Conrad's 55-yard field goal as time expired (247Sports / USF Athletics)");
+ok(band.indexOf("Illinois beat Nebraska 24–13 (Final)") >= 0 &&
+   band.indexOf("Collin Dixon caught two touchdown passes") >= 0 &&
+   band.indexOf("most single-season receiving touchdowns in Illinois history") >= 0,
+   "spotlight reports Friday's Big Ten result: Illinois beat Nebraska 24-13 (Final), Dixon two TD catches including the Illinois single-season record-breaker (AP)");
+ok(band.indexOf("New Mexico beat Nevada 31–3 (Final)") >= 0 &&
+   band.indexOf("first game in the AP poll in school history") >= 0 &&
+   band.indexOf("minus-9 rushing yards and 97 total yards") >= 0,
+   "spotlight reports Friday's Mountain West result: New Mexico beat Nevada 31-3 (Final) in the Lobos' first game in the AP poll in school history, Nevada held to minus-9 rushing yards (AP)");
+ok(band.indexOf("Arizona beat TCU 29–28 (Final)") >= 0 &&
+   band.indexOf("Michael Salgado-Medina kicked a 37-yard field goal with 38 seconds left") >= 0 &&
+   band.indexOf("Tyrese Boss sealed it with an interception") >= 0,
+   "spotlight reports Friday's Big 12 result: Arizona beat TCU 29-28 (Final) on Salgado-Medina's 37-yard field goal with 38 seconds left, Boss's interception sealing it (Arizona Sports / USA Today)");
+ok(band.indexOf("Saturday slate takes over today, Nov 7") >= 0 &&
+   band.indexOf("BYU vs Utah") >= 0 &&
+   band.indexOf("Alabama vs LSU") >= 0,
+   "spotlight names today's Saturday college slate (BYU vs Utah, Texas vs Missouri, UCLA vs Minnesota, Alabama vs LSU)");
+ok(band.indexOf("College football continues tonight, Friday Nov 6") === -1 &&
+   band.indexOf("Virginia Tech vs SMU, South Florida vs East Carolina") === -1,
+   "spotlight no longer frames the settled Friday quintet as tonight's fixtures");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
