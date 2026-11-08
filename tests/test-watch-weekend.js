@@ -755,8 +755,8 @@ ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV06VTSMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV06NEBILL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV06UNMNEV") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV06TCUARIZ") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV07BYUUTAH") >= 0,
-   "kalshi-ncaaf.json settles Friday's quintet (Virginia Tech/SMU, South Florida/East Carolina, Nebraska/Illinois, New Mexico/Nevada, TCU/Arizona gone) and heads today's Saturday slate (BYU vs Utah)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV07BYUUTAH") === -1,
+   "kalshi-ncaaf.json settles Friday's quintet (Virginia Tech/SMU, South Florida/East Carolina, Nebraska/Illinois, New Mexico/Nevada, TCU/Arizona gone) — the Saturday slate this pin kept on Nov 7 (headed by BYU vs Utah) settled that day and is pinned as gone in the Nov 8 block below");
 ok(band.indexOf("SMU beat Virginia Tech 51–28 (Final)") >= 0 &&
    band.indexOf("Kevin Jennings threw for 350 yards and four touchdowns") >= 0 &&
    band.indexOf("scored on each of its first eight drives") >= 0,
@@ -777,13 +777,99 @@ ok(band.indexOf("Arizona beat TCU 29–28 (Final)") >= 0 &&
    band.indexOf("Michael Salgado-Medina kicked a 37-yard field goal with 38 seconds left") >= 0 &&
    band.indexOf("Tyrese Boss sealed it with an interception") >= 0,
    "spotlight reports Friday's Big 12 result: Arizona beat TCU 29-28 (Final) on Salgado-Medina's 37-yard field goal with 38 seconds left, Boss's interception sealing it (Arizona Sports / USA Today)");
-ok(band.indexOf("Saturday slate takes over today, Nov 7") >= 0 &&
-   band.indexOf("BYU vs Utah") >= 0 &&
-   band.indexOf("Alabama vs LSU") >= 0,
-   "spotlight names today's Saturday college slate (BYU vs Utah, Texas vs Missouri, UCLA vs Minnesota, Alabama vs LSU)");
+ok(band.indexOf("Saturday slate is Final now too") >= 0 &&
+   band.indexOf("Saturday slate takes over today, Nov 7") === -1,
+   "spotlight now reports the Saturday slate it named as fixtures on Nov 7 as Finals (detailed result pins in the Nov 8 block below)");
 ok(band.indexOf("College football continues tonight, Friday Nov 6") === -1 &&
    band.indexOf("Virginia Tech vs SMU, South Florida vs East Carolina") === -1,
    "spotlight no longer frames the settled Friday quintet as tonight's fixtures");
+/* The Nov 8 snapshot (fetched 18:49Z NFL / 18:53Z NCAAF) settles
+   Saturday's 85-game college slate and Sunday morning's Madrid
+   NFL game — the four Saturday games the Nov 7 band named as
+   fixtures drop out, as does Cincinnati vs Atlanta (occ Nov 8
+   17:30Z, the 9:30 a.m. ET Madrid kickoff, already Final at the
+   fetch). Saturday's Finals (all cross-checked): No. 3 Utah
+   beat No. 9 BYU 28-20 in the Holy War at Rice-Eccles Stadium
+   (AP / USA Today — Dampier four total TDs, 177 passing and
+   two scores plus 87 rushing and two more for 264 yards of
+   offense; BYU led 20-14 at the half and was shut out after it;
+   Bachmeier four interceptions, the last in the end zone with
+   two seconds left; Utah 9-0, 6-0 Big 12; BYU 7-2), No. 9
+   Alabama beat No. 15 LSU 31-13 at Tiger Stadium (AP —
+   Russell 206 yards and three TDs; LSU led 13-10 in the third
+   before 21 unanswered Alabama points; LSU 6-3 outgained
+   Alabama 457-285 but went 0-for-4 on fourth down), No. 7
+   Texas beat No. 18 Missouri 34-20 at Faurot Field (247Sports
+   / Missouri Athletics — Manning 28-of-38 for 297 yards and
+   three TDs; Missouri 6-3 led 20-13 in the third before 21
+   unanswered Texas points, the go-ahead score Manning's
+   23-yard TD pass to Brown with 5:03 left; Texas 7-2), and
+   No. 5 UCLA beat Minnesota 34-20 at Huntington Bank Stadium
+   (UCLA Athletics / NBC Sports — Dieffenbach 303 yards and
+   three TDs on eight completions, back-to-back 75-yard TD
+   passes to Mizell breaking a 17-17 fourth-quarter tie; UCLA
+   9-0, 6-0 Big Ten, first 9-0 start since 1998; Minnesota
+   held to 296 yards). The Madrid Final (Sportradar / Athlon
+   Sports / Bengals): Cincinnati beat Atlanta 34-17 at
+   Santiago Bernabéu Stadium — Burrow 24-of-29 for 271 yards
+   and three TD passes (two to Higgins, one to Chase) plus a
+   rushing TD; Chase 142 receiving yards by halftime;
+   Cincinnati 6-2, fourth straight win; Atlanta 3-6. NFL
+   state: 27 games, 33 moves, 0 new — the Week 10 window
+   (Nov 6-10Z) falls to the 13-game remainder pinned
+   dynamically above, the rest of today's slate headed by
+   Cleveland vs New Orleans at 21:00Z. NCAAF state: 256
+   games, 244 moves, 95 new per the snapshot's new_games
+   (96 by event-ticker set-diff — Chattanooga vs Alabama,
+   Nov 21, is on the board but absent from new_games, a
+   fetcher diff quirk noted in the run log, not in the copy);
+   the board now heads with Tuesday Nov 10's MACtion trio
+   (Kent St. vs Bowling Green, Ohio vs Miami (OH), Western
+   Michigan vs Akron, occ Nov 11Z). The band (same Nov 3-Nov 9
+   window) now reports all four Saturday Finals and the
+   Madrid result, and names Tuesday's MACtion trio as the
+   next slate; the stale Saturday-fixture framing and the
+   14-game remainder count are banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV08CINATL") === -1,
+   "kalshi-nfl.json settles the Madrid game (Cincinnati vs Atlanta gone) — Cincinnati won 34-17 (Final)");
+ok(band.indexOf("Cincinnati beat Atlanta 34–17 (Final)") >= 0 &&
+   band.indexOf("Santiago Bernabéu Stadium") >= 0 &&
+   band.indexOf("Joe Burrow was 24-of-29 for 271 yards and three touchdown passes") >= 0,
+   "spotlight reports the Madrid result: Cincinnati beat Atlanta 34-17 (Final) at Santiago Bernabéu, Burrow 24-of-29 for 271 yards and three TD passes (Sportradar / Athlon Sports)");
+ok(band.indexOf("142 receiving yards by halftime") >= 0 &&
+   band.indexOf("won its fourth straight") >= 0 &&
+   band.indexOf("Atlanta fell to 3–6") >= 0,
+   "spotlight reports the Madrid detail: Chase 142 receiving yards by halftime, Cincinnati's fourth straight win, Atlanta 3-6");
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV07BYUUTAH") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV07TEXMIZZ") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV07UCLAMINN") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV07ALALSU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV10KENTBGSU") >= 0,
+   "kalshi-ncaaf.json settles Saturday's marquee four (BYU/Utah, Texas/Missouri, UCLA/Minnesota, Alabama/LSU gone) and heads Tuesday's MACtion trio (Kent St. vs Bowling Green)");
+ok(band.indexOf("Utah beat No. 9 BYU 28–20 (Final)") >= 0 &&
+   band.indexOf("Devon Dampier accounted for four touchdowns") >= 0 &&
+   band.indexOf("Bear Bachmeier threw four interceptions") >= 0,
+   "spotlight reports Saturday's Holy War result: No. 3 Utah beat No. 9 BYU 28-20 (Final), Dampier four total TDs, Bachmeier four interceptions (AP / USA Today)");
+ok(band.indexOf("Alabama beat No. 15 LSU 31–13 (Final)") >= 0 &&
+   band.indexOf("Keelon Russell threw for 206 yards and three touchdowns") >= 0 &&
+   band.indexOf("0-for-4 on fourth down") >= 0,
+   "spotlight reports Saturday's SEC result: No. 9 Alabama beat No. 15 LSU 31-13 (Final), Russell 206 yards and three TDs, LSU 0-for-4 on fourth down (AP)");
+ok(band.indexOf("Texas beat No. 18 Missouri 34–20 (Final)") >= 0 &&
+   band.indexOf("Arch Manning was 28-of-38 for 297 yards and three touchdowns") >= 0 &&
+   band.indexOf("23-yard touchdown pass to Raleek Brown with 5:03 left") >= 0,
+   "spotlight reports Saturday's other SEC result: No. 7 Texas beat No. 18 Missouri 34-20 (Final), Manning 297 yards and three TDs, go-ahead TD to Brown with 5:03 left (247Sports)");
+ok(band.indexOf("UCLA beat Minnesota 34–20 (Final)") >= 0 &&
+   band.indexOf("Ty Dieffenbach threw for 303 yards and three touchdowns on just eight completions") >= 0 &&
+   band.indexOf("back-to-back 75-yard touchdown passes to Aidan Mizell") >= 0 &&
+   band.indexOf("9–0 for the first time since 1998") >= 0,
+   "spotlight reports Saturday's Big Ten result: No. 5 UCLA beat Minnesota 34-20 (Final), Dieffenbach 303 yards on eight completions with back-to-back 75-yard TDs to Mizell, first 9-0 start since 1998 (UCLA Athletics / NBC Sports)");
+ok(band.indexOf("opens Tuesday night, Nov 10, with MACtion") >= 0 &&
+   band.indexOf("Kent St. vs Bowling Green, Ohio vs Miami (OH), and Western Michigan vs Akron") >= 0,
+   "spotlight names the next college slate: Tuesday Nov 10 MACtion (Kent St. vs Bowling Green, Ohio vs Miami (OH), Western Michigan vs Akron)");
+ok(band.indexOf("Saturday slate takes over today, Nov 7") === -1 &&
+   band.indexOf("BYU vs Utah, Texas vs Missouri, UCLA vs Minnesota, and Alabama vs LSU head the Kalshi NCAAF board") === -1 &&
+   band.indexOf("14-game") === -1,
+   "spotlight no longer frames the settled Saturday slate as today's fixtures and no longer counts the stale 14-game Week 10 remainder");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
