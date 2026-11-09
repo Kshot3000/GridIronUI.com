@@ -154,11 +154,11 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-11-03"[^>]*data-end="2026-11-09"[^>]*hidden/.test(html),
-   "spotlight band ships hidden with the Nov 3-Nov 9 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-11-09"[^>]*data-end="2026-11-16"[^>]*hidden/.test(html),
+   "spotlight band ships hidden with the Nov 9-Nov 16 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Nov 3–Nov 9 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Nov 9–Nov 16 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
@@ -867,9 +867,90 @@ ok(band.indexOf("opens Tuesday night, Nov 10, with MACtion") >= 0 &&
    band.indexOf("Kent St. vs Bowling Green, Ohio vs Miami (OH), and Western Michigan vs Akron") >= 0,
    "spotlight names the next college slate: Tuesday Nov 10 MACtion (Kent St. vs Bowling Green, Ohio vs Miami (OH), Western Michigan vs Akron)");
 ok(band.indexOf("Saturday slate takes over today, Nov 7") === -1 &&
-   band.indexOf("BYU vs Utah, Texas vs Missouri, UCLA vs Minnesota, and Alabama vs LSU head the Kalshi NCAAF board") === -1 &&
-   band.indexOf("14-game") === -1,
-   "spotlight no longer frames the settled Saturday slate as today's fixtures and no longer counts the stale 14-game Week 10 remainder");
+   band.indexOf("BYU vs Utah, Texas vs Missouri, UCLA vs Minnesota, and Alabama vs LSU head the Kalshi NCAAF board") === -1,
+   "spotlight no longer frames the settled Saturday slate as today's fixtures (the stale 14-game Week 10 remainder ban from this block is lifted in the Nov 9 block below: 14 games is now Week 11's real slate count, pinned dynamically there)");
+/* The Nov 9 snapshot (fetched 18:50Z NFL / 18:51Z MLB /
+   18:55Z NCAAF) settles Sunday's twelve remaining Week 10 games —
+   every Sunday ticker the Nov 8 band named as the 13-game
+   remainder except tonight's Monday closer (Buffalo at
+   Minnesota, occ Nov 10Z) drops out. Sunday's Finals (all
+   cross-checked): Chicago beat Tampa Bay 27-24 on Sunday night
+   at Soldier Field (Reuters / AP — Tampa Bay forced five
+   turnovers including the first four-interception game of
+   Caleb Williams' career; Tampa Bay trailed 24-13 early in the
+   fourth, Irving's second TD and Mayfield's two-point run tied
+   it 24-24 with 2:51 left; Williams hit Loveland for 38 yards
+   to the Tampa Bay 16 and Santos kicked a 38-yard field goal
+   as time expired; Williams 22-of-37 for 279 yards and two
+   TDs, Jaylon Johnson's pick-six; Bears 7-2, fourth straight;
+   Mayfield 18-of-32 for 243 yards with two interceptions;
+   Tampa Bay 3-6), Green Bay beat New England 45-27 (Providence
+   Journal — Love 372 yards and three TDs), Houston routed the
+   Los Angeles Chargers 44-22 (AP — Stroud's flu game: five TD
+   passes, 21-of-35 for 384 yards; Chargers 0-8), San Francisco
+   beat Las Vegas 38-17, Kansas City beat the New York Jets
+   35-12, Dallas beat Indianapolis 27-23, New Orleans beat
+   Cleveland 23-22, the New York Giants beat Philadelphia
+   19-11, Denver beat Carolina 26-21, Detroit beat Miami 19-9,
+   the Los Angeles Rams beat Washington 20-13, and Seattle beat
+   Arizona 17-3 (Corner Wire / JAM scoreboard roundup). NFL
+   state: 15 games, 23 moves, 0 new — the Week 10 window
+   (Nov 6-10Z) falls to the 1-game remainder pinned dynamically
+   above, and the Week 11 window (Nov 13-17Z) holds the full
+   14-game slate pinned dynamically below. The band ROLLS to a
+   new Nov 9-Nov 16 window: it reports all twelve Sunday
+   Finals, names tonight's Week 10 closer and the Week 11
+   slate (Thursday Nov 12 Washington at the New York Giants
+   through Monday Nov 16 the Los Angeles Chargers at
+   Baltimore, Sunday night Pittsburgh vs Cincinnati), and
+   keeps Tuesday Nov 10's MACtion trio as the next college
+   slate; the stale Sunday-fixture framing is banned below. */
+["KXNFLGAME-26NOV08CLENO", "KXNFLGAME-26NOV08DALIND", "KXNFLGAME-26NOV08DENCAR",
+ "KXNFLGAME-26NOV08DETMIA", "KXNFLGAME-26NOV08LARWAS", "KXNFLGAME-26NOV08NYGPHI",
+ "KXNFLGAME-26NOV08NYJKC", "KXNFLGAME-26NOV08HOULAC", "KXNFLGAME-26NOV08ARISEA",
+ "KXNFLGAME-26NOV08GBNE", "KXNFLGAME-26NOV08LVSF", "KXNFLGAME-26NOV08TBCHI"].forEach(function(t){
+  ok(nflTickers.indexOf(t) === -1,
+     "kalshi-nfl.json settles Sunday's Week 10 game (" + t + " gone)");
+});
+ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") >= 0,
+   "kalshi-nfl.json keeps tonight's Week 10 closer (Buffalo at Minnesota)");
+var week11 = nfl.games.filter(function(g){
+  return g.occ >= "2026-11-13T00:00:00Z" && g.occ < "2026-11-18T00:00:00Z";
+});
+ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 14,
+   "spotlight's Week 11 game count matches the Kalshi NFL snapshot (" + week11.length + " games in the Nov 13-17Z window)");
+ok(band.indexOf("Chicago beat Tampa Bay 27–24 (Final)") >= 0 &&
+   band.indexOf("Cairo Santos kicked a 38-yard field goal as time expired") >= 0 &&
+   band.indexOf("Colston Loveland for 38 yards") >= 0,
+   "spotlight reports Sunday night's result: Chicago beat Tampa Bay 27-24 (Final), Loveland's 38-yard catch setting up Santos' 38-yard field goal as time expired (Reuters / AP)");
+ok(band.indexOf("first four-interception game of Caleb Williams' career") >= 0 &&
+   band.indexOf("Williams finished 22-of-37 for 279 yards and two touchdowns") >= 0 &&
+   band.indexOf("Jaylon Johnson returned an interception for a touchdown") >= 0 &&
+   band.indexOf("Mayfield was 18-of-32 for 243 yards with two interceptions") >= 0,
+   "spotlight reports the SNF detail: Williams' first four-interception game, 22-of-37 for 279 yards and two TDs, Johnson's pick-six, Mayfield 18-of-32 for 243 yards (Reuters / AP)");
+ok(band.indexOf("Bucky Irving's second touchdown") >= 0 &&
+   band.indexOf("tied it 24–24 with 2:51 left") >= 0 &&
+   band.indexOf("Tampa Bay fell to 3–6") >= 0,
+   "spotlight reports the SNF comeback detail: Irving's second TD and the 24-24 tie with 2:51 left, Tampa Bay 3-6 (Reuters / AP)");
+ok(band.indexOf("Green Bay beat New England 45–27 (Final)") >= 0 &&
+   band.indexOf("Jordan Love's 372 passing yards and three touchdowns") >= 0 &&
+   band.indexOf("Houston routed the Los Angeles Chargers 44–22 (Final)") >= 0 &&
+   band.indexOf("five C.J. Stroud touchdown passes") >= 0 &&
+   band.indexOf("21-of-35 for 384 yards") >= 0,
+   "spotlight reports Sunday's other marquee Finals: Green Bay 45-27 New England (Love 372 yards, three TDs) and Houston 44-22 over the Chargers (Stroud five TD passes, 384 yards) (Providence Journal / AP)");
+ok(band.indexOf("San Francisco beat Las Vegas 38–17 (Final)") >= 0 &&
+   band.indexOf("Kansas City beat the New York Jets 35–12 (Final)") >= 0 &&
+   band.indexOf("Seattle beat Arizona 17–3 (Final)") >= 0,
+   "spotlight reports Sunday's remaining Finals list (San Francisco, Kansas City, Seattle among them) (Corner Wire)");
+ok(band.indexOf("closes tonight, Monday night, Nov 9, with Buffalo at Minnesota") >= 0 &&
+   band.indexOf("opens Thursday night, Nov 12, with Washington at the New York Giants") >= 0 &&
+   band.indexOf("Sunday night is Pittsburgh vs Cincinnati") >= 0 &&
+   band.indexOf("closes Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") >= 0,
+   "spotlight names the Week 10 closer (tonight, Buffalo at Minnesota) and the Week 11 slate (Thu Nov 12 Washington at the New York Giants, SNF Pittsburgh vs Cincinnati, MNF Nov 16 Chargers at Baltimore)");
+ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
+   band.indexOf("Sunday night is Tampa Bay at Chicago") === -1 &&
+   band.indexOf("13-game") === -1,
+   "spotlight no longer frames the settled Sunday slate as today's fixtures and no longer counts the stale 13-game Week 10 remainder");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
