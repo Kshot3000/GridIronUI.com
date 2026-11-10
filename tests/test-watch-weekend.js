@@ -538,8 +538,10 @@ ok(band.indexOf("Week 9 closed Monday night") >= 0,
 var week10 = nfl.games.filter(function(g){
   return g.occ >= "2026-11-06T00:00:00Z" && g.occ < "2026-11-11T00:00:00Z";
 });
-ok(band.indexOf(week10.length + "-game") >= 0,
-   "spotlight's Week 10 game count matches the Kalshi NFL snapshot (" + week10.length + " games in the Nov 6-10Z window)");
+ok(week10.length === 0,
+   "kalshi-nfl.json carries no Week 10 game — the slate closed with Buffalo 23-6 at Minnesota on Monday night (Final) (" + week10.length + " games in the Nov 6-10Z window)");
+ok(band.indexOf("Week 10 closed Monday night") >= 0,
+   "spotlight reports Week 10 as closed, with no remainder count (this pin held the dynamic Week 10 count while the slate was live; it inverts on the closer's settlement, following the Week 8/9 precedent above)");
 ok(band.indexOf("Chicago beat Seattle 34–17 (Final)") >= 0 &&
    band.indexOf("three second-half touchdowns") >= 0 &&
    band.indexOf("Caleb Williams was 24-of-34 for 247 yards") >= 0,
@@ -912,8 +914,8 @@ ok(band.indexOf("Saturday slate takes over today, Nov 7") === -1 &&
   ok(nflTickers.indexOf(t) === -1,
      "kalshi-nfl.json settles Sunday's Week 10 game (" + t + " gone)");
 });
-ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") >= 0,
-   "kalshi-nfl.json keeps tonight's Week 10 closer (Buffalo at Minnesota)");
+ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
+   "kalshi-nfl.json settles the Week 10 closer (Buffalo at Minnesota gone) — this pin kept the closer on the Nov 9 board; Buffalo won 23-6 (Final) and the settlement is pinned in the Nov 10 block below");
 var week11 = nfl.games.filter(function(g){
   return g.occ >= "2026-11-13T00:00:00Z" && g.occ < "2026-11-18T00:00:00Z";
 });
@@ -942,15 +944,71 @@ ok(band.indexOf("San Francisco beat Las Vegas 38–17 (Final)") >= 0 &&
    band.indexOf("Kansas City beat the New York Jets 35–12 (Final)") >= 0 &&
    band.indexOf("Seattle beat Arizona 17–3 (Final)") >= 0,
    "spotlight reports Sunday's remaining Finals list (San Francisco, Kansas City, Seattle among them) (Corner Wire)");
-ok(band.indexOf("closes tonight, Monday night, Nov 9, with Buffalo at Minnesota") >= 0 &&
+ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("opens Thursday night, Nov 12, with Washington at the New York Giants") >= 0 &&
    band.indexOf("Sunday night is Pittsburgh vs Cincinnati") >= 0 &&
    band.indexOf("closes Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") >= 0,
-   "spotlight names the Week 10 closer (tonight, Buffalo at Minnesota) and the Week 11 slate (Thu Nov 12 Washington at the New York Giants, SNF Pittsburgh vs Cincinnati, MNF Nov 16 Chargers at Baltimore)");
+   "spotlight reports the Week 10 closer as a Final (Buffalo beat Minnesota 23-6; detailed pins in the Nov 10 block below — this pin named it as tonight's fixture on Nov 9) and still names the Week 11 slate (Thu Nov 12 Washington at the New York Giants, SNF Pittsburgh vs Cincinnati, MNF Nov 16 Chargers at Baltimore)");
 ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    band.indexOf("Sunday night is Tampa Bay at Chicago") === -1 &&
    band.indexOf("13-game") === -1,
    "spotlight no longer frames the settled Sunday slate as today's fixtures and no longer counts the stale 13-game Week 10 remainder");
+/* The Nov 10 snapshot (fetched 18:51Z NFL / 18:51Z MLB /
+   18:55Z NCAAF) settles Monday night's
+   Week 10 closer — Buffalo at Minnesota (occ Nov 10Z) drops
+   out and the NFL board becomes Week 11's 14-game slate plus
+   Week 12's first 13 listed games (Thu Nov 19 Indianapolis at
+   Houston through Mon Nov 23 Cincinnati at Washington). The
+   MNF Final (cross-checked Sportradar / USA Today / DAZN /
+   Democrat and Chronicle): Buffalo beat Minnesota 23-6 at
+   U.S. Bank Stadium — Buffalo led 10-6 at the half and scored
+   13 unanswered points after it; Allen 21-of-31 for 234 yards
+   with a 25-yard TD pass to Keleki Latu (his first career
+   score, 44 seconds left in the first half) and an
+   interception, sacked four times; Cook 107 yards and a TD on
+   31 carries, his 5-yard score capping a 15-play, 84-yard
+   drive that ate 8:32 of the fourth quarter; Bass 3-for-3 on
+   field goals including the 52-yarder with 4:40 left that set
+   the final score; Buffalo's defense forced three turnovers,
+   held Minnesota without a touchdown and to 0-for-8 on third
+   down, outgained the Vikings 339-178 and held the ball for
+   42:32; Wentz 8-of-25 for 81 yards with two interceptions
+   and a lost fumble before Brosmer replaced him in the fourth
+   quarter; Buffalo 7-1 with a fourth straight win, Minnesota
+   6-2 with a second straight loss after a 6-0 start. NFL
+   state: 27 games, 9 moves, 13 new. NCAAF state: 258 games,
+   182 moves, 2 new (Nov 21: Texas A&M vs Oklahoma, LSU vs
+   Tennessee) — tonight's Tuesday Nov 10 MACtion trio still
+   heads the board. The band (same Nov 9-Nov
+   16 window) now headlines the MNF result, reports Week 10 as
+   closed, and keeps the Week 11 slate and tonight's Tuesday
+   Nov 10 MACtion trio as the next slates; the stale MNF-fixture
+   framing is banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
+   "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
+ok(band.indexOf("Buffalo beat Minnesota 23–6 on Monday night") >= 0 &&
+   band.indexOf("James Cook's fourth-quarter touchdown capped a defensive stranglehold at U.S. Bank Stadium") >= 0,
+   "spotlight headlines the MNF result: Buffalo beat Minnesota 23-6 on Monday night, Cook's fourth-quarter TD capping the defensive stranglehold at U.S. Bank Stadium");
+ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
+   band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
+   band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
+   band.indexOf("first career score, with 44 seconds left in the first half") >= 0,
+   "spotlight reports the MNF result: Buffalo beat Minnesota 23-6 (Final), Allen 21-of-31 for 234 yards with the 25-yard TD to Latu, his first career score with 44 seconds left in the first half (USA Today / DAZN)");
+ok(band.indexOf("James Cook ran for 107 yards and a touchdown on 31 carries") >= 0 &&
+   band.indexOf("15-play, 84-yard drive that ate 8:32 of the fourth quarter") >= 0 &&
+   band.indexOf("52-yarder with 4:40 left that set the final score") >= 0,
+   "spotlight reports the MNF ground detail: Cook 107 yards and a TD on 31 carries, the 15-play 84-yard drive eating 8:32, Bass's 52-yarder with 4:40 left setting the final score (DAZN / Democrat and Chronicle)");
+ok(band.indexOf("held Minnesota without a touchdown and to 0-for-8 on third down") >= 0 &&
+   band.indexOf("outgained the Vikings 339–178 while holding the ball for 42:32") >= 0 &&
+   band.indexOf("Carson Wentz was 8-of-25 for 81 yards with two interceptions and a lost fumble") >= 0,
+   "spotlight reports the MNF defensive detail: Minnesota held without a touchdown and to 0-for-8 on third down, outgained 339-178 with 42:32 possession, Wentz 8-of-25 for 81 yards with two interceptions and a lost fumble (Democrat and Chronicle)");
+ok(band.indexOf("Buffalo (7–1) won its fourth straight") >= 0 &&
+   band.indexOf("Minnesota (6–2) lost its second straight after a 6–0 start") >= 0 &&
+   band.indexOf("Week 10 closed Monday night in Minneapolis") >= 0,
+   "spotlight closes Week 10 with the records: Buffalo 7-1, fourth straight; Minnesota 6-2, second straight loss after a 6-0 start");
+ok(band.indexOf("closes tonight, Monday night, Nov 9, with Buffalo at Minnesota") === -1 &&
+   band.indexOf("1-game</strong> remainder") === -1,
+   "spotlight no longer frames the settled MNF closer as tonight's fixture or counts the stale 1-game Week 10 remainder");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
