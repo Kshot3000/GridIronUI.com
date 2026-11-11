@@ -846,8 +846,8 @@ ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV07BYUUTAH") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV07TEXMIZZ") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV07UCLAMINN") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV07ALALSU") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV10KENTBGSU") >= 0,
-   "kalshi-ncaaf.json settles Saturday's marquee four (BYU/Utah, Texas/Missouri, UCLA/Minnesota, Alabama/LSU gone) and heads Tuesday's MACtion trio (Kent St. vs Bowling Green)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV10KENTBGSU") === -1,
+   "kalshi-ncaaf.json settles Saturday's marquee four (BYU/Utah, Texas/Missouri, UCLA/Minnesota, Alabama/LSU gone) — the Tuesday MACtion head this pin kept on Nov 8 (Kent St. vs Bowling Green) settled Tuesday night, Bowling Green won 33-28 (Final), and its settlement is pinned in the Nov 11 block below");
 ok(band.indexOf("Utah beat No. 9 BYU 28–20 (Final)") >= 0 &&
    band.indexOf("Devon Dampier accounted for four touchdowns") >= 0 &&
    band.indexOf("Bear Bachmeier threw four interceptions") >= 0,
@@ -865,9 +865,9 @@ ok(band.indexOf("UCLA beat Minnesota 34–20 (Final)") >= 0 &&
    band.indexOf("back-to-back 75-yard touchdown passes to Aidan Mizell") >= 0 &&
    band.indexOf("9–0 for the first time since 1998") >= 0,
    "spotlight reports Saturday's Big Ten result: No. 5 UCLA beat Minnesota 34-20 (Final), Dieffenbach 303 yards on eight completions with back-to-back 75-yard TDs to Mizell, first 9-0 start since 1998 (UCLA Athletics / NBC Sports)");
-ok(band.indexOf("opens Tuesday night, Nov 10, with MACtion") >= 0 &&
-   band.indexOf("Kent St. vs Bowling Green, Ohio vs Miami (OH), and Western Michigan vs Akron") >= 0,
-   "spotlight names the next college slate: Tuesday Nov 10 MACtion (Kent St. vs Bowling Green, Ohio vs Miami (OH), Western Michigan vs Akron)");
+ok(band.indexOf("Tuesday MACtion is Final now too") >= 0 &&
+   band.indexOf("Miami (OH) beat Ohio 34–17 (Final)") >= 0,
+   "spotlight now reports the Tuesday Nov 10 MACtion slate it named as fixtures on Nov 8 as Finals (detailed result pins in the Nov 11 block below)");
 ok(band.indexOf("Saturday slate takes over today, Nov 7") === -1 &&
    band.indexOf("BYU vs Utah, Texas vs Missouri, UCLA vs Minnesota, and Alabama vs LSU head the Kalshi NCAAF board") === -1,
    "spotlight no longer frames the settled Saturday slate as today's fixtures (the stale 14-game Week 10 remainder ban from this block is lifted in the Nov 9 block below: 14 games is now Week 11's real slate count, pinned dynamically there)");
@@ -986,9 +986,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Buffalo beat Minnesota 23–6 on Monday night") >= 0 &&
-   band.indexOf("James Cook's fourth-quarter touchdown capped a defensive stranglehold at U.S. Bank Stadium") >= 0,
-   "spotlight headlines the MNF result: Buffalo beat Minnesota 23-6 on Monday night, Cook's fourth-quarter TD capping the defensive stranglehold at U.S. Bank Stadium");
+ok(band.indexOf("Miami (OH) scored 34 unanswered points to stun Ohio 34–17") >= 0 &&
+   band.indexOf("two scores in the final two minutes stole the Battle of the Bricks") >= 0,
+   "spotlight headlines Tuesday's MACtion result: Miami (OH) 34 unanswered points to stun Ohio 34-17, two scores in the final two minutes stealing the Battle of the Bricks (this pin held the Nov 10 MNF headline — Buffalo 23-6 at Minnesota — which rolled to the MACtion comeback on Nov 11; the MNF result stays pinned as a body result in the pins below)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1009,6 +1009,110 @@ ok(band.indexOf("Buffalo (7–1) won its fourth straight") >= 0 &&
 ok(band.indexOf("closes tonight, Monday night, Nov 9, with Buffalo at Minnesota") === -1 &&
    band.indexOf("1-game</strong> remainder") === -1,
    "spotlight no longer frames the settled MNF closer as tonight's fixture or counts the stale 1-game Week 10 remainder");
+/* The Nov 11 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:54Z NCAAF) settles Tuesday night's MACtion trio — all
+   three tickers drop out and tonight's Wednesday Nov 11 trio
+   (Buffalo vs Ball St., UMass vs Toledo, Sacramento St. vs
+   Central Michigan, all occ Nov 11 23:00Z) heads the board.
+   Tuesday's Finals (all cross-checked): Miami (OH) beat Ohio
+   34-17 in the 103rd Battle of the Bricks at Yager Stadium
+   (Miami Athletics / Sportradar / SI / USA Today) — Ohio led
+   17-0 in the second quarter before 34 unanswered Miami
+   points: Smith's 15-yard WR-pass TD to Huggins with 1:02
+   left in the half, Ohio's fake field goal broken up in the
+   end zone before the break (after a Miami unsportsmanlike
+   flag for the video-board graphic on the original kick
+   try), Jones's 1-yard TD run in the third, Stidham's
+   36-yard tying FG early in the fourth and his 25-yard
+   go-ahead FG with 3:55 left, McCain's forced-and-recovered
+   fumble on fourth down with 1:55 left, Jones's 48-yard TD
+   on the next play and Knighten's 58-yard pick-six on the
+   next snap; Bellisari (true freshman, off the bench for the
+   injured Heavner) 99 passing yards, 64 rushing, no
+   turnovers; Jones a career-high 115 yards and two TDs;
+   Miami 6-4 (4-2 MAC), bowl-eligible, biggest comeback win
+   since 2014; Ohio 7-3 (5-1), first MAC loss; crowd 17,156.
+   Bowling Green beat Kent St. 33-28 at Doyt L. Perry Stadium
+   (Kent State Athletics / Beacon Journal / Sportradar) —
+   Kent St. rallied from 27-14 down in the fourth to lead
+   28-27 on DeShields' 25-yard TD run with 2:34 left, but
+   Amachree's 48-yard TD run with 1:51 left (two plays, nine
+   seconds, 64 yards) reclaimed it; DeShields 19-of-38 for
+   332 yards with two passing and two rushing TDs, Harris
+   eight catches for 143 yards and two scores, Kent St.
+   outgained Bowling Green 409-347 but fell to 3-7 (2-4) with
+   its bowl hopes ended; Bowling Green 3-7 (3-3). Western
+   Michigan beat Akron 42-14 at InfoCision Stadium (Western
+   Michigan Athletics / Sportradar) — a season-high 566
+   yards (360 rushing), possession 42:46; Lowry a perfect
+   15-for-15 for 149 yards and a TD, Reynolds two TD passes
+   to Levicki, Buckley 126 yards and two TDs, Cabana 107
+   yards including an 82-yard TD run for the second straight
+   game; Western Michigan 7-3 (5-1) stayed tied atop the
+   MAC; Broughton's two TD passes to Williams were Akron's
+   (1-9, 0-6) only scores. NFL state: 27 games, 25 moves, 0
+   new — the board is unchanged (Week 11's 14-game slate
+   plus Week 12's 13 listed games). NCAAF state: 257 games,
+   169 moves, 2 new (Nov 24: Miami (OH) vs Western Michigan,
+   Kent St. vs Eastern Michigan — the set-diff matches
+   new_games exactly this run). The band (same Nov 9-Nov 16
+   window) now headlines the Miami comeback, reports all
+   three Tuesday Finals, and names tonight's Wednesday trio
+   as the next slate; the stale Tuesday-fixture framing and
+   the Nov 10 MNF headline are banned below. */
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV10KENTBGSU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV10OHIOMOH") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV10WMUAKR") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11BUFFBALL") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11MASSTOL") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11SACCMU") >= 0,
+   "kalshi-ncaaf.json settles Tuesday's MACtion trio (Kent St./Bowling Green, Ohio/Miami (OH), Western Michigan/Akron gone) and heads tonight's Wednesday trio (Buffalo vs Ball St., UMass vs Toledo, Sacramento St. vs Central Michigan)");
+ok(band.indexOf("Miami (OH) beat Ohio 34–17 (Final) in the 103rd Battle of the Bricks at Yager Stadium") >= 0 &&
+   band.indexOf("Ohio led 17–0 in the second quarter, but Miami scored 34 unanswered points") >= 0 &&
+   band.indexOf("Scoop Smith threw a 15-yard touchdown pass to Maleek Huggins with 1:02 left in the half") >= 0,
+   "spotlight reports Tuesday's Battle of the Bricks result: Miami (OH) beat Ohio 34-17 (Final), 34 unanswered points after a 17-0 deficit, Smith's 15-yard WR-pass TD to Huggins with 1:02 left in the half (Miami Athletics)");
+ok(band.indexOf("Ohio's fake field goal was broken up in the end zone before the break") >= 0 &&
+   band.indexOf("video-board graphic shown during the original kick try (USA Today)") >= 0 &&
+   band.indexOf("D'Shawntae Jones ran in from a yard out in the third quarter") >= 0,
+   "spotlight reports the Bricks turning points: Ohio's fake field goal broken up in the end zone after Miami's video-board unsportsmanlike flag (USA Today), Jones's 1-yard third-quarter TD (Miami Athletics)");
+ok(band.indexOf("Brady Stidham tied it with a 36-yard field goal early in the fourth") >= 0 &&
+   band.indexOf("put Miami ahead for the first time, 20–17, with a 25-yarder with 3:55 left") >= 0 &&
+   band.indexOf("Malcolm McCain forced and recovered a fumble on fourth down with 1:55 left") >= 0,
+   "spotlight reports the Bricks finish: Stidham's 36-yard tying FG and 25-yard go-ahead FG with 3:55 left, McCain's forced-and-recovered fumble with 1:55 left (Miami Athletics)");
+ok(band.indexOf("Jones raced 48 yards for a touchdown on the next play") >= 0 &&
+   band.indexOf("Amariyun Knighten returned an interception 58 yards for a pick-six on Ohio's next snap") >= 0 &&
+   band.indexOf("true freshman Drew Bellisari came off the bench for the injured Caleb Heavner and threw for 99 yards with 64 rushing yards and no turnovers") >= 0,
+   "spotlight reports the Bricks exclamation points: Jones's 48-yard TD on the next play, Knighten's 58-yard pick-six on the next snap, freshman Bellisari 99 passing and 64 rushing yards with no turnovers off the bench (Miami Athletics)");
+ok(band.indexOf("Jones finished with a career-high 115 yards and two touchdowns") >= 0 &&
+   band.indexOf("Miami (6–4, 4–2 in the MAC) became bowl-eligible with its biggest comeback win since 2014") >= 0 &&
+   band.indexOf("Ohio (7–3, 5–1) took its first MAC loss before a crowd of 17,156") >= 0,
+   "spotlight closes the Bricks with the records: Jones a career-high 115 yards and two TDs, Miami 6-4 (4-2) bowl-eligible with its biggest comeback win since 2014, Ohio 7-3 (5-1) first MAC loss, crowd 17,156 (Miami Athletics)");
+ok(band.indexOf("Bowling Green beat Kent St. 33–28 (Final) at Doyt L. Perry Stadium") >= 0 &&
+   band.indexOf("Kent St. rallied from 27–14 down in the fourth quarter to lead 28–27 on Dru DeShields' 25-yard touchdown run with 2:34 left") >= 0 &&
+   band.indexOf("Nakai Amachree answered with a 48-yard touchdown run with 1:51 left — two plays, nine seconds, 64 yards") >= 0,
+   "spotlight reports Tuesday's other rally: Bowling Green beat Kent St. 33-28 (Final), DeShields' 25-yard TD run putting Kent St. ahead with 2:34 left before Amachree's 48-yard winner with 1:51 left — two plays, nine seconds, 64 yards (Kent State Athletics / Beacon Journal)");
+ok(band.indexOf("DeShields finished 19-of-38 for 332 yards with two passing and two rushing touchdowns") >= 0 &&
+   band.indexOf("Wayne Harris caught eight passes for 143 yards and two scores") >= 0 &&
+   band.indexOf("Kent St. outgained Bowling Green 409–347 but fell to 3–7 (2–4 in the MAC)") >= 0 &&
+   band.indexOf("Bowling Green is 3–7 (3–3)") >= 0,
+   "spotlight reports the Kent St. detail: DeShields 19-of-38 for 332 yards with four total TDs, Harris 8-143-2, Kent St. outgained Bowling Green 409-347 but fell to 3-7 (2-4) with its bowl hopes ended, Bowling Green 3-7 (3-3) (Kent State Athletics)");
+ok(band.indexOf("Western Michigan beat Akron 42–14 (Final) at InfoCision Stadium") >= 0 &&
+   band.indexOf("season-high 566 yards, 360 of them rushing, and held the ball for 42:46") >= 0 &&
+   band.indexOf("Broc Lowry was a perfect 15-for-15 for 149 yards and a touchdown") >= 0 &&
+   band.indexOf("Mayson Reynolds threw two touchdown passes to Nate Levicki") >= 0,
+   "spotlight reports Tuesday's rout: Western Michigan beat Akron 42-14 (Final), a season-high 566 yards (360 rushing) with 42:46 possession, Lowry a perfect 15-for-15 for 149 yards and a TD, Reynolds two TD passes to Levicki (Western Michigan Athletics)");
+ok(band.indexOf("Jalen Buckley ran for 126 yards and two touchdowns") >= 0 &&
+   band.indexOf("Cole Cabana added 107 yards including an 82-yard touchdown run for the second straight game") >= 0 &&
+   band.indexOf("Western Michigan (7–3, 5–1 in the MAC) stayed tied atop the MAC") >= 0 &&
+   band.indexOf("Cibastian Broughton threw two touchdown passes to Marcel Williams for Akron (1–9, 0–6)") >= 0,
+   "spotlight reports the Western Michigan ground detail: Buckley 126 yards and two TDs, Cabana 107 yards including the 82-yard TD, Western Michigan 7-3 (5-1) tied atop the MAC, Broughton's two TD passes to Williams for Akron 1-9 (0-6) (Western Michigan Athletics)");
+ok(band.indexOf("opens tonight, Wednesday night, Nov 11, with MACtion") >= 0 &&
+   band.indexOf("Buffalo vs Ball St., UMass vs Toledo, and Sacramento St. vs Central Michigan head the Kalshi NCAAF board") >= 0,
+   "spotlight names the next college slate: tonight's Wednesday Nov 11 MACtion (Buffalo vs Ball St., UMass vs Toledo, Sacramento St. vs Central Michigan)");
+ok(band.indexOf("opens Tuesday night, Nov 10, with MACtion") === -1 &&
+   band.indexOf("Kent St. vs Bowling Green, Ohio vs Miami (OH), and Western Michigan vs Akron head the Kalshi NCAAF board") === -1 &&
+   band.indexOf("Buffalo beat Minnesota 23–6 on Monday night — James Cook's") === -1,
+   "spotlight no longer frames the settled Tuesday trio as tonight's fixtures and no longer carries the Nov 10 MNF headline (the MNF result itself stays in the body, pinned in the Nov 10 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
