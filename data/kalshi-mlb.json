@@ -1,9 +1,9 @@
 {
- "updated_at": "2026-11-11T18:50:06Z",
+ "updated_at": "2026-11-12T18:50:09Z",
  "source": "Kalshi public trade-api v2 (server-side snapshot; browser CORS-blocked)",
  "series_ticker": "KXMLBGAME",
  "games": [],
- "prev_at": "2026-11-10T18:51:03Z",
+ "prev_at": "2026-11-11T18:50:06Z",
  "moves": [],
  "new_games": []
 }

@@ -986,9 +986,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Miami (OH) scored 34 unanswered points to stun Ohio 34–17") >= 0 &&
-   band.indexOf("two scores in the final two minutes stole the Battle of the Bricks") >= 0,
-   "spotlight headlines Tuesday's MACtion result: Miami (OH) 34 unanswered points to stun Ohio 34-17, two scores in the final two minutes stealing the Battle of the Bricks (this pin held the Nov 10 MNF headline — Buffalo 23-6 at Minnesota — which rolled to the MACtion comeback on Nov 11; the MNF result stays pinned as a body result in the pins below)");
+ok(band.indexOf("Messiah Burch ran for a career-high 209 yards in the Muncie rain as Buffalo beat Ball State 28–7") >= 0 &&
+   band.indexOf("the Bulls’ fifth straight win pulled them into a four-way tie atop the MAC") >= 0,
+   "spotlight headlines Wednesday's MACtion result: Burch's career-high 209 yards in the Muncie rain as Buffalo beat Ball State 28-7, the fifth straight win pulling the Bulls into a four-way tie atop the MAC (this pin held the Nov 11 Miami headline — 34 unanswered points to stun Ohio 34-17 — which rolled to the Burch night on Nov 12; the Miami result stays pinned as a body result in the Nov 11 block below)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1063,10 +1063,10 @@ ok(band.indexOf("closes tonight, Monday night, Nov 9, with Buffalo at Minnesota"
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV10KENTBGSU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV10OHIOMOH") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV10WMUAKR") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11BUFFBALL") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11MASSTOL") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11SACCMU") >= 0,
-   "kalshi-ncaaf.json settles Tuesday's MACtion trio (Kent St./Bowling Green, Ohio/Miami (OH), Western Michigan/Akron gone) and heads tonight's Wednesday trio (Buffalo vs Ball St., UMass vs Toledo, Sacramento St. vs Central Michigan)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11BUFFBALL") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11MASSTOL") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11SACCMU") === -1,
+   "kalshi-ncaaf.json settles Tuesday's MACtion trio (Kent St./Bowling Green, Ohio/Miami (OH), Western Michigan/Akron gone) — the Wednesday trio this pin kept on Nov 11 (Buffalo vs Ball St., UMass vs Toledo, Sacramento St. vs Central Michigan) settled Wednesday night and its settlement is pinned in the Nov 12 block below");
 ok(band.indexOf("Miami (OH) beat Ohio 34–17 (Final) in the 103rd Battle of the Bricks at Yager Stadium") >= 0 &&
    band.indexOf("Ohio led 17–0 in the second quarter, but Miami scored 34 unanswered points") >= 0 &&
    band.indexOf("Scoop Smith threw a 15-yard touchdown pass to Maleek Huggins with 1:02 left in the half") >= 0,
@@ -1106,13 +1106,125 @@ ok(band.indexOf("Jalen Buckley ran for 126 yards and two touchdowns") >= 0 &&
    band.indexOf("Western Michigan (7–3, 5–1 in the MAC) stayed tied atop the MAC") >= 0 &&
    band.indexOf("Cibastian Broughton threw two touchdown passes to Marcel Williams for Akron (1–9, 0–6)") >= 0,
    "spotlight reports the Western Michigan ground detail: Buckley 126 yards and two TDs, Cabana 107 yards including the 82-yard TD, Western Michigan 7-3 (5-1) tied atop the MAC, Broughton's two TD passes to Williams for Akron 1-9 (0-6) (Western Michigan Athletics)");
-ok(band.indexOf("opens tonight, Wednesday night, Nov 11, with MACtion") >= 0 &&
-   band.indexOf("Buffalo vs Ball St., UMass vs Toledo, and Sacramento St. vs Central Michigan head the Kalshi NCAAF board") >= 0,
-   "spotlight names the next college slate: tonight's Wednesday Nov 11 MACtion (Buffalo vs Ball St., UMass vs Toledo, Sacramento St. vs Central Michigan)");
+ok(band.indexOf("College football’s Wednesday MACtion is Final now too") >= 0 &&
+   band.indexOf("Buffalo beat Ball St. 28–7 (Final)") >= 0 &&
+   band.indexOf("Toledo shut out UMass 24–0 (Final)") >= 0 &&
+   band.indexOf("Central Michigan beat Sacramento St. 28–7 (Final)") >= 0,
+   "spotlight now reports the Wednesday Nov 11 MACtion slate it named as fixtures on Nov 11 as Finals (detailed result pins in the Nov 12 block below)");
 ok(band.indexOf("opens Tuesday night, Nov 10, with MACtion") === -1 &&
    band.indexOf("Kent St. vs Bowling Green, Ohio vs Miami (OH), and Western Michigan vs Akron head the Kalshi NCAAF board") === -1 &&
    band.indexOf("Buffalo beat Minnesota 23–6 on Monday night — James Cook's") === -1,
    "spotlight no longer frames the settled Tuesday trio as tonight's fixtures and no longer carries the Nov 10 MNF headline (the MNF result itself stays in the body, pinned in the Nov 10 block above)");
+/* The Nov 12 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:54Z NCAAF) settles Wednesday night's MACtion trio —
+   all three tickers drop out and tonight's Thursday Nov 12
+   pair (Memphis vs South Florida, occ Nov 13 04:00Z;
+   Louisiana vs Louisiana-Monroe, occ Nov 13 05:00Z) heads
+   the board. Wednesday's Finals (all cross-checked):
+   Buffalo beat Ball St. 28-7 at Scheumann Stadium in Muncie
+   (AP / The Star Press / Sportradar) — rain-soaked, kickoff
+   delayed 15 minutes by weather; Ball State's only score
+   was a blocked punt recovered in the end zone and its
+   offense never scored; Burch a career-high 209 yards and
+   two TDs on 31 carries (the 2-yard go-ahead TD with 3:10
+   left in the third capping a 12-play, 79-yard drive that
+   ate more than six minutes; a 67-yard run made him the
+   12th player in Buffalo history to rush for 1,000 yards
+   in a season), Shelton a career-high 92 yards and the
+   final score, Buffalo 302 team rushing yards with Ball
+   State held to 48 passing yards; the Cardinals drove
+   inside Buffalo's 30 six times with no offensive point
+   (Boehm missed all three field goals) and fell to 3-7
+   (2-4) with bowl hopes ended for the fifth straight
+   season; Buffalo 7-3 (5-1), a fifth straight win,
+   bowl-eligible for the ninth time in program history, in
+   a four-way tie atop the MAC (with Toledo, Ohio and
+   Western Michigan); former Ball State head coach Pete
+   Lembo is now 2-0 against his old team with the Bulls.
+   Toledo shut out UMass 24-0 at the Glass Bowl (Toledo
+   Athletics / UMass Athletics / Covers) — all 24 points in
+   the first half: Walendzak's 69-yard Wildcat TD run
+   (five plays, 90 yards) late in the first quarter in his
+   return from injury, Griffith's 27-yard field goal and
+   Thompson's 62-yard pick-six in the second quarter, and
+   Walendzak's 17-yard TD catch from Richter with 1:51
+   left in the half; Walendzak a career-high 117 rushing
+   yards; Toledo 8-2 (5-1) outgained UMass 436-188 and
+   never let UMass reach the red zone; UMass QB Watson
+   left in the first quarter after re-injuring his ankle
+   and did not return; UMass 5-5 (2-4); the shutout was
+   Toledo's first in back-to-back seasons since 1992-93.
+   Central Michigan beat Sacramento St. 28-7 at
+   Kelly/Shorts Stadium in Mount Pleasant (Central
+   Michigan Athletics / Sacramento State Athletics /
+   Sportradar) — tied 7-7 on Ene's 37-yard TD run in the
+   second quarter, then 21 unanswered CMU points behind
+   319 rushing yards and four rushing TDs: Clerveaux a
+   27-yard TD and 100 yards, Woodford 119 yards, Townsend
+   a 40-yard TD capping a 97-yard drive (CMU's longest of
+   the season) in the third quarter and a 6-yard TD with
+   1:05 left; CMU 5-5 (3-3) ran 30 more plays, outgained
+   Sacramento St. 424-211, held the ball nearly 40 minutes
+   and moved within a win of bowl eligibility with a
+   second straight win; Sacramento St. 2-9 (1-7) closed
+   its first MAC season and gets 17 days off before its
+   Nov 28 finale at Hawaii. NFL state: 27 games, 4 moves,
+   0 new — the board is unchanged (Week 11's 14-game slate
+   opens tonight, Thursday Nov 12, Washington at the New
+   York Giants). NCAAF state: 254 games, 162 moves, 0 new.
+   The band (same Nov 9-Nov 16 window) now headlines
+   Burch's 209-yard night, reports all three Wednesday
+   Finals, and names tonight's Thursday pair as the next
+   slate; the stale Wednesday-fixture framing and the
+   Nov 11 Miami headline are banned below. */
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV11BUFFBALL") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11MASSTOL") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV11SACCMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12MEMUSF") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") >= 0,
+   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Buffalo/Ball St., UMass/Toledo, Sacramento St./Central Michigan gone) and heads tonight's Thursday pair (Memphis vs South Florida, Louisiana vs Louisiana-Monroe)");
+ok(band.indexOf("Buffalo beat Ball St. 28–7 (Final) at Scheumann Stadium in Muncie") >= 0 &&
+   band.indexOf("a brief weather delay pushed kickoff back 15 minutes on a rain-soaked night") >= 0 &&
+   band.indexOf("Ball State scored first by recovering a blocked punt in the end zone, and its offense never scored at all") >= 0,
+   "spotlight reports Wednesday's Muncie result: Buffalo beat Ball St. 28-7 (Final) at Scheumann Stadium, kickoff delayed 15 minutes by weather, Ball State's only score a blocked punt recovered in the end zone with zero offensive points (AP / The Star Press)");
+ok(band.indexOf("Messiah Burch ran for a career-high 209 yards and two touchdowns on 31 carries") >= 0 &&
+   band.indexOf("his 2-yard score with 3:10 left in the third quarter capped a 12-play, 79-yard drive that ate more than six minutes") >= 0 &&
+   band.indexOf("a 67-yard run made him the 12th player in Buffalo history to rush for 1,000 yards in a season") >= 0,
+   "spotlight reports the Burch detail: a career-high 209 yards and two TDs on 31 carries, the 2-yard go-ahead score with 3:10 left in the third capping a 12-play 79-yard drive, the 67-yarder making him Buffalo's 12th 1,000-yard rusher (AP)");
+ok(band.indexOf("Shelton added a career-high 92 yards and the final score") >= 0 &&
+   band.indexOf("Buffalo ran for 302 yards as a team and held Ball State to 48 passing yards") >= 0 &&
+   band.indexOf("Buffalo (7–3, 5–1) won its fifth straight, became bowl-eligible for the ninth time in program history and joined a four-way tie atop the MAC") >= 0 &&
+   band.indexOf("the Cardinals (3–7, 2–4 in the MAC) drove inside Buffalo’s 30 six times without an offensive point") >= 0,
+   "spotlight closes Buffalo's win with the records: Shelton a career-high 92 yards, 302 team rushing yards with Ball State held to 48 passing yards, Buffalo 7-3 (5-1) with a fifth straight win and a four-way MAC tie, Ball State 3-7 (2-4) with six trips inside the 30 and no offensive point (The Star Press)");
+ok(band.indexOf("Toledo shut out UMass 24–0 (Final) at the Glass Bowl") >= 0 &&
+   band.indexOf("all 24 points came in the first half") >= 0 &&
+   band.indexOf("Connor Walendzak, back from injury, opened the scoring late in the first quarter with a 69-yard touchdown run out of the Wildcat to finish a five-play, 90-yard drive") >= 0,
+   "spotlight reports Wednesday's Glass Bowl shutout: Toledo beat UMass 24-0 (Final) with all 24 points in the first half, Walendzak's 69-yard Wildcat TD opening the scoring in his return from injury (Toledo Athletics)");
+ok(band.indexOf("Nicholas Thompson returned an interception 62 yards for a touchdown") >= 0 &&
+   band.indexOf("Walendzak caught a 17-yard scoring pass from John Alan Richter with 1:51 left in the half") >= 0 &&
+   band.indexOf("Walendzak finished with a career-high 117 rushing yards") >= 0 &&
+   band.indexOf("Toledo (8–2, 5–1) outgained UMass 436–188 and never let the Minutemen reach the red zone") >= 0,
+   "spotlight reports the Toledo detail: Thompson's 62-yard pick-six, Walendzak's 17-yard TD catch with 1:51 left in the half and a career-high 117 rushing yards, Toledo 8-2 (5-1) outgaining UMass 436-188 with no red-zone trip allowed (Toledo Athletics / Covers)");
+ok(band.indexOf("starting quarterback William “Pop” Watson III left in the first quarter after re-injuring his ankle and did not return") >= 0 &&
+   band.indexOf("UMass fell to 5–5 (2–4)") >= 0 &&
+   band.indexOf("the shutout gave Toledo one in back-to-back seasons for the first time since 1992–93") >= 0,
+   "spotlight closes the shutout with the records: Watson out in the first quarter (ankle), UMass 5-5 (2-4), Toledo's first shutout in back-to-back seasons since 1992-93 (UMass Athletics / Toledo Athletics)");
+ok(band.indexOf("Central Michigan beat Sacramento St. 28–7 (Final) at Kelly/Shorts Stadium in Mount Pleasant") >= 0 &&
+   band.indexOf("after Ene’s 37-yard touchdown run tied it 7–7 in the second quarter, the Chippewas scored the final 21 points behind 319 rushing yards and four rushing touchdowns") >= 0 &&
+   band.indexOf("Jayden Clerveaux opened the scoring with a 27-yard run and finished with 100 yards") >= 0 &&
+   band.indexOf("Nick Woodford ran for 119 yards") >= 0,
+   "spotlight reports Wednesday's Mount Pleasant result: Central Michigan beat Sacramento St. 28-7 (Final), 21 unanswered points after a 7-7 tie behind 319 rushing yards, Clerveaux 100 yards and Woodford 119 (Central Michigan Athletics)");
+ok(band.indexOf("Brock Townsend capped a 97-yard drive — Central Michigan’s longest of the season — with a 40-yard touchdown in the third quarter before adding a 6-yard score with 1:05 left") >= 0 &&
+   band.indexOf("Central Michigan (5–5, 3–3) ran 30 more plays than Sacramento St., outgained it 424–211") >= 0 &&
+   band.indexOf("Sacramento St. (2–9, 1–7) closed its first MAC season and now gets 17 days off before its finale at Hawaii on Nov 28") >= 0,
+   "spotlight reports the CMU finish: Townsend's 40-yard TD capping a 97-yard drive and his 6-yard score with 1:05 left, Central Michigan 5-5 (3-3) outgaining Sacramento St. 424-211, Sacramento St. 2-9 (1-7) done in the MAC until its Nov 28 finale at Hawaii (Sacramento State Athletics)");
+ok(band.indexOf("opens tonight, Thursday night, Nov 12") >= 0 &&
+   band.indexOf("Memphis vs South Florida and Louisiana vs Louisiana-Monroe head the Kalshi NCAAF board") >= 0,
+   "spotlight names the next college slate: tonight's Thursday Nov 12 pair (Memphis vs South Florida, Louisiana vs Louisiana-Monroe)");
+ok(band.indexOf("opens tonight, Wednesday night, Nov 11, with MACtion") === -1 &&
+   band.indexOf("Buffalo vs Ball St., UMass vs Toledo, and Sacramento St. vs Central Michigan head the Kalshi NCAAF board") === -1 &&
+   band.indexOf("Miami (OH) scored 34 unanswered points to stun Ohio 34–17") === -1,
+   "spotlight no longer frames the settled Wednesday trio as tonight's fixtures and no longer carries the Nov 11 Miami headline (the Miami result itself stays in the body, pinned in the Nov 11 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
