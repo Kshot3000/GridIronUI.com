@@ -919,8 +919,8 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
 var week11 = nfl.games.filter(function(g){
   return g.occ >= "2026-11-13T00:00:00Z" && g.occ < "2026-11-18T00:00:00Z";
 });
-ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 14,
-   "spotlight's Week 11 game count matches the Kalshi NFL snapshot (" + week11.length + " games in the Nov 13-17Z window)");
+ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 13,
+   "spotlight's Week 11 remainder count matches the Kalshi NFL snapshot (" + week11.length + " games left in the Nov 13-17Z window — this pin held the full 14-game slate while the week was unplayed; it follows the remainder once the Thursday opener settles, per the Week 8/9 precedent above, and the opener's settlement is pinned in the Nov 13 block below)");
 ok(band.indexOf("Chicago beat Tampa Bay 27–24 (Final)") >= 0 &&
    band.indexOf("Cairo Santos kicked a 38-yard field goal as time expired") >= 0 &&
    band.indexOf("Colston Loveland for 38 yards") >= 0,
@@ -945,14 +945,13 @@ ok(band.indexOf("San Francisco beat Las Vegas 38–17 (Final)") >= 0 &&
    band.indexOf("Seattle beat Arizona 17–3 (Final)") >= 0,
    "spotlight reports Sunday's remaining Finals list (San Francisco, Kansas City, Seattle among them) (Corner Wire)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
-   band.indexOf("opens Thursday night, Nov 12, with Washington at the New York Giants") >= 0 &&
+   band.indexOf("Washington beat the New York Giants 24–21 (Final)") >= 0 &&
    band.indexOf("Sunday night is Pittsburgh vs Cincinnati") >= 0 &&
    band.indexOf("closes Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") >= 0,
-   "spotlight reports the Week 10 closer as a Final (Buffalo beat Minnesota 23-6; detailed pins in the Nov 10 block below — this pin named it as tonight's fixture on Nov 9) and still names the Week 11 slate (Thu Nov 12 Washington at the New York Giants, SNF Pittsburgh vs Cincinnati, MNF Nov 16 Chargers at Baltimore)");
+   "spotlight reports the Week 10 closer as a Final (Buffalo beat Minnesota 23-6; detailed pins in the Nov 10 block below — this pin named it as tonight's fixture on Nov 9) and the Week 11 opener as a Final too (Washington beat the New York Giants 24-21; detailed pins in the Nov 13 block below — this pin named it as Thursday's fixture on Nov 9), still naming the rest of the Week 11 slate (SNF Pittsburgh vs Cincinnati, MNF Nov 16 Chargers at Baltimore)");
 ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
-   band.indexOf("Sunday night is Tampa Bay at Chicago") === -1 &&
-   band.indexOf("13-game") === -1,
-   "spotlight no longer frames the settled Sunday slate as today's fixtures and no longer counts the stale 13-game Week 10 remainder");
+   band.indexOf("Sunday night is Tampa Bay at Chicago") === -1,
+   "spotlight no longer frames the settled Sunday slate as today's fixtures (the stale 13-game Week 10 remainder ban from this pin is lifted in the Nov 13 block below: 13 games is now Week 11's real remainder count after Thursday's opener settled, pinned dynamically above)");
 /* The Nov 10 snapshot (fetched 18:51Z NFL / 18:51Z MLB /
    18:55Z NCAAF) settles Monday night's
    Week 10 closer — Buffalo at Minnesota (occ Nov 10Z) drops
@@ -986,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Messiah Burch ran for a career-high 209 yards in the Muncie rain as Buffalo beat Ball State 28–7") >= 0 &&
-   band.indexOf("the Bulls’ fifth straight win pulled them into a four-way tie atop the MAC") >= 0,
-   "spotlight headlines Wednesday's MACtion result: Burch's career-high 209 yards in the Muncie rain as Buffalo beat Ball State 28-7, the fifth straight win pulling the Bulls into a four-way tie atop the MAC (this pin held the Nov 11 Miami headline — 34 unanswered points to stun Ohio 34-17 — which rolled to the Burch night on Nov 12; the Miami result stays pinned as a body result in the Nov 11 block below)");
+ok(band.indexOf("Jayden Daniels hit Stefon Diggs for a 32-yard touchdown with 57 seconds left as Washington rallied past the New York Giants 24–21") >= 0 &&
+   band.indexOf("a season-saving Thursday night win that kept the Commanders alive in the NFC East") >= 0,
+   "spotlight headlines Thursday's Week 11 opener: Daniels' 32-yard touchdown to Diggs with 57 seconds left as Washington rallied past the New York Giants 24-21, a season-saving win that kept the Commanders alive in the NFC East (this pin held the Nov 12 Burch headline — a career-high 209 yards in the Muncie rain as Buffalo beat Ball State 28-7 — which rolled to the Daniels night on Nov 13; the Burch result stays pinned as a body result in the Nov 12 block below)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1180,9 +1179,13 @@ ok(band.indexOf("opens Tuesday night, Nov 10, with MACtion") === -1 &&
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV11BUFFBALL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV11MASSTOL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV11SACCMU") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12MEMUSF") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") >= 0,
-   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Buffalo/Ball St., UMass/Toledo, Sacramento St./Central Michigan gone) and heads tonight's Thursday pair (Memphis vs South Florida, Louisiana vs Louisiana-Monroe)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12MEMUSF") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13FSUPITT") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13ILLUCLA") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13SUUPRST") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13HOUCOLO") >= 0,
+   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Buffalo/Ball St., UMass/Toledo, Sacramento St./Central Michigan gone) — the Thursday pair this pin kept on Nov 12 (Memphis vs South Florida, Louisiana vs Louisiana-Monroe) settled Thursday night and is pinned as gone in the Nov 13 block below, which heads tonight's Friday quartet (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St., Houston vs Colorado)");
 ok(band.indexOf("Buffalo beat Ball St. 28–7 (Final) at Scheumann Stadium in Muncie") >= 0 &&
    band.indexOf("a brief weather delay pushed kickoff back 15 minutes on a rain-soaked night") >= 0 &&
    band.indexOf("Ball State scored first by recovering a blocked punt in the end zone, and its offense never scored at all") >= 0,
@@ -1218,13 +1221,142 @@ ok(band.indexOf("Brock Townsend capped a 97-yard drive — Central Michigan’s 
    band.indexOf("Central Michigan (5–5, 3–3) ran 30 more plays than Sacramento St., outgained it 424–211") >= 0 &&
    band.indexOf("Sacramento St. (2–9, 1–7) closed its first MAC season and now gets 17 days off before its finale at Hawaii on Nov 28") >= 0,
    "spotlight reports the CMU finish: Townsend's 40-yard TD capping a 97-yard drive and his 6-yard score with 1:05 left, Central Michigan 5-5 (3-3) outgaining Sacramento St. 424-211, Sacramento St. 2-9 (1-7) done in the MAC until its Nov 28 finale at Hawaii (Sacramento State Athletics)");
-ok(band.indexOf("opens tonight, Thursday night, Nov 12") >= 0 &&
-   band.indexOf("Memphis vs South Florida and Louisiana vs Louisiana-Monroe head the Kalshi NCAAF board") >= 0,
-   "spotlight names the next college slate: tonight's Thursday Nov 12 pair (Memphis vs South Florida, Louisiana vs Louisiana-Monroe)");
+ok(band.indexOf("College football continued Thursday night with two Finals") >= 0 &&
+   band.indexOf("Memphis beat South Florida 52–41 (Final)") >= 0 &&
+   band.indexOf("Louisiana beat Louisiana-Monroe 42–21 (Final)") >= 0,
+   "spotlight now reports the Thursday Nov 12 pair it named as fixtures on Nov 12 as Finals (detailed result pins in the Nov 13 block below)");
 ok(band.indexOf("opens tonight, Wednesday night, Nov 11, with MACtion") === -1 &&
    band.indexOf("Buffalo vs Ball St., UMass vs Toledo, and Sacramento St. vs Central Michigan head the Kalshi NCAAF board") === -1 &&
    band.indexOf("Miami (OH) scored 34 unanswered points to stun Ohio 34–17") === -1,
    "spotlight no longer frames the settled Wednesday trio as tonight's fixtures and no longer carries the Nov 11 Miami headline (the Miami result itself stays in the body, pinned in the Nov 11 block above)");
+/* The Nov 13 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:56Z NCAAF) settles Thursday night's Week 11 opener —
+   Washington at the New York Giants (occ Nov 13 04:15Z)
+   drops out, leaving Week 11's 13-game remainder — and
+   Thursday's college pair; tonight's Friday Nov 13 quartet
+   (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern
+   Utah vs Portland St., Houston vs Colorado) heads the
+   NCAAF board. Thursday's Finals (all cross-checked):
+   Washington beat the New York Giants 24-21 at MetLife
+   Stadium (Reuters / USA Today / ESPN) — New York led
+   21-17 on McCarthy's 66-yard TD pass to Likely with 8:13
+   left, but Daniels drove Washington 71 yards in 49
+   seconds and hit Diggs for a 32-yard go-ahead TD with 57
+   seconds left, and Douglas intercepted McCarthy at the
+   Washington 11 with 25 seconds left to seal it; Daniels
+   23-of-33 for 249 yards with three TDs and his first two
+   interceptions of the season, Diggs six catches for 83
+   yards, Skattebo 78 rushing yards and two TDs for New
+   York, Likely nine catches for 127 yards; Washington
+   3-5-1 took the head-to-head tiebreaker and stayed alive
+   in the NFC East, the Giants fell to 5-3-1. Memphis beat
+   South Florida 52-41 at Raymond James Stadium (Memphis
+   Athletics / USF Athletics / Covers) — a 21-0 Memphis
+   first-quarter lead behind Stokes' career-long 47-yard
+   TD run (the longest scoring run by a Memphis QB in 30
+   years), a 41-17 USF run and the Bulls' first lead,
+   41-38, on Gramatica's 38-yard FG with 8:04 left, Stokes'
+   76-yard TD pass to Davis two plays later with 7:34
+   left, a fourth-and-goal stop from the 4 with under four
+   minutes left, and Carter's second TD with 44 seconds
+   left; Stokes 15-of-31 for 313 yards and three passing
+   TDs with 73 rushing yards and two more scores (five
+   total TDs for the third straight game), Davis 5-161 in
+   his first 100-yard game, Carter 109 yards and the 10th
+   1,000-yard rushing season in Memphis history;
+   Kromenhoek 416 total yards for USF (271 passing and
+   three TDs, a career-high 146 rushing yards on 30
+   carries and another score), a USF season-best 552
+   yards, 93 combined points and 1,133 combined yards,
+   and a season-high seven Memphis sacks in its sixth
+   straight win over the Bulls; Memphis 8-2 (5-1
+   American), USF 6-4 (2-4). Louisiana beat
+   Louisiana-Monroe 42-21 at FMOL Health | St. Francis
+   Stadium in Monroe in the 62nd Battle on the Bayou
+   (Louisiana Athletics / AP / The News Star) — ULM led
+   14-7 in the second quarter before 28 unanswered
+   Louisiana points: Wade's 8-yard TD run with 40 seconds
+   left in the half tying it 14-14, Johnson's 18-yard
+   fumble-return TD with 12:27 left in the third for the
+   Cajuns' first lead, and Garner's TD runs of 19 and 18
+   yards; Louisiana rushed for 274 yards behind Garner
+   (104 yards on nine carries, a rushing TD for the
+   seventh straight game) and Blanco (a career-high 113
+   yards and the final 2-yard score with 1:57 left), the
+   first Louisiana pair over 100 rushing yards in the
+   same game since 2023, and the defense forced three
+   turnovers with Johnson adding nine tackles and two
+   fumble recoveries; Louisiana 7-3 (4-2 Sun Belt), a
+   fourth straight win over its rival and its 16th in
+   the last 19 meetings; ULM 2-8 (2-4), still winless at
+   home. NFL state: 26 games, 4 moves, 0 new — Week 11's
+   13-game remainder plus Week 12's 13 listed games.
+   NCAAF state: 257 games, 162 moves, 5 new (Nov 26: TCU
+   vs TTU; Nov 27: BUFF vs AKR, MSST vs MISS, NEB vs
+   IOWA, TOL vs OHIO — the set-diff matches new_games
+   exactly). The band (same Nov 9-Nov 16 window) now
+   headlines the Daniels-to-Diggs winner, reports the
+   TNF Final and both Thursday college Finals, and names
+   tonight's Friday quartet as the next slate; the stale
+   Thursday-fixture framing and the Nov 12 Burch headline
+   are banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV12WASNYG") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12MEMUSF") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13FSUPITT") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13ILLUCLA") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13SUUPRST") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13HOUCOLO") >= 0,
+   "kalshi snapshots settle Thursday's Week 11 opener (Washington at the New York Giants gone) and Thursday's college pair (Memphis/South Florida, Louisiana/Louisiana-Monroe gone) and head tonight's Friday quartet (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St., Houston vs Colorado)");
+ok(band.indexOf("Week 11 opened Thursday night at MetLife Stadium, where Washington beat the New York Giants 24–21 (Final)") >= 0 &&
+   band.indexOf("New York led 21–17 after J.J. McCarthy hit Isaiah Likely for a 66-yard touchdown with 8:13 left") >= 0,
+   "spotlight reports Thursday's TNF result: Washington beat the New York Giants 24-21 (Final) at MetLife after Likely's 66-yard TD put New York up 21-17 with 8:13 left (Reuters)");
+ok(band.indexOf("Jayden Daniels drove Washington 71 yards in 49 seconds and found Stefon Diggs for a 32-yard go-ahead touchdown with 57 seconds left") >= 0 &&
+   band.indexOf("Rasul Douglas intercepted McCarthy at the Washington 11 with 25 seconds left to seal it") >= 0,
+   "spotlight reports the TNF finish: Daniels' 71-yard drive in 49 seconds to Diggs' 32-yard go-ahead TD with 57 seconds left, Douglas' interception at the Washington 11 with 25 seconds left (Reuters)");
+ok(band.indexOf("Daniels finished 23-of-33 for 249 yards with three touchdowns and his first two interceptions of the season") >= 0 &&
+   band.indexOf("Diggs caught six passes for 83 yards") >= 0 &&
+   band.indexOf("Cam Skattebo ran for 78 yards and two touchdowns for the Giants") >= 0 &&
+   band.indexOf("Likely caught nine passes for 127 yards") >= 0,
+   "spotlight reports the TNF detail: Daniels 23-of-33 for 249 yards with three TDs and his first two interceptions, Diggs 6-83, Skattebo 78 yards and two TDs, Likely 9-127 (Reuters)");
+ok(band.indexOf("Washington (3–5–1) took the head-to-head tiebreaker and stayed alive in the NFC East, while the Giants fell to 5–3–1 (Reuters)") >= 0 &&
+   band.indexOf("Week 11's remaining <strong>13-game</strong> slate runs through Sunday, Nov 15") >= 0,
+   "spotlight closes TNF with the records (Washington 3-5-1 with the tiebreaker, Giants 5-3-1) and names Week 11's remaining 13-game slate through Sunday, Nov 15 (Reuters)");
+ok(band.indexOf("Memphis beat South Florida 52–41 (Final) at Raymond James Stadium in Tampa") >= 0 &&
+   band.indexOf("raced to a 21–0 first-quarter lead behind Marcus Stokes' career-long 47-yard touchdown run, the longest scoring run by a Memphis quarterback in 30 years") >= 0,
+   "spotlight reports Thursday's Tampa shootout: Memphis beat South Florida 52-41 (Final), a 21-0 first-quarter lead behind Stokes' career-long 47-yard TD run, the longest scoring run by a Memphis QB in 30 years (Memphis Athletics)");
+ok(band.indexOf("South Florida answered with a 41–17 run and took its first lead, 41–38, on Nico Gramatica's 38-yard field goal with 8:04 left") >= 0 &&
+   band.indexOf("Stokes answered two plays later with a 76-yard touchdown pass to Jemyri Davis with 7:34 left") >= 0 &&
+   band.indexOf("the Tigers stopped the Bulls on fourth-and-goal from the 4 with under four minutes to play") >= 0 &&
+   band.indexOf("Jaylin Carter sealed it with his second touchdown with 44 seconds left") >= 0,
+   "spotlight reports the shootout swing: USF's 41-17 run to a 41-38 lead on Gramatica's 38-yard FG with 8:04 left, Stokes' 76-yard TD to Davis two plays later with 7:34 left, the fourth-and-goal stop from the 4, and Carter's sealing TD with 44 seconds left (USF Athletics / Memphis Athletics)");
+ok(band.indexOf("Stokes finished 15-of-31 for 313 yards and three passing touchdowns with 73 rushing yards and two more scores — five total touchdowns for the third straight game") >= 0 &&
+   band.indexOf("Davis caught five passes for 161 yards in his first 100-yard game") >= 0 &&
+   band.indexOf("Carter ran for 109 yards to become the 10th player in Memphis history to rush for 1,000 yards in a season") >= 0,
+   "spotlight reports the Memphis detail: Stokes 15-of-31 for 313 yards with five total TDs for the third straight game, Davis 5-161 in his first 100-yard game, Carter 109 yards and Memphis's 10th 1,000-yard rushing season (Memphis Athletics)");
+ok(band.indexOf("Luke Kromenhoek posted 416 total yards for South Florida (271 passing yards and three touchdowns, a career-high 146 rushing yards on 30 carries and another score)") >= 0 &&
+   band.indexOf("the Bulls (6–4, 2–4) piled up a season-best 552 yards in a game the teams combined for 93 points and 1,133 yards") >= 0 &&
+   band.indexOf("Memphis recorded a season-high seven sacks in its sixth straight win over the Bulls (Memphis Athletics / USF Athletics)") >= 0,
+   "spotlight reports the USF detail: Kromenhoek's 416 total yards (271 passing, a career-high 146 rushing on 30 carries), a season-best 552 USF yards in a 93-point, 1,133-yard game, and seven Memphis sacks in a sixth straight win over the Bulls (USF Athletics)");
+ok(band.indexOf("Louisiana beat Louisiana-Monroe 42–21 (Final) at FMOL Health | St. Francis Stadium in Monroe in the 62nd Battle on the Bayou") >= 0 &&
+   band.indexOf("ULM (2–8, 2–4 in the Sun Belt) led 14–7 in the second quarter, but Louisiana scored 28 unanswered points") >= 0 &&
+   band.indexOf("KeDarius Wade's 8-yard touchdown run with 40 seconds left in the half tied it 14–14") >= 0 &&
+   band.indexOf("Micah Johnson returned a fumble 18 yards for a touchdown with 12:27 left in the third quarter for the Cajuns' first lead") >= 0,
+   "spotlight reports Thursday's Battle on the Bayou: Louisiana beat Louisiana-Monroe 42-21 (Final) in Monroe, 28 unanswered points after a 14-7 deficit — Wade's 8-yard TD tying it with 40 seconds left in the half and Johnson's 18-yard fumble-return TD for the first lead (Louisiana Athletics)");
+ok(band.indexOf("JJ Garner ran for touchdowns of 19 and 18 yards") >= 0 &&
+   band.indexOf("Louisiana (7–3, 4–2) rushed for 274 yards behind Garner (104 yards on nine carries, a rushing touchdown for the seventh straight game) and Steven Blanco (a career-high 113 yards and the final 2-yard score with 1:57 left)") >= 0 &&
+   band.indexOf("the first Louisiana pair to top 100 rushing yards in the same game since 2023") >= 0 &&
+   band.indexOf("its defense forced three turnovers as Johnson added nine tackles and two fumble recoveries") >= 0 &&
+   band.indexOf("Louisiana's fourth straight win over its in-state rival and its 16th in the last 19 meetings, and ULM stayed winless at home (Louisiana Athletics / AP)") >= 0,
+   "spotlight reports the Bayou detail: Garner's 19- and 18-yard TDs, Louisiana's 274 rushing yards behind Garner (104, a TD for the seventh straight game) and Blanco (a career-high 113 and the final score with 1:57 left) — the first Louisiana 100-yard pair since 2023 — three forced turnovers with Johnson's nine tackles and two recoveries, a fourth straight rivalry win and 16th in 19 meetings, ULM still winless at home (Louisiana Athletics / AP)");
+ok(band.indexOf("opens tonight, Friday night, Nov 13") >= 0 &&
+   band.indexOf("Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St. and Houston vs Colorado head the Kalshi NCAAF board") >= 0,
+   "spotlight names the next college slate: tonight's Friday Nov 13 quartet (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St., Houston vs Colorado)");
+ok(band.indexOf("opens tonight, Thursday night, Nov 12") === -1 &&
+   band.indexOf("Memphis vs South Florida and Louisiana vs Louisiana-Monroe head the Kalshi NCAAF board") === -1 &&
+   band.indexOf("Messiah Burch ran for a career-high 209 yards in the Muncie rain") === -1 &&
+   band.indexOf("slate opens Thursday night, Nov 12, with Washington at the New York Giants") === -1,
+   "spotlight no longer frames the settled Thursday pair or the settled TNF opener as tonight's fixtures and no longer carries the Nov 12 Burch headline (the Burch result itself stays in the body, pinned in the Nov 12 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
