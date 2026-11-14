@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Jayden Daniels hit Stefon Diggs for a 32-yard touchdown with 57 seconds left as Washington rallied past the New York Giants 24–21") >= 0 &&
-   band.indexOf("a season-saving Thursday night win that kept the Commanders alive in the NFC East") >= 0,
-   "spotlight headlines Thursday's Week 11 opener: Daniels' 32-yard touchdown to Diggs with 57 seconds left as Washington rallied past the New York Giants 24-21, a season-saving win that kept the Commanders alive in the NFC East (this pin held the Nov 12 Burch headline — a career-high 209 yards in the Muncie rain as Buffalo beat Ball State 28-7 — which rolled to the Daniels night on Nov 13; the Burch result stays pinned as a body result in the Nov 12 block below)");
+ok(band.indexOf("No. 4 UCLA held off Illinois 22–14 at a rainy Rose Bowl to reach 10–0 for the first time since 1998") >= 0 &&
+   band.indexOf("Ty Dieffenbach returned from injury to throw the fourth-quarter touchdown that kept the Bruins unbeaten") >= 0,
+   "spotlight headlines Friday's UCLA result: No. 4 UCLA held off Illinois 22-14 at a rainy Rose Bowl to reach 10-0 for the first time since 1998, Dieffenbach returning from injury to throw the fourth-quarter TD that kept the Bruins unbeaten (this pin held the Nov 13 Daniels headline — the 32-yard winner with 57 seconds left as Washington rallied past the Giants 24-21 — which rolled to the UCLA night on Nov 14; the Daniels result stays pinned as a body result in the Nov 13 block below)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1180,12 +1180,8 @@ ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV11BUFFBALL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV11MASSTOL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV11SACCMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV12MEMUSF") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13FSUPITT") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13ILLUCLA") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13SUUPRST") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13HOUCOLO") >= 0,
-   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Buffalo/Ball St., UMass/Toledo, Sacramento St./Central Michigan gone) — the Thursday pair this pin kept on Nov 12 (Memphis vs South Florida, Louisiana vs Louisiana-Monroe) settled Thursday night and is pinned as gone in the Nov 13 block below, which heads tonight's Friday quartet (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St., Houston vs Colorado)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") === -1,
+   "kalshi-ncaaf.json settles Wednesday's MACtion trio (Buffalo/Ball St., UMass/Toledo, Sacramento St./Central Michigan gone) — the Thursday pair this pin kept on Nov 12 (Memphis vs South Florida, Louisiana vs Louisiana-Monroe) settled Thursday night and is pinned as gone in the Nov 13 block below; the Friday quartet that block headed settled Friday night and is pinned as gone in the Nov 14 block below");
 ok(band.indexOf("Buffalo beat Ball St. 28–7 (Final) at Scheumann Stadium in Muncie") >= 0 &&
    band.indexOf("a brief weather delay pushed kickoff back 15 minutes on a rain-soaked night") >= 0 &&
    band.indexOf("Ball State scored first by recovering a blocked punt in the end zone, and its offense never scored at all") >= 0,
@@ -1302,12 +1298,8 @@ ok(band.indexOf("opens tonight, Wednesday night, Nov 11, with MACtion") === -1 &
    are banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV12WASNYG") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV12MEMUSF") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13FSUPITT") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13ILLUCLA") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13SUUPRST") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13HOUCOLO") >= 0,
-   "kalshi snapshots settle Thursday's Week 11 opener (Washington at the New York Giants gone) and Thursday's college pair (Memphis/South Florida, Louisiana/Louisiana-Monroe gone) and head tonight's Friday quartet (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St., Houston vs Colorado)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV12ULLULM") === -1,
+   "kalshi snapshots settle Thursday's Week 11 opener (Washington at the New York Giants gone) and Thursday's college pair (Memphis/South Florida, Louisiana/Louisiana-Monroe gone) — the Friday quartet this pin kept on Nov 13 (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St., Houston vs Colorado) settled Friday night and is pinned as gone in the Nov 14 block below");
 ok(band.indexOf("Week 11 opened Thursday night at MetLife Stadium, where Washington beat the New York Giants 24–21 (Final)") >= 0 &&
    band.indexOf("New York led 21–17 after J.J. McCarthy hit Isaiah Likely for a 66-yard touchdown with 8:13 left") >= 0,
    "spotlight reports Thursday's TNF result: Washington beat the New York Giants 24-21 (Final) at MetLife after Likely's 66-yard TD put New York up 21-17 with 8:13 left (Reuters)");
@@ -1349,14 +1341,128 @@ ok(band.indexOf("JJ Garner ran for touchdowns of 19 and 18 yards") >= 0 &&
    band.indexOf("its defense forced three turnovers as Johnson added nine tackles and two fumble recoveries") >= 0 &&
    band.indexOf("Louisiana's fourth straight win over its in-state rival and its 16th in the last 19 meetings, and ULM stayed winless at home (Louisiana Athletics / AP)") >= 0,
    "spotlight reports the Bayou detail: Garner's 19- and 18-yard TDs, Louisiana's 274 rushing yards behind Garner (104, a TD for the seventh straight game) and Blanco (a career-high 113 and the final score with 1:57 left) — the first Louisiana 100-yard pair since 2023 — three forced turnovers with Johnson's nine tackles and two recoveries, a fourth straight rivalry win and 16th in 19 meetings, ULM still winless at home (Louisiana Athletics / AP)");
-ok(band.indexOf("opens tonight, Friday night, Nov 13") >= 0 &&
-   band.indexOf("Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St. and Houston vs Colorado head the Kalshi NCAAF board") >= 0,
-   "spotlight names the next college slate: tonight's Friday Nov 13 quartet (Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St., Houston vs Colorado)");
+ok(band.indexOf("Florida St. beat Pittsburgh 16–10 (Final)") >= 0 &&
+   band.indexOf("UCLA beat Illinois 22–14 (Final)") >= 0 &&
+   band.indexOf("Southern Utah beat Portland St. 23–21 (Final)") >= 0 &&
+   band.indexOf("Colorado beat No. 14 Houston 42–32 (Final)") >= 0,
+   "spotlight now reports the Friday Nov 13 quartet it named as fixtures on Nov 13 as Finals (detailed result pins in the Nov 14 block below)");
 ok(band.indexOf("opens tonight, Thursday night, Nov 12") === -1 &&
    band.indexOf("Memphis vs South Florida and Louisiana vs Louisiana-Monroe head the Kalshi NCAAF board") === -1 &&
    band.indexOf("Messiah Burch ran for a career-high 209 yards in the Muncie rain") === -1 &&
-   band.indexOf("slate opens Thursday night, Nov 12, with Washington at the New York Giants") === -1,
-   "spotlight no longer frames the settled Thursday pair or the settled TNF opener as tonight's fixtures and no longer carries the Nov 12 Burch headline (the Burch result itself stays in the body, pinned in the Nov 12 block above)");
+   band.indexOf("slate opens Thursday night, Nov 12, with Washington at the New York Giants") === -1 &&
+   band.indexOf("opens tonight, Friday night, Nov 13") === -1 &&
+   band.indexOf("Jayden Daniels hit Stefon Diggs for a 32-yard touchdown with 57 seconds left as Washington rallied past the New York Giants 24–21 at MetLife — a season-saving") === -1,
+   "spotlight no longer frames the settled Thursday pair or the settled TNF opener as tonight's fixtures and no longer carries the Nov 12 Burch headline (the Burch result itself stays in the body, pinned in the Nov 12 block above); the Friday-fixture framing and the Nov 13 Daniels headline are also banned here — they settled/rolled on Nov 14 and are pinned in the Nov 14 block below (the Daniels result itself stays in the body, pinned in the Nov 13 block above)");
+/* The Nov 14 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:54Z NCAAF) settles Friday night's Nov 13 quartet —
+   all four games drop out and today's Saturday Nov 14
+   slate (117 games by Nov 14 ticker, headed by Bryant vs
+   Sacred Heart at 20:00Z) heads the NCAAF board. Friday's
+   Finals (all cross-checked): Florida St. beat Pittsburgh
+   16-10 at Acrisure Stadium (Tallahassee Democrat / FSU
+   Athletics) — FSU 5-5 (3-4 ACC), second straight road win,
+   2-0 under interim Stockstill, one win from first bowl
+   since 2023; Pitt 6-4 (3-4) led 7-6 at half on Dailey's
+   11-yard TD to Turner, Kennedy's INT off a deflection off
+   Diggis set up Thomas's 1-yard TD early in Q3, Panikowski
+   3-for-3 on FGs (27, 37, 47) to move to 11-for-11, FSU
+   defense 7 TFL / 2 sacks / 6 hurries, Pitt 5-of-16 on
+   third and 1-of-4 on fourth; Dailey 16-of-34 for 157,
+   Daniels 163 passing yards, FSU held to 260 total yards.
+   No. 4 UCLA beat Illinois 22-14 at a rainy Rose Bowl
+   (UCLA Athletics / Illinois Athletics) — UCLA 10-0 (7-0
+   Big Ten), first 10-0 since 1998, matched program wins
+   record; Illinois 6-4 (4-3) scoreless in first half,
+   Feagin TD within 12-7 in Q3, Dixon's record 13th TD
+   (7 yards) cut it to 19-14 with 7:14 left; Dieffenbach
+   13-of-20 for 232 yards, 2 TDs, 1 INT, returned from
+   elbow/ankle injuries for a Q4 TD to Morgan, Mizell
+   6-176 career highs, Jackson 2 INTs (Big Ten-leading 5),
+   UCLA defense 3 INTs (FBS-leading 20 INTs / 30 takeaways),
+   Illinois held to 240 yards, Gobaira Q3 safety (first
+   UCLA safety since 2022), Bhaghani FG after Jackson's
+   second INT set 22-14. Southern Utah beat Portland St.
+   23-21 at Hillsboro Stadium (SuperWest Sports / EIN
+   Presswire) — SUU blew a 20-7 lead, Portland led 21-20
+   late, Rogers' 33-yard FG with 17 seconds left won it;
+   Burns 2 TD passes, Spjut TD + 79 receiving, Vance 11
+   tackles, Malo INT; Thompson 169 rushing yards + TD,
+   Helmstetler 11 stops, Portland outgained SUU 335-330,
+   three lead changes. Colorado beat No. 14 Houston 42-32
+   at Folsom Field (Colorado Athletics / Houston
+   Athletics) — Colorado 4-6 (2-5 Big 12), trailed 20-7,
+   28 unanswered, first top-15 win since 2007, five rushing
+   TDs and 249 rushing yards; Young 99 yards + 2 TDs (48
+   and the 2-yarder with 3:59 left for 42-26), Taylor
+   67-yard TD, Smith 32-yard TD in final 109 seconds of
+   first half for first lead 21-20, Wilson 17-of-25 for
+   217 + TD, Williams 5-80 with a 52-yard TD, Sweetwyne
+   14-yard TD; Weigman 26-of-42 for 272 + 3 TDs, Hughes
+   106 yards + TD on 15 carries, Overmyer 9-116 + TD;
+   Houston 7-3 (4-3) per Houston Athletics (Colorado's
+   recap intro carried Houston's pregame 8-2 line — the
+   postgame Houston record is used). NFL state: 26 games,
+   0 moves, 0 new — Week 11's 13-game remainder unchanged.
+   NCAAF state: 265 games, 274 moves, 12 new (Nov 27:
+   APP vs USA, TEM vs MEM, TLSA vs UTSA, FLA vs FSU, NDSU
+   vs SJSU, AFA vs UNM, MINN vs WIS, TEX vs TXAM, WVU vs
+   UTAH; Nov 28: CMU vs BALL, MASS vs BGSU, MICH vs OSU —
+   the set-diff matches new_games exactly). History:
+   2,198 tickers, max 41 points, 32,804 total points
+   (32,222 + 52 NFL + 0 MLB + 530 NCAAF = exactly one
+   append per priced market, verified against the
+   pre-fetch backup; +24 tickers = 12 new games x 2). The
+   band (same Nov 9-Nov 16 window) now headlines the UCLA
+   result, reports all four Friday Finals, and names
+   today's Saturday slate; the stale Friday-fixture
+   framing and the Nov 13 Daniels headline are banned
+   below. */
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV13FSUPITT") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13ILLUCLA") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13SUUPRST") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV13HOUCOLO") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14BRYSHU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14BUTMRST") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14CCSULIU") >= 0,
+   "kalshi snapshots settle Friday's quartet (Florida St./Pittsburgh, Illinois/UCLA, Southern Utah/Portland St., Houston/Colorado gone) and head today's Saturday Nov 14 slate (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU)");
+ok(band.indexOf("Florida St. beat Pittsburgh 16–10 (Final) at Acrisure Stadium") >= 0 &&
+   band.indexOf("within one win of its first bowl game since 2023") >= 0 &&
+   band.indexOf("Gabe Panikowski made all three of his field goals (27, 37 and 47 yards) to move to 11-for-11 on the season") >= 0,
+   "spotlight reports Friday's ACC result: Florida St. beat Pittsburgh 16-10 (Final) at Acrisure, one win from its first bowl since 2023, Panikowski 3-for-3 (27, 37, 47) to move to 11-for-11 (Tallahassee Democrat)");
+ok(band.indexOf("Rylan Kennedy's interception") >= 0 &&
+   band.indexOf("Amari Thomas's 1-yard touchdown early in the third quarter for a 13–7 lead") >= 0 &&
+   band.indexOf("seven tackles for loss, two sacks and six quarterback hurries") >= 0 &&
+   band.indexOf("Dailey finished 16-of-34 for 157 yards and Ashton Daniels threw for 163 yards") >= 0,
+   "spotlight reports the FSU detail: Kennedy's interception setting up Thomas's 1-yard TD for 13-7, seven TFL / two sacks / six hurries, Dailey 16-of-34 for 157 and Daniels 163 yards (Tallahassee Democrat)");
+ok(band.indexOf("No. 4 UCLA beat Illinois 22–14 (Final) at a rainy Rose Bowl Stadium in Pasadena") >= 0 &&
+   band.indexOf("reached 10–0 for the first time since 1998 and matched the program record for wins") >= 0 &&
+   band.indexOf("Collin Dixon's 7-yard touchdown") >= 0 &&
+   band.indexOf("cut it to 19–14 with 7:14 left") >= 0,
+   "spotlight reports Friday's Big Ten result: No. 4 UCLA beat Illinois 22-14 (Final) at a rainy Rose Bowl, 10-0 for the first time since 1998 and a matched program wins record, Dixon's 7-yard TD cutting it to 19-14 with 7:14 left (UCLA Athletics / Illinois Athletics)");
+ok(band.indexOf("Ty Dieffenbach finished 13-of-20 for 232 yards with two touchdowns and an interception") >= 0 &&
+   band.indexOf("Aidan Mizell caught six passes for a career-high 176 yards") >= 0 &&
+   band.indexOf("Scooter Jackson grabbed two interceptions to take the Big Ten lead with five") >= 0 &&
+   band.indexOf("FBS-leading totals to 20 interceptions and 30 takeaways") >= 0 &&
+   band.indexOf("Mateen Bhaghani's field goal after Jackson's second interception set the final 22–14 margin") >= 0,
+   "spotlight reports the UCLA detail: Dieffenbach 13-of-20 for 232 yards with two TDs, Mizell 6-176, Jackson's two INTs for a Big Ten-leading five, FBS-leading 20 INTs / 30 takeaways, Bhaghani's FG setting 22-14 (UCLA Athletics)");
+ok(band.indexOf("Southern Utah beat Portland St. 23–21 (Final) at Hillsboro Stadium") >= 0 &&
+   band.indexOf("Jayden Rogers kicked a 33-yard field goal with 17 seconds left to win it") >= 0 &&
+   band.indexOf("Delon Thompson rushed for 169 yards and a touchdown") >= 0 &&
+   band.indexOf("Portland St., which outgained Southern Utah 335–330 in a game with three lead changes") >= 0,
+   "spotlight reports Friday's FCS result: Southern Utah beat Portland St. 23-21 (Final) at Hillsboro on Rogers' 33-yard FG with 17 seconds left, Thompson 169 rushing yards, Portland outgaining SUU 335-330 with three lead changes (SuperWest Sports / EIN Presswire)");
+ok(band.indexOf("Colorado beat No. 14 Houston 42–32 (Final) at Folsom Field in Boulder") >= 0 &&
+   band.indexOf("trailed 20–7 in the second quarter before scoring 28 unanswered points for its first win over a top-15 team since 2007") >= 0 &&
+   band.indexOf("Richard Young rushed for 99 yards and two touchdowns") >= 0 &&
+   band.indexOf("Conner Weigman finished 26-of-42 for 272 yards and three touchdowns for Houston") >= 0 &&
+   band.indexOf("Houston fell to 7–3 (4–3 in the Big 12) (Colorado Athletics / Houston Athletics)") >= 0,
+   "spotlight reports Friday's Big 12 upset: Colorado beat No. 14 Houston 42-32 (Final) at Folsom, 28 unanswered after a 20-7 deficit for its first top-15 win since 2007, Young 99 yards and two TDs, Weigman 26-of-42 for 272 and three TDs, Houston 7-3 (Colorado Athletics / Houston Athletics)");
+ok(band.indexOf("College football's Saturday slate takes over today, Nov 14") >= 0 &&
+   band.indexOf("Bryant vs Sacred Heart, Butler vs Marist and Central Connecticut St. vs LIU head the Kalshi NCAAF board") >= 0,
+   "spotlight names the next college slate: today's Saturday Nov 14 slate (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU)");
+ok(band.indexOf("opens tonight, Friday night, Nov 13") === -1 &&
+   band.indexOf("Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St. and Houston vs Colorado head the Kalshi NCAAF board") === -1 &&
+   band.indexOf("Jayden Daniels hit Stefon Diggs for a 32-yard touchdown with 57 seconds left") === -1,
+   "spotlight no longer frames the settled Friday quartet as tonight's fixtures and no longer carries the Nov 13 Daniels headline (the Daniels result itself stays in the body, pinned in the Nov 13 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
