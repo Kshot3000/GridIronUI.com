@@ -919,8 +919,8 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
 var week11 = nfl.games.filter(function(g){
   return g.occ >= "2026-11-13T00:00:00Z" && g.occ < "2026-11-18T00:00:00Z";
 });
-ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 13,
-   "spotlight's Week 11 remainder count matches the Kalshi NFL snapshot (" + week11.length + " games left in the Nov 13-17Z window — this pin held the full 14-game slate while the week was unplayed; it follows the remainder once the Thursday opener settles, per the Week 8/9 precedent above, and the opener's settlement is pinned in the Nov 13 block below)");
+ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 12,
+   "spotlight's Week 11 remainder count matches the Kalshi NFL snapshot (" + week11.length + " games left in the Nov 13-17Z window — this pin held the full 14-game slate while the week was unplayed; it follows the remainder once the Thursday opener settles, per the Week 8/9 precedent above, and the opener's settlement is pinned in the Nov 13 block below; the count fell 13 to 12 on Nov 15 when the Sunday opener (New England at Detroit) kicked off and dropped off the board, pinned in the Nov 15 block below)");
 ok(band.indexOf("Chicago beat Tampa Bay 27–24 (Final)") >= 0 &&
    band.indexOf("Cairo Santos kicked a 38-yard field goal as time expired") >= 0 &&
    band.indexOf("Colston Loveland for 38 yards") >= 0,
@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("No. 4 UCLA held off Illinois 22–14 at a rainy Rose Bowl to reach 10–0 for the first time since 1998") >= 0 &&
-   band.indexOf("Ty Dieffenbach returned from injury to throw the fourth-quarter touchdown that kept the Bruins unbeaten") >= 0,
-   "spotlight headlines Friday's UCLA result: No. 4 UCLA held off Illinois 22-14 at a rainy Rose Bowl to reach 10-0 for the first time since 1998, Dieffenbach returning from injury to throw the fourth-quarter TD that kept the Bruins unbeaten (this pin held the Nov 13 Daniels headline — the 32-yard winner with 57 seconds left as Washington rallied past the Giants 24-21 — which rolled to the UCLA night on Nov 14; the Daniels result stays pinned as a body result in the Nov 13 block below)");
+ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three seconds left as No. 8 Texas rallied from 11 down to beat No. 22 LSU 22–21 at Tiger Stadium") >= 0 &&
+   band.indexOf("the Longhorns' first win in Baton Rouge since 1952") >= 0,
+   "spotlight headlines Saturday's Texas result: Manning's 4-yard TD to Brown with three seconds left as No. 8 Texas rallied from 11 down to beat No. 22 LSU 22-21 at Tiger Stadium, the Longhorns' first win in Baton Rouge since 1952 (this pin held the Nov 14 UCLA headline — No. 4 UCLA 22-14 over Illinois to reach 10-0 for the first time since 1998 — which rolled to the Texas night on Nov 15; the UCLA result stays pinned as a body result in the Nov 14 block below)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1312,8 +1312,8 @@ ok(band.indexOf("Daniels finished 23-of-33 for 249 yards with three touchdowns a
    band.indexOf("Likely caught nine passes for 127 yards") >= 0,
    "spotlight reports the TNF detail: Daniels 23-of-33 for 249 yards with three TDs and his first two interceptions, Diggs 6-83, Skattebo 78 yards and two TDs, Likely 9-127 (Reuters)");
 ok(band.indexOf("Washington (3–5–1) took the head-to-head tiebreaker and stayed alive in the NFC East, while the Giants fell to 5–3–1 (Reuters)") >= 0 &&
-   band.indexOf("Week 11's remaining <strong>13-game</strong> slate runs through Sunday, Nov 15") >= 0,
-   "spotlight closes TNF with the records (Washington 3-5-1 with the tiebreaker, Giants 5-3-1) and names Week 11's remaining 13-game slate through Sunday, Nov 15 (Reuters)");
+   band.indexOf("Week 11's remaining <strong>12-game</strong> slate is under way today, Sunday, Nov 15") >= 0,
+   "spotlight closes TNF with the records (Washington 3-5-1 with the tiebreaker, Giants 5-3-1) and names Week 11's remaining slate under way today, Sunday, Nov 15 (Reuters) — this pin named the 13-game remainder on Nov 13; the count rolled to 12 on Nov 15 when the Sunday opener kicked off, pinned dynamically in the Nov 9 block above and in the Nov 15 block below");
 ok(band.indexOf("Memphis beat South Florida 52–41 (Final) at Raymond James Stadium in Tampa") >= 0 &&
    band.indexOf("raced to a 21–0 first-quarter lead behind Marcus Stokes' career-long 47-yard touchdown run, the longest scoring run by a Memphis quarterback in 30 years") >= 0,
    "spotlight reports Thursday's Tampa shootout: Memphis beat South Florida 52-41 (Final), a 21-0 first-quarter lead behind Stokes' career-long 47-yard TD run, the longest scoring run by a Memphis QB in 30 years (Memphis Athletics)");
@@ -1421,10 +1421,10 @@ ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV13FSUPITT") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV13ILLUCLA") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV13SUUPRST") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV13HOUCOLO") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14BRYSHU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14BUTMRST") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14CCSULIU") >= 0,
-   "kalshi snapshots settle Friday's quartet (Florida St./Pittsburgh, Illinois/UCLA, Southern Utah/Portland St., Houston/Colorado gone) and head today's Saturday Nov 14 slate (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14BRYSHU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14BUTMRST") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14CCSULIU") === -1,
+   "kalshi snapshots settle Friday's quartet (Florida St./Pittsburgh, Illinois/UCLA, Southern Utah/Portland St., Houston/Colorado gone) and the Saturday Nov 14 slate this pin headed on Nov 14 (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU) settled Saturday and is pinned as gone in the Nov 15 block below");
 ok(band.indexOf("Florida St. beat Pittsburgh 16–10 (Final) at Acrisure Stadium") >= 0 &&
    band.indexOf("within one win of its first bowl game since 2023") >= 0 &&
    band.indexOf("Gabe Panikowski made all three of his field goals (27, 37 and 47 yards) to move to 11-for-11 on the season") >= 0,
@@ -1456,13 +1456,137 @@ ok(band.indexOf("Colorado beat No. 14 Houston 42–32 (Final) at Folsom Field in
    band.indexOf("Conner Weigman finished 26-of-42 for 272 yards and three touchdowns for Houston") >= 0 &&
    band.indexOf("Houston fell to 7–3 (4–3 in the Big 12) (Colorado Athletics / Houston Athletics)") >= 0,
    "spotlight reports Friday's Big 12 upset: Colorado beat No. 14 Houston 42-32 (Final) at Folsom, 28 unanswered after a 20-7 deficit for its first top-15 win since 2007, Young 99 yards and two TDs, Weigman 26-of-42 for 272 and three TDs, Houston 7-3 (Colorado Athletics / Houston Athletics)");
-ok(band.indexOf("College football's Saturday slate takes over today, Nov 14") >= 0 &&
-   band.indexOf("Bryant vs Sacred Heart, Butler vs Marist and Central Connecticut St. vs LIU head the Kalshi NCAAF board") >= 0,
-   "spotlight names the next college slate: today's Saturday Nov 14 slate (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU)");
+ok(band.indexOf("College football's Saturday slate is Final now too") >= 0 &&
+   band.indexOf("Ball St. vs Ohio, Eastern Michigan vs Western Michigan and Miami (OH) vs Kent St. head the Kalshi NCAAF board") >= 0,
+   "spotlight names the next college slate after Saturday's Finals: Monday night's MACtion (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.) — this pin named the Saturday Nov 14 slate (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU) as today's fixtures on Nov 14; that slate settled Saturday and its Finals are pinned in the Nov 15 block below");
 ok(band.indexOf("opens tonight, Friday night, Nov 13") === -1 &&
    band.indexOf("Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St. and Houston vs Colorado head the Kalshi NCAAF board") === -1 &&
    band.indexOf("Jayden Daniels hit Stefon Diggs for a 32-yard touchdown with 57 seconds left") === -1,
    "spotlight no longer frames the settled Friday quartet as tonight's fixtures and no longer carries the Nov 13 Daniels headline (the Daniels result itself stays in the body, pinned in the Nov 13 block above)");
+/* The Nov 15 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
+   18:54Z NCAAF) settles Saturday's Nov 14 slate — 116 of
+   the 117 Nov 14-ticker games drop out; the exception is
+   Ole Miss vs Oklahoma, which the SEC moved to Sunday
+   noon in Norman after Ole Miss could not fly out
+   following Friday's nationwide FAA ground stop, so
+   Kalshi still lists it under its Saturday ticker and it
+   heads the board ahead of Monday night's MACtion trio
+   (Ball St. vs Ohio, Eastern Michigan vs Western
+   Michigan, Miami (OH) vs Kent St., occ Nov 18 03:00Z).
+   Saturday's Finals (all cross-checked): No. 8 Texas
+   beat No. 22 LSU 22-21 at Tiger Stadium (USA Today) —
+   LSU led nearly all night and by 11 in the second half;
+   Manning threw three interceptions but drove Texas 58
+   yards in the final 2:15 and hit Brown for a 4-yard TD
+   with three seconds left; Texas 8-2 (5-2 SEC), first
+   win in Baton Rouge since 1952; LSU 6-4 (3-4), Kiffin's
+   first season, outgained Texas 366-273. No. 2 Utah beat
+   No. 23 Arizona 40-39 at Casino Del Sol Stadium (AP /
+   Utah Athletics) — Utah 10-0 (7-0 Big 12), arrived
+   hours before a kickoff pushed back three hours by the
+   ground stop, trailed 39-33 after Fifita's 10-yard TD
+   to Mizell with 3:13 left, Dampier answered with a
+   70-yard TD to Whittemore with 2:35 left and a
+   fourth-down stop sealed it; Dampier four TDs (204
+   passing / two scores, 100 rushing / two more), Bray
+   197 rushing yards, Fifita 356 yards and three TDs,
+   seven lead changes, Arizona 7-3 (4-3). No. 1 Georgia
+   beat No. 22 Missouri 48-21 at Sanford Stadium
+   (Georgia Athletics) — INT on the game's first play,
+   scores on the first five possessions, 31-0 midway
+   through Q2, Frazier three TDs, 468 yards; Georgia
+   9-1 (7-1), Missouri 6-4 (3-4) with three late Simmons
+   TD passes. No. 18 Oregon beat Michigan 31-7 at Autzen
+   Stadium (Michigan Athletics / Register-Guard) —
+   Raiola 20-of-28 for 341 yards and four TDs, Oregon
+   the first team to score 30+ on Michigan this season,
+   Hill's 49-yard TD with 4:03 left, Hiter's 70-yard TD
+   run Michigan's only score, Michigan outrushed Oregon
+   215-126; Oregon 7-3 (5-2), Michigan 5-5 (2-5). No. 7
+   Alabama beat Vanderbilt 21-6 at FirstBank Stadium
+   (Alabama Athletics) — Bama held Vanderbilt out of the
+   end zone, 21 points in a 7:53 span across Q2/Q3,
+   Russell 217 yards and three TDs on an ailing ankle,
+   Taylor FGs of 52 and 57 Vanderbilt's only points,
+   Vanderbilt 12 rushing yards, Lee's 83-yard kickoff
+   return set up the final TD; Alabama 8-2 (6-2),
+   Vanderbilt 4-6 (1-6). No. 9 Tennessee beat Texas A&M
+   22-7 at Kyle Field (Tennessee Athletics / NBC
+   Sports) — Tennessee trailed 7-6 at the half, 19
+   unanswered, Ranvier a career-high five FGs (23, 27,
+   30, 32, 44), Texas A&M held to 179 yards, freshman
+   Brandon finished at QB after MacIntyre's third-quarter
+   right knee injury, Bishop 97 yards on 34 carries,
+   Brame's TD catch the Vols' only touchdown; Tennessee
+   8-2 (5-2), Texas A&M 4-6 (1-6). NFL state: 25 games,
+   23 moves, 0 new — the Week 11 window falls to the
+   12-game remainder pinned dynamically in the Nov 9
+   block above (the Sunday opener, New England at
+   Detroit, kicked off at 17:30Z and dropped off the
+   board unplayed in the snapshot's terms — no result is
+   claimed for it). NCAAF state: 185 games, 234 moves,
+   36 new (all Nov 28/29, headed by Georgia Tech vs
+   Georgia and LSU vs Arkansas — the set-diff matches
+   new_games exactly). History: 2,270 tickers, max 41
+   points, 33,224 total points (32,804 + 50 NFL + 0 MLB
+   + 370 NCAAF = exactly one append per priced market,
+   verified against the pre-fetch backup; +72 tickers =
+   36 new games x 2). The band (same Nov 9-Nov 16
+   window) now headlines the Texas result, reports all
+   six Saturday Finals plus the Ole Miss postponement,
+   and names Monday night's MACtion as the next college
+   slate; the stale Saturday-fixture framing and the
+   Nov 14 UCLA headline are banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV15NEDET") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14ALAVAN") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MICHORE") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14TEXLSU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14TENNTXAM") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14UTAHARIZ") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MIZZUGA") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MISSOKLA") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17EMUWMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17MOHKENT") >= 0,
+   "kalshi snapshots settle Saturday's marquee seven (Alabama/Vanderbilt, Michigan/Oregon, Texas/LSU, Tennessee/Texas A&M, Utah/Arizona, Missouri/Georgia gone) and the NFL Sunday opener (New England at Detroit gone at kickoff), while Ole Miss vs Oklahoma stays listed under its Saturday ticker (moved to Sunday noon by the SEC) ahead of Monday night's MACtion trio (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.)");
+ok(band.indexOf("No. 8 Texas beat No. 22 LSU 22–21 (Final) at Tiger Stadium in Baton Rouge") >= 0 &&
+   band.indexOf("Arch Manning, despite three interceptions, drove Texas 58 yards in the final 2:15 and hit Raleek Brown for a 4-yard touchdown with three seconds left") >= 0 &&
+   band.indexOf("LSU (6–4, 3–4) lost in Lane Kiffin's first season despite outgaining Texas 366–273 (USA Today)") >= 0,
+   "spotlight reports Saturday's SEC thriller: No. 8 Texas beat No. 22 LSU 22-21 (Final) at Tiger Stadium, Manning's 58-yard drive in the final 2:15 to Brown's 4-yard TD with three seconds left despite three interceptions, LSU 6-4 in Kiffin's first season despite outgaining Texas 366-273 (USA Today)");
+ok(band.indexOf("No. 2 Utah beat No. 23 Arizona 40–39 (Final) at Casino Del Sol Stadium in Tucson") >= 0 &&
+   band.indexOf("trailed 39–33 after Noah Fifita's third touchdown pass, a 10-yarder to Isaiah Mizell with 3:13 left") >= 0 &&
+   band.indexOf("Devon Dampier answered with a 70-yard touchdown pass to Creed Whittemore with 2:35 left") >= 0 &&
+   band.indexOf("Daniel Bray ran for 197 yards, Fifita threw for 356 yards and three touchdowns") >= 0 &&
+   band.indexOf("Arizona fell to 7–3 (4–3) in a game with seven lead changes (AP / Utah Athletics)") >= 0,
+   "spotlight reports Saturday's Big 12 classic: No. 2 Utah beat No. 23 Arizona 40-39 (Final) in Tucson, Dampier's 70-yard TD to Whittemore with 2:35 left answering Fifita's go-ahead score with 3:13 left, Bray 197 rushing yards, Fifita 356 yards and three TDs, seven lead changes (AP / Utah Athletics)");
+ok(band.indexOf("No. 1 Georgia beat No. 22 Missouri 48–21 (Final) at Sanford Stadium") >= 0 &&
+   band.indexOf("intercepted the game's first play, scored on its first five possessions and led 31–0 midway through the second quarter") >= 0 &&
+   band.indexOf("three Nate Frazier touchdowns and 468 total yards") >= 0,
+   "spotlight reports Saturday's Athens rout: No. 1 Georgia beat No. 22 Missouri 48-21 (Final), an interception on the first play and scores on the first five possessions to lead 31-0, Frazier's three TDs and 468 yards (Georgia Athletics)");
+ok(band.indexOf("No. 18 Oregon beat Michigan 31–7 (Final) at Autzen Stadium") >= 0 &&
+   band.indexOf("Dylan Raiola was 20-of-28 for 341 yards and four touchdowns") >= 0 &&
+   band.indexOf("became the first team to score more than 30 points on Michigan this season") >= 0 &&
+   band.indexOf("Savion Hiter's 70-yard touchdown run despite outrushing the Ducks 215–126") >= 0,
+   "spotlight reports Saturday's Big Ten result: No. 18 Oregon beat Michigan 31-7 (Final) at Autzen, Raiola 20-of-28 for 341 yards and four TDs, the first 30-point game against Michigan this season, Hiter's 70-yard TD run Michigan's only score despite a 215-126 rushing edge (Michigan Athletics / Register-Guard)");
+ok(band.indexOf("No. 7 Alabama beat Vanderbilt 21–6 (Final) at FirstBank Stadium in Nashville") >= 0 &&
+   band.indexOf("scoring 21 points in a 7:53 span across the second and third quarters behind Keelon Russell, who started on an ailing ankle and threw for 217 yards and three touchdowns") >= 0 &&
+   band.indexOf("Brock Taylor field goals of 52 and 57 yards and 12 rushing yards") >= 0 &&
+   band.indexOf("Dijon Lee Jr.'s 83-yard kickoff return set up Alabama's final touchdown (Alabama Athletics)") >= 0,
+   "spotlight reports Saturday's Nashville result: No. 7 Alabama beat Vanderbilt 21-6 (Final), 21 points in a 7:53 span behind Russell's 217 yards and three TDs on an ailing ankle, Taylor's 52- and 57-yard FGs Vanderbilt's only points with 12 rushing yards, Lee's 83-yard return setting up the final TD (Alabama Athletics)");
+ok(band.indexOf("No. 9 Tennessee beat Texas A&amp;M 22–7 (Final) at Kyle Field") >= 0 &&
+   band.indexOf("Cooper Ranvier kicked a career-high five field goals (23, 27, 30, 32 and 44 yards)") >= 0 &&
+   band.indexOf("the Vols held Texas A&amp;M (4–6, 1–6) to 179 total yards") >= 0 &&
+   band.indexOf("freshman Faizon Brandon finished at quarterback after George MacIntyre left in the third quarter with a right knee injury") >= 0 &&
+   band.indexOf("DeSean Bishop ran for 97 yards on 34 carries and DaSaahn Brame caught Tennessee's only touchdown (Tennessee Athletics / NBC Sports)") >= 0,
+   "spotlight reports Saturday's College Station result: No. 9 Tennessee beat Texas A&M 22-7 (Final), Ranvier's career-high five FGs, Texas A&M held to 179 yards, Brandon finishing at QB after MacIntyre's third-quarter knee injury, Bishop 97 yards on 34 carries and Brame's TD catch (Tennessee Athletics / NBC Sports)");
+ok(band.indexOf("the SEC moved No. 19 Ole Miss at Oklahoma to Sunday noon in Norman after Ole Miss could not fly out following Friday's nationwide ground stop, over Oklahoma's objection (Reuters)") >= 0 &&
+   band.indexOf("College football's next slate is Monday night's MACtion") >= 0,
+   "spotlight reports the Saturday postponement (the SEC moved No. 19 Ole Miss at Oklahoma to Sunday noon in Norman after Ole Miss could not fly out following Friday's ground stop, over Oklahoma's objection — Reuters) and names Monday night's MACtion as the next college slate");
+ok(band.indexOf("College football's Saturday slate takes over today, Nov 14") === -1 &&
+   band.indexOf("Bryant vs Sacred Heart, Butler vs Marist and Central Connecticut St. vs LIU head the Kalshi NCAAF board") === -1 &&
+   band.indexOf("No. 4 UCLA held off Illinois 22–14 at a rainy Rose Bowl to reach 10–0 for the first time since 1998") === -1 &&
+   band.indexOf("Week 11's remaining <strong>13-game</strong> slate runs through Sunday, Nov 15") === -1,
+   "spotlight no longer frames the settled Saturday slate as today's fixtures, no longer carries the Nov 14 UCLA headline (the UCLA result itself stays in the body, pinned in the Nov 14 block above), and no longer counts Week 11's remainder at 13 (the 12-game remainder is pinned dynamically in the Nov 9 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
