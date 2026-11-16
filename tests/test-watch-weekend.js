@@ -154,11 +154,11 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-11-09"[^>]*data-end="2026-11-16"[^>]*hidden/.test(html),
-   "spotlight band ships hidden with the Nov 9-Nov 16 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-11-16"[^>]*data-end="2026-11-23"[^>]*hidden/.test(html),
+   "spotlight band ships hidden with the Nov 16-Nov 23 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Nov 9–Nov 16 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Nov 16–Nov 23 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
@@ -919,8 +919,8 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
 var week11 = nfl.games.filter(function(g){
   return g.occ >= "2026-11-13T00:00:00Z" && g.occ < "2026-11-18T00:00:00Z";
 });
-ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 12,
-   "spotlight's Week 11 remainder count matches the Kalshi NFL snapshot (" + week11.length + " games left in the Nov 13-17Z window — this pin held the full 14-game slate while the week was unplayed; it follows the remainder once the Thursday opener settles, per the Week 8/9 precedent above, and the opener's settlement is pinned in the Nov 13 block below; the count fell 13 to 12 on Nov 15 when the Sunday opener (New England at Detroit) kicked off and dropped off the board, pinned in the Nov 15 block below)");
+ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 1,
+   "spotlight's Week 11 remainder count matches the Kalshi NFL snapshot (" + week11.length + " games left in the Nov 13-17Z window — this pin held the full 14-game slate while the week was unplayed; it follows the remainder once the Thursday opener settles, per the Week 8/9 precedent above, and the opener's settlement is pinned in the Nov 13 block below; the count fell 13 to 12 on Nov 15 when the Sunday opener (New England at Detroit) kicked off and dropped off the board, pinned in the Nov 15 block below, and 12 to 1 on Nov 16 when Sunday's eleven games settled, leaving only tonight's Monday-night closer (the Los Angeles Chargers at Baltimore), pinned in the Nov 16 block below)");
 ok(band.indexOf("Chicago beat Tampa Bay 27–24 (Final)") >= 0 &&
    band.indexOf("Cairo Santos kicked a 38-yard field goal as time expired") >= 0 &&
    band.indexOf("Colston Loveland for 38 yards") >= 0,
@@ -946,9 +946,9 @@ ok(band.indexOf("San Francisco beat Las Vegas 38–17 (Final)") >= 0 &&
    "spotlight reports Sunday's remaining Finals list (San Francisco, Kansas City, Seattle among them) (Corner Wire)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Washington beat the New York Giants 24–21 (Final)") >= 0 &&
-   band.indexOf("Sunday night is Pittsburgh vs Cincinnati") >= 0 &&
-   band.indexOf("closes Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") >= 0,
-   "spotlight reports the Week 10 closer as a Final (Buffalo beat Minnesota 23-6; detailed pins in the Nov 10 block below — this pin named it as tonight's fixture on Nov 9) and the Week 11 opener as a Final too (Washington beat the New York Giants 24-21; detailed pins in the Nov 13 block below — this pin named it as Thursday's fixture on Nov 9), still naming the rest of the Week 11 slate (SNF Pittsburgh vs Cincinnati, MNF Nov 16 Chargers at Baltimore)");
+   band.indexOf("Cincinnati beat Pittsburgh 38–18 on Sunday night (Final)") >= 0 &&
+   band.indexOf("closes tonight, Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") >= 0,
+   "spotlight reports the Week 10 closer as a Final (Buffalo beat Minnesota 23-6; detailed pins in the Nov 10 block below — this pin named it as tonight's fixture on Nov 9) and the Week 11 opener as a Final too (Washington beat the New York Giants 24-21; detailed pins in the Nov 13 block below — this pin named it as Thursday's fixture on Nov 9), and now reports Sunday night's game as a Final too (Cincinnati beat Pittsburgh 38-18; detailed pins in the Nov 16 block below — this pin named it as Sunday's fixture on Nov 9), still naming tonight's Week 11 closer (MNF Nov 16 Chargers at Baltimore)");
 ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    band.indexOf("Sunday night is Tampa Bay at Chicago") === -1,
    "spotlight no longer frames the settled Sunday slate as today's fixtures (the stale 13-game Week 10 remainder ban from this pin is lifted in the Nov 13 block below: 13 games is now Week 11's real remainder count after Thursday's opener settled, pinned dynamically above)");
@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three seconds left as No. 8 Texas rallied from 11 down to beat No. 22 LSU 22–21 at Tiger Stadium") >= 0 &&
-   band.indexOf("the Longhorns' first win in Baton Rouge since 1952") >= 0,
-   "spotlight headlines Saturday's Texas result: Manning's 4-yard TD to Brown with three seconds left as No. 8 Texas rallied from 11 down to beat No. 22 LSU 22-21 at Tiger Stadium, the Longhorns' first win in Baton Rouge since 1952 (this pin held the Nov 14 UCLA headline — No. 4 UCLA 22-14 over Illinois to reach 10-0 for the first time since 1998 — which rolled to the Texas night on Nov 15; the UCLA result stays pinned as a body result in the Nov 14 block below)");
+ok(band.indexOf("Joe Burrow threw for 409 yards and four touchdowns as Cincinnati routed Pittsburgh 38–18 on Sunday night") >= 0 &&
+   band.indexOf("the first 38–18 final in NFL history") >= 0,
+   "spotlight headlines Sunday night's result: Burrow's 409 yards and four TDs as Cincinnati routed Pittsburgh 38-18 to take sole possession of first place in the AFC North, the first 38-18 final in NFL history (this pin held the Nov 15 Texas headline — Manning's 4-yard TD to Brown with three seconds left as No. 8 Texas rallied from 11 down to beat No. 22 LSU 22-21 at Tiger Stadium, the Longhorns' first win in Baton Rouge since 1952 — which rolled to the Burrow night on Nov 16; the Texas result stays pinned as a body result in the Nov 15 block below)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1312,8 +1312,9 @@ ok(band.indexOf("Daniels finished 23-of-33 for 249 yards with three touchdowns a
    band.indexOf("Likely caught nine passes for 127 yards") >= 0,
    "spotlight reports the TNF detail: Daniels 23-of-33 for 249 yards with three TDs and his first two interceptions, Diggs 6-83, Skattebo 78 yards and two TDs, Likely 9-127 (Reuters)");
 ok(band.indexOf("Washington (3–5–1) took the head-to-head tiebreaker and stayed alive in the NFC East, while the Giants fell to 5–3–1 (Reuters)") >= 0 &&
-   band.indexOf("Week 11's remaining <strong>12-game</strong> slate is under way today, Sunday, Nov 15") >= 0,
-   "spotlight closes TNF with the records (Washington 3-5-1 with the tiebreaker, Giants 5-3-1) and names Week 11's remaining slate under way today, Sunday, Nov 15 (Reuters) — this pin named the 13-game remainder on Nov 13; the count rolled to 12 on Nov 15 when the Sunday opener kicked off, pinned dynamically in the Nov 9 block above and in the Nov 15 block below");
+   band.indexOf("Week 11's Sunday slate is Final now too") >= 0 &&
+   band.indexOf("Week 11's remaining <strong>12-game</strong> slate is under way today, Sunday, Nov 15") === -1,
+   "spotlight closes TNF with the records (Washington 3-5-1 with the tiebreaker, Giants 5-3-1) and now reports Week 11's Sunday slate as Final (detailed pins in the Nov 16 block below) — this pin named the 13-game remainder on Nov 13 and the 12-game remainder under way on Nov 15; both counts settled on Nov 16, pinned dynamically in the Nov 9 block above");
 ok(band.indexOf("Memphis beat South Florida 52–41 (Final) at Raymond James Stadium in Tampa") >= 0 &&
    band.indexOf("raced to a 21–0 first-quarter lead behind Marcus Stokes' career-long 47-yard touchdown run, the longest scoring run by a Memphis quarterback in 30 years") >= 0,
    "spotlight reports Thursday's Tampa shootout: Memphis beat South Florida 52-41 (Final), a 21-0 first-quarter lead behind Stokes' career-long 47-yard TD run, the longest scoring run by a Memphis QB in 30 years (Memphis Athletics)");
@@ -1544,11 +1545,11 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV15NEDET") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV14TENNTXAM") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV14UTAHARIZ") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MIZZUGA") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MISSOKLA") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MISSOKLA") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17EMUWMU") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17MOHKENT") >= 0,
-   "kalshi snapshots settle Saturday's marquee seven (Alabama/Vanderbilt, Michigan/Oregon, Texas/LSU, Tennessee/Texas A&M, Utah/Arizona, Missouri/Georgia gone) and the NFL Sunday opener (New England at Detroit gone at kickoff), while Ole Miss vs Oklahoma stays listed under its Saturday ticker (moved to Sunday noon by the SEC) ahead of Monday night's MACtion trio (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.)");
+   "kalshi snapshots settle Saturday's marquee seven (Alabama/Vanderbilt, Michigan/Oregon, Texas/LSU, Tennessee/Texas A&M, Utah/Arizona, Missouri/Georgia gone) and the NFL Sunday opener (New England at Detroit gone at kickoff) — Ole Miss vs Oklahoma stayed listed under its Saturday ticker on Nov 15 (moved to Sunday noon by the SEC), played Sunday and settled in the Nov 16 snapshot (Oklahoma won 24-17, pinned in the Nov 16 block below), ahead of Tuesday night's MACtion trio (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.)");
 ok(band.indexOf("No. 8 Texas beat No. 22 LSU 22–21 (Final) at Tiger Stadium in Baton Rouge") >= 0 &&
    band.indexOf("Arch Manning, despite three interceptions, drove Texas 58 yards in the final 2:15 and hit Raleek Brown for a 4-yard touchdown with three seconds left") >= 0 &&
    band.indexOf("LSU (6–4, 3–4) lost in Lane Kiffin's first season despite outgaining Texas 366–273 (USA Today)") >= 0,
@@ -1579,14 +1580,168 @@ ok(band.indexOf("No. 9 Tennessee beat Texas A&amp;M 22–7 (Final) at Kyle Field
    band.indexOf("freshman Faizon Brandon finished at quarterback after George MacIntyre left in the third quarter with a right knee injury") >= 0 &&
    band.indexOf("DeSean Bishop ran for 97 yards on 34 carries and DaSaahn Brame caught Tennessee's only touchdown (Tennessee Athletics / NBC Sports)") >= 0,
    "spotlight reports Saturday's College Station result: No. 9 Tennessee beat Texas A&M 22-7 (Final), Ranvier's career-high five FGs, Texas A&M held to 179 yards, Brandon finishing at QB after MacIntyre's third-quarter knee injury, Bishop 97 yards on 34 carries and Brame's TD catch (Tennessee Athletics / NBC Sports)");
-ok(band.indexOf("the SEC moved No. 19 Ole Miss at Oklahoma to Sunday noon in Norman after Ole Miss could not fly out following Friday's nationwide ground stop, over Oklahoma's objection (Reuters)") >= 0 &&
-   band.indexOf("College football's next slate is Monday night's MACtion") >= 0,
-   "spotlight reports the Saturday postponement (the SEC moved No. 19 Ole Miss at Oklahoma to Sunday noon in Norman after Ole Miss could not fly out following Friday's ground stop, over Oklahoma's objection — Reuters) and names Monday night's MACtion as the next college slate");
+ok(band.indexOf("in the game the SEC moved to Sunday noon after Ole Miss could not fly out following Friday's nationwide ground stop") >= 0 &&
+   band.indexOf("College football's next slate is Tuesday night's MACtion") >= 0,
+   "spotlight reports the moved game as played (the SEC moved No. 19 Ole Miss at Oklahoma to Sunday noon in Norman after Ole Miss could not fly out following Friday's ground stop; the result itself is pinned in the Nov 16 block below — this pin carried the postponement framing on Nov 15) and names Tuesday night's MACtion as the next college slate (the Nov 15 copy called the trio Monday night's; the games occur Tuesday night US, occ Nov 18 03:00Z)");
 ok(band.indexOf("College football's Saturday slate takes over today, Nov 14") === -1 &&
    band.indexOf("Bryant vs Sacred Heart, Butler vs Marist and Central Connecticut St. vs LIU head the Kalshi NCAAF board") === -1 &&
    band.indexOf("No. 4 UCLA held off Illinois 22–14 at a rainy Rose Bowl to reach 10–0 for the first time since 1998") === -1 &&
    band.indexOf("Week 11's remaining <strong>13-game</strong> slate runs through Sunday, Nov 15") === -1,
-   "spotlight no longer frames the settled Saturday slate as today's fixtures, no longer carries the Nov 14 UCLA headline (the UCLA result itself stays in the body, pinned in the Nov 14 block above), and no longer counts Week 11's remainder at 13 (the 12-game remainder is pinned dynamically in the Nov 9 block above)");
+   "spotlight no longer frames the settled Saturday slate as today's fixtures, no longer carries the Nov 14 UCLA headline (the UCLA result itself stays in the body, pinned in the Nov 14 block above), and no longer counts Week 11's remainder at 13 (the 12-game remainder was pinned dynamically in the Nov 9 block above; it fell to 1 on Nov 16, pinned there now)");
+/* The Nov 16 snapshot (fetched 18:51Z NFL / 18:51Z MLB /
+   18:54Z NCAAF) settles Sunday's eleven Week 11 games —
+   the twelfth Sunday game (New England at Detroit) had
+   already dropped off at kickoff on Nov 15 — and the
+   moved Ole Miss at Oklahoma game; tonight's Monday-night
+   closer (the Los Angeles Chargers at Baltimore) heads
+   the NFL board, followed by Week 12's 13 games (Thu
+   Nov 19 Indianapolis at Houston through Mon Nov 23
+   Cincinnati at Washington). Sunday's Finals (all
+   cross-checked): Cincinnati beat Pittsburgh 38-18 on
+   Sunday night at Paycor Stadium (AP / Bengals /
+   Cincinnati.com) — Burrow 35-of-44 for 409 yards and
+   four TDs, Chase 11 catches for 231 yards, Chase Brown
+   two receiving TDs and 82 scrimmage yards, Cincinnati
+   484-222 in total yards and 24-3 at the half, Rodgers
+   15-of-29 for 143 yards with both TD passes in the
+   fourth quarter; Cincinnati 7-2 with a fifth straight
+   win and sole possession of first place in the AFC
+   North, Pittsburgh 6-3; the 38-18 final was the first
+   in NFL history (Scorigami, the league's 1,100th unique
+   score — CBS Sports). Detroit beat New England 35-10
+   at Allianz Arena in Munich (Detroit Lions / Free
+   Press / Reuters) — a record crowd of 70,225, Gibbs
+   252 total yards (153 rushing on 22 carries, 99
+   receiving) and two TDs, St. Brown two TD catches (56
+   and 28 yards), TeSlaa a 12-yard diving TD catch, Goff
+   20-of-31 for 303 yards and three TDs, Detroit 494
+   total yards and a 21-3 halftime lead; Maye left with
+   an ankle injury on Hutchinson's sack and Hutchinson
+   hurt his own knee celebrating it; Detroit 7-2 with
+   five straight wins, New England 5-5. San Francisco
+   beat Dallas 46-40 at AT&T Stadium (USA Today / AP) —
+   Purdy a career-high 389 yards (22-of-28) and three
+   TDs with no interception, McCaffrey 223 scrimmage
+   yards and three scores including the 66-yard TD catch
+   that sealed it, San Francisco 584 yards (the
+   third-most the Cowboys have ever allowed, AP) with
+   three TDs of 65-plus yards; Prescott matched his
+   career high with five TD passes (343 yards), Pickens
+   three TD catches for 145 yards, Dallas 21 fourth-
+   quarter points cutting a 19-point lead to six; San
+   Francisco 8-1, Dallas 4-6, crowd 93,715. Cleveland
+   beat Houston 27-24 at Huntington Bank Field (AP /
+   Beacon Journal) — Houston led 17-0 in the second
+   quarter (Stroud TD passes, the second an 11-yarder to
+   Hutchinson), Watson's 6-yard TD run and Concepcion's
+   6-yard end-around TD tied it 17-17, Szmyt's 26-yard FG
+   made it 20-17, Stroud's 11-yard TD to Schultz with
+   9:17 left put Houston back up 24-20, and Judkins'
+   5-yard TD run with 53 seconds left won it after
+   Watson hit Fannin for 30 yards down the seam; Watson
+   312 passing yards and 50 rushing; Cleveland 6-4 (4-0
+   at home), the first team in NFL history whose first
+   six wins of a season all came by four points or fewer,
+   each on a go-ahead fourth-quarter Watson drive;
+   Houston 3-6. Carolina beat New Orleans 20-17 at
+   Caesars Superdome (NBC Sports / AP / Panthers Wire) —
+   Shough's 4-yard TD pass to Kamara gave New Orleans a
+   14-10 fourth-quarter lead, Hubbard's 1-yard TD put
+   Carolina ahead 17-14 with 1:49 left, Smyth's 55-yard
+   FG tied it with 41 seconds left, and a 30-yard
+   pass-interference flag on McKinstry set up
+   Fitzgerald's 54-yard FG as time expired; Hubbard 172
+   scrimmage yards (92 rushing, 80 receiving) and both
+   Carolina TDs, Carolina a franchise-record 17 penalties
+   for 152 yards but held New Orleans to 222 yards and
+   2.1 yards per carry with three takeaways; Carolina
+   4-5 alone in first place in the NFC South (snapping a
+   three-game losing streak), New Orleans 3-6. The list:
+   Buffalo 31-12 at the Jets (Allen three total TDs,
+   Cook's 74-yard TD run; Buffalo 8-1, Jets 2-8), Kansas
+   City 35-13 at Atlanta (Mahomes five TD passes; KC
+   7-2, Atlanta 3-7), Jacksonville 40-23 at Tennessee
+   (Lawrence 352 yards and three TDs; Jacksonville 7-2,
+   Tennessee 1-8), Indianapolis 24-22 over Miami (Colts
+   snap a five-game skid; Miami 1-8), Minnesota 30-10 at
+   Green Bay (Cousins' return — eight sacks of Love;
+   Minnesota 7-2, Green Bay 6-4), the Rams 34-6 at
+   Arizona, and Seattle 21-13 at Las Vegas (Seattle 6-4,
+   Las Vegas 4-6). Oklahoma beat No. 19 Ole Miss 24-17
+   on Sunday in Norman (AP / The Oklahoman / Ole Miss
+   Athletics) — detail in the pin below. NFL state: 14
+   games, 16 moves, 0 new. NCAAF state: 185 games, 228
+   moves, 1 new (Nov 21: Virginia Tech vs Miami — the
+   set-diff matches new_games exactly). History: 2,272
+   tickers, max 41 points, 33,622 total points (33,224 +
+   28 NFL + 0 MLB + 370 NCAAF = exactly one append per
+   priced market, verified against the pre-fetch backup;
+   +2 tickers = 1 new game x 2). The band ROLLS to a new
+   Nov 16-Nov 23 window: it headlines the Burrow night,
+   reports all twelve Sunday Finals and the Ole Miss
+   result, names tonight's MNF closer, the Week 12 slate
+   and Tuesday night's MACtion; the stale Sunday-fixture
+   framing, the Nov 15 Texas headline and the Week 11
+   prices link are banned below. The window closes after
+   Monday night's Week 12 closer (Nov 23), so the next
+   run on/after Nov 24 must roll it again. */
+["KXNFLGAME-26NOV15BUFNYJ", "KXNFLGAME-26NOV15CARNO", "KXNFLGAME-26NOV15HOUCLE",
+ "KXNFLGAME-26NOV15JACTEN", "KXNFLGAME-26NOV15KCATL", "KXNFLGAME-26NOV15MIAIND",
+ "KXNFLGAME-26NOV15MINGB", "KXNFLGAME-26NOV15LARARI", "KXNFLGAME-26NOV15SEALV",
+ "KXNFLGAME-26NOV15SFDAL", "KXNFLGAME-26NOV15PITCIN"].forEach(function(t){
+  ok(nflTickers.indexOf(t) === -1,
+     "kalshi-nfl.json settles Sunday's Week 11 game (" + t + " gone)");
+});
+ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21VTMIA") >= 0,
+   "kalshi snapshots keep tonight's Week 11 closer (the Los Angeles Chargers at Baltimore) and add the one new NCAAF game (Virginia Tech vs Miami, Nov 21 — set-diff matches new_games exactly)");
+ok(band.indexOf("Cincinnati beat Pittsburgh 38–18 on Sunday night (Final) at Paycor Stadium") >= 0 &&
+   band.indexOf("Burrow was 35-of-44 for 409 yards and four touchdowns") >= 0 &&
+   band.indexOf("Ja'Marr Chase caught 11 passes for 231 yards") >= 0 &&
+   band.indexOf("the 38–18 score was a Scorigami — the first in NFL history and the league's 1,100th unique final score (AP / CBS Sports)") >= 0,
+   "spotlight reports Sunday night's result: Cincinnati beat Pittsburgh 38-18 (Final) at Paycor Stadium, Burrow 35-of-44 for 409 yards and four TDs, Chase 11-231, the first 38-18 final in NFL history (Scorigami, the league's 1,100th unique score) (AP / CBS Sports)");
+ok(band.indexOf("Detroit beat New England 35–10 (Final) at Allianz Arena in Munich before a record crowd of 70,225") >= 0 &&
+   band.indexOf("Jahmyr Gibbs produced 252 total yards (153 rushing, 99 receiving) and two touchdowns") >= 0 &&
+   band.indexOf("New England (5–5) lost Drake Maye to an ankle injury on a sack by Aidan Hutchinson, who hurt his own knee celebrating the play (Detroit Lions / Free Press)") >= 0,
+   "spotlight reports Sunday's Munich result: Detroit beat New England 35-10 (Final) before a record crowd of 70,225, Gibbs 252 total yards and two TDs, Maye's ankle injury on Hutchinson's sack — Hutchinson hurt his own knee celebrating (Detroit Lions / Free Press)");
+ok(band.indexOf("San Francisco beat Dallas 46–40 (Final) at AT&T Stadium") >= 0 &&
+   band.indexOf("Brock Purdy threw for a career-high 389 yards and three touchdowns") >= 0 &&
+   band.indexOf("Christian McCaffrey piled up 223 yards from scrimmage and three scores including the 66-yard touchdown catch") >= 0 &&
+   band.indexOf("Dak Prescott matched his career high with five touchdown passes for Dallas (4–6)") >= 0,
+   "spotlight reports Sunday's Arlington shootout: San Francisco beat Dallas 46-40 (Final), Purdy a career-high 389 yards and three TDs, McCaffrey 223 scrimmage yards and three scores including the 66-yard sealer, Prescott a career-high-tying five TD passes for Dallas 4-6 (USA Today / AP)");
+ok(band.indexOf("Cleveland beat Houston 27–24 (Final) at Huntington Bank Field") >= 0 &&
+   band.indexOf("Quinshon Judkins' 5-yard touchdown run with 53 seconds left") >= 0 &&
+   band.indexOf("the first team in NFL history whose first six wins of a season all came by four points or fewer") >= 0,
+   "spotlight reports Sunday's Cleveland comeback: the Browns beat Houston 27-24 (Final) from 17-0 down on Judkins' 5-yard TD run with 53 seconds left, the first team in NFL history whose first six wins of a season all came by four points or fewer (AP)");
+ok(band.indexOf("Carolina beat New Orleans 20–17 (Final) at Caesars Superdome") >= 0 &&
+   band.indexOf("Ryan Fitzgerald's 54-yard field goal as time expired") >= 0 &&
+   band.indexOf("Chuba Hubbard accounted for 172 yards from scrimmage and both Carolina touchdowns") >= 0 &&
+   band.indexOf("a franchise-record 17 penalties for 152 yards") >= 0,
+   "spotlight reports Sunday's Superdome walk-off: Carolina beat New Orleans 20-17 (Final) on Fitzgerald's 54-yard FG as time expired, Hubbard 172 scrimmage yards and both Carolina TDs, a franchise-record 17 penalties for 152 yards (NBC Sports / AP)");
+ok(band.indexOf("Buffalo beat the New York Jets 31–12 (Final)") >= 0 &&
+   band.indexOf("Kansas City beat Atlanta 35–13 (Final) behind five Patrick Mahomes touchdown passes") >= 0 &&
+   band.indexOf("Jacksonville beat Tennessee 40–23 (Final)") >= 0 &&
+   band.indexOf("Indianapolis beat Miami 24–22 (Final)") >= 0 &&
+   band.indexOf("Minnesota beat Green Bay 30–10 (Final)") >= 0 &&
+   band.indexOf("the Los Angeles Rams beat Arizona 34–6 (Final)") >= 0 &&
+   band.indexOf("Seattle beat Las Vegas 21–13 (Final)") >= 0,
+   "spotlight reports Sunday's remaining Finals list (Buffalo, Kansas City, Jacksonville, Indianapolis, Minnesota, the Rams, Seattle) (AP / USA Today)");
+ok(band.indexOf("Oklahoma beat No. 19 Ole Miss 24–17 (Final) on Sunday at Gaylord Family Oklahoma Memorial Stadium in Norman") >= 0 &&
+   band.indexOf("Isaiah Sategna III's 75-yard punt-return touchdown") >= 0 &&
+   band.indexOf("John Mateer accounted for 181 yards of offense (111 passing yards and a team-high 70 rushing yards with a touchdown)") >= 0 &&
+   band.indexOf("his Hail Mary was batted down in the end zone as time expired") >= 0 &&
+   band.indexOf("the Rebels (6–4, 4–4) lost their second straight despite outgaining Oklahoma 307–299 (AP / The Oklahoman)") >= 0,
+   "spotlight reports the moved game's result: Oklahoma beat No. 19 Ole Miss 24-17 (Final) in Norman, Sategna's 75-yard punt-return TD in a 14-0 first quarter, Mateer's 181 yards of offense, Chambliss's Hail Mary batted down as time expired, Ole Miss 6-4 (4-4) despite a 307-299 yardage edge (AP / The Oklahoman)");
+ok(band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Houston") >= 0 &&
+   band.indexOf("runs through Monday night, Nov 23, when Cincinnati visits Washington — Sunday night is Minnesota at San Francisco") >= 0 &&
+   band.indexOf("Kalshi Week 12 prices") >= 0,
+   "spotlight names the new window's slate: Week 12 opens Thursday night, Nov 19 (Indianapolis at Houston) and runs through Monday night, Nov 23 (Cincinnati at Washington), Sunday night Minnesota at San Francisco, and links the Week 12 Kalshi prices");
+ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three seconds left as No. 8 Texas rallied from 11 down") === -1 &&
+   band.indexOf("Sunday night is Pittsburgh vs Cincinnati") === -1 &&
+   band.indexOf("under way today, Sunday, Nov 15") === -1 &&
+   band.indexOf("Monday night's MACtion") === -1 &&
+   band.indexOf("Kalshi Week 11 prices") === -1,
+   "spotlight no longer carries the Nov 15 Texas headline (the Texas result itself stays in the body, pinned in the Nov 15 block above), no longer frames Sunday night as a fixture, drops the wrong-day Monday MACtion label and links Week 12 prices, not Week 11");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
