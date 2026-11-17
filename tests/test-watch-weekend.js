@@ -919,8 +919,8 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
 var week11 = nfl.games.filter(function(g){
   return g.occ >= "2026-11-13T00:00:00Z" && g.occ < "2026-11-18T00:00:00Z";
 });
-ok(band.indexOf(week11.length + "-game") >= 0 && week11.length === 1,
-   "spotlight's Week 11 remainder count matches the Kalshi NFL snapshot (" + week11.length + " games left in the Nov 13-17Z window — this pin held the full 14-game slate while the week was unplayed; it follows the remainder once the Thursday opener settles, per the Week 8/9 precedent above, and the opener's settlement is pinned in the Nov 13 block below; the count fell 13 to 12 on Nov 15 when the Sunday opener (New England at Detroit) kicked off and dropped off the board, pinned in the Nov 15 block below, and 12 to 1 on Nov 16 when Sunday's eleven games settled, leaving only tonight's Monday-night closer (the Los Angeles Chargers at Baltimore), pinned in the Nov 16 block below)");
+ok(week11.length === 0 && band.indexOf("Week 11 closed Monday night") >= 0,
+   "spotlight reports Week 11 as closed, with no remainder count (" + week11.length + " games left in the Nov 13-17Z window — this pin held the full 14-game slate while the week was unplayed, followed the remainder once the Thursday opener settled, per the Week 8/9 precedent above, fell 13 to 12 on Nov 15 and 12 to 1 on Nov 16, and inverts on the closer's settlement on Nov 17, following the Week 8/9/10 precedent: the Los Angeles Chargers beat Baltimore 23-20 (Final) on Monday night, pinned in the Nov 17 block below)");
 ok(band.indexOf("Chicago beat Tampa Bay 27–24 (Final)") >= 0 &&
    band.indexOf("Cairo Santos kicked a 38-yard field goal as time expired") >= 0 &&
    band.indexOf("Colston Loveland for 38 yards") >= 0,
@@ -947,8 +947,8 @@ ok(band.indexOf("San Francisco beat Las Vegas 38–17 (Final)") >= 0 &&
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Washington beat the New York Giants 24–21 (Final)") >= 0 &&
    band.indexOf("Cincinnati beat Pittsburgh 38–18 on Sunday night (Final)") >= 0 &&
-   band.indexOf("closes tonight, Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") >= 0,
-   "spotlight reports the Week 10 closer as a Final (Buffalo beat Minnesota 23-6; detailed pins in the Nov 10 block below — this pin named it as tonight's fixture on Nov 9) and the Week 11 opener as a Final too (Washington beat the New York Giants 24-21; detailed pins in the Nov 13 block below — this pin named it as Thursday's fixture on Nov 9), and now reports Sunday night's game as a Final too (Cincinnati beat Pittsburgh 38-18; detailed pins in the Nov 16 block below — this pin named it as Sunday's fixture on Nov 9), still naming tonight's Week 11 closer (MNF Nov 16 Chargers at Baltimore)");
+   band.indexOf("the Los Angeles Chargers beat Baltimore 23–20 (Final)") >= 0,
+   "spotlight reports the Week 10 closer as a Final (Buffalo beat Minnesota 23-6; detailed pins in the Nov 10 block below — this pin named it as tonight's fixture on Nov 9) and the Week 11 opener as a Final too (Washington beat the New York Giants 24-21; detailed pins in the Nov 13 block below — this pin named it as Thursday's fixture on Nov 9), and now reports Sunday night's game as a Final too (Cincinnati beat Pittsburgh 38-18; detailed pins in the Nov 16 block below — this pin named it as Sunday's fixture on Nov 9), and the Week 11 closer as a Final too (the Los Angeles Chargers beat Baltimore 23-20; detailed pins in the Nov 17 block below — this pin named it as tonight's fixture on Nov 9)");
 ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    band.indexOf("Sunday night is Tampa Bay at Chicago") === -1,
    "spotlight no longer frames the settled Sunday slate as today's fixtures (the stale 13-game Week 10 remainder ban from this pin is lifted in the Nov 13 block below: 13 games is now Week 11's real remainder count after Thursday's opener settled, pinned dynamically above)");
@@ -1692,9 +1692,9 @@ ok(band.indexOf("College football's Saturday slate takes over today, Nov 14") ==
   ok(nflTickers.indexOf(t) === -1,
      "kalshi-nfl.json settles Sunday's Week 11 game (" + t + " gone)");
 });
-ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") >= 0 &&
+ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21VTMIA") >= 0,
-   "kalshi snapshots keep tonight's Week 11 closer (the Los Angeles Chargers at Baltimore) and add the one new NCAAF game (Virginia Tech vs Miami, Nov 21 — set-diff matches new_games exactly)");
+   "kalshi snapshots settle the Week 11 closer (the Los Angeles Chargers at Baltimore gone — this pin kept it on Nov 16; Los Angeles won 23-20 (Final) and the settlement is pinned in the Nov 17 block below) and keep the one new NCAAF game added Nov 16 (Virginia Tech vs Miami, Nov 21)");
 ok(band.indexOf("Cincinnati beat Pittsburgh 38–18 on Sunday night (Final) at Paycor Stadium") >= 0 &&
    band.indexOf("Burrow was 35-of-44 for 409 yards and four touchdowns") >= 0 &&
    band.indexOf("Ja'Marr Chase caught 11 passes for 231 yards") >= 0 &&
@@ -1742,6 +1742,76 @@ ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three
    band.indexOf("Monday night's MACtion") === -1 &&
    band.indexOf("Kalshi Week 11 prices") === -1,
    "spotlight no longer carries the Nov 15 Texas headline (the Texas result itself stays in the body, pinned in the Nov 15 block above), no longer frames Sunday night as a fixture, drops the wrong-day Monday MACtion label and links Week 12 prices, not Week 11");
+/* The Nov 17 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:54Z NCAAF) settles Monday night's Week 11 closer —
+   the Los Angeles Chargers at Baltimore drops out, Week
+   12's 13 games (Thu Nov 19 Indianapolis at Houston
+   through Mon Nov 23 Cincinnati at Washington) head the
+   NFL board, and a new 16-game Thanksgiving-week slate
+   (Wed Nov 25 Green Bay at the Los Angeles Rams through
+   Mon Nov 30 Carolina at Tampa Bay) is added. The MNF
+   Final (cross-checked): the Los Angeles Chargers beat
+   Baltimore 23-20 at M&T Bank Stadium (AP / ESPN /
+   theScore / Ravens Wire) — Herbert's 22-yard scoring
+   run on the first possession gave Los Angeles a lead it
+   never relinquished, Hampton powered in from the 1 on
+   fourth down with 1:56 left in the half to make it 17-7
+   and finished with 105 rushing yards, and the Chargers
+   outrushed Baltimore 160-16; Herbert completed 12
+   passes for 129 yards, ran for 51 more and threw no
+   interception for the first time this season; Henry was
+   held to 10 yards on 10 carries but scored both
+   Baltimore TDs (2 yards to cut it to 10-7, 1 yard to cut
+   it to 23-20 with 10:23 left); Brissett threw for 340
+   yards (33-of-49, Ravens Wire) in his Ravens debut;
+   Still forced Flowers' fumble with 2:03 remaining and
+   Molden recovered at the Los Angeles 46, then Herbert
+   hit ex-Raven Charlie Kolar for the sealing first down;
+   Los Angeles 1-8 (first win after 11 straight losses
+   dating to last season; the combined 15 straight losses
+   entering was a Monday-night record, AP), Baltimore 4-6
+   with a fifth straight loss. NFL state: 29 games, 7
+   moves, 16 new (set-diff matches new_games exactly; the
+   only drop is the settled closer). MLB state: 0 games.
+   NCAAF state: 191 games, 124 moves, 6 new (all Nov 28:
+   NC St. vs North Carolina, Southern Miss vs Old
+   Dominion, Virginia vs Virginia Tech, USC vs UCLA, UTEP
+   vs Northern Illinois, Arizona St. vs Arizona — set-diff
+   matches new_games exactly), 0 dropped; tonight's
+   Tuesday MACtion trio (Ball St. vs Ohio, Eastern
+   Michigan vs Western Michigan, Miami (OH) vs Kent St.)
+   still heads the board. History: 2,316 tickers, max 41
+   points, 34,062 total points (33,622 + 58 NFL + 0 MLB +
+   382 NCAAF = exactly one append per priced market,
+   verified against the pre-fetch backup; +44 tickers =
+   22 new games x 2). The band stays in its Nov 16-Nov 23
+   window (no roll — Week 12 is the band's slate): it
+   reports Week 11 as closed with the MNF result and
+   still names Week 12's opener; the stale closes-tonight
+   framing and the 1-game remainder are banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") >= 0 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV25GBLAR") >= 0 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV30CARTB") >= 0,
+   "kalshi-nfl.json settles the Week 11 closer (the Los Angeles Chargers at Baltimore gone), keeps Week 12's opener (Indianapolis vs Houston, Nov 19) at the head and adds the 16-game Thanksgiving-week slate (Green Bay at the Los Angeles Rams, Nov 25 through Carolina at Tampa Bay, Nov 30 — set-diff matches new_games exactly)");
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28USCUCLA") >= 0,
+   "kalshi-ncaaf.json keeps tonight's Tuesday MACtion head (Ball St. vs Ohio) and adds the six new Nov 28 games (USC vs UCLA among them — set-diff matches new_games exactly)");
+ok(band.indexOf("Week 11 closed Monday night in Baltimore, where the Los Angeles Chargers beat Baltimore 23–20 (Final)") >= 0 &&
+   band.indexOf("Herbert's 22-yard scoring run on the Chargers' first possession gave Los Angeles a lead it never relinquished") >= 0 &&
+   band.indexOf("Hampton powered in from the 1 on fourth down with 1:56 left in the half to make it 17–7 and finished with 105 rushing yards") >= 0 &&
+   band.indexOf("the Chargers (1–8) outrushed Baltimore 160–16 to earn their first win of the season after 11 straight losses dating to last season") >= 0,
+   "spotlight reports the Week 11 closer as a Final: the Los Angeles Chargers beat Baltimore 23-20, Herbert's 22-yard TD run on the first possession, Hampton's fourth-down 1-yard TD with 1:56 left in the half and 105 rushing yards, outrushed 160-16, first win at 1-8 after 11 straight losses (AP / ESPN)");
+ok(band.indexOf("Herbert completed 12 passes for 129 yards, ran for 51 more and threw no interception for the first time this season") >= 0 &&
+   band.indexOf("Derrick Henry was held to 10 yards on 10 carries but scored both Baltimore touchdowns — his 1-yard run cut it to 23–20 with 10:23 left") >= 0 &&
+   band.indexOf("Jacoby Brissett threw for 340 yards in his Ravens debut") >= 0 &&
+   band.indexOf("Tarheeb Still forced Zay Flowers' fumble with 2:03 remaining, Elijah Molden recovering at the Los Angeles 46") >= 0 &&
+   band.indexOf("Baltimore (4–6) lost its fifth straight (AP / ESPN)") >= 0,
+   "spotlight reports the MNF detail: Herbert 12 passes for 129 yards, 51 rushing yards and no interception for the first time this season, Henry 10 yards on 10 carries with both Baltimore TDs (the 1-yarder cutting it to 23-20 with 10:23 left), Brissett 340 yards in his Ravens debut, Still forcing Flowers' fumble with 2:03 left and Molden recovering at the Los Angeles 46, Baltimore 4-6 with a fifth straight loss (AP / ESPN)");
+ok(band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Houston") >= 0 &&
+   band.indexOf("closes tonight, Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") === -1 &&
+   band.indexOf("Week 11's remaining <strong>1-game</strong> slate") === -1,
+   "spotlight still names Week 12's opener (Thursday night, Nov 19, Indianapolis at Houston) and no longer frames the settled Week 11 closer as tonight's fixture or counts its 1-game remainder");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
