@@ -1458,8 +1458,8 @@ ok(band.indexOf("Colorado beat No. 14 Houston 42–32 (Final) at Folsom Field in
    band.indexOf("Houston fell to 7–3 (4–3 in the Big 12) (Colorado Athletics / Houston Athletics)") >= 0,
    "spotlight reports Friday's Big 12 upset: Colorado beat No. 14 Houston 42-32 (Final) at Folsom, 28 unanswered after a 20-7 deficit for its first top-15 win since 2007, Young 99 yards and two TDs, Weigman 26-of-42 for 272 and three TDs, Houston 7-3 (Colorado Athletics / Houston Athletics)");
 ok(band.indexOf("College football's Saturday slate is Final now too") >= 0 &&
-   band.indexOf("Ball St. vs Ohio, Eastern Michigan vs Western Michigan and Miami (OH) vs Kent St. head the Kalshi NCAAF board") >= 0,
-   "spotlight names the next college slate after Saturday's Finals: Monday night's MACtion (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.) — this pin named the Saturday Nov 14 slate (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU) as today's fixtures on Nov 14; that slate settled Saturday and its Finals are pinned in the Nov 15 block below");
+   band.indexOf("Ball St. vs Ohio, Eastern Michigan vs Western Michigan and Miami (OH) vs Kent St. head the Kalshi NCAAF board") === -1,
+   "spotlight names the next college slate after Saturday's Finals: Monday night's MACtion (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.) — this pin named the trio as the next slate on Nov 14; the trio settled Tuesday night and its Finals are pinned in the Nov 18 block below; this pin named the Saturday Nov 14 slate (Bryant vs Sacred Heart, Butler vs Marist, Central Connecticut St. vs LIU) as today's fixtures on Nov 14; that slate settled Saturday and its Finals are pinned in the Nov 15 block below");
 ok(band.indexOf("opens tonight, Friday night, Nov 13") === -1 &&
    band.indexOf("Florida St. vs Pittsburgh, Illinois vs UCLA, Southern Utah vs Portland St. and Houston vs Colorado head the Kalshi NCAAF board") === -1 &&
    band.indexOf("Jayden Daniels hit Stefon Diggs for a 32-yard touchdown with 57 seconds left") === -1,
@@ -1546,10 +1546,10 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV15NEDET") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV14UTAHARIZ") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MIZZUGA") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV14MISSOKLA") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17EMUWMU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17MOHKENT") >= 0,
-   "kalshi snapshots settle Saturday's marquee seven (Alabama/Vanderbilt, Michigan/Oregon, Texas/LSU, Tennessee/Texas A&M, Utah/Arizona, Missouri/Georgia gone) and the NFL Sunday opener (New England at Detroit gone at kickoff) — Ole Miss vs Oklahoma stayed listed under its Saturday ticker on Nov 15 (moved to Sunday noon by the SEC), played Sunday and settled in the Nov 16 snapshot (Oklahoma won 24-17, pinned in the Nov 16 block below), ahead of Tuesday night's MACtion trio (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17EMUWMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17MOHKENT") === -1,
+   "kalshi snapshots settle Saturday's marquee seven (Alabama/Vanderbilt, Michigan/Oregon, Texas/LSU, Tennessee/Texas A&M, Utah/Arizona, Missouri/Georgia gone) and the NFL Sunday opener (New England at Detroit gone at kickoff) — Ole Miss vs Oklahoma stayed listed under its Saturday ticker on Nov 15 (moved to Sunday noon by the SEC), played Sunday and settled in the Nov 16 snapshot (Oklahoma won 24-17, pinned in the Nov 16 block below), ahead of Tuesday night's MACtion trio (Ball St. vs Ohio, Eastern Michigan vs Western Michigan, Miami (OH) vs Kent St.) — the trio this pin kept settled Tuesday night (Ohio beat Ball St. 35-28, Western Michigan beat Eastern Michigan 34-27, Miami (OH) beat Kent St. 20-3) and its settlement is pinned in the Nov 18 block below");
 ok(band.indexOf("No. 8 Texas beat No. 22 LSU 22–21 (Final) at Tiger Stadium in Baton Rouge") >= 0 &&
    band.indexOf("Arch Manning, despite three interceptions, drove Texas 58 yards in the final 2:15 and hit Raleek Brown for a 4-yard touchdown with three seconds left") >= 0 &&
    band.indexOf("LSU (6–4, 3–4) lost in Lane Kiffin's first season despite outgaining Texas 366–273 (USA Today)") >= 0,
@@ -1581,8 +1581,8 @@ ok(band.indexOf("No. 9 Tennessee beat Texas A&amp;M 22–7 (Final) at Kyle Field
    band.indexOf("DeSean Bishop ran for 97 yards on 34 carries and DaSaahn Brame caught Tennessee's only touchdown (Tennessee Athletics / NBC Sports)") >= 0,
    "spotlight reports Saturday's College Station result: No. 9 Tennessee beat Texas A&M 22-7 (Final), Ranvier's career-high five FGs, Texas A&M held to 179 yards, Brandon finishing at QB after MacIntyre's third-quarter knee injury, Bishop 97 yards on 34 carries and Brame's TD catch (Tennessee Athletics / NBC Sports)");
 ok(band.indexOf("in the game the SEC moved to Sunday noon after Ole Miss could not fly out following Friday's nationwide ground stop") >= 0 &&
-   band.indexOf("College football's next slate is Tuesday night's MACtion") >= 0,
-   "spotlight reports the moved game as played (the SEC moved No. 19 Ole Miss at Oklahoma to Sunday noon in Norman after Ole Miss could not fly out following Friday's ground stop; the result itself is pinned in the Nov 16 block below — this pin carried the postponement framing on Nov 15) and names Tuesday night's MACtion as the next college slate (the Nov 15 copy called the trio Monday night's; the games occur Tuesday night US, occ Nov 18 03:00Z)");
+   band.indexOf("College football's Tuesday MACtion is Final now too") >= 0,
+   "spotlight reports the moved game as played (the SEC moved No. 19 Ole Miss at Oklahoma to Sunday noon in Norman after Ole Miss could not fly out following Friday's ground stop; the result itself is pinned in the Nov 16 block below — this pin carried the postponement framing on Nov 15) and now reports Tuesday night's MACtion as Finals (detailed pins in the Nov 18 block below — this pin named it as the next college slate on Nov 15; the games occurred Tuesday night US, occ Nov 18 03:00Z)");
 ok(band.indexOf("College football's Saturday slate takes over today, Nov 14") === -1 &&
    band.indexOf("Bryant vs Sacred Heart, Butler vs Marist and Central Connecticut St. vs LIU head the Kalshi NCAAF board") === -1 &&
    band.indexOf("No. 4 UCLA held off Illinois 22–14 at a rainy Rose Bowl to reach 10–0 for the first time since 1998") === -1 &&
@@ -1794,9 +1794,9 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV25GBLAR") >= 0 &&
    nflTickers.indexOf("KXNFLGAME-26NOV30CARTB") >= 0,
    "kalshi-nfl.json settles the Week 11 closer (the Los Angeles Chargers at Baltimore gone), keeps Week 12's opener (Indianapolis vs Houston, Nov 19) at the head and adds the 16-game Thanksgiving-week slate (Green Bay at the Los Angeles Rams, Nov 25 through Carolina at Tampa Bay, Nov 30 — set-diff matches new_games exactly)");
-ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") >= 0 &&
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28USCUCLA") >= 0,
-   "kalshi-ncaaf.json keeps tonight's Tuesday MACtion head (Ball St. vs Ohio) and adds the six new Nov 28 games (USC vs UCLA among them — set-diff matches new_games exactly)");
+   "kalshi-ncaaf.json settles the Tuesday MACtion head (Ball St. vs Ohio gone — this pin kept it on Nov 17; Ohio won 35-28 (Final) and the settlement is pinned in the Nov 18 block below) and keeps the six new Nov 28 games added Nov 17 (USC vs UCLA among them — set-diff matches new_games exactly)");
 ok(band.indexOf("Week 11 closed Monday night in Baltimore, where the Los Angeles Chargers beat Baltimore 23–20 (Final)") >= 0 &&
    band.indexOf("Herbert's 22-yard scoring run on the Chargers' first possession gave Los Angeles a lead it never relinquished") >= 0 &&
    band.indexOf("Hampton powered in from the 1 on fourth down with 1:56 left in the half to make it 17–7 and finished with 105 rushing yards") >= 0 &&
@@ -1812,6 +1812,76 @@ ok(band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Hous
    band.indexOf("closes tonight, Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") === -1 &&
    band.indexOf("Week 11's remaining <strong>1-game</strong> slate") === -1,
    "spotlight still names Week 12's opener (Thursday night, Nov 19, Indianapolis at Houston) and no longer frames the settled Week 11 closer as tonight's fixture or counts its 1-game remainder");
+/* The Nov 18 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
+   18:54Z NCAAF) settles Tuesday night's MACtion trio —
+   Ball St. at Ohio, Eastern Michigan at Western Michigan
+   and Miami (OH) at Kent St. all drop out; tonight's
+   MACtion pair (Akron vs UMass, Central Michigan vs
+   Buffalo, both occ Nov 18 23:00Z) heads the NCAAF
+   board. The Finals (all cross-checked): Ohio beat
+   Ball St. 35-28 at Peden Stadium (Ohio Athletics /
+   The Star Press / Covers) — Ball St. led 20-14 at the
+   half; James-Hamilton's 34-yard pick-six opened the
+   fourth quarter, Poulos threw for 155 yards and ran
+   for 58 with two rushing TDs, Ball St. tied it 28-28
+   with 2:23 left, and Poulos hit Dorwart for a 29-yard
+   TD with 1:16 left; Ohio 8-3 (6-1 MAC) with an 18th
+   straight home win, Ball St. 3-8. Western Michigan
+   beat Eastern Michigan 34-27 at Waldo Stadium (EMU
+   Athletics / WMU Athletics) — Buckley's 72-yard TD
+   run on the first snap, 140 rushing yards and two
+   TDs, Broncos 31-7 at the half; Blue's career-high
+   160 rushing yards and three TDs led a 20-3 second
+   half, his third score cutting it to 34-27 with 7:36
+   left; Western Michigan 8-3 (6-1 MAC), Eastern
+   Michigan 4-7. Miami (OH) beat Kent St. 20-3 at Dix
+   Stadium (Miami Athletics) — 58 carries for 301
+   yards, nearly 39 minutes of possession, Jones 29
+   carries for 121 yards and two 1-yard TDs, freshman
+   Bellisari 124 passing yards and a 23-yard TD run in
+   his first career start, Kent St. held to 31 rushing
+   yards and 170 total, scoreless over the final 51
+   minutes; Miami 7-4 (5-2 MAC), Kent St. 3-8. NFL
+   state: 29 games, 30 moves, 0 new, 0 dropped — Week
+   12's opener (Thu Nov 19 Indianapolis at Houston)
+   still heads the board. MLB state: 0 games. NCAAF
+   state: 188 games, 142 moves, 0 new, exactly the
+   trio dropped (set-diff verified). History: 2,316
+   tickers, max 41 points, 34,496 total points (34,062
+   + 58 NFL + 0 MLB + 376 NCAAF = exactly one append
+   per priced market, verified against the pre-fetch
+   backup). The band stays in its Nov 16-Nov 23 window
+   (no roll — Week 12 is the band's slate): it reports
+   the MACtion trio as Finals and names tonight's pair;
+   the stale next-slate trio framing is banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17EMUWMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV17MOHKENT") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18AKRMASS") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18CMUBUFF") >= 0,
+   "kalshi snapshots settle Tuesday's MACtion trio (Ball St./Ohio, Eastern Michigan/Western Michigan, Miami (OH)/Kent St. gone) and head the NCAAF board with tonight's pair (Akron vs UMass, Central Michigan vs Buffalo), with Week 12's NFL opener (Indianapolis vs Houston, Nov 19) still at the head");
+ok(band.indexOf("Ohio beat Ball St. 35–28 (Final) at Peden Stadium in Athens") >= 0 &&
+   band.indexOf("Darren James-Hamilton's 34-yard pick-six opened the fourth quarter") >= 0 &&
+   band.indexOf("Nick Poulos threw for 155 yards and ran for 58 more with two rushing touchdowns") >= 0 &&
+   band.indexOf("Poulos hit Dom Dorwart for a 29-yard touchdown with 1:16 remaining") >= 0 &&
+   band.indexOf("Ohio (8–3, 6–1 in the MAC) won its 18th straight home game") >= 0,
+   "spotlight reports Tuesday's Athens Final: Ohio beat Ball St. 35-28, James-Hamilton's 34-yard pick-six opening the fourth quarter, Poulos 155 passing yards and 58 rushing with two rushing TDs, the 29-yard Dorwart winner with 1:16 left, Ohio 8-3 with an 18th straight home win (Ohio Athletics / The Star Press)");
+ok(band.indexOf("Western Michigan beat Eastern Michigan 34–27 (Final) at Waldo Stadium in Kalamazoo") >= 0 &&
+   band.indexOf("Jalen Buckley scored on a 72-yard run on the game's first snap and finished with 140 rushing yards and two touchdowns") >= 0 &&
+   band.indexOf("Amareon Blue's career-high 160 rushing yards and three touchdowns") >= 0 &&
+   band.indexOf("Blue's third score cutting it to 34–27 with 7:36 left") >= 0,
+   "spotlight reports Tuesday's Kalamazoo Final: Western Michigan beat Eastern Michigan 34-27, Buckley's 72-yard TD on the first snap and 140 rushing yards, Blue's career-high 160 yards and three TDs cutting it to 34-27 with 7:36 left (EMU Athletics / WMU Athletics)");
+ok(band.indexOf("Miami (OH) beat Kent St. 20–3 (Final) at Dix Stadium in Kent") >= 0 &&
+   band.indexOf("the RedHawks ran 58 times for 301 yards and held the ball for nearly 39 minutes") >= 0 &&
+   band.indexOf("D'Shawntae Jones carried 29 times for 121 yards and two 1-yard touchdowns") >= 0 &&
+   band.indexOf("freshman Drew Bellisari threw for 124 yards and ran for a 23-yard touchdown in his first career start") >= 0 &&
+   band.indexOf("Miami's defense held Kent St. to 31 rushing yards and 170 total yards, scoreless over the final 51 minutes") >= 0,
+   "spotlight reports Tuesday's Kent Final: Miami (OH) beat Kent St. 20-3, 58 carries for 301 yards and nearly 39 minutes of possession, Jones 121 yards and two 1-yard TDs, Bellisari 124 passing yards and a 23-yard TD run in his first career start, Kent St. held to 31 rushing yards and scoreless over the final 51 minutes (Miami Athletics)");
+ok(band.indexOf("College football's next slate is tonight's MACtion pair — Akron vs UMass and Central Michigan vs Buffalo head the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("College football's next slate is Tuesday night's MACtion") === -1 &&
+   band.indexOf("Ball St. vs Ohio, Eastern Michigan vs Western Michigan and Miami (OH) vs Kent St. head the Kalshi NCAAF board") === -1,
+   "spotlight names tonight's MACtion pair (Akron vs UMass, Central Michigan vs Buffalo) as the next college slate and no longer frames the settled Tuesday trio as the next slate");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
