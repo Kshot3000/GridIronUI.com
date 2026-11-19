@@ -1858,9 +1858,9 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17EMUWMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17MOHKENT") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18AKRMASS") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18CMUBUFF") >= 0,
-   "kalshi snapshots settle Tuesday's MACtion trio (Ball St./Ohio, Eastern Michigan/Western Michigan, Miami (OH)/Kent St. gone) and head the NCAAF board with tonight's pair (Akron vs UMass, Central Michigan vs Buffalo), with Week 12's NFL opener (Indianapolis vs Houston, Nov 19) still at the head");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18AKRMASS") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18CMUBUFF") === -1,
+   "kalshi snapshots settle Tuesday's MACtion trio (Ball St./Ohio, Eastern Michigan/Western Michigan, Miami (OH)/Kent St. gone) and headed the NCAAF board with that night's pair (Akron vs UMass, Central Michigan vs Buffalo) — the pair settled that night (Akron won 34-33, Buffalo won 40-21) and its settlement is pinned in the Nov 19 block below, with Week 12's NFL opener (Indianapolis vs Houston, Nov 19) still at the head");
 ok(band.indexOf("Ohio beat Ball St. 35–28 (Final) at Peden Stadium in Athens") >= 0 &&
    band.indexOf("Darren James-Hamilton's 34-yard pick-six opened the fourth quarter") >= 0 &&
    band.indexOf("Nick Poulos threw for 155 yards and ran for 58 more with two rushing touchdowns") >= 0 &&
@@ -1878,10 +1878,79 @@ ok(band.indexOf("Miami (OH) beat Kent St. 20–3 (Final) at Dix Stadium in Kent"
    band.indexOf("freshman Drew Bellisari threw for 124 yards and ran for a 23-yard touchdown in his first career start") >= 0 &&
    band.indexOf("Miami's defense held Kent St. to 31 rushing yards and 170 total yards, scoreless over the final 51 minutes") >= 0,
    "spotlight reports Tuesday's Kent Final: Miami (OH) beat Kent St. 20-3, 58 carries for 301 yards and nearly 39 minutes of possession, Jones 121 yards and two 1-yard TDs, Bellisari 124 passing yards and a 23-yard TD run in his first career start, Kent St. held to 31 rushing yards and scoreless over the final 51 minutes (Miami Athletics)");
-ok(band.indexOf("College football's next slate is tonight's MACtion pair — Akron vs UMass and Central Michigan vs Buffalo head the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is tonight's MACtion pair — Akron vs UMass and Central Michigan vs Buffalo head the Kalshi NCAAF board") === -1 &&
    band.indexOf("College football's next slate is Tuesday night's MACtion") === -1 &&
    band.indexOf("Ball St. vs Ohio, Eastern Michigan vs Western Michigan and Miami (OH) vs Kent St. head the Kalshi NCAAF board") === -1,
-   "spotlight names tonight's MACtion pair (Akron vs UMass, Central Michigan vs Buffalo) as the next college slate and no longer frames the settled Tuesday trio as the next slate");
+   "spotlight named that night's MACtion pair (Akron vs UMass, Central Michigan vs Buffalo) as the next college slate on Nov 18 — the pair settled that night and is now reported as Finals (detailed pins in the Nov 19 block below) — and no longer frames the settled Tuesday trio as the next slate");
+/* The Nov 19 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:53Z NCAAF) settles Wednesday night's MACtion pair —
+   Akron at UMass and Central Michigan at Buffalo both
+   drop out; tonight's trio (Northwestern St. vs Stephen
+   F. Austin, Southeastern Louisiana vs Nicholls St.,
+   Rice vs Temple, occ Nov 20 03:00-03:30Z) heads the
+   NCAAF board. The Finals (all cross-checked): Akron
+   beat UMass 34-33 at McGuirk Alumni Stadium (UMass
+   Athletics / Akron Athletics / Beacon Journal) —
+   UMass led 26-7 in the first half behind three Logan
+   Inagawa touchdown passes (Inagawa in for the injured
+   Watson III), but Jordan Gant ran for 151 yards and
+   two TDs including a career-long 73-yarder, Brandon
+   Hills returned the second-half kickoff 100 yards for
+   a TD, and Aidan Stire's 28-yard FG with 5:34 left
+   gave Akron its first lead; Akron 2-9 (1-6 MAC),
+   eight-game losing streak snapped, first win since
+   September; UMass 5-6 (2-5) ran for 269 yards, its
+   most since 2021, behind Faulkner's career-high 105.
+   (The Beacon Journal's 5:13 FG time is an outlier
+   against both schools' recaps at 5:34 — 5:34 used.)
+   Buffalo beat Central Michigan 40-21 at Broadview
+   Stadium (Central Michigan Athletics / AP) — Messiah
+   Burch ran for 200 yards and two TDs, his 75-yarder
+   on Buffalo's next play answering CMU's third-quarter
+   TD that cut it to 26-21, Terrance Shelton added 81
+   yards and the clinching 1-yard TD, Buffalo piled up
+   283 rushing yards for a sixth straight win; Buffalo
+   8-3 (6-1 MAC) tied atop the MAC, Central Michigan
+   5-6 (3-4) with three turnovers despite Glasser's
+   career-high three TD passes and Duley's school-
+   record 86-yard punt, the longest in the FBS this
+   season. NFL state: 29 games, 6 moves, 0 new, 0
+   dropped — Week 12's opener (tonight, Thu Nov 19
+   Indianapolis at Houston) still heads the board. MLB
+   state: 0 games. NCAAF state: 186 games, 113 moves, 0
+   new, exactly the settled pair dropped (set-diff
+   verified). History: 2,316 tickers, max 41 points,
+   34,926 total points (34,496 + 58 NFL + 0 MLB + 372
+   NCAAF = exactly one append per priced market,
+   verified against the pre-fetch backup). The band
+   stays in its Nov 16-Nov 23 window (no roll — Week 12
+   is the band's slate): it reports the MACtion pair as
+   Finals and names tonight's trio; the stale tonight's-
+   pair framing is banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18AKRMASS") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV18CMUBUFF") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19NWSTSFA") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19SELANICH") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19RICETEM") >= 0,
+   "kalshi snapshots settle Wednesday's MACtion pair (Akron/UMass, Central Michigan/Buffalo gone) and head the NCAAF board with tonight's trio (Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls St., Rice/Temple), with Week 12's NFL opener (Indianapolis vs Houston, tonight Nov 19) still at the head");
+ok(band.indexOf("Akron beat UMass 34–33 (Final) at McGuirk Alumni Stadium in Amherst") >= 0 &&
+   band.indexOf("UMass jumped out to a 26–7 first-half lead behind three Logan Inagawa touchdown passes") >= 0 &&
+   band.indexOf("Jordan Gant ran for 151 yards and two touchdowns including a career-long 73-yarder") >= 0 &&
+   band.indexOf("Brandon Hills returned the second-half kickoff 100 yards for a touchdown") >= 0 &&
+   band.indexOf("Aidan Stire's 28-yard field goal with 5:34 left gave Akron (2–9, 1–6 in the MAC) its first lead of the night and snapped its eight-game losing streak") >= 0 &&
+   band.indexOf("UMass (5–6, 2–5) ran for 269 yards, its most since 2021") >= 0,
+   "spotlight reports Wednesday's Amherst Final: Akron beat UMass 34-33, UMass's 26-7 lead behind three Inagawa TD passes, Gant 151 yards and two TDs with a career-long 73-yarder, Hills's 100-yard kickoff-return TD, Stire's 28-yard winner with 5:34 left snapping Akron's eight-game skid at 2-9, UMass 269 rushing yards (UMass Athletics / Akron Athletics)");
+ok(band.indexOf("Buffalo beat Central Michigan 40–21 (Final) at Broadview Stadium in Buffalo") >= 0 &&
+   band.indexOf("Messiah Burch ran for 200 yards and two touchdowns") >= 0 &&
+   band.indexOf("a 75-yard score on Buffalo's very next play") >= 0 &&
+   band.indexOf("Terrance Shelton added 81 rushing yards and the clinching 1-yard touchdown") >= 0 &&
+   band.indexOf("the Bulls (8–3, 6–1 in the MAC) piled up 283 rushing yards to win their sixth straight") >= 0 &&
+   band.indexOf("Declan Duley's school-record 86-yard punt, the longest in the FBS this season") >= 0,
+   "spotlight reports Wednesday's Buffalo Final: Buffalo beat Central Michigan 40-21, Burch 200 yards and two TDs with the 75-yard answer, Shelton 81 yards and the clincher, 283 team rushing yards and a sixth straight win at 8-3, Duley's school-record 86-yard punt (Central Michigan Athletics)");
+ok(band.indexOf("College football's next slate is tonight's trio — Northwestern St. vs Stephen F. Austin, Southeastern Louisiana vs Nicholls and Rice vs Temple head the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("College football's next slate is tonight's MACtion pair") === -1,
+   "spotlight names tonight's trio (Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls, Rice/Temple) as the next college slate and no longer frames the settled MACtion pair as the next slate");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
