@@ -1732,10 +1732,10 @@ ok(band.indexOf("Oklahoma beat No. 19 Ole Miss 24–17 (Final) on Sunday at Gayl
    band.indexOf("his Hail Mary was batted down in the end zone as time expired") >= 0 &&
    band.indexOf("the Rebels (6–4, 4–4) lost their second straight despite outgaining Oklahoma 307–299 (AP / The Oklahoman)") >= 0,
    "spotlight reports the moved game's result: Oklahoma beat No. 19 Ole Miss 24-17 (Final) in Norman, Sategna's 75-yard punt-return TD in a 14-0 first quarter, Mateer's 181 yards of offense, Chambliss's Hail Mary batted down as time expired, Ole Miss 6-4 (4-4) despite a 307-299 yardage edge (AP / The Oklahoman)");
-ok(band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Houston") >= 0 &&
-   band.indexOf("runs through Monday night, Nov 23, when Cincinnati visits Washington — Sunday night is Minnesota at San Francisco") >= 0 &&
+ok(band.indexOf("Week 12 opened Thursday night in Houston, where Houston beat Indianapolis 26–3 (Final) at Reliant Stadium") >= 0 &&
+   band.indexOf("Week 12 runs through Monday night, Nov 23, when Cincinnati visits Washington — Sunday night is Minnesota at San Francisco") >= 0 &&
    band.indexOf("Kalshi Week 12 prices") >= 0,
-   "spotlight names the new window's slate: Week 12 opens Thursday night, Nov 19 (Indianapolis at Houston) and runs through Monday night, Nov 23 (Cincinnati at Washington), Sunday night Minnesota at San Francisco, and links the Week 12 Kalshi prices");
+   "spotlight names the new window's slate: Week 12 opened Thursday night, Nov 19 in Houston (Houston beat Indianapolis 26-3, Final — detailed pins in the Nov 20 block below) and runs through Monday night, Nov 23 (Cincinnati at Washington), Sunday night Minnesota at San Francisco, and links the Week 12 Kalshi prices");
 ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three seconds left as No. 8 Texas rallied from 11 down") === -1 &&
    band.indexOf("Sunday night is Pittsburgh vs Cincinnati") === -1 &&
    band.indexOf("under way today, Sunday, Nov 15") === -1 &&
@@ -1790,10 +1790,10 @@ ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three
    still names Week 12's opener; the stale closes-tonight
    framing and the 1-game remainder are banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") === -1 &&
-   nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") >= 0 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV25GBLAR") >= 0 &&
    nflTickers.indexOf("KXNFLGAME-26NOV30CARTB") >= 0,
-   "kalshi-nfl.json settles the Week 11 closer (the Los Angeles Chargers at Baltimore gone), keeps Week 12's opener (Indianapolis vs Houston, Nov 19) at the head and adds the 16-game Thanksgiving-week slate (Green Bay at the Los Angeles Rams, Nov 25 through Carolina at Tampa Bay, Nov 30 — set-diff matches new_games exactly)");
+   "kalshi-nfl.json settled the Week 11 closer (the Los Angeles Chargers at Baltimore gone), kept Week 12's opener (Indianapolis vs Houston, Nov 19) at the head on Nov 17 and added the 16-game Thanksgiving-week slate (Green Bay at the Los Angeles Rams, Nov 25 through Carolina at Tampa Bay, Nov 30 — set-diff matched new_games exactly) — the opener settled Nov 19 (Houston won 26-3) and its settlement is pinned in the Nov 20 block below");
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28USCUCLA") >= 0,
    "kalshi-ncaaf.json settles the Tuesday MACtion head (Ball St. vs Ohio gone — this pin kept it on Nov 17; Ohio won 35-28 (Final) and the settlement is pinned in the Nov 18 block below) and keeps the six new Nov 28 games added Nov 17 (USC vs UCLA among them — set-diff matches new_games exactly)");
@@ -1808,10 +1808,10 @@ ok(band.indexOf("Herbert completed 12 passes for 129 yards, ran for 51 more and 
    band.indexOf("Tarheeb Still forced Zay Flowers' fumble with 2:03 remaining, Elijah Molden recovering at the Los Angeles 46") >= 0 &&
    band.indexOf("Baltimore (4–6) lost its fifth straight (AP / ESPN)") >= 0,
    "spotlight reports the MNF detail: Herbert 12 passes for 129 yards, 51 rushing yards and no interception for the first time this season, Henry 10 yards on 10 carries with both Baltimore TDs (the 1-yarder cutting it to 23-20 with 10:23 left), Brissett 340 yards in his Ravens debut, Still forcing Flowers' fumble with 2:03 left and Molden recovering at the Los Angeles 46, Baltimore 4-6 with a fifth straight loss (AP / ESPN)");
-ok(band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Houston") >= 0 &&
+ok(band.indexOf("Week 12 opened Thursday night in Houston, where Houston beat Indianapolis 26–3 (Final) at Reliant Stadium") >= 0 &&
    band.indexOf("closes tonight, Monday night, Nov 16, with the Los Angeles Chargers at Baltimore") === -1 &&
    band.indexOf("Week 11's remaining <strong>1-game</strong> slate") === -1,
-   "spotlight still names Week 12's opener (Thursday night, Nov 19, Indianapolis at Houston) and no longer frames the settled Week 11 closer as tonight's fixture or counts its 1-game remainder");
+   "spotlight reports Week 12's opener as a Final (Houston beat Indianapolis 26-3 on Thursday night, Nov 19 — detailed pins in the Nov 20 block below) and no longer frames the settled Week 11 closer as tonight's fixture or counts its 1-game remainder");
 /* The Nov 18 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
    18:54Z NCAAF) settles Tuesday night's MACtion trio —
    Ball St. at Ohio, Eastern Michigan at Western Michigan
@@ -1854,13 +1854,13 @@ ok(band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Hous
    (no roll — Week 12 is the band's slate): it reports
    the MACtion trio as Finals and names tonight's pair;
    the stale next-slate trio framing is banned below. */
-ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") >= 0 &&
+ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17EMUWMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV17MOHKENT") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV18AKRMASS") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV18CMUBUFF") === -1,
-   "kalshi snapshots settle Tuesday's MACtion trio (Ball St./Ohio, Eastern Michigan/Western Michigan, Miami (OH)/Kent St. gone) and headed the NCAAF board with that night's pair (Akron vs UMass, Central Michigan vs Buffalo) — the pair settled that night (Akron won 34-33, Buffalo won 40-21) and its settlement is pinned in the Nov 19 block below, with Week 12's NFL opener (Indianapolis vs Houston, Nov 19) still at the head");
+   "kalshi snapshots settle Tuesday's MACtion trio (Ball St./Ohio, Eastern Michigan/Western Michigan, Miami (OH)/Kent St. gone) and headed the NCAAF board with that night's pair (Akron vs UMass, Central Michigan vs Buffalo) — the pair settled that night (Akron won 34-33, Buffalo won 40-21) and its settlement is pinned in the Nov 19 block below; Week 12's NFL opener (Indianapolis vs Houston, Nov 19) was still at the head then and settled Nov 19 (Houston won 26-3, pinned in the Nov 20 block below)");
 ok(band.indexOf("Ohio beat Ball St. 35–28 (Final) at Peden Stadium in Athens") >= 0 &&
    band.indexOf("Darren James-Hamilton's 34-yard pick-six opened the fourth quarter") >= 0 &&
    band.indexOf("Nick Poulos threw for 155 yards and ran for 58 more with two rushing touchdowns") >= 0 &&
@@ -1927,13 +1927,13 @@ ok(band.indexOf("College football's next slate is tonight's MACtion pair — Akr
    is the band's slate): it reports the MACtion pair as
    Finals and names tonight's trio; the stale tonight's-
    pair framing is banned below. */
-ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") >= 0 &&
+ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV18AKRMASS") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV18CMUBUFF") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19NWSTSFA") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19SELANICH") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19RICETEM") >= 0,
-   "kalshi snapshots settle Wednesday's MACtion pair (Akron/UMass, Central Michigan/Buffalo gone) and head the NCAAF board with tonight's trio (Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls St., Rice/Temple), with Week 12's NFL opener (Indianapolis vs Houston, tonight Nov 19) still at the head");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19NWSTSFA") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19SELANICH") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19RICETEM") === -1,
+   "kalshi snapshots settled Wednesday's MACtion pair (Akron/UMass, Central Michigan/Buffalo gone) and headed the NCAAF board with that night's trio (Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls St., Rice/Temple) — the trio and Week 12's NFL opener (Indianapolis vs Houston) settled that night (Houston won 26-3, Stephen F. Austin won 66-0, Southeastern Louisiana won 38-10, Rice won 31-27) and their settlement is pinned in the Nov 20 block below");
 ok(band.indexOf("Akron beat UMass 34–33 (Final) at McGuirk Alumni Stadium in Amherst") >= 0 &&
    band.indexOf("UMass jumped out to a 26–7 first-half lead behind three Logan Inagawa touchdown passes") >= 0 &&
    band.indexOf("Jordan Gant ran for 151 yards and two touchdowns including a career-long 73-yarder") >= 0 &&
@@ -1948,9 +1948,112 @@ ok(band.indexOf("Buffalo beat Central Michigan 40–21 (Final) at Broadview Stad
    band.indexOf("the Bulls (8–3, 6–1 in the MAC) piled up 283 rushing yards to win their sixth straight") >= 0 &&
    band.indexOf("Declan Duley's school-record 86-yard punt, the longest in the FBS this season") >= 0,
    "spotlight reports Wednesday's Buffalo Final: Buffalo beat Central Michigan 40-21, Burch 200 yards and two TDs with the 75-yard answer, Shelton 81 yards and the clincher, 283 team rushing yards and a sixth straight win at 8-3, Duley's school-record 86-yard punt (Central Michigan Athletics)");
-ok(band.indexOf("College football's next slate is tonight's trio — Northwestern St. vs Stephen F. Austin, Southeastern Louisiana vs Nicholls and Rice vs Temple head the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is tonight's trio") === -1 &&
    band.indexOf("College football's next slate is tonight's MACtion pair") === -1,
-   "spotlight names tonight's trio (Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls, Rice/Temple) as the next college slate and no longer frames the settled MACtion pair as the next slate");
+   "spotlight named that night's trio (Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls, Rice/Temple) as the next college slate on Nov 19 — the trio settled that night and is now reported as Finals (detailed pins in the Nov 20 block below) — and no longer frames the settled MACtion pair as the next slate");
+/* The Nov 20 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
+   18:53Z NCAAF) settles Thursday night's four games —
+   Week 12's NFL opener (Indianapolis at Houston) drops
+   out and tonight's NCAAF trio (Northwestern St. at
+   Stephen F. Austin, Southeastern Louisiana at Nicholls,
+   Rice at Temple) drops out; tonight's Friday night card
+   (Iowa St. vs UCF, Bowling Green vs Toledo, Clemson vs
+   Duke, occ Nov 21 02:00-03:30Z) heads the NCAAF board
+   and Sunday's NFL slate (Arizona vs Kansas City first,
+   occ Nov 22 21:00Z) heads the NFL board. The Finals
+   (all cross-checked): Houston beat Indianapolis 26-3
+   at Reliant Stadium (Reuters / Pro Football Reference)
+   — Stroud 21-of-27 for 194 yards and three TDs (42 to
+   Collins, 24 to Boutte, 13 to Klein), Montgomery 107
+   rushing yards on 26 carries in his return from a
+   groin injury, Anderson's end-zone sack of Jones for
+   a third-quarter safety (NFL-best 11.5 sacks), the
+   Colts held to 167 yards and eight first downs with
+   Taylor at 21 yards on 11 carries and Shrader's
+   opening-drive 34-yard FG their only score; Houston
+   4-6 (fourth win in six, first home win of the
+   season), Indianapolis 3-8. Stephen F. Austin beat
+   Northwestern St. 66-0 at Homer Bryce Stadium (SFA
+   Athletics) — a 35-point second quarter made it 52-0
+   at the half, Kitna threw for 253 yards and three
+   TDs, Mortimer scored on a 70-yard catch and a
+   45-yard punt return, nine Lumberjacks scored, 703
+   total yards against 210 allowed; SFA 11-1 (8-1
+   Southland) with a second straight conference title,
+   Northwestern St. 0-12. Southeastern Louisiana beat
+   Nicholls 38-10 in the River Bell Classic at John L.
+   Guidry Stadium (SELA Athletics) — 477-164 yardage,
+   a season-high 324 rushing yards, Lowe threw for 153
+   yards and two TDs and ran for 107 yards and two
+   more, Joseph's school-record 14 catches for 139
+   yards and a TD, three Lion TDs in the final 10
+   minutes breaking a 17-10 game open; SELA 6-6 (4-5
+   Southland), River Bell retained a third straight
+   year, Nicholls 4-8. Rice beat Temple 31-27 at
+   Lincoln Financial Field (Rice Athletics) — Temple
+   led 27-17 in the fourth quarter, Crayton Jr. came
+   off the bench and converted a fourth-and-10 on each
+   of the last two drives (47 yards to Mosey setting up
+   Ochoa's 9-yard TD to Mosey at 1:55, then an 18-yard
+   strike to Clark before the 30-yard winner to Brown
+   with six seconds left), Hardeman's career-high 137
+   rushing yards; Rice 2-9 (1-6 American) snapped a
+   nine-game losing streak with its first conference
+   win, Temple 2-9 (1-6) lost a sixth straight. NFL
+   state: 28 games, 9 moves, 0 new, exactly the opener
+   dropped (set-diff verified). MLB state: 0 games.
+   NCAAF state: 183 games, 72 moves, 0 new, exactly
+   the settled trio dropped (set-diff verified).
+   History: 2,316 tickers, max 41 points, 35,348 total
+   points (34,926 + 56 NFL + 0 MLB + 366 NCAAF =
+   exactly one append per priced market, verified
+   against the pre-fetch backup). The band stays in
+   its Nov 16-Nov 23 window (no roll — Week 12 is the
+   band's slate): it reports all four Thursday Finals
+   and names tonight's Friday night card; the stale
+   Week 12-opens and tonight's-trio framings are
+   banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19NWSTSFA") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19SELANICH") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV19RICETEM") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20ISUUCF") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20BGSUTOL") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20CLEMDUKE") >= 0,
+   "kalshi snapshots settle Thursday night's four games (Indianapolis/Houston gone from the NFL board, the Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls and Rice/Temple trio gone from the NCAAF board) and head the NCAAF board with tonight's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke), with Sunday's NFL slate (Arizona vs Kansas City) at the NFL head");
+ok(band.indexOf("Houston beat Indianapolis 26–3 (Final) at Reliant Stadium") >= 0 &&
+   band.indexOf("C.J. Stroud completed 21 of 27 passes for 194 yards and three touchdowns, a 42-yarder to Nico Collins, a 24-yarder to Kayshon Boutte and a 13-yarder to Marlin Klein") >= 0 &&
+   band.indexOf("David Montgomery rushed for 107 yards on 26 carries in his return after missing four games with a groin injury") >= 0 &&
+   band.indexOf("Will Anderson Jr. sacked Daniel Jones in the end zone for a third-quarter safety, raising his NFL-best sack total to 11.5") >= 0 &&
+   band.indexOf("the Texans held the Colts to 167 yards and eight first downs in Houston's first home win of the season") >= 0 &&
+   band.indexOf("Jonathan Taylor managed just 21 yards on 11 carries") >= 0 &&
+   band.indexOf("Spencer Shrader's 34-yard field goal on the opening drive was Indianapolis's only score") >= 0 &&
+   band.indexOf("Houston (4–6) won for the fourth time in six games and Indianapolis fell to 3–8 (Reuters)") >= 0,
+   "spotlight reports the Week 12 opener Final: Houston beat Indianapolis 26-3 at Reliant Stadium, Stroud 21-of-27 for 194 yards and three TDs (Collins 42, Boutte 24, Klein 13), Montgomery 107 yards in his return, Anderson's safety sack (NFL-best 11.5), 167 yards and eight first downs allowed, Taylor 21 yards, Shrader's opening FG the Colts' only score, Houston 4-6 and Indianapolis 3-8 (Reuters)");
+ok(band.indexOf("No. 5 Stephen F. Austin beat Northwestern St. 66–0 (Final) at Homer Bryce Stadium in Nacogdoches") >= 0 &&
+   band.indexOf("the Lumberjacks scored 35 points in the second quarter to lead 52–0 at the half") >= 0 &&
+   band.indexOf("JT Kitna threw for 253 yards and three touchdowns") >= 0 &&
+   band.indexOf("Bugs Mortimer scored on a 70-yard reception and a 45-yard punt return") >= 0 &&
+   band.indexOf("nine different Lumberjacks scored as Stephen F. Austin piled up 703 total yards and held Northwestern St. to 210") >= 0 &&
+   band.indexOf("finishing 11–1 (8–1 in the Southland) with its second straight Southland Conference championship while Northwestern St. closed its season 0–12 (Stephen F. Austin Athletics)") >= 0,
+   "spotlight reports Thursday's Nacogdoches Final: Stephen F. Austin beat Northwestern St. 66-0, a 35-point second quarter for 52-0 at the half, Kitna 253 yards and three TDs, Mortimer's 70-yard catch and 45-yard punt-return TDs, nine scorers and 703-210 yardage, SFA 11-1 (8-1) with a second straight Southland title and Northwestern St. 0-12 (Stephen F. Austin Athletics)");
+ok(band.indexOf("Southeastern Louisiana beat Nicholls 38–10 (Final) in the River Bell Classic at John L. Guidry Stadium in Thibodaux") >= 0 &&
+   band.indexOf("the Lions outgained Nicholls 477–164 and ran for a season-high 324 yards") >= 0 &&
+   band.indexOf("Kyle Lowe threw for 153 yards and two touchdowns and ran for 107 yards and two more") >= 0 &&
+   band.indexOf("Dkhai Joseph set a school record with 14 receptions for 139 yards and a touchdown") >= 0 &&
+   band.indexOf("Southeastern Louisiana (6–6, 4–5 in the Southland) scored three times in the final 10 minutes to pull away from a 17–10 game and retain the River Bell for the third straight season; Nicholls finished 4–8 (Southeastern Louisiana Athletics)") >= 0,
+   "spotlight reports Thursday's River Bell Final: Southeastern Louisiana beat Nicholls 38-10 in Thibodaux, 477-164 yardage and a season-high 324 rushing yards, Lowe's four total TDs (153 passing, 107 rushing), Joseph's school-record 14 catches for 139 yards, three late TDs breaking a 17-10 game open, SELA 6-6 with the River Bell retained a third straight year and Nicholls 4-8 (Southeastern Louisiana Athletics)");
+ok(band.indexOf("Rice beat Temple 31–27 (Final) at Lincoln Financial Field in Philadelphia") >= 0 &&
+   band.indexOf("Temple led 27–17 in the fourth quarter, but Patrick Crayton Jr. came off the bench and converted a fourth-and-10 on each of Rice's last two drives") >= 0 &&
+   band.indexOf("hitting Max Mosey for 47 yards to set up Gael Ochoa's 9-yard touchdown pass to Mosey with 1:55 left and then finding Jacurri Brown for a 30-yard touchdown with six seconds remaining") >= 0 &&
+   band.indexOf("D'Andre Hardeman Jr. rushed for a career-high 137 yards") >= 0 &&
+   band.indexOf("Rice (2–9, 1–6 in the American) snapped a nine-game losing streak with its first conference win of the season while Temple (2–9, 1–6) lost its sixth straight (Rice Athletics)") >= 0,
+   "spotlight reports Thursday's Philadelphia Final: Rice beat Temple 31-27, erasing a 27-17 fourth-quarter deficit as Crayton Jr. converted two fourth-and-10s and hit Brown for the 30-yard winner with six seconds left after Ochoa's 9-yard TD to Mosey at 1:55, Hardeman's career-high 137 rushing yards, Rice 2-9 snapping a nine-game skid and Temple 2-9 losing a sixth straight (Rice Athletics)");
+ok(band.indexOf("College football's next slate is tonight's Friday night card — Iowa St. vs UCF, Bowling Green vs Toledo and Clemson vs Duke head the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Houston") === -1 &&
+   band.indexOf("College football's Thursday slate is Final now too") >= 0,
+   "spotlight names tonight's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke) as the next college slate, reports Thursday's slate as Final and no longer frames Week 12 as opening Thursday night");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
