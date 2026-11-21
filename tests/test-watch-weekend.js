@@ -2018,10 +2018,10 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV19NWSTSFA") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV19SELANICH") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV19RICETEM") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20ISUUCF") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20BGSUTOL") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20CLEMDUKE") >= 0,
-   "kalshi snapshots settle Thursday night's four games (Indianapolis/Houston gone from the NFL board, the Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls and Rice/Temple trio gone from the NCAAF board) and head the NCAAF board with tonight's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke), with Sunday's NFL slate (Arizona vs Kansas City) at the NFL head");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20ISUUCF") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20BGSUTOL") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20CLEMDUKE") === -1,
+   "kalshi snapshots settle Thursday night's four games (Indianapolis/Houston gone from the NFL board, the Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls and Rice/Temple trio gone from the NCAAF board) and headed the NCAAF board with that night's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke) — the card settled that night (UCF won 48-17, Toledo won 19-0, Clemson won 20-10) and its settlement is pinned in the Nov 21 block below; Sunday's NFL slate (Arizona vs Kansas City) stays at the NFL head");
 ok(band.indexOf("Houston beat Indianapolis 26–3 (Final) at Reliant Stadium") >= 0 &&
    band.indexOf("C.J. Stroud completed 21 of 27 passes for 194 yards and three touchdowns, a 42-yarder to Nico Collins, a 24-yarder to Kayshon Boutte and a 13-yarder to Marlin Klein") >= 0 &&
    band.indexOf("David Montgomery rushed for 107 yards on 26 carries in his return after missing four games with a groin injury") >= 0 &&
@@ -2050,10 +2050,135 @@ ok(band.indexOf("Rice beat Temple 31–27 (Final) at Lincoln Financial Field in 
    band.indexOf("D'Andre Hardeman Jr. rushed for a career-high 137 yards") >= 0 &&
    band.indexOf("Rice (2–9, 1–6 in the American) snapped a nine-game losing streak with its first conference win of the season while Temple (2–9, 1–6) lost its sixth straight (Rice Athletics)") >= 0,
    "spotlight reports Thursday's Philadelphia Final: Rice beat Temple 31-27, erasing a 27-17 fourth-quarter deficit as Crayton Jr. converted two fourth-and-10s and hit Brown for the 30-yard winner with six seconds left after Ochoa's 9-yard TD to Mosey at 1:55, Hardeman's career-high 137 rushing yards, Rice 2-9 snapping a nine-game skid and Temple 2-9 losing a sixth straight (Rice Athletics)");
-ok(band.indexOf("College football's next slate is tonight's Friday night card — Iowa St. vs UCF, Bowling Green vs Toledo and Clemson vs Duke head the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is tonight's Friday night card — Iowa St. vs UCF, Bowling Green vs Toledo and Clemson vs Duke head the Kalshi NCAAF board") === -1 &&
    band.indexOf("Week 12 opens Thursday night, Nov 19, with Indianapolis at Houston") === -1 &&
    band.indexOf("College football's Thursday slate is Final now too") >= 0,
-   "spotlight names tonight's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke) as the next college slate, reports Thursday's slate as Final and no longer frames Week 12 as opening Thursday night");
+   "spotlight named that night's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke) as the next college slate on Nov 20 — the card settled that night and is now reported as Finals (detailed pins in the Nov 21 block below) — reports Thursday's slate as Final and no longer frames Week 12 as opening Thursday night");
+/* The Nov 21 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
+   18:54Z NCAAF) settles Friday night's six-game college
+   card — Iowa St. at UCF, Bowling Green at Toledo,
+   Clemson at Duke, Oregon at Michigan St., UTEP at Air
+   Force and New Mexico at Wyoming all drop out; today's
+   Saturday card (96 games occ Nov 21, headed by Albany
+   vs North Carolina A&T, Cornell vs Columbia and
+   Duquesne vs Central Connecticut St., all occ Nov 21
+   20:00Z) heads the NCAAF board and Sunday's NFL slate
+   (Arizona vs Kansas City first, occ Nov 22 21:00Z)
+   still heads the NFL board. The Finals (all
+   cross-checked): UCF beat Iowa St. 48-17 at Acrisure
+   Bounce House (UCF Athletics / AP) — Barnett III
+   17-of-27 for 255 yards and four TDs, three to Derry
+   (21, 65, 24 yards; Derry 4 catches for 125 yards,
+   first UCF receiver with three TD catches in a game
+   since Jacob Harris vs South Florida in 2020), plus a
+   15-yard rushing TD; Watson 113 rushing yards; UCF
+   forced four turnovers worth 21 points after Iowa St.
+   led 3-0 early; UCF 6-5 (4-4 Big 12), bowl-eligible
+   for the first time since 2023, Iowa St. 5-6 (3-5).
+   Toledo beat Bowling Green 19-0 at the Glass Bowl
+   (Toledo Athletics / AP) — Battle of I-75; Griffith's
+   career-high four FGs (46, 30, 39, 42), Richter
+   14-of-24 for 191 yards and the 35-yard TD to Dabbs
+   in the final minute of the first half (16-0 at the
+   half), 10 TFL and three sacks, BGSU one red-zone
+   trip; Toledo's first shutout of BGSU since 1970 and
+   first back-to-back shutouts since 1981; Toledo 9-2
+   (6-1 MAC), fifth straight win, series 44-43-4, first
+   Battle of I-75 win since 2023; BGSU 3-8 (3-4).
+   Clemson beat Duke 20-10 at Wallace Wade Stadium (AP)
+   — Pearman 164 passing yards and 51 rushing in his
+   first career start with a 9-yard TD run (10-0 in the
+   third), Denson 16 carries for 71 yards and a 7-yard
+   TD (17-7 midway through the fourth), Clemson held
+   Duke to 247 total yards, Sheppard 116 rushing yards
+   with a 55-yard TD, Hauser's 39-yard FG clinched it
+   with 1:01 left; Clemson 7-4 (5-3 ACC), Duke 7-4
+   (4-4) with a second straight loss. No. 14 Oregon
+   beat Michigan St. 45-7 at Spartan Stadium (AP / NBC
+   Sports) — Smith's career-high 121 rushing yards and
+   two TDs, Hurych's 15-yard fake-field-goal TD run
+   with two seconds left in the first half; Oregon 8-3
+   (6-2 Big Ten), fourth straight win, Michigan St.
+   3-8 (1-7). Air Force beat UTEP 52-3 at Falcon
+   Stadium (AP / UTEP Athletics) — 429 rushing yards,
+   586 total on 64 attempts, Medders two TD passes and
+   Martin one (three of four completions for TDs),
+   first downs 27-6, first meeting since 1995; Air
+   Force 9-2 (5-2), UTEP 1-10 (0-7). New Mexico beat
+   Wyoming 24-17 at War Memorial Stadium (7220 Sports /
+   Wyoming News) — Lobos led 17-0 in the second quarter
+   and 24-7 after three, 433-188 yardage and 38:01
+   possession, Wyoming's 10 fourth-quarter points too
+   late; New Mexico 9-2 (6-1 Mountain West), first win
+   in Laramie since 2021, Wyoming 7-4 (6-2) with a
+   five-game win streak snapped and its chance to host
+   the conference championship gone. NFL state: 28
+   games, 7 moves, 0 new, 0 dropped (set-diff
+   verified). MLB state: 0 games. NCAAF state: 177
+   games, 189 moves, 0 new, exactly the Friday six
+   dropped (set-diff verified). History: 2,316 tickers,
+   max 41 points, 35,758 total points (35,348 + 56 NFL
+   + 0 MLB + 354 NCAAF = exactly one append per priced
+   market, verified against the pre-fetch backup; the
+   /tmp backup was lost to a mid-run service restart
+   after the NFL/MLB fetches landed, so the NCAAF fetch
+   was re-run once from a durable backup — its first
+   attempt never wrote). The band stays in its
+   Nov 16-Nov 23 window (no roll — Week 12 is the
+   band's slate): it reports all six Friday Finals and
+   names today's Saturday card; the stale tonight's-
+   Friday-card framing is banned below. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20ISUUCF") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20BGSUTOL") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20CLEMDUKE") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20OREMSU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20UTEPAFA") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV20UNMWYO") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21ALBYNCAT") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21CORCLMB") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21DUQCCSU") >= 0,
+   "kalshi snapshots settle Friday night's six games (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke, Oregon/Michigan St., UTEP/Air Force, New Mexico/Wyoming gone) and head the NCAAF board with today's Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.), with Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head");
+ok(band.indexOf("UCF beat Iowa St. 48–17 (Final) at Acrisure Bounce House in Orlando") >= 0 &&
+   band.indexOf("Alonza Barnett III threw for 255 yards and four touchdowns, three of them to Josh Derry (21, 65 and 24 yards)") >= 0 &&
+   band.indexOf("the first UCF receiver with three touchdown catches in a game since Jacob Harris against South Florida in 2020") >= 0 &&
+   band.indexOf("UCF's defense forced four turnovers that became 21 points") >= 0 &&
+   band.indexOf("UCF (6–5, 4–4 in the Big 12) became bowl-eligible for the first time since 2023") >= 0 &&
+   band.indexOf("Iowa St. fell to 5–6 (3–5) in its final road game of the season (UCF Athletics / AP)") >= 0,
+   "spotlight reports Friday's Orlando Final: UCF beat Iowa St. 48-17, Barnett III 255 yards and four TDs (three to Derry), Derry the first UCF receiver with three TD catches in a game since 2020, four forced turnovers worth 21 points, UCF 6-5 bowl-eligible for the first time since 2023 and Iowa St. 5-6 (UCF Athletics / AP)");
+ok(band.indexOf("Toledo beat Bowling Green 19–0 (Final) at the Glass Bowl in Toledo in the Battle of I-75") >= 0 &&
+   band.indexOf("Reice Griffith kicked a career-high four field goals (46, 30, 39 and 42 yards)") >= 0 &&
+   band.indexOf("John Alan Richter finished 14-of-24 for 191 yards in his first rivalry start and hit Adjatay Dabbs for a 35-yard touchdown in the final minute of the first half to make it 16–0") >= 0 &&
+   band.indexOf("Toledo's first shutout of Bowling Green since a 20–0 win in 1970") >= 0 &&
+   band.indexOf("Toledo (9–2, 6–1 in the MAC) won its fifth straight to stay tied atop the MAC and take a 44–43–4 lead in the 91-game series") >= 0 &&
+   band.indexOf("Bowling Green fell to 3–8 (3–4) (Toledo Athletics / AP)") >= 0,
+   "spotlight reports Friday's Battle of I-75 Final: Toledo beat Bowling Green 19-0, Griffith's career-high four FGs, Richter 191 yards and the 35-yard Dabbs TD for 16-0 at the half, Toledo's first shutout of BGSU since 1970, Toledo 9-2 atop the MAC with a 44-43-4 series lead and BGSU 3-8 (Toledo Athletics / AP)");
+ok(band.indexOf("Clemson beat Duke 20–10 (Final) at Wallace Wade Stadium in Durham") >= 0 &&
+   band.indexOf("walk-on Trent Pearman threw for 164 yards and ran for 51 more in his first career start, scoring on a 9-yard run for a 10–0 third-quarter lead") >= 0 &&
+   band.indexOf("Chris Denson ran 16 times for 71 yards and scored from the 7 for a 17–7 lead midway through the fourth") >= 0 &&
+   band.indexOf("Clemson's defense held Duke to 247 total yards") >= 0 &&
+   band.indexOf("Nolan Hauser's 39-yard field goal clinched it with 1:01 left") >= 0 &&
+   band.indexOf("Clemson (7–4, 5–3 in the ACC) closed its conference schedule with a birthday win for Dabo Swinney, and Duke (7–4, 4–4) lost its second straight on Senior Night (AP)") >= 0,
+   "spotlight reports Friday's Durham Final: Clemson beat Duke 20-10, Pearman's 164 passing yards and 9-yard TD run in his first career start, Denson's 71 yards and 7-yard TD, Duke held to 247 total yards, Hauser's 39-yard clincher with 1:01 left, Clemson 7-4 and Duke 7-4 with a second straight loss (AP)");
+ok(band.indexOf("No. 14 Oregon beat Michigan St. 45–7 (Final) at Spartan Stadium in East Lansing") >= 0 &&
+   band.indexOf("Brandon Smith set career highs with 121 rushing yards and two touchdowns as an injury replacement at featured back") >= 0 &&
+   band.indexOf("kicker Gage Hurych ran for a 15-yard touchdown on a fake field goal with two seconds left in the first half") >= 0 &&
+   band.indexOf("Oregon (8–3, 6–2 in the Big Ten) won its fourth straight to keep its College Football Playoff hopes alive while Michigan St. fell to 3–8 (1–7) (AP / NBC Sports)") >= 0,
+   "spotlight reports Friday's East Lansing Final: No. 14 Oregon beat Michigan St. 45-7, Smith's career-high 121 yards and two TDs, Hurych's 15-yard fake-field-goal TD, Oregon 8-3 with a fourth straight win and Michigan St. 3-8 (AP / NBC Sports)");
+ok(band.indexOf("Air Force beat UTEP 52–3 (Final) at Falcon Stadium") >= 0 &&
+   band.indexOf("the Falcons ran for 429 yards and piled up 586 total yards on 64 rushing attempts") >= 0 &&
+   band.indexOf("Evan Medders threw two touchdown passes and Maguire Martin one as three of Air Force's four completions went for touchdowns") >= 0 &&
+   band.indexOf("Air Force (9–2, 5–2) won on Senior Night in the schools' first meeting since 1995, when both were in the Western Athletic Conference; UTEP fell to 1–10 (0–7) (AP / UTEP Athletics)") >= 0,
+   "spotlight reports Friday's Falcon Stadium Final: Air Force beat UTEP 52-3, 429 rushing yards and 586 total on 64 attempts, three of four completions for TDs (Medders two, Martin one), Air Force 9-2 in the schools' first meeting since 1995 and UTEP 1-10 (AP / UTEP Athletics)");
+ok(band.indexOf("New Mexico beat Wyoming 24–17 (Final) at War Memorial Stadium in Laramie") >= 0 &&
+   band.indexOf("the Lobos led 17–0 in the second quarter and 24–7 after three, outgained Wyoming 433–188 and held the ball for 38:01") >= 0 &&
+   band.indexOf("New Mexico (9–2, 6–1 in the Mountain West) won in Laramie for the first time since 2021 to sit atop the Mountain West") >= 0 &&
+   band.indexOf("Wyoming (7–4, 6–2) saw its five-game winning streak snapped and its chance to host the conference championship game end with the loss (7220 Sports / Wyoming News)") >= 0,
+   "spotlight reports Friday's Laramie Final: New Mexico beat Wyoming 24-17, 17-0 and 24-7 leads with a 433-188 yardage edge and 38:01 of possession, New Mexico 9-2 atop the Mountain West with its first Laramie win since 2021 and Wyoming 7-4 with its five-game streak snapped (7220 Sports / Wyoming News)");
+ok(band.indexOf("College football's next slate is today's Saturday card — Albany vs North Carolina A&T, Cornell vs Columbia and Duquesne vs Central Connecticut St. head the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("College football's Friday night card is Final now too") >= 0 &&
+   band.indexOf("College football's next slate is tonight's Friday night card") === -1,
+   "spotlight names today's Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.) as the next college slate, reports Friday's card as Final and no longer frames the settled Friday card as tonight's slate");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
