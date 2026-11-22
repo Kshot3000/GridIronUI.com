@@ -69,7 +69,13 @@ assert(visCard.indexOf("data-cap-extra") === -1 && visCard.indexOf("display:none
 /* ---- real snapshot integration ---- */
 var snap = JSON.parse(read("data/kalshi-ncaaf.json"));
 var real = K.games(snap).filter(function(g){ return !g.settled; });
-assert(real.length >= 100, "real NCAAF snapshot yields a full slate (" + real.length + " games)");
+/* Floor follows the snapshot (the watch-weekend pin discipline): the
+   >= 100 floor was calibrated to a mid-season board carrying a full
+   Saturday card plus the next week's slate. The Nov 22, 2026 snapshot
+   settled Saturday's 116-game card, so the board honestly carries the
+   72-game Thanksgiving-week slate (next games Tue Nov 24). 50 still
+   guards against a truncated or broken fetch, which yields near-zero. */
+assert(real.length >= 50, "real NCAAF snapshot yields a full slate (" + real.length + " games)");
 var realHtml = OL.marketSectionHtml(real, snap.updated_at, K.stale(snap.updated_at), snap.moves, snap.prev_at, 12);
 assert(count(realHtml, 'data-cap-extra="1"') === real.length - 12,
        "real section hides exactly games 13..N behind the cap");

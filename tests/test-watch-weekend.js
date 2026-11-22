@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Joe Burrow threw for 409 yards and four touchdowns as Cincinnati routed Pittsburgh 38–18 on Sunday night") >= 0 &&
-   band.indexOf("the first 38–18 final in NFL history") >= 0,
-   "spotlight headlines Sunday night's result: Burrow's 409 yards and four TDs as Cincinnati routed Pittsburgh 38-18 to take sole possession of first place in the AFC North, the first 38-18 final in NFL history (this pin held the Nov 15 Texas headline — Manning's 4-yard TD to Brown with three seconds left as No. 8 Texas rallied from 11 down to beat No. 22 LSU 22-21 at Tiger Stadium, the Longhorns' first win in Baton Rouge since 1952 — which rolled to the Burrow night on Nov 16; the Texas result stays pinned as a body result in the Nov 15 block below)");
+ok(band.indexOf("Michigan toppled unbeaten No. 4 UCLA 18–16 in triple overtime at the Big House on Saturday") >= 0 &&
+   band.indexOf("Bryce Underwood's two-point conversion pass to Jalen Hoffman won it after the Bruins had tied the game with 10 seconds left in regulation") >= 0,
+   "spotlight headlines Saturday's upset: Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation (this pin held the Nov 16 Burrow headline — 409 yards and four TDs as Cincinnati routed Pittsburgh 38-18 on Sunday night, the first 38-18 final in NFL history — which rolled to the Michigan upset on Nov 22; the Burrow result stays pinned as a body result in the Nov 16 block below)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1693,8 +1693,8 @@ ok(band.indexOf("College football's Saturday slate takes over today, Nov 14") ==
      "kalshi-nfl.json settles Sunday's Week 11 game (" + t + " gone)");
 });
 ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21VTMIA") >= 0,
-   "kalshi snapshots settle the Week 11 closer (the Los Angeles Chargers at Baltimore gone — this pin kept it on Nov 16; Los Angeles won 23-20 (Final) and the settlement is pinned in the Nov 17 block below) and keep the one new NCAAF game added Nov 16 (Virginia Tech vs Miami, Nov 21)");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21VTMIA") === -1,
+   "kalshi snapshots settle the Week 11 closer (the Los Angeles Chargers at Baltimore gone — this pin kept it on Nov 16; Los Angeles won 23-20 (Final) and the settlement is pinned in the Nov 17 block below) and settle the one new NCAAF game added Nov 16 (Virginia Tech vs Miami, kicked off late Saturday night Nov 21 and gone in the Nov 22 snapshot)");
 ok(band.indexOf("Cincinnati beat Pittsburgh 38–18 on Sunday night (Final) at Paycor Stadium") >= 0 &&
    band.indexOf("Burrow was 35-of-44 for 409 yards and four touchdowns") >= 0 &&
    band.indexOf("Ja'Marr Chase caught 11 passes for 231 yards") >= 0 &&
@@ -1879,9 +1879,8 @@ ok(band.indexOf("Miami (OH) beat Kent St. 20–3 (Final) at Dix Stadium in Kent"
    band.indexOf("Miami's defense held Kent St. to 31 rushing yards and 170 total yards, scoreless over the final 51 minutes") >= 0,
    "spotlight reports Tuesday's Kent Final: Miami (OH) beat Kent St. 20-3, 58 carries for 301 yards and nearly 39 minutes of possession, Jones 121 yards and two 1-yard TDs, Bellisari 124 passing yards and a 23-yard TD run in his first career start, Kent St. held to 31 rushing yards and scoreless over the final 51 minutes (Miami Athletics)");
 ok(band.indexOf("College football's next slate is tonight's MACtion pair — Akron vs UMass and Central Michigan vs Buffalo head the Kalshi NCAAF board") === -1 &&
-   band.indexOf("College football's next slate is Tuesday night's MACtion") === -1 &&
    band.indexOf("Ball St. vs Ohio, Eastern Michigan vs Western Michigan and Miami (OH) vs Kent St. head the Kalshi NCAAF board") === -1,
-   "spotlight named that night's MACtion pair (Akron vs UMass, Central Michigan vs Buffalo) as the next college slate on Nov 18 — the pair settled that night and is now reported as Finals (detailed pins in the Nov 19 block below) — and no longer frames the settled Tuesday trio as the next slate");
+   "spotlight named that night's MACtion pair (Akron vs UMass, Central Michigan vs Buffalo) as the next college slate on Nov 18 — the pair settled that night and is now reported as Finals (detailed pins in the Nov 19 block below) — and no longer frames the settled Tuesday trio as the next slate (the generic Tuesday-night's-MACtion framing this pin once banned returned legitimately on Nov 22 for the new Nov 24 pair, Miami (OH)/Western Michigan and Kent St./Eastern Michigan, pinned in the Nov 22 block below)");
 /* The Nov 19 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
    18:53Z NCAAF) settles Wednesday night's MACtion pair —
    Akron at UMass and Central Michigan at Buffalo both
@@ -2135,10 +2134,10 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20OREMSU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20UTEPAFA") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20UNMWYO") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21ALBYNCAT") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21CORCLMB") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21DUQCCSU") >= 0,
-   "kalshi snapshots settle Friday night's six games (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke, Oregon/Michigan St., UTEP/Air Force, New Mexico/Wyoming gone) and head the NCAAF board with today's Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.), with Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21ALBYNCAT") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21CORCLMB") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21DUQCCSU") === -1,
+   "kalshi snapshots settle Friday night's six games (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke, Oregon/Michigan St., UTEP/Air Force, New Mexico/Wyoming gone) and headed the NCAAF board with the Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.) — the card this pin kept on Nov 21 settled that night (Michigan won 18-16 in triple overtime, Georgia won 34-6, Utah won 38-17) and its settlement is pinned in the Nov 22 block below; Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head");
 ok(band.indexOf("UCF beat Iowa St. 48–17 (Final) at Acrisure Bounce House in Orlando") >= 0 &&
    band.indexOf("Alonza Barnett III threw for 255 yards and four touchdowns, three of them to Josh Derry (21, 65 and 24 yards)") >= 0 &&
    band.indexOf("the first UCF receiver with three touchdown catches in a game since Jacob Harris against South Florida in 2020") >= 0 &&
@@ -2175,10 +2174,131 @@ ok(band.indexOf("New Mexico beat Wyoming 24–17 (Final) at War Memorial Stadium
    band.indexOf("New Mexico (9–2, 6–1 in the Mountain West) won in Laramie for the first time since 2021 to sit atop the Mountain West") >= 0 &&
    band.indexOf("Wyoming (7–4, 6–2) saw its five-game winning streak snapped and its chance to host the conference championship game end with the loss (7220 Sports / Wyoming News)") >= 0,
    "spotlight reports Friday's Laramie Final: New Mexico beat Wyoming 24-17, 17-0 and 24-7 leads with a 433-188 yardage edge and 38:01 of possession, New Mexico 9-2 atop the Mountain West with its first Laramie win since 2021 and Wyoming 7-4 with its five-game streak snapped (7220 Sports / Wyoming News)");
-ok(band.indexOf("College football's next slate is today's Saturday card — Albany vs North Carolina A&T, Cornell vs Columbia and Duquesne vs Central Connecticut St. head the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is today's Saturday card — Albany vs North Carolina A&T, Cornell vs Columbia and Duquesne vs Central Connecticut St. head the Kalshi NCAAF board") === -1 &&
    band.indexOf("College football's Friday night card is Final now too") >= 0 &&
    band.indexOf("College football's next slate is tonight's Friday night card") === -1,
-   "spotlight names today's Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.) as the next college slate, reports Friday's card as Final and no longer frames the settled Friday card as tonight's slate");
+   "spotlight named the Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.) as the next college slate on Nov 21 — the card settled that night and is now reported as Finals (detailed pins in the Nov 22 block below) — reports Friday's card as Final and no longer frames the settled Friday card as tonight's slate");
+/* The Nov 22 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
+   18:50Z NCAAF) settles Saturday's 116-game college card
+   — the 96 games occ Nov 21 plus the 20 late kickoffs occ
+   Nov 22 00:00-06:30Z all drop out; Tuesday night's
+   MACtion pair (Miami (OH) vs Western Michigan, occ
+   Nov 24 23:00Z, and Kent St. vs Eastern Michigan, occ
+   Nov 25 03:00Z) heads the NCAAF board and Sunday's NFL
+   slate (Arizona vs Kansas City first, occ Nov 22
+   21:00Z) still heads the NFL board. NFL state: 28
+   games, 26 moves, 0 new. NCAAF state: 72 games, 91
+   moves, 11 new. The Finals (all cross-checked):
+   Michigan beat No. 4 UCLA 18-16 in triple overtime at
+   Michigan Stadium (AP / UCLA Athletics) — Underwood's
+   6-yard TD to Bonner early in the fourth for 10-3,
+   Woods' 1-yard jump pass to Loftin with 10 seconds
+   left tied it at the end of a 15-play, 77-yard drive,
+   field goals traded through two overtimes, UCLA's
+   two-point try failed in the third and Underwood hit
+   Hoffman for the winner; Michigan held UCLA to 296
+   yards and a season-low 107 rushing and won turnovers
+   3-1; Michigan 6-5 (3-5 Big Ten) bowl-eligible, UCLA
+   10-1 (7-1) with its first loss and a missed Big Ten
+   title-game clinch. No. 1 Georgia beat No. 21 South
+   Carolina 34-6 at Williams-Brice Stadium (AP) — SC
+   led 6-3 in the second quarter, Georgia scored 31
+   unanswered: Frazier 94 yards and two TDs, Stockton
+   281 yards and a 14-yard TD to Dandridge Jr., Georgia
+   held SC to 118 yards over the final three quarters;
+   Georgia 10-1 (8-1 SEC) clinched the SEC title game
+   with a record sixth straight appearance, SC 6-5
+   (4-5). No. 2 Utah beat TCU 38-17 at Amon G. Carter
+   Stadium (AP) — Utah led 17-0, TCU tied it 17-17 on
+   Lemmerman's 32-yard FG with 9:26 left, then 21
+   unanswered: Andrews' 2-yard TD with 5:46 left,
+   Dampier's 85-yard TD pass and 10-yard scoring run
+   (68-yard TD pass before halftime); Utah 11-0 (8-0
+   Big 12), 17th straight win, the nation's only
+   unbeaten team, Big 12 title game clinched; TCU 5-6
+   (3-5). No. 9 Tennessee beat LSU 27-13 at Neyland
+   Stadium (AP / Tennessee Athletics) — LSU led 6-0 on
+   two first-quarter FGs, Tennessee outscored them 27-7
+   from there: Brandon 112 rushing yards and two
+   fourth-quarter TDs including the 55-yarder with 4:13
+   left, eight sacks of Leavitt, LSU held to 265 yards;
+   Tennessee 9-2 (6-2 SEC), first home win over LSU
+   since 2001; LSU 6-5 (3-5), third straight loss in
+   Kiffin's return to Neyland. Nebraska beat No. 14
+   Ohio St. 31-28 at Memorial Stadium (USA Today /
+   theScore) — Colandrea 200 passing yards and three
+   TDs plus a rushing score, the 26-yard TD to Clark
+   made it 31-21 with 7:41 left after an Ohio St.
+   interception, both Buckeye giveaways became TDs and
+   Nebraska committed none; Nebraska 7-4 (4-4 Big Ten)
+   snapped a 31-game losing streak vs AP Top 25 dating
+   to 2016, Ohio St. 7-4 (5-3) with its Big Ten title
+   and CFP hopes over. No. 8 Texas beat Arkansas 45-3
+   at Darrell K Royal-Texas Memorial Stadium (AP /
+   Texas Athletics) — Manning 21-of-25 for 287 yards
+   and two TDs with a 3-yard scoring run and no
+   turnovers before sitting the fourth, TD passes to
+   Winston (21 yards) and Mosley V (17 yards) in the
+   final 2:20 of the first half built the 31-3 halftime
+   lead, the Longhorns' biggest of the season; Texas
+   9-2 (6-2 SEC), fifth straight win; Arkansas 4-7
+   (2-6), no TD for the first time in 41 games, bowl
+   eligibility gone. The band (same Nov 16-Nov 23
+   window) now headlines the Michigan upset, reports
+   Saturday's slate as Final, and names Tuesday's
+   MACtion as the next college slate. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21ALBYNCAT") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21CORCLMB") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV21DUQCCSU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0,
+   "kalshi snapshots settle Saturday's 116-game college card (the Albany/North Carolina A&T, Cornell/Columbia and Duquesne/Central Connecticut St. headliners gone) and head the NCAAF board with Tuesday night's MACtion pair (Miami (OH)/Western Michigan, Kent St./Eastern Michigan), with Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head");
+ok(band.indexOf("Michigan beat No. 4 UCLA 18–16 in triple overtime (Final) at Michigan Stadium in Ann Arbor") >= 0 &&
+   band.indexOf("Michigan led 10–3 after Bryce Underwood's 6-yard touchdown pass to Mason Bonner early in the fourth quarter") >= 0 &&
+   band.indexOf("UCLA forced overtime at the end of a 15-play, 77-yard drive on Anthony Woods' 1-yard jump pass to Brayden Loftin with 10 seconds left in regulation") >= 0 &&
+   band.indexOf("after UCLA's two-point try failed in the third overtime, Underwood found Jalen Hoffman for the winning two-point conversion") >= 0 &&
+   band.indexOf("Michigan's defense held the Bruins to 296 total yards and a season-low 107 rushing yards and won the turnover battle 3–1") >= 0 &&
+   band.indexOf("UCLA (10–1, 7–1) lost for the first time and missed its chance to clinch a Big Ten championship game spot (AP / UCLA Athletics)") >= 0,
+   "spotlight reports Saturday's Ann Arbor Final: Michigan beat No. 4 UCLA 18-16 in triple overtime, Underwood's 6-yard TD to Bonner for 10-3, Woods' 1-yard jump pass to Loftin with 10 seconds left tying it after a 15-play 77-yard drive, Hoffman's winning two-point conversion in the third overtime, UCLA held to 296 yards and a season-low 107 rushing with turnovers 3-1, Michigan 6-5 bowl-eligible and UCLA 10-1 with a first loss (AP / UCLA Athletics)");
+ok(band.indexOf("No. 1 Georgia beat No. 21 South Carolina 34–6 (Final) at Williams-Brice Stadium in Columbia") >= 0 &&
+   band.indexOf("South Carolina led 6–3 in the second quarter before Georgia scored 31 unanswered points") >= 0 &&
+   band.indexOf("Nate Frazier ran for 94 yards and two touchdowns, Gunnar Stockton threw for 281 yards and a 14-yard touchdown to Craig Dandridge Jr.") >= 0 &&
+   band.indexOf("Georgia's defense held the Gamecocks to 118 yards over the final three quarters") >= 0 &&
+   band.indexOf("Georgia (10–1, 8–1 in the SEC) clinched a spot in the SEC championship game with a record sixth straight appearance") >= 0 &&
+   band.indexOf("South Carolina fell to 6–5 (4–5) (AP)") >= 0,
+   "spotlight reports Saturday's Columbia Final: No. 1 Georgia beat No. 21 South Carolina 34-6, 31 unanswered after a 6-3 deficit, Frazier 94 yards and two TDs, Stockton 281 yards and the 14-yard TD to Dandridge Jr., South Carolina held to 118 yards over the final three quarters, Georgia 10-1 into the SEC title game with a record sixth straight appearance and South Carolina 6-5 (AP)");
+ok(band.indexOf("No. 2 Utah beat TCU 38–17 (Final) at Amon G. Carter Stadium in Fort Worth") >= 0 &&
+   band.indexOf("Utah led 17–0 before TCU tied it 17–17 on Kyle Lemmerman's 32-yard field goal with 9:26 left") >= 0 &&
+   band.indexOf("Hunter Andrews' 2-yard touchdown run with 5:46 left snapping the tie") >= 0 &&
+   band.indexOf("Devon Dampier — who had thrown a 68-yard touchdown pass before halftime — threw an 85-yard touchdown pass and ran for a 10-yard score") >= 0 &&
+   band.indexOf("Utah (11–0, 8–0 in the Big 12) won its 17th straight, stayed the nation's only unbeaten team and clinched a Big 12 championship game spot") >= 0 &&
+   band.indexOf("TCU fell to 5–6 (3–5) (AP)") >= 0,
+   "spotlight reports Saturday's Fort Worth Final: No. 2 Utah beat TCU 38-17, TCU tying 17-17 on Lemmerman's 32-yard FG with 9:26 left before 21 unanswered Ute points, Andrews' 2-yard tiebreaker with 5:46 left, Dampier's 68-yard and 85-yard TD passes and 10-yard scoring run, Utah 11-0 with a 17th straight win as the nation's only unbeaten team and a Big 12 title game spot, TCU 5-6 (AP)");
+ok(band.indexOf("No. 9 Tennessee beat LSU 27–13 (Final) at Neyland Stadium in Knoxville") >= 0 &&
+   band.indexOf("LSU led 6–0 on two first-quarter field goals, but Tennessee outscored the Tigers 27–7 the rest of the way") >= 0 &&
+   band.indexOf("freshman Faizon Brandon, who ran for 112 yards and two fourth-quarter touchdowns including the 55-yarder with 4:13 left") >= 0 &&
+   band.indexOf("a defense that sacked Sam Leavitt eight times and held LSU to 265 total yards") >= 0 &&
+   band.indexOf("Tennessee (9–2, 6–2 in the SEC) beat LSU at home for the first time since 2001") >= 0 &&
+   band.indexOf("LSU (6–5, 3–5) lost its third straight in Lane Kiffin's return to Neyland Stadium (AP / Tennessee Athletics)") >= 0,
+   "spotlight reports Saturday's Knoxville Final: No. 9 Tennessee beat LSU 27-13, outscoring the Tigers 27-7 after a 6-0 deficit, Brandon's 112 rushing yards and two fourth-quarter TDs including the 55-yarder with 4:13 left, eight sacks of Leavitt and LSU held to 265 yards, Tennessee 9-2 with its first home win over LSU since 2001 and LSU 6-5 with a third straight loss (AP / Tennessee Athletics)");
+ok(band.indexOf("Nebraska beat No. 14 Ohio St. 31–28 (Final) at Memorial Stadium in Lincoln") >= 0 &&
+   band.indexOf("Anthony Colandrea threw for 200 yards and three touchdowns and ran for a fourth score") >= 0 &&
+   band.indexOf("his 26-yard touchdown pass to Quinn Clark made it 31–21 with 7:41 left after an Ohio St. interception") >= 0 &&
+   band.indexOf("Nebraska turned both Buckeye giveaways into touchdowns while committing none of its own") >= 0 &&
+   band.indexOf("Nebraska (7–4, 4–4 in the Big Ten) snapped a 31-game losing streak against AP Top 25 opponents dating to 2016") >= 0 &&
+   band.indexOf("Ohio St. (7–4, 5–3) saw its Big Ten title and College Football Playoff hopes end (USA Today / theScore)") >= 0,
+   "spotlight reports Saturday's Lincoln Final: Nebraska beat No. 14 Ohio St. 31-28, Colandrea's 200 passing yards and three TDs plus a rushing score, the 26-yard TD to Clark for 31-21 with 7:41 left after an interception, both Buckeye giveaways turned into TDs with none committed, Nebraska 7-4 snapping a 31-game losing streak vs the AP Top 25 dating to 2016 and Ohio St. 7-4 with its title and CFP hopes over (USA Today / theScore)");
+ok(band.indexOf("No. 8 Texas beat Arkansas 45–3 (Final) at Darrell K Royal–Texas Memorial Stadium in Austin") >= 0 &&
+   band.indexOf("Arch Manning was 21-of-25 for 287 yards and two touchdowns with a 3-yard scoring run and no turnovers before sitting out the fourth quarter") >= 0 &&
+   band.indexOf("his touchdown passes to Emaree Winston (21 yards) and Emmett Mosley V (17 yards) in the final 2:20 of the first half built a 31–3 halftime lead, the Longhorns' biggest of the season") >= 0 &&
+   band.indexOf("Texas (9–2, 6–2 in the SEC) won its fifth straight") >= 0 &&
+   band.indexOf("Arkansas (4–7, 2–6) went without a touchdown for the first time in 41 games and lost its bowl eligibility (AP / Texas Athletics)") >= 0,
+   "spotlight reports Saturday's Austin Final: No. 8 Texas beat Arkansas 45-3, Manning 21-of-25 for 287 yards and two TDs with a 3-yard scoring run and no turnovers, the Winston (21 yards) and Mosley V (17 yards) TDs in the final 2:20 of the half building a 31-3 lead, Texas 9-2 with a fifth straight win and Arkansas 4-7 without a TD for the first time in 41 games (AP / Texas Athletics)");
+ok(band.indexOf("College football's next slate is Tuesday night's MACtion — Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("College football's Saturday slate is Final now too") >= 0 &&
+   band.indexOf("College football's next slate is today's Saturday card") === -1,
+   "spotlight names Tuesday night's MACtion (Miami (OH)/Western Michigan, Kent St./Eastern Michigan) as the next college slate, reports Saturday's card as Final and no longer frames the settled Saturday card as today's slate");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
