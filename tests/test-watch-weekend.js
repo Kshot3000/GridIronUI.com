@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Michigan toppled unbeaten No. 4 UCLA 18–16 in triple overtime at the Big House on Saturday") >= 0 &&
-   band.indexOf("Bryce Underwood's two-point conversion pass to Jalen Hoffman won it after the Bruins had tied the game with 10 seconds left in regulation") >= 0,
-   "spotlight headlines Saturday's upset: Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation (this pin held the Nov 16 Burrow headline — 409 yards and four TDs as Cincinnati routed Pittsburgh 38-18 on Sunday night, the first 38-18 final in NFL history — which rolled to the Michigan upset on Nov 22; the Burrow result stays pinned as a body result in the Nov 16 block below)");
+ok(band.indexOf("San Francisco dismantled Minnesota 35–10 on Sunday night in Mexico City") >= 0 &&
+   band.indexOf("Brock Purdy's three touchdown passes hung 35 points on the league's stingiest defense and kept the 49ers alone atop the NFC at 9–1") >= 0,
+   "spotlight headlines Sunday night's rout: San Francisco dismantled Minnesota 35-10 in Mexico City, Purdy's three TD passes hanging 35 points on the league's stingiest defense with the 49ers alone atop the NFC at 9-1 (this pin held the Nov 22 Michigan headline — Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation — which rolled to the 49ers rout on Nov 23; the Michigan result stays pinned as a body result in the Nov 22 block below, and the Nov 16 Burrow headline it replaced stays pinned there)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1733,9 +1733,9 @@ ok(band.indexOf("Oklahoma beat No. 19 Ole Miss 24–17 (Final) on Sunday at Gayl
    band.indexOf("the Rebels (6–4, 4–4) lost their second straight despite outgaining Oklahoma 307–299 (AP / The Oklahoman)") >= 0,
    "spotlight reports the moved game's result: Oklahoma beat No. 19 Ole Miss 24-17 (Final) in Norman, Sategna's 75-yard punt-return TD in a 14-0 first quarter, Mateer's 181 yards of offense, Chambliss's Hail Mary batted down as time expired, Ole Miss 6-4 (4-4) despite a 307-299 yardage edge (AP / The Oklahoman)");
 ok(band.indexOf("Week 12 opened Thursday night in Houston, where Houston beat Indianapolis 26–3 (Final) at Reliant Stadium") >= 0 &&
-   band.indexOf("Week 12 runs through Monday night, Nov 23, when Cincinnati visits Washington — Sunday night is Minnesota at San Francisco") >= 0 &&
+   band.indexOf("Week 12 closes tonight, Monday night, Nov 23, when Cincinnati visits Washington") >= 0 &&
    band.indexOf("Kalshi Week 12 prices") >= 0,
-   "spotlight names the new window's slate: Week 12 opened Thursday night, Nov 19 in Houston (Houston beat Indianapolis 26-3, Final — detailed pins in the Nov 20 block below) and runs through Monday night, Nov 23 (Cincinnati at Washington), Sunday night Minnesota at San Francisco, and links the Week 12 Kalshi prices");
+   "spotlight names the new window's slate: Week 12 opened Thursday night, Nov 19 in Houston (Houston beat Indianapolis 26-3, Final — detailed pins in the Nov 20 block below) and closes tonight, Monday night, Nov 23 (Cincinnati at Washington) — this pin kept the runs-through framing with Sunday night (Minnesota at San Francisco) as a fixture until Nov 23, when Sunday's slate settled (San Francisco won 35-10, Final) and its settlement is pinned in the Nov 23 block below — and links the Week 12 Kalshi prices");
 ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three seconds left as No. 8 Texas rallied from 11 down") === -1 &&
    band.indexOf("Sunday night is Pittsburgh vs Cincinnati") === -1 &&
    band.indexOf("under way today, Sunday, Nov 15") === -1 &&
@@ -2013,14 +2013,14 @@ ok(band.indexOf("College football's next slate is tonight's trio") === -1 &&
    Week 12-opens and tonight's-trio framings are
    banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") === -1 &&
-   nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV19NWSTSFA") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV19SELANICH") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV19RICETEM") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20ISUUCF") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20BGSUTOL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20CLEMDUKE") === -1,
-   "kalshi snapshots settle Thursday night's four games (Indianapolis/Houston gone from the NFL board, the Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls and Rice/Temple trio gone from the NCAAF board) and headed the NCAAF board with that night's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke) — the card settled that night (UCF won 48-17, Toledo won 19-0, Clemson won 20-10) and its settlement is pinned in the Nov 21 block below; Sunday's NFL slate (Arizona vs Kansas City) stays at the NFL head");
+   "kalshi snapshots settle Thursday night's four games (Indianapolis/Houston gone from the NFL board, the Northwestern St./Stephen F. Austin, Southeastern Louisiana/Nicholls and Rice/Temple trio gone from the NCAAF board) and headed the NCAAF board with that night's Friday night card (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke) — the card settled that night (UCF won 48-17, Toledo won 19-0, Clemson won 20-10) and its settlement is pinned in the Nov 21 block below; Sunday's NFL slate (Arizona vs Kansas City) stays at the NFL head — the slate settled Sunday (Kansas City won 34-7) and its settlement is pinned in the Nov 23 block below");
 ok(band.indexOf("Houston beat Indianapolis 26–3 (Final) at Reliant Stadium") >= 0 &&
    band.indexOf("C.J. Stroud completed 21 of 27 passes for 194 yards and three touchdowns, a 42-yarder to Nico Collins, a 24-yarder to Kayshon Boutte and a 13-yarder to Marlin Klein") >= 0 &&
    band.indexOf("David Montgomery rushed for 107 yards on 26 carries in his return after missing four games with a groin injury") >= 0 &&
@@ -2127,7 +2127,7 @@ ok(band.indexOf("College football's next slate is tonight's Friday night card �
    band's slate): it reports all six Friday Finals and
    names today's Saturday card; the stale tonight's-
    Friday-card framing is banned below. */
-ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
+ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20ISUUCF") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20BGSUTOL") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV20CLEMDUKE") === -1 &&
@@ -2137,7 +2137,7 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21ALBYNCAT") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21CORCLMB") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21DUQCCSU") === -1,
-   "kalshi snapshots settle Friday night's six games (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke, Oregon/Michigan St., UTEP/Air Force, New Mexico/Wyoming gone) and headed the NCAAF board with the Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.) — the card this pin kept on Nov 21 settled that night (Michigan won 18-16 in triple overtime, Georgia won 34-6, Utah won 38-17) and its settlement is pinned in the Nov 22 block below; Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head");
+   "kalshi snapshots settle Friday night's six games (Iowa St./UCF, Bowling Green/Toledo, Clemson/Duke, Oregon/Michigan St., UTEP/Air Force, New Mexico/Wyoming gone) and headed the NCAAF board with the Saturday card (Albany/North Carolina A&T, Cornell/Columbia, Duquesne/Central Connecticut St.) — the card this pin kept on Nov 21 settled that night (Michigan won 18-16 in triple overtime, Georgia won 34-6, Utah won 38-17) and its settlement is pinned in the Nov 22 block below; Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head — the slate settled Sunday (Kansas City won 34-7) and its settlement is pinned in the Nov 23 block below");
 ok(band.indexOf("UCF beat Iowa St. 48–17 (Final) at Acrisure Bounce House in Orlando") >= 0 &&
    band.indexOf("Alonza Barnett III threw for 255 yards and four touchdowns, three of them to Josh Derry (21, 65 and 24 yards)") >= 0 &&
    band.indexOf("the first UCF receiver with three touchdown catches in a game since Jacob Harris against South Florida in 2020") >= 0 &&
@@ -2247,13 +2247,13 @@ ok(band.indexOf("College football's next slate is today's Saturday card — Alba
    window) now headlines the Michigan upset, reports
    Saturday's slate as Final, and names Tuesday's
    MACtion as the next college slate. */
-ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") >= 0 &&
+ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21ALBYNCAT") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21CORCLMB") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21DUQCCSU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0,
-   "kalshi snapshots settle Saturday's 116-game college card (the Albany/North Carolina A&T, Cornell/Columbia and Duquesne/Central Connecticut St. headliners gone) and head the NCAAF board with Tuesday night's MACtion pair (Miami (OH)/Western Michigan, Kent St./Eastern Michigan), with Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head");
+   "kalshi snapshots settle Saturday's 116-game college card (the Albany/North Carolina A&T, Cornell/Columbia and Duquesne/Central Connecticut St. headliners gone) and head the NCAAF board with Tuesday night's MACtion pair (Miami (OH)/Western Michigan, Kent St./Eastern Michigan), with Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head — the Sunday slate settled the next day (Kansas City won 34-7) and its settlement is pinned in the Nov 23 block below");
 ok(band.indexOf("Michigan beat No. 4 UCLA 18–16 in triple overtime (Final) at Michigan Stadium in Ann Arbor") >= 0 &&
    band.indexOf("Michigan led 10–3 after Bryce Underwood's 6-yard touchdown pass to Mason Bonner early in the fourth quarter") >= 0 &&
    band.indexOf("UCLA forced overtime at the end of a 15-play, 77-yard drive on Anthony Woods' 1-yard jump pass to Brayden Loftin with 10 seconds left in regulation") >= 0 &&
@@ -2299,6 +2299,85 @@ ok(band.indexOf("College football's next slate is Tuesday night's MACtion — Mi
    band.indexOf("College football's Saturday slate is Final now too") >= 0 &&
    band.indexOf("College football's next slate is today's Saturday card") === -1,
    "spotlight names Tuesday night's MACtion (Miami (OH)/Western Michigan, Kent St./Eastern Michigan) as the next college slate, reports Saturday's card as Final and no longer frames the settled Saturday card as today's slate");
+/* The Nov 23 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
+   18:50Z NCAAF) settles Sunday's 11-game NFL slate — all
+   eleven Nov 22 games drop out; tonight's Week 12 closer
+   (Cincinnati at Washington, occ Nov 24 01:15Z) heads the
+   NFL board and Tuesday night's MACtion pair still heads
+   the NCAAF board. NFL state: 17 games, 24 moves, 0 new.
+   NCAAF state: 72 games, 80 moves, 0 new. The Finals
+   (all cross-checked): San Francisco beat Minnesota
+   35-10 on Sunday night at Estadio Banorte in Mexico
+   City (NBC Sports / Vikings) — Purdy 21-of-26 for 255
+   yards and three TDs with no interceptions, 21
+   second-quarter points for a 28-10 halftime lead
+   against a defense that had allowed a league-low 14.5
+   points per game, McCaffrey's 5-yard TD run capped a
+   98-yard drive, Evans six catches for 109 yards with a
+   one-handed TD grab; San Francisco 9-1 atop the NFC,
+   Minnesota 7-3 (Cousins 235 yards and a pick-six before
+   Wentz finished). Kansas City beat Arizona 34-7 at
+   Arrowhead Stadium (Niners Nation) — Mahomes 324 yards
+   and three TDs, two to Kelce, 435 total yards; Arizona
+   3-8 started 40-year-old Josh Johnson with Beck ailing,
+   his 2-yard TD to Fehoko the Cardinals' only score.
+   Carolina beat Baltimore 35-33 at Bank of America
+   Stadium (SI / Tar Heel Tribune) — Baltimore led 12-0
+   after an early safety, then a fumble out of the end
+   zone for a touchback, two muffed punts and four
+   turnovers in a sixth straight loss; Walker's 86-yard
+   kickoff-return TD made it 19-14 Ravens, Hubbard 120
+   yards and two TDs, Young 254 yards and two scores,
+   Fitzgerald's 37-yard FG with 1:44 left won it;
+   Carolina 5-5, Baltimore 4-7. Dallas beat Tennessee
+   51-30 at AT&T Stadium (Bleacher Report) — Prescott
+   28-of-33 for 325 yards and four TDs plus a rushing
+   score, touchdowns on the Cowboys' first six
+   possessions and scores on all eight meaningful drives,
+   the first 51-30 final in NFL history (Scorigami).
+   The rest: Buffalo 26-9 Miami, Detroit 31-21 Tampa
+   Bay, Philadelphia 19-16 Pittsburgh, the Jets 27-24
+   over the Chargers, the Giants 23-18 Jacksonville,
+   Chicago 21-13 New Orleans, Denver 38-24 Las Vegas.
+   The band (same Nov 16-Nov 23 window, its last day)
+   now headlines the 49ers rout, reports Sunday's slate
+   as Final, and frames Week 12 as closing tonight. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV22MINSF") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV22BALCAR") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV22TENDAL") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV23CINWAS") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0,
+   "kalshi snapshots settle Sunday's 11-game NFL slate (Arizona/Kansas City, Minnesota/San Francisco, Baltimore/Carolina and Tennessee/Dallas gone) and head the NFL board with tonight's Week 12 closer (Cincinnati at Washington), with Tuesday night's MACtion pair still heading the NCAAF board");
+ok(band.indexOf("San Francisco beat Minnesota 35–10 (Final) on Sunday night at Estadio Banorte in Mexico City") >= 0 &&
+   band.indexOf("Brock Purdy was 21-of-26 for 255 yards and three touchdowns with no interceptions") >= 0 &&
+   band.indexOf("the 49ers scored 21 points in the second quarter to lead 28–10 at the half against a Minnesota defense that had allowed a league-low 14.5 points per game") >= 0 &&
+   band.indexOf("Christian McCaffrey's 5-yard touchdown run capped a 98-yard drive") >= 0 &&
+   band.indexOf("Mike Evans caught six passes for 109 yards including a one-handed touchdown grab") >= 0 &&
+   band.indexOf("San Francisco (9–1) strengthened its hold on the NFC's top seed while Minnesota (7–3) got 235 passing yards and a pick-six from Kirk Cousins before Carson Wentz finished the game (NBC Sports / Vikings)") >= 0,
+   "spotlight reports Sunday night's Mexico City Final: San Francisco beat Minnesota 35-10, Purdy 21-of-26 for 255 yards and three TDs with no interceptions, 21 second-quarter points for a 28-10 halftime lead against the league-low 14.5-points-allowed defense, McCaffrey's 5-yard TD capping a 98-yard drive, Evans 6-109 with a one-handed TD grab, San Francisco 9-1 atop the NFC and Minnesota 7-3 with Cousins' 235 yards and a pick-six before Wentz finished (NBC Sports / Vikings)");
+ok(band.indexOf("Kansas City beat Arizona 34–7 (Final) at Arrowhead Stadium") >= 0 &&
+   band.indexOf("Patrick Mahomes threw for 324 yards and three touchdowns, two of them to Travis Kelce, the Chiefs (8–2) piled up 435 total yards") >= 0 &&
+   band.indexOf("Arizona (3–8) started 40-year-old Josh Johnson with rookie Carson Beck ailing, its only score his 2-yard touchdown pass to Simi Fehoko in the second quarter (Niners Nation)") >= 0,
+   "spotlight reports Sunday's Arrowhead Final: Kansas City beat Arizona 34-7, Mahomes 324 yards and three TDs with two to Kelce and 435 total yards, Arizona 3-8 starting 40-year-old Josh Johnson with Beck ailing and Fehoko's 2-yard catch the only score (Niners Nation)");
+ok(band.indexOf("Carolina beat Baltimore 35–33 (Final) at Bank of America Stadium") >= 0 &&
+   band.indexOf("Baltimore (4–7) led 12–0 after forcing an early safety but fumbled a ball out of the back of the end zone for a touchback, muffed two punts and committed four turnovers in its sixth straight loss") >= 0 &&
+   band.indexOf("Tez Walker's 86-yard kickoff-return touchdown put the Ravens ahead 19–14 in the second quarter") >= 0 &&
+   band.indexOf("Chuba Hubbard ran for 120 yards and two touchdowns, Bryce Young threw for 254 yards and two scores") >= 0 &&
+   band.indexOf("Ryan Fitzgerald's 37-yard field goal with 1:44 left won it for the Panthers (5–5) (SI / Tar Heel Tribune)") >= 0,
+   "spotlight reports Sunday's Charlotte Final: Carolina beat Baltimore 35-33, the Ravens blowing a 12-0 lead with a fumble out of the end zone, two muffed punts and four turnovers in a sixth straight loss, Walker's 86-yard kickoff-return TD for 19-14, Hubbard 120 yards and two TDs, Young 254 yards and two scores, Fitzgerald's 37-yard FG with 1:44 left winning it for 5-5 Carolina (SI / Tar Heel Tribune)");
+ok(band.indexOf("Dallas beat Tennessee 51–30 (Final) at AT&T Stadium") >= 0 &&
+   band.indexOf("Dak Prescott was 28-of-33 for 325 yards and four touchdowns and ran for a fifth score") >= 0 &&
+   band.indexOf("the Cowboys scored on all eight of their meaningful possessions with touchdowns on their first six") >= 0 &&
+   band.indexOf("the 51–30 final was a Scorigami, the first in NFL history (Bleacher Report)") >= 0,
+   "spotlight reports Sunday's Arlington Final: Dallas beat Tennessee 51-30, Prescott 28-of-33 for 325 yards and four TDs plus a rushing score, touchdowns on the first six possessions and scores on all eight meaningful drives, the first 51-30 final in NFL history (Bleacher Report)");
+ok(band.indexOf("Buffalo beat Miami 26–9 (Final), Detroit beat Tampa Bay 31–21 (Final), Philadelphia beat Pittsburgh 19–16 (Final), the New York Jets beat the Los Angeles Chargers 27–24 (Final), the New York Giants beat Jacksonville 23–18 (Final), Chicago beat New Orleans 21–13 (Final) and Denver beat Las Vegas 38–24 (Final)") >= 0,
+   "spotlight reports Sunday's remaining Finals list: Buffalo over Miami 26-9, Detroit over Tampa Bay 31-21, Philadelphia over Pittsburgh 19-16, the Jets over the Chargers 27-24, the Giants over Jacksonville 23-18, Chicago over New Orleans 21-13 and Denver over Las Vegas 38-24");
+ok(band.indexOf("Week 12 closes tonight, Monday night, Nov 23, when Cincinnati visits Washington") >= 0 &&
+   band.indexOf("Week 12's Sunday slate is Final now too") >= 0 &&
+   band.indexOf("Week 12 runs through Monday night, Nov 23, when Cincinnati visits Washington — Sunday night is Minnesota at San Francisco") === -1,
+   "spotlight frames Week 12 as closing tonight (Monday night, Nov 23, Cincinnati at Washington), reports Sunday's slate as Final and no longer frames Sunday night as a fixture");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
