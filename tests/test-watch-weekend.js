@@ -154,11 +154,11 @@ ok(/\.vf-brand\{[^}]*font-weight:900/.test(html),
    "watch.html carries the page-scoped .vf-brand wordmark CSS");
 ok(/\.wk-band\{[^}]*border-left:4px solid var\(--gold\)/.test(html),
    "watch.html carries the page-scoped .wk-band spotlight CSS");
-ok(/id="weekend-spotlight"[^>]*data-start="2026-11-16"[^>]*data-end="2026-11-23"[^>]*hidden/.test(html),
-   "spotlight band ships hidden with the Nov 16-Nov 23 window in data attributes");
+ok(/id="weekend-spotlight"[^>]*data-start="2026-11-24"[^>]*data-end="2026-11-30"[^>]*hidden/.test(html),
+   "spotlight band ships hidden with the Nov 24-Nov 30 window in data attributes");
 var band = html.slice(html.indexOf('id="weekend-spotlight"'));
 band = band.slice(0, band.indexOf("</section>"));
-ok(band.indexOf("This band shows Nov 16–Nov 23 only, then hides itself") >= 0,
+ok(band.indexOf("This band shows Nov 24–Nov 30 only, then hides itself") >= 0,
    "band states its own expiry honestly in the copy");
 
 /* the editorial claims are pinned to the real snapshot data, not typed by hand */
@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("San Francisco dismantled Minnesota 35–10 on Sunday night in Mexico City") >= 0 &&
-   band.indexOf("Brock Purdy's three touchdown passes hung 35 points on the league's stingiest defense and kept the 49ers alone atop the NFC at 9–1") >= 0,
-   "spotlight headlines Sunday night's rout: San Francisco dismantled Minnesota 35-10 in Mexico City, Purdy's three TD passes hanging 35 points on the league's stingiest defense with the 49ers alone atop the NFC at 9-1 (this pin held the Nov 22 Michigan headline — Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation — which rolled to the 49ers rout on Nov 23; the Michigan result stays pinned as a body result in the Nov 22 block below, and the Nov 16 Burrow headline it replaced stays pinned there)");
+ok(band.indexOf("Washington stunned Cincinnati 22–20 on Monday night in Landover") >= 0 &&
+   band.indexOf("Jayden Daniels drove 64 yards in the final 39 seconds and Drew Stevens' fifth field goal walked it off as time expired, snapping the Bengals' five-game winning streak and closing Week 12") >= 0,
+   "spotlight headlines Monday night's walk-off: Washington stunned Cincinnati 22-20 in Landover, Daniels driving 64 yards in the final 39 seconds for Stevens' fifth field goal as time expired, snapping the Bengals' five-game winning streak and closing Week 12 (this pin held the Nov 23 San Francisco headline — San Francisco dismantled Minnesota 35-10 in Mexico City, Purdy's three TD passes hanging 35 points on the league's stingiest defense with the 49ers alone atop the NFC at 9-1 — which rolled to the Washington walk-off on Nov 24 when the band rolled to its Nov 24-Nov 30 window; the 49ers result stays pinned as a body result in the Nov 23 block below. This pin earlier held the Nov 22 Michigan headline — Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation — which rolled to the 49ers rout on Nov 23; the Michigan result stays pinned as a body result in the Nov 22 block below, and the Nov 16 Burrow headline it replaced stays pinned there)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1733,15 +1733,16 @@ ok(band.indexOf("Oklahoma beat No. 19 Ole Miss 24–17 (Final) on Sunday at Gayl
    band.indexOf("the Rebels (6–4, 4–4) lost their second straight despite outgaining Oklahoma 307–299 (AP / The Oklahoman)") >= 0,
    "spotlight reports the moved game's result: Oklahoma beat No. 19 Ole Miss 24-17 (Final) in Norman, Sategna's 75-yard punt-return TD in a 14-0 first quarter, Mateer's 181 yards of offense, Chambliss's Hail Mary batted down as time expired, Ole Miss 6-4 (4-4) despite a 307-299 yardage edge (AP / The Oklahoman)");
 ok(band.indexOf("Week 12 opened Thursday night in Houston, where Houston beat Indianapolis 26–3 (Final) at Reliant Stadium") >= 0 &&
-   band.indexOf("Week 12 closes tonight, Monday night, Nov 23, when Cincinnati visits Washington") >= 0 &&
-   band.indexOf("Kalshi Week 12 prices") >= 0,
-   "spotlight names the new window's slate: Week 12 opened Thursday night, Nov 19 in Houston (Houston beat Indianapolis 26-3, Final — detailed pins in the Nov 20 block below) and closes tonight, Monday night, Nov 23 (Cincinnati at Washington) — this pin kept the runs-through framing with Sunday night (Minnesota at San Francisco) as a fixture until Nov 23, when Sunday's slate settled (San Francisco won 35-10, Final) and its settlement is pinned in the Nov 23 block below — and links the Week 12 Kalshi prices");
+   band.indexOf("Week 12 closed Monday night in Landover, where Washington beat Cincinnati 22–20 (Final) at Northwest Stadium") >= 0 &&
+   band.indexOf("Kalshi Week 13 prices") >= 0,
+   "spotlight names the new window's slate: Week 12 opened Thursday night, Nov 19 in Houston (Houston beat Indianapolis 26-3, Final — detailed pins in the Nov 20 block below) and closed Monday night, Nov 23 in Landover (Washington beat Cincinnati 22-20, Final — detailed pins in the Nov 24 block below) — this pin kept the closes-tonight framing until Nov 24, when the closer settled and the band rolled to its Nov 24-Nov 30 window — and links the Week 13 Kalshi prices");
 ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three seconds left as No. 8 Texas rallied from 11 down") === -1 &&
    band.indexOf("Sunday night is Pittsburgh vs Cincinnati") === -1 &&
    band.indexOf("under way today, Sunday, Nov 15") === -1 &&
    band.indexOf("Monday night's MACtion") === -1 &&
-   band.indexOf("Kalshi Week 11 prices") === -1,
-   "spotlight no longer carries the Nov 15 Texas headline (the Texas result itself stays in the body, pinned in the Nov 15 block above), no longer frames Sunday night as a fixture, drops the wrong-day Monday MACtion label and links Week 12 prices, not Week 11");
+   band.indexOf("Kalshi Week 11 prices") === -1 &&
+   band.indexOf("Kalshi Week 12 prices") === -1,
+   "spotlight no longer carries the Nov 15 Texas headline (the Texas result itself stays in the body, pinned in the Nov 15 block above), no longer frames Sunday night as a fixture, drops the wrong-day Monday MACtion label and links Week 13 prices, not Week 11 or Week 12");
 /* The Nov 17 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
    18:54Z NCAAF) settles Monday night's Week 11 closer —
    the Los Angeles Chargers at Baltimore drops out, Week
@@ -2295,10 +2296,10 @@ ok(band.indexOf("No. 8 Texas beat Arkansas 45–3 (Final) at Darrell K Royal–T
    band.indexOf("Texas (9–2, 6–2 in the SEC) won its fifth straight") >= 0 &&
    band.indexOf("Arkansas (4–7, 2–6) went without a touchdown for the first time in 41 games and lost its bowl eligibility (AP / Texas Athletics)") >= 0,
    "spotlight reports Saturday's Austin Final: No. 8 Texas beat Arkansas 45-3, Manning 21-of-25 for 287 yards and two TDs with a 3-yard scoring run and no turnovers, the Winston (21 yards) and Mosley V (17 yards) TDs in the final 2:20 of the half building a 31-3 lead, Texas 9-2 with a fifth straight win and Arkansas 4-7 without a TD for the first time in 41 games (AP / Texas Athletics)");
-ok(band.indexOf("College football's next slate is Tuesday night's MACtion — Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion — Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") >= 0 &&
    band.indexOf("College football's Saturday slate is Final now too") >= 0 &&
    band.indexOf("College football's next slate is today's Saturday card") === -1,
-   "spotlight names Tuesday night's MACtion (Miami (OH)/Western Michigan, Kent St./Eastern Michigan) as the next college slate, reports Saturday's card as Final and no longer frames the settled Saturday card as today's slate");
+   "spotlight names tonight's Tuesday MACtion (Miami (OH)/Western Michigan, Kent St./Eastern Michigan) as the next college slate — this pin named it as Tuesday night's slate on Nov 23, when the pair was a day away; it is tonight's slate on Nov 24 — reports Saturday's card as Final and no longer frames the settled Saturday card as today's slate");
 /* The Nov 23 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
    18:50Z NCAAF) settles Sunday's 11-game NFL slate — all
    eleven Nov 22 games drop out; tonight's Week 12 closer
@@ -2346,10 +2347,10 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV22MINSF") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV22BALCAR") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV22TENDAL") === -1 &&
-   nflTickers.indexOf("KXNFLGAME-26NOV23CINWAS") >= 0 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV23CINWAS") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0,
-   "kalshi snapshots settle Sunday's 11-game NFL slate (Arizona/Kansas City, Minnesota/San Francisco, Baltimore/Carolina and Tennessee/Dallas gone) and head the NFL board with tonight's Week 12 closer (Cincinnati at Washington), with Tuesday night's MACtion pair still heading the NCAAF board");
+   "kalshi snapshots settle Sunday's 11-game NFL slate (Arizona/Kansas City, Minnesota/San Francisco, Baltimore/Carolina and Tennessee/Dallas gone) and headed the NFL board with the Week 12 closer (Cincinnati at Washington) — this pin kept the closer on the board on Nov 23; it settled Monday night (Washington won 22-20, Final) and its settlement is pinned in the Nov 24 block below — with Tuesday night's MACtion pair still heading the NCAAF board");
 ok(band.indexOf("San Francisco beat Minnesota 35–10 (Final) on Sunday night at Estadio Banorte in Mexico City") >= 0 &&
    band.indexOf("Brock Purdy was 21-of-26 for 255 yards and three touchdowns with no interceptions") >= 0 &&
    band.indexOf("the 49ers scored 21 points in the second quarter to lead 28–10 at the half against a Minnesota defense that had allowed a league-low 14.5 points per game") >= 0 &&
@@ -2374,10 +2375,73 @@ ok(band.indexOf("Dallas beat Tennessee 51–30 (Final) at AT&T Stadium") >= 0 &&
    "spotlight reports Sunday's Arlington Final: Dallas beat Tennessee 51-30, Prescott 28-of-33 for 325 yards and four TDs plus a rushing score, touchdowns on the first six possessions and scores on all eight meaningful drives, the first 51-30 final in NFL history (Bleacher Report)");
 ok(band.indexOf("Buffalo beat Miami 26–9 (Final), Detroit beat Tampa Bay 31–21 (Final), Philadelphia beat Pittsburgh 19–16 (Final), the New York Jets beat the Los Angeles Chargers 27–24 (Final), the New York Giants beat Jacksonville 23–18 (Final), Chicago beat New Orleans 21–13 (Final) and Denver beat Las Vegas 38–24 (Final)") >= 0,
    "spotlight reports Sunday's remaining Finals list: Buffalo over Miami 26-9, Detroit over Tampa Bay 31-21, Philadelphia over Pittsburgh 19-16, the Jets over the Chargers 27-24, the Giants over Jacksonville 23-18, Chicago over New Orleans 21-13 and Denver over Las Vegas 38-24");
-ok(band.indexOf("Week 12 closes tonight, Monday night, Nov 23, when Cincinnati visits Washington") >= 0 &&
+ok(band.indexOf("Week 12 closed Monday night in Landover, where Washington beat Cincinnati 22–20 (Final) at Northwest Stadium") >= 0 &&
    band.indexOf("Week 12's Sunday slate is Final now too") >= 0 &&
+   band.indexOf("Week 12 closes tonight, Monday night, Nov 23, when Cincinnati visits Washington") === -1 &&
    band.indexOf("Week 12 runs through Monday night, Nov 23, when Cincinnati visits Washington — Sunday night is Minnesota at San Francisco") === -1,
-   "spotlight frames Week 12 as closing tonight (Monday night, Nov 23, Cincinnati at Washington), reports Sunday's slate as Final and no longer frames Sunday night as a fixture");
+   "spotlight frames Week 12 as closed (Monday night, Nov 23, in Landover — Washington beat Cincinnati 22-20, Final; detailed pins in the Nov 24 block below), reports Sunday's slate as Final and no longer frames the closer or Sunday night as fixtures — this pin held the closes-tonight framing on Nov 23, the old window's last day");
+/* The Nov 24 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:52Z NCAAF) settles Monday night's Week 12 closer \u2014
+   Cincinnati at Washington drops out, Green Bay at the
+   Los Angeles Rams heads the NFL board and Week 14's
+   first 14 games are added (Thu Dec 3 Kansas City at the
+   Los Angeles Rams through Mon Dec 7 Dallas at Seattle).
+   NFL state: 30 games, 1 move, 14 new. NCAAF state: 73
+   games, 38 moves, 1 new (Sat Nov 28 Illinois vs
+   Northwestern) \u2014 tonight's Tuesday MACtion pair still
+   heads the board. The MNF Final (cross-checked AP via
+   theScore / Bengals / Commanders Wire / USA Today):
+   Washington beat Cincinnati 22-20 at Northwest Stadium
+   in Landover \u2014 rookie Drew Stevens kicked five field
+   goals, all in the second half, the last a 26-yarder as
+   time expired after Jayden Daniels, taking over at his
+   own 28 with 39 seconds left and no timeouts after Evan
+   McPherson's 56-yard field goal had put Cincinnati
+   ahead 20-19 with 46 seconds left, hit rookie Antonio
+   Williams for 22 yards and then on a 42-yard
+   catch-and-run to the Cincinnati 8; Daniels finished
+   with 283 passing yards and a team-high 55 rushing
+   yards, Williams caught nine passes for 122 yards, and
+   Washington (4-5-1) ended the game with six consecutive
+   scoring drives of 50-plus yards, the first team in at
+   least 30 years to do so (OptaSTATS), while its defense
+   held Joe Burrow (300 yards, two touchdowns) to
+   checkdowns \u2014 Ja'Marr Chase and Tee Higgins combined
+   for just seven catches for 74 yards \u2014 as Cincinnati
+   (7-3) saw its five-game winning streak, in which it
+   had scored at least 31 points every week, snapped.
+   The band ROLLS to a new Nov 24-Nov 30 window (the
+   Nov 16-23 window expired after Monday night): it
+   headlines the walk-off, reports Week 12 as closed,
+   names the full Week 13 Thanksgiving slate, frames
+   tonight's MACtion as tonight's, and links the Week 13
+   Kalshi prices. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV23CINWAS") === -1 &&
+   nflTickers[0] === "KXNFLGAME-26NOV25GBLAR" &&
+   nflTickers.indexOf("KXNFLGAME-26DEC03KCLAR") >= 0 &&
+   nflTickers.indexOf("KXNFLGAME-26DEC07DALSEA") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28ILLNW") >= 0,
+   "kalshi snapshots settle Monday night's Week 12 closer (Cincinnati at Washington gone \u2014 Washington won 22-20, Final), head the NFL board with Thanksgiving Eve (Green Bay at the Los Angeles Rams) and add Week 14's first 14 games (Kansas City at the Los Angeles Rams through Dallas at Seattle), with tonight's MACtion pair still heading the NCAAF board and Illinois vs Northwestern the one new college game");
+ok(band.indexOf("Washington beat Cincinnati 22\u201320 (Final) at Northwest Stadium") >= 0 &&
+   band.indexOf("rookie Drew Stevens kicked five field goals, all in the second half, the last a 26-yarder as time expired") >= 0 &&
+   band.indexOf("taking over at his own 28 with 39 seconds left and no timeouts after Evan McPherson's 56-yard field goal had put Cincinnati ahead 20\u201319 with 46 seconds left") >= 0 &&
+   band.indexOf("hit rookie Antonio Williams for 22 yards and then on a 42-yard catch-and-run to the Cincinnati 8") >= 0,
+   "spotlight reports Monday night's Landover Final: Washington beat Cincinnati 22-20, Stevens' five field goals all in the second half with the 26-yard walk-off as time expired, Daniels taking over at his own 28 with 39 seconds left and no timeouts after McPherson's 56-yarder put Cincinnati up 20-19 with 46 seconds left, and the two Williams throws (22 yards, then a 42-yard catch-and-run to the 8) (AP via theScore)");
+ok(band.indexOf("Daniels finished with 283 passing yards and a team-high 55 rushing yards, Williams caught nine passes for 122 yards") >= 0 &&
+   band.indexOf("Washington (4\u20135\u20131) ended the game with six consecutive scoring drives of 50-plus yards, the first team in at least 30 years to do so (OptaSTATS)") >= 0 &&
+   band.indexOf("its defense held Joe Burrow (300 yards and two touchdowns) to checkdowns \u2014 Ja'Marr Chase and Tee Higgins combined for just seven catches for 74 yards") >= 0 &&
+   band.indexOf("Cincinnati (7\u20133) saw its five-game winning streak, in which it had scored at least 31 points every week, snapped (AP via theScore)") >= 0,
+   "spotlight reports the MNF detail: Daniels 283 passing yards and a team-high 55 rushing, Williams 9 catches for 122 yards, Washington 4-5-1 with six straight 50-plus-yard scoring drives (first team in at least 30 years, OptaSTATS), Burrow's 300 yards and two TDs held to checkdowns with Chase and Higgins combining for 7 catches and 74 yards, and 7-3 Cincinnati's five-game win streak (31-plus points every week) snapped (AP via theScore)");
+ok(band.indexOf("Week 13 opens Wednesday night, Nov 25 \u2014 Thanksgiving Eve \u2014 when Green Bay visits the Los Angeles Rams at SoFi Stadium in the NFL's first Thanksgiving Eve game") >= 0 &&
+   band.indexOf("continues Thanksgiving Day, Thursday, Nov 26, with Chicago at Detroit, Philadelphia at Dallas and Kansas City at Buffalo") >= 0 &&
+   band.indexOf("then Black Friday, Nov 27, with Denver at Pittsburgh, Sunday's ten-game slate on Nov 29 and Monday night's closer, Nov 30, when Carolina visits Tampa Bay") >= 0 &&
+   band.indexOf("Kalshi Week 13 prices") >= 0,
+   "spotlight names the Week 13 Thanksgiving slate in the new Nov 24-Nov 30 window: Thanksgiving Eve Wed Nov 25 (Green Bay at the Los Angeles Rams, the NFL's first Thanksgiving Eve game), Thanksgiving Day Thu Nov 26 (Chicago at Detroit, Philadelphia at Dallas, Kansas City at Buffalo), Black Friday Nov 27 (Denver at Pittsburgh), Sunday's ten games Nov 29 and the Mon Nov 30 closer (Carolina at Tampa Bay) \u2014 and links the Week 13 Kalshi prices");
+ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion \u2014 Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("San Francisco dismantled Minnesota 35\u201310 on Sunday night in Mexico City") === -1,
+   "spotlight frames tonight's Tuesday MACtion as tonight's in the new window and no longer carries the Nov 23 San Francisco headline (the 49ers result itself stays in the body, pinned in the Nov 23 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
