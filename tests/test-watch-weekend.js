@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Washington stunned Cincinnati 22–20 on Monday night in Landover") >= 0 &&
-   band.indexOf("Jayden Daniels drove 64 yards in the final 39 seconds and Drew Stevens' fifth field goal walked it off as time expired, snapping the Bengals' five-game winning streak and closing Week 12") >= 0,
-   "spotlight headlines Monday night's walk-off: Washington stunned Cincinnati 22-20 in Landover, Daniels driving 64 yards in the final 39 seconds for Stevens' fifth field goal as time expired, snapping the Bengals' five-game winning streak and closing Week 12 (this pin held the Nov 23 San Francisco headline — San Francisco dismantled Minnesota 35-10 in Mexico City, Purdy's three TD passes hanging 35 points on the league's stingiest defense with the 49ers alone atop the NFC at 9-1 — which rolled to the Washington walk-off on Nov 24 when the band rolled to its Nov 24-Nov 30 window; the 49ers result stays pinned as a body result in the Nov 23 block below. This pin earlier held the Nov 22 Michigan headline — Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation — which rolled to the 49ers rout on Nov 23; the Michigan result stays pinned as a body result in the Nov 22 block below, and the Nov 16 Burrow headline it replaced stays pinned there)");
+ok(band.indexOf("Miami (OH) stunned Western Michigan 28–24 on Tuesday night in Kalamazoo") >= 0 &&
+   band.indexOf("freshman Drew Bellisari accounted for four touchdowns in just his second start and Amariyun Knighten's end-zone interception with 26 seconds left kept the RedHawks' MAC title-game hopes alive") >= 0,
+   "spotlight headlines Tuesday night's MACtion upset: Miami (OH) stunned Western Michigan 28-24 in Kalamazoo, freshman Bellisari accounting for four touchdowns in just his second start and Knighten's end-zone interception with 26 seconds left keeping the RedHawks' MAC title-game hopes alive (this pin held the Nov 24 Washington headline — Washington stunned Cincinnati 22-20 on Monday night in Landover, Daniels driving 64 yards in the final 39 seconds for Stevens' fifth field goal as time expired, snapping the Bengals' five-game winning streak and closing Week 12 — which rolled to the Miami upset on Nov 25 when Tuesday's MACtion settled; the Washington result stays pinned as a body result in the Nov 24 block below. This pin earlier held the Nov 23 San Francisco headline — San Francisco dismantled Minnesota 35-10 in Mexico City, Purdy's three TD passes hanging 35 points on the league's stingiest defense with the 49ers alone atop the NFC at 9-1 — which rolled to the Washington walk-off on Nov 24 when the band rolled to its Nov 24-Nov 30 window; the 49ers result stays pinned as a body result in the Nov 23 block below. This pin earlier held the Nov 22 Michigan headline — Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation — which rolled to the 49ers rout on Nov 23; the Michigan result stays pinned as a body result in the Nov 22 block below, and the Nov 16 Burrow headline it replaced stays pinned there)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -2252,9 +2252,9 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21ALBYNCAT") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21CORCLMB") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV21DUQCCSU") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0,
-   "kalshi snapshots settle Saturday's 116-game college card (the Albany/North Carolina A&T, Cornell/Columbia and Duquesne/Central Connecticut St. headliners gone) and head the NCAAF board with Tuesday night's MACtion pair (Miami (OH)/Western Michigan, Kent St./Eastern Michigan), with Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head — the Sunday slate settled the next day (Kansas City won 34-7) and its settlement is pinned in the Nov 23 block below");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") === -1,
+   "kalshi snapshots settle Saturday's 116-game college card (the Albany/North Carolina A&T, Cornell/Columbia and Duquesne/Central Connecticut St. headliners gone) and headed the NCAAF board with Tuesday night's MACtion pair (Miami (OH)/Western Michigan, Kent St./Eastern Michigan), with Sunday's NFL slate (Arizona vs Kansas City) still at the NFL head — the Sunday slate settled the next day (Kansas City won 34-7) and its settlement is pinned in the Nov 23 block below; the MACtion pair this pin kept on the board through Nov 24 settled Tuesday night (Miami (OH) won 28-24, Eastern Michigan won 17-12) and its settlement is pinned in the Nov 25 block below");
 ok(band.indexOf("Michigan beat No. 4 UCLA 18–16 in triple overtime (Final) at Michigan Stadium in Ann Arbor") >= 0 &&
    band.indexOf("Michigan led 10–3 after Bryce Underwood's 6-yard touchdown pass to Mason Bonner early in the fourth quarter") >= 0 &&
    band.indexOf("UCLA forced overtime at the end of a 15-play, 77-yard drive on Anthony Woods' 1-yard jump pass to Brayden Loftin with 10 seconds left in regulation") >= 0 &&
@@ -2296,10 +2296,10 @@ ok(band.indexOf("No. 8 Texas beat Arkansas 45–3 (Final) at Darrell K Royal–T
    band.indexOf("Texas (9–2, 6–2 in the SEC) won its fifth straight") >= 0 &&
    band.indexOf("Arkansas (4–7, 2–6) went without a touchdown for the first time in 41 games and lost its bowl eligibility (AP / Texas Athletics)") >= 0,
    "spotlight reports Saturday's Austin Final: No. 8 Texas beat Arkansas 45-3, Manning 21-of-25 for 287 yards and two TDs with a 3-yard scoring run and no turnovers, the Winston (21 yards) and Mosley V (17 yards) TDs in the final 2:20 of the half building a 31-3 lead, Texas 9-2 with a fifth straight win and Arkansas 4-7 without a TD for the first time in 41 games (AP / Texas Athletics)");
-ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion — Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion — Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") === -1 &&
    band.indexOf("College football's Saturday slate is Final now too") >= 0 &&
    band.indexOf("College football's next slate is today's Saturday card") === -1,
-   "spotlight names tonight's Tuesday MACtion (Miami (OH)/Western Michigan, Kent St./Eastern Michigan) as the next college slate — this pin named it as Tuesday night's slate on Nov 23, when the pair was a day away; it is tonight's slate on Nov 24 — reports Saturday's card as Final and no longer frames the settled Saturday card as today's slate");
+   "spotlight named tonight's Tuesday MACtion (Miami (OH)/Western Michigan, Kent St./Eastern Michigan) as the next college slate through Nov 24 — the pair settled Tuesday night (Miami (OH) won 28-24, Eastern Michigan won 17-12, both Finals, detailed pins in the Nov 25 block below) and is no longer framed as the next slate; this pin named it as Tuesday night's slate on Nov 23, when the pair was a day away, and as tonight's slate on Nov 24 — reports Saturday's card as Final and no longer frames the settled Saturday card as today's slate");
 /* The Nov 23 snapshot (fetched 18:49Z NFL / 18:49Z MLB /
    18:50Z NCAAF) settles Sunday's 11-game NFL slate — all
    eleven Nov 22 games drop out; tonight's Week 12 closer
@@ -2348,9 +2348,9 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV22ARIKC") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV22BALCAR") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV22TENDAL") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV23CINWAS") === -1 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0,
-   "kalshi snapshots settle Sunday's 11-game NFL slate (Arizona/Kansas City, Minnesota/San Francisco, Baltimore/Carolina and Tennessee/Dallas gone) and headed the NFL board with the Week 12 closer (Cincinnati at Washington) — this pin kept the closer on the board on Nov 23; it settled Monday night (Washington won 22-20, Final) and its settlement is pinned in the Nov 24 block below — with Tuesday night's MACtion pair still heading the NCAAF board");
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") === -1,
+   "kalshi snapshots settle Sunday's 11-game NFL slate (Arizona/Kansas City, Minnesota/San Francisco, Baltimore/Carolina and Tennessee/Dallas gone) and headed the NFL board with the Week 12 closer (Cincinnati at Washington) — this pin kept the closer on the board on Nov 23; it settled Monday night (Washington won 22-20, Final) and its settlement is pinned in the Nov 24 block below — with Tuesday night's MACtion pair then heading the NCAAF board; the pair settled Tuesday night (Miami (OH) won 28-24, Eastern Michigan won 17-12) and its settlement is pinned in the Nov 25 block below");
 ok(band.indexOf("San Francisco beat Minnesota 35–10 (Final) on Sunday night at Estadio Banorte in Mexico City") >= 0 &&
    band.indexOf("Brock Purdy was 21-of-26 for 255 yards and three touchdowns with no interceptions") >= 0 &&
    band.indexOf("the 49ers scored 21 points in the second quarter to lead 28–10 at the half against a Minnesota defense that had allowed a league-low 14.5 points per game") >= 0 &&
@@ -2420,10 +2420,10 @@ ok(nflTickers.indexOf("KXNFLGAME-26NOV23CINWAS") === -1 &&
    nflTickers[0] === "KXNFLGAME-26NOV25GBLAR" &&
    nflTickers.indexOf("KXNFLGAME-26DEC03KCLAR") >= 0 &&
    nflTickers.indexOf("KXNFLGAME-26DEC07DALSEA") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") >= 0 &&
-   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28ILLNW") >= 0,
-   "kalshi snapshots settle Monday night's Week 12 closer (Cincinnati at Washington gone \u2014 Washington won 22-20, Final), head the NFL board with Thanksgiving Eve (Green Bay at the Los Angeles Rams) and add Week 14's first 14 games (Kansas City at the Los Angeles Rams through Dallas at Seattle), with tonight's MACtion pair still heading the NCAAF board and Illinois vs Northwestern the one new college game");
+   "kalshi snapshots settle Monday night's Week 12 closer (Cincinnati at Washington gone \u2014 Washington won 22-20, Final), head the NFL board with Thanksgiving Eve (Green Bay at the Los Angeles Rams) and add Week 14's first 14 games (Kansas City at the Los Angeles Rams through Dallas at Seattle), with the MACtion pair then heading the NCAAF board and Illinois vs Northwestern the one new college game \u2014 the pair settled Tuesday night (Miami (OH) won 28-24, Eastern Michigan won 17-12) and its settlement is pinned in the Nov 25 block below");
 ok(band.indexOf("Washington beat Cincinnati 22\u201320 (Final) at Northwest Stadium") >= 0 &&
    band.indexOf("rookie Drew Stevens kicked five field goals, all in the second half, the last a 26-yarder as time expired") >= 0 &&
    band.indexOf("taking over at his own 28 with 39 seconds left and no timeouts after Evan McPherson's 56-yard field goal had put Cincinnati ahead 20\u201319 with 46 seconds left") >= 0 &&
@@ -2439,9 +2439,73 @@ ok(band.indexOf("Week 13 opens Wednesday night, Nov 25 \u2014 Thanksgiving Eve \
    band.indexOf("then Black Friday, Nov 27, with Denver at Pittsburgh, Sunday's ten-game slate on Nov 29 and Monday night's closer, Nov 30, when Carolina visits Tampa Bay") >= 0 &&
    band.indexOf("Kalshi Week 13 prices") >= 0,
    "spotlight names the Week 13 Thanksgiving slate in the new Nov 24-Nov 30 window: Thanksgiving Eve Wed Nov 25 (Green Bay at the Los Angeles Rams, the NFL's first Thanksgiving Eve game), Thanksgiving Day Thu Nov 26 (Chicago at Detroit, Philadelphia at Dallas, Kansas City at Buffalo), Black Friday Nov 27 (Denver at Pittsburgh), Sunday's ten games Nov 29 and the Mon Nov 30 closer (Carolina at Tampa Bay) \u2014 and links the Week 13 Kalshi prices");
-ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion \u2014 Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion \u2014 Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") === -1 &&
    band.indexOf("San Francisco dismantled Minnesota 35\u201310 on Sunday night in Mexico City") === -1,
-   "spotlight frames tonight's Tuesday MACtion as tonight's in the new window and no longer carries the Nov 23 San Francisco headline (the 49ers result itself stays in the body, pinned in the Nov 23 block above)");
+   "spotlight no longer frames Tuesday's MACtion as the next slate \u2014 the pair settled Tuesday night (Miami (OH) beat Western Michigan 28-24 and Eastern Michigan beat Kent St. 17-12, both Finals, detailed pins in the Nov 25 block below); this pin held the tonight's-MACtion framing on Nov 24, the pair's game day \u2014 and the band no longer carries the Nov 23 San Francisco headline (the 49ers result itself stays in the body, pinned in the Nov 23 block above)");
+/* The Nov 25 snapshot (fetched 18:50Z NFL / 18:50Z MLB /
+   18:51Z NCAAF) settles Tuesday night's MACtion pair \u2014
+   Miami (OH) at Western Michigan and Kent St. at Eastern
+   Michigan drop out, TCU at Texas Tech (Thanksgiving
+   night, occ Nov 27 04:00Z) heads the NCAAF board and
+   four Saturday Nov 28 games are added (University at
+   Albany vs Lehigh, Harvard vs Monmouth, Dayton vs
+   Tennessee Tech, Incarnate Word vs Montana). NFL state:
+   30 games, 18 moves, 0 new \u2014 Thanksgiving Eve (Green
+   Bay at the Los Angeles Rams) still heads the board.
+   NCAAF state: 75 games, 12 moves, 4 new. The MACtion
+   Finals (cross-checked AP via theScore / NCAA.com for
+   Miami; Kent State Athletics / AP / NCAA.com for
+   Eastern Michigan): Miami (OH) beat Western Michigan
+   28-24 at Waldo Stadium in Kalamazoo \u2014 freshman Drew
+   Bellisari, in just his second start, accounted for
+   four touchdowns (13-of-26 for 214 yards and two
+   touchdown passes, plus 93 rushing yards and two more
+   scores), his 12-yard scoring run with 5:40 left put
+   Miami back ahead 28-24 after Jalen Buckley's 23-yard
+   touchdown run had given the Broncos the lead with
+   8:02 left, and Amariyun Knighten intercepted Broc
+   Lowry's third-and-goal throw in the end zone with 26
+   seconds left; both teams finished 8-4, 6-2 in the
+   MAC, Miami's slim title-game hopes alive and Western
+   Michigan kept from clinching. Eastern Michigan beat
+   Kent St. 17-12 at Rynearson Stadium in Ypsilanti \u2014
+   Amareon Blue's 61-yard touchdown run 46 seconds in
+   (137 rushing yards), a 14-12 halftime lead, Rudy
+   Kessinger's 28-yard field goal with 1:57 left, and
+   Kent St.'s apparent game-winning 14-yard touchdown
+   with one second left overturned to an incomplete
+   pass on replay review; Kent St. finished 3-9 (2-6)
+   and Eastern Michigan 5-7 (4-4). The band (same
+   Nov 24-Nov 30 window) now headlines the Miami upset,
+   reports both MACtion Finals, and names Thanksgiving
+   night's TCU at Texas Tech as the next college slate;
+   tonight's Thanksgiving Eve NFL opener stays a
+   fixture (it kicks off tonight). */
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") === -1 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") === -1 &&
+   ncaafTickers[0] === "KXNCAAFGAME-26NOV26TCUTTU" &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28ALBYLEH") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28HARVMONM") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28DAYTNTC") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28IWMONT") >= 0 &&
+   nflTickers[0] === "KXNFLGAME-26NOV25GBLAR",
+   "kalshi snapshots settle Tuesday's MACtion pair (Miami (OH) at Western Michigan and Kent St. at Eastern Michigan gone \u2014 Miami won 28-24 and Eastern Michigan won 17-12, both Finals), head the NCAAF board with Thanksgiving night (TCU at Texas Tech) and add four Saturday Nov 28 games (Albany vs Lehigh, Harvard vs Monmouth, Dayton vs Tennessee Tech, Incarnate Word vs Montana), with Thanksgiving Eve (Green Bay at the Los Angeles Rams) still heading the NFL board");
+ok(band.indexOf("Miami (OH) beat Western Michigan 28\u201324 (Final) at Waldo Stadium in Kalamazoo") >= 0 &&
+   band.indexOf("freshman Drew Bellisari, in just his second start, accounted for four touchdowns (13-of-26 for 214 yards and two touchdown passes, plus 93 rushing yards and two more scores on the ground)") >= 0 &&
+   band.indexOf("his 12-yard scoring run with 5:40 left put Miami back ahead 28\u201324 after Jalen Buckley's 23-yard touchdown run (126 yards and two scores on 19 carries) had given the Broncos the lead with 8:02 left") >= 0 &&
+   band.indexOf("Amariyun Knighten intercepted Broc Lowry's third-and-goal throw in the end zone with 26 seconds left to seal it") >= 0,
+   "spotlight reports Tuesday's Kalamazoo Final: Miami (OH) beat Western Michigan 28-24, Bellisari's four TDs in his second start (214 passing yards and two TDs, 93 rushing and two more), the 12-yard go-ahead run with 5:40 left answering Buckley's 23-yard score (126 yards, two TDs), and Knighten's end-zone interception with 26 seconds left (AP via theScore)");
+ok(band.indexOf("Miami (8\u20134, 6\u20132 in the MAC) kept its slim MAC title-game hopes alive, and Western Michigan (8\u20134, 6\u20132) was kept from clinching its berth in the Dec. 5 title game in Detroit (AP via theScore)") >= 0 &&
+   band.indexOf("Eastern Michigan beat Kent St. 17\u201312 (Final) at Rynearson Stadium in Ypsilanti on Senior Night") >= 0 &&
+   band.indexOf("Amareon Blue scored on a 61-yard touchdown run just 46 seconds into the game and finished with 137 rushing yards") >= 0 &&
+   band.indexOf("Rudy Kessinger's 28-yard field goal with 1:57 left made it 17\u201312") >= 0,
+   "spotlight reports the MAC stakes and the Ypsilanti Final: Miami 8-4 (6-2) kept its slim title-game hopes alive while 8-4 Western Michigan was kept from clinching the Dec. 5 Detroit berth, and Eastern Michigan beat Kent St. 17-12 on Senior Night behind Blue's 61-yard TD 46 seconds in (137 rushing yards) and Kessinger's 28-yard field goal with 1:57 left (AP via theScore / Kent State Athletics)");
+ok(band.indexOf("Ethan Thanthanavong's fourth-and-9, 14-yard touchdown pass to Wayne Harris with one second left \u2014 initially ruled a game-winning score \u2014 was overturned to an incomplete pass on replay review") >= 0 &&
+   band.indexOf("Kent St. (3\u20139, 2\u20136 in the MAC) outgained Eastern Michigan 305\u2013234 behind Thanthanavong's 234 passing yards and a touchdown in his first career start, and Eastern Michigan (5\u20137, 4\u20134) snapped a four-game losing streak in both teams' season finale (Kent State Athletics / AP)") >= 0,
+   "spotlight reports the overturned finish: Thanthanavong's fourth-and-9 14-yard TD to Harris with one second left, initially ruled a game-winner, overturned to incomplete on review; Kent St. 3-9 (2-6) outgained Eastern Michigan 305-234 in Thanthanavong's first start (234 yards, one TD) and 5-7 (4-4) Eastern Michigan snapped a four-game skid in both teams' finale (Kent State Athletics / AP)");
+ok(band.indexOf("College football's next slate is Thanksgiving night, when TCU visits Texas Tech, before Friday's slate heads the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("Washington stunned Cincinnati 22\u201320 on Monday night in Landover") === -1,
+   "spotlight names Thanksgiving night's TCU at Texas Tech as the next college slate in the Nov 24-Nov 30 window and no longer carries the Nov 24 Washington headline (the walk-off result itself stays in the body, pinned in the Nov 24 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
