@@ -985,9 +985,9 @@ ok(band.indexOf("runs through today, Sunday, Nov 8") === -1 &&
    framing is banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV09BUFMIN") === -1,
    "kalshi-nfl.json settles Monday night's Week 10 closer (Buffalo at Minnesota gone) — Buffalo won 23-6 (Final)");
-ok(band.indexOf("Miami (OH) stunned Western Michigan 28–24 on Tuesday night in Kalamazoo") >= 0 &&
-   band.indexOf("freshman Drew Bellisari accounted for four touchdowns in just his second start and Amariyun Knighten's end-zone interception with 26 seconds left kept the RedHawks' MAC title-game hopes alive") >= 0,
-   "spotlight headlines Tuesday night's MACtion upset: Miami (OH) stunned Western Michigan 28-24 in Kalamazoo, freshman Bellisari accounting for four touchdowns in just his second start and Knighten's end-zone interception with 26 seconds left keeping the RedHawks' MAC title-game hopes alive (this pin held the Nov 24 Washington headline — Washington stunned Cincinnati 22-20 on Monday night in Landover, Daniels driving 64 yards in the final 39 seconds for Stevens' fifth field goal as time expired, snapping the Bengals' five-game winning streak and closing Week 12 — which rolled to the Miami upset on Nov 25 when Tuesday's MACtion settled; the Washington result stays pinned as a body result in the Nov 24 block below. This pin earlier held the Nov 23 San Francisco headline — San Francisco dismantled Minnesota 35-10 in Mexico City, Purdy's three TD passes hanging 35 points on the league's stingiest defense with the 49ers alone atop the NFC at 9-1 — which rolled to the Washington walk-off on Nov 24 when the band rolled to its Nov 24-Nov 30 window; the 49ers result stays pinned as a body result in the Nov 23 block below. This pin earlier held the Nov 22 Michigan headline — Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation — which rolled to the 49ers rout on Nov 23; the Michigan result stays pinned as a body result in the Nov 22 block below, and the Nov 16 Burrow headline it replaced stays pinned there)");
+ok(band.indexOf("Philadelphia stunned Dallas 39–38 on Thanksgiving at AT&amp;T Stadium") >= 0 &&
+   band.indexOf("the Eagles erased a 21-point third-quarter deficit for the largest Thanksgiving comeback in NFL history and won it on Jake Elliott's 59-yard field goal with two seconds left") >= 0,
+   "spotlight headlines the Eagles' Thanksgiving comeback: Philadelphia stunned Dallas 39-38 at AT&T Stadium, erasing a 21-point third-quarter deficit for the largest Thanksgiving comeback in NFL history and winning on Elliott's 59-yard field goal with two seconds left (this pin held the Nov 25 Miami headline — Miami (OH) stunned Western Michigan 28-24 on Tuesday night in Kalamazoo, freshman Bellisari accounting for four touchdowns in just his second start and Knighten's end-zone interception with 26 seconds left keeping the RedHawks' MAC title-game hopes alive — which rolled to the Eagles comeback on Nov 27 when Thanksgiving settled; the Miami result stays pinned as a body result in the Nov 25 block below. This pin earlier held the Nov 24 Washington headline — Miami (OH) stunned Western Michigan 28-24 in Kalamazoo, freshman Bellisari accounting for four touchdowns in just his second start and Knighten's end-zone interception with 26 seconds left keeping the RedHawks' MAC title-game hopes alive (this pin held the Nov 24 Washington headline — Washington stunned Cincinnati 22-20 on Monday night in Landover, Daniels driving 64 yards in the final 39 seconds for Stevens' fifth field goal as time expired, snapping the Bengals' five-game winning streak and closing Week 12 — which rolled to the Miami upset on Nov 25 when Tuesday's MACtion settled; the Washington result stays pinned as a body result in the Nov 24 block below. This pin earlier held the Nov 23 San Francisco headline — San Francisco dismantled Minnesota 35-10 in Mexico City, Purdy's three TD passes hanging 35 points on the league's stingiest defense with the 49ers alone atop the NFC at 9-1 — which rolled to the Washington walk-off on Nov 24 when the band rolled to its Nov 24-Nov 30 window; the 49ers result stays pinned as a body result in the Nov 23 block below. This pin earlier held the Nov 22 Michigan headline — Michigan toppled unbeaten No. 4 UCLA 18-16 in triple overtime at the Big House, Underwood's two-point conversion pass to Hoffman winning it after the Bruins tied the game with 10 seconds left in regulation — which rolled to the 49ers rout on Nov 23; the Michigan result stays pinned as a body result in the Nov 22 block below, and the Nov 16 Burrow headline it replaced stays pinned there)");
 ok(band.indexOf("Buffalo beat Minnesota 23–6 (Final)") >= 0 &&
    band.indexOf("Josh Allen was 21-of-31 for 234 yards") >= 0 &&
    band.indexOf("25-yard touchdown pass to Keleki Latu") >= 0 &&
@@ -1792,9 +1792,9 @@ ok(band.indexOf("Arch Manning hit Raleek Brown for a 4-yard touchdown with three
    framing and the 1-game remainder are banned below. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV16LACBAL") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV19INDHOU") === -1 &&
-   nflTickers.indexOf("KXNFLGAME-26NOV25GBLAR") >= 0 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV25GBLAR") === -1 &&
    nflTickers.indexOf("KXNFLGAME-26NOV30CARTB") >= 0,
-   "kalshi-nfl.json settled the Week 11 closer (the Los Angeles Chargers at Baltimore gone), kept Week 12's opener (Indianapolis vs Houston, Nov 19) at the head on Nov 17 and added the 16-game Thanksgiving-week slate (Green Bay at the Los Angeles Rams, Nov 25 through Carolina at Tampa Bay, Nov 30 — set-diff matched new_games exactly) — the opener settled Nov 19 (Houston won 26-3) and its settlement is pinned in the Nov 20 block below");
+   "kalshi-nfl.json settled the Week 11 closer (the Los Angeles Chargers at Baltimore gone), kept Week 12's opener (Indianapolis vs Houston, Nov 19) at the head on Nov 17 and added the 16-game Thanksgiving-week slate (Green Bay at the Los Angeles Rams, Nov 25 through Carolina at Tampa Bay, Nov 30 — set-diff matched new_games exactly) — the opener settled Nov 19 (Houston won 26-3) and its settlement is pinned in the Nov 20 block below; the Thanksgiving Eve head this pin kept (Green Bay at the Los Angeles Rams) settled Nov 25 (the Rams won 26-13, Final) and its settlement is pinned in the Nov 27 block below");
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV17BALLOHIO") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28USCUCLA") >= 0,
    "kalshi-ncaaf.json settles the Tuesday MACtion head (Ball St. vs Ohio gone — this pin kept it on Nov 17; Ohio won 35-28 (Final) and the settlement is pinned in the Nov 18 block below) and keeps the six new Nov 28 games added Nov 17 (USC vs UCLA among them — set-diff matches new_games exactly)");
@@ -2417,13 +2417,13 @@ ok(band.indexOf("Week 12 closed Monday night in Landover, where Washington beat 
    tonight's MACtion as tonight's, and links the Week 13
    Kalshi prices. */
 ok(nflTickers.indexOf("KXNFLGAME-26NOV23CINWAS") === -1 &&
-   nflTickers[0] === "KXNFLGAME-26NOV25GBLAR" &&
+   nflTickers[0] === "KXNFLGAME-26NOV27DENPIT" &&
    nflTickers.indexOf("KXNFLGAME-26DEC03KCLAR") >= 0 &&
    nflTickers.indexOf("KXNFLGAME-26DEC07DALSEA") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28ILLNW") >= 0,
-   "kalshi snapshots settle Monday night's Week 12 closer (Cincinnati at Washington gone \u2014 Washington won 22-20, Final), head the NFL board with Thanksgiving Eve (Green Bay at the Los Angeles Rams) and add Week 14's first 14 games (Kansas City at the Los Angeles Rams through Dallas at Seattle), with the MACtion pair then heading the NCAAF board and Illinois vs Northwestern the one new college game \u2014 the pair settled Tuesday night (Miami (OH) won 28-24, Eastern Michigan won 17-12) and its settlement is pinned in the Nov 25 block below");
+   "kalshi snapshots settle Monday night's Week 12 closer (Cincinnati at Washington gone \u2014 Washington won 22-20, Final), head the NFL board with Thanksgiving Eve (Green Bay at the Los Angeles Rams) and add Week 14's first 14 games (Kansas City at the Los Angeles Rams through Dallas at Seattle), with the MACtion pair then heading the NCAAF board and Illinois vs Northwestern the one new college game \u2014 the pair settled Tuesday night (Miami (OH) won 28-24, Eastern Michigan won 17-12) and its settlement is pinned in the Nov 25 block below; the Thanksgiving Eve head this pin kept settled Nov 25 (the Rams won 26-13, Final) and Black Friday (Denver at Pittsburgh) now heads the board, pinned in the Nov 27 block below");
 ok(band.indexOf("Washington beat Cincinnati 22\u201320 (Final) at Northwest Stadium") >= 0 &&
    band.indexOf("rookie Drew Stevens kicked five field goals, all in the second half, the last a 26-yarder as time expired") >= 0 &&
    band.indexOf("taking over at his own 28 with 39 seconds left and no timeouts after Evan McPherson's 56-yard field goal had put Cincinnati ahead 20\u201319 with 46 seconds left") >= 0 &&
@@ -2434,11 +2434,10 @@ ok(band.indexOf("Daniels finished with 283 passing yards and a team-high 55 rush
    band.indexOf("its defense held Joe Burrow (300 yards and two touchdowns) to checkdowns \u2014 Ja'Marr Chase and Tee Higgins combined for just seven catches for 74 yards") >= 0 &&
    band.indexOf("Cincinnati (7\u20133) saw its five-game winning streak, in which it had scored at least 31 points every week, snapped (AP via theScore)") >= 0,
    "spotlight reports the MNF detail: Daniels 283 passing yards and a team-high 55 rushing, Williams 9 catches for 122 yards, Washington 4-5-1 with six straight 50-plus-yard scoring drives (first team in at least 30 years, OptaSTATS), Burrow's 300 yards and two TDs held to checkdowns with Chase and Higgins combining for 7 catches and 74 yards, and 7-3 Cincinnati's five-game win streak (31-plus points every week) snapped (AP via theScore)");
-ok(band.indexOf("Week 13 opens Wednesday night, Nov 25 \u2014 Thanksgiving Eve \u2014 when Green Bay visits the Los Angeles Rams at SoFi Stadium in the NFL's first Thanksgiving Eve game") >= 0 &&
-   band.indexOf("continues Thanksgiving Day, Thursday, Nov 26, with Chicago at Detroit, Philadelphia at Dallas and Kansas City at Buffalo") >= 0 &&
-   band.indexOf("then Black Friday, Nov 27, with Denver at Pittsburgh, Sunday's ten-game slate on Nov 29 and Monday night's closer, Nov 30, when Carolina visits Tampa Bay") >= 0 &&
+ok(band.indexOf("Week 13 opened Wednesday night, Nov 25 \u2014 Thanksgiving Eve \u2014 at SoFi Stadium in the NFL's first Thanksgiving Eve game and continued Thanksgiving Day, Thursday, Nov 26, with Chicago at Detroit, Philadelphia at Dallas and Kansas City at Buffalo \u2014 all four games are Final now and reported in full at the end of this band") >= 0 &&
+   band.indexOf("it continues Black Friday, Nov 27, with Denver at Pittsburgh, Sunday's ten-game slate on Nov 29 and Monday night's closer, Nov 30, when Carolina visits Tampa Bay") >= 0 &&
    band.indexOf("Kalshi Week 13 prices") >= 0,
-   "spotlight names the Week 13 Thanksgiving slate in the new Nov 24-Nov 30 window: Thanksgiving Eve Wed Nov 25 (Green Bay at the Los Angeles Rams, the NFL's first Thanksgiving Eve game), Thanksgiving Day Thu Nov 26 (Chicago at Detroit, Philadelphia at Dallas, Kansas City at Buffalo), Black Friday Nov 27 (Denver at Pittsburgh), Sunday's ten games Nov 29 and the Mon Nov 30 closer (Carolina at Tampa Bay) \u2014 and links the Week 13 Kalshi prices");
+   "spotlight frames the Week 13 Thanksgiving slate as settled for Wed/Thu in the Nov 24-Nov 30 window: Thanksgiving Eve Wed Nov 25 (the NFL's first Thanksgiving Eve game, at SoFi Stadium) and Thanksgiving Day Thu Nov 26 (Chicago at Detroit, Philadelphia at Dallas, Kansas City at Buffalo) are all Final and reported in full at the end of the band (detailed pins in the Nov 27 block below), continuing Black Friday Nov 27 (Denver at Pittsburgh), Sunday's ten games Nov 29 and the Mon Nov 30 closer (Carolina at Tampa Bay) \u2014 and links the Week 13 Kalshi prices (this pin held the fixture framing on Nov 24)");
 ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion \u2014 Miami (OH) vs Western Michigan and Kent St. vs Eastern Michigan head the Kalshi NCAAF board") === -1 &&
    band.indexOf("San Francisco dismantled Minnesota 35\u201310 on Sunday night in Mexico City") === -1,
    "spotlight no longer frames Tuesday's MACtion as the next slate \u2014 the pair settled Tuesday night (Miami (OH) beat Western Michigan 28-24 and Eastern Michigan beat Kent St. 17-12, both Finals, detailed pins in the Nov 25 block below); this pin held the tonight's-MACtion framing on Nov 24, the pair's game day \u2014 and the band no longer carries the Nov 23 San Francisco headline (the 49ers result itself stays in the body, pinned in the Nov 23 block above)");
@@ -2483,13 +2482,13 @@ ok(band.indexOf("College football's next slate is tonight's Tuesday MACtion \u20
    fixture (it kicks off tonight). */
 ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV24MOHWMU") === -1 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV24KENTEMU") === -1 &&
-   ncaafTickers[0] === "KXNCAAFGAME-26NOV26TCUTTU" &&
+   ncaafTickers[0] === "KXNCAAFGAME-26NOV27BUFFAKR" &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28ALBYLEH") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28HARVMONM") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28DAYTNTC") >= 0 &&
    ncaafTickers.indexOf("KXNCAAFGAME-26NOV28IWMONT") >= 0 &&
-   nflTickers[0] === "KXNFLGAME-26NOV25GBLAR",
-   "kalshi snapshots settle Tuesday's MACtion pair (Miami (OH) at Western Michigan and Kent St. at Eastern Michigan gone \u2014 Miami won 28-24 and Eastern Michigan won 17-12, both Finals), head the NCAAF board with Thanksgiving night (TCU at Texas Tech) and add four Saturday Nov 28 games (Albany vs Lehigh, Harvard vs Monmouth, Dayton vs Tennessee Tech, Incarnate Word vs Montana), with Thanksgiving Eve (Green Bay at the Los Angeles Rams) still heading the NFL board");
+   nflTickers[0] === "KXNFLGAME-26NOV27DENPIT",
+   "kalshi snapshots settle Tuesday's MACtion pair (Miami (OH) at Western Michigan and Kent St. at Eastern Michigan gone \u2014 Miami won 28-24 and Eastern Michigan won 17-12, both Finals), head the NCAAF board with Thanksgiving night (TCU at Texas Tech) and add four Saturday Nov 28 games (Albany vs Lehigh, Harvard vs Monmouth, Dayton vs Tennessee Tech, Incarnate Word vs Montana), with Thanksgiving Eve (Green Bay at the Los Angeles Rams) still heading the NFL board on Nov 25 \u2014 both heads settled (the Rams won 26-13 and Texas Tech won 48-27, both Finals), Black Friday (Denver at Pittsburgh) now heads the NFL board and Friday's Buffalo vs Akron heads the NCAAF board; the settlements are pinned in the Nov 27 block below");
 ok(band.indexOf("Miami (OH) beat Western Michigan 28\u201324 (Final) at Waldo Stadium in Kalamazoo") >= 0 &&
    band.indexOf("freshman Drew Bellisari, in just his second start, accounted for four touchdowns (13-of-26 for 214 yards and two touchdown passes, plus 93 rushing yards and two more scores on the ground)") >= 0 &&
    band.indexOf("his 12-yard scoring run with 5:40 left put Miami back ahead 28\u201324 after Jalen Buckley's 23-yard touchdown run (126 yards and two scores on 19 carries) had given the Broncos the lead with 8:02 left") >= 0 &&
@@ -2503,9 +2502,112 @@ ok(band.indexOf("Miami (8\u20134, 6\u20132 in the MAC) kept its slim MAC title-g
 ok(band.indexOf("Ethan Thanthanavong's fourth-and-9, 14-yard touchdown pass to Wayne Harris with one second left \u2014 initially ruled a game-winning score \u2014 was overturned to an incomplete pass on replay review") >= 0 &&
    band.indexOf("Kent St. (3\u20139, 2\u20136 in the MAC) outgained Eastern Michigan 305\u2013234 behind Thanthanavong's 234 passing yards and a touchdown in his first career start, and Eastern Michigan (5\u20137, 4\u20134) snapped a four-game losing streak in both teams' season finale (Kent State Athletics / AP)") >= 0,
    "spotlight reports the overturned finish: Thanthanavong's fourth-and-9 14-yard TD to Harris with one second left, initially ruled a game-winner, overturned to incomplete on review; Kent St. 3-9 (2-6) outgained Eastern Michigan 305-234 in Thanthanavong's first start (234 yards, one TD) and 5-7 (4-4) Eastern Michigan snapped a four-game skid in both teams' finale (Kent State Athletics / AP)");
-ok(band.indexOf("College football's next slate is Thanksgiving night, when TCU visits Texas Tech, before Friday's slate heads the Kalshi NCAAF board") >= 0 &&
+ok(band.indexOf("College football's next slate is Thanksgiving night, when TCU visits Texas Tech, before Friday's slate heads the Kalshi NCAAF board") === -1 &&
    band.indexOf("Washington stunned Cincinnati 22\u201320 on Monday night in Landover") === -1,
-   "spotlight names Thanksgiving night's TCU at Texas Tech as the next college slate in the Nov 24-Nov 30 window and no longer carries the Nov 24 Washington headline (the walk-off result itself stays in the body, pinned in the Nov 24 block above)");
+   "spotlight no longer names Thanksgiving night's TCU at Texas Tech as the next college slate \u2014 it settled Thursday night (Texas Tech won 48-27, Final; detailed pins in the Nov 27 block below) and Friday's slate now heads the board; this pin held the Thanksgiving-night framing on Nov 25 \u2014 and the band no longer carries the Nov 24 Washington headline (the walk-off result itself stays in the body, pinned in the Nov 24 block above)");
+/* The Nov 27 snapshot (fetched 18:49Z NFL / 18:50Z MLB /
+   18:51Z NCAAF) settles Thanksgiving Eve and the whole
+   Thanksgiving Day tripleheader — Green Bay at the Los
+   Angeles Rams, Chicago at Detroit, Philadelphia at
+   Dallas and Kansas City at Buffalo all drop out, Black
+   Friday's Denver at Pittsburgh heads the NFL board.
+   NFL state: 26 games, 25 moves, 0 new. NCAAF state: 79
+   games, 25 moves, 5 new (Sat Nov 28: Idaho St. vs North
+   Dakota, Western Illinois vs Weber St., Illinois St.
+   vs Austin Peay, LIU vs Northern Arizona; Fri Dec 4:
+   the Big 12 Championship, Utah vs Texas Tech) —
+   Thanksgiving night's TCU at Texas Tech drops out and
+   Friday's Buffalo vs Akron heads the board. History:
+   2,386 tickers, max 41 points, 36,762 total points
+   (36,552 + 52 NFL + 0 MLB + 158 NCAAF = exactly one
+   append per priced market, verified against the
+   pre-fetch backup; per-ticker delta distribution 0/1
+   only). The Finals (all cross-checked): the Rams beat
+   Green Bay 26-13 on Thanksgiving Eve at SoFi (NBC
+   Sports / Packers) — 13-13 at the half, a 13-0
+   second-half shutout, Corum 32 carries for a
+   career-high 184 yards (151 and a TD after halftime),
+   the Rams running 47 times for 241 yards, Love
+   17-of-29 for 198 yards with two second-half
+   interceptions, Green Bay 6-5 and the Rams 7-4 with a
+   fifth straight win. Chicago beat Detroit 39-35 at
+   Ford Field (Chicago Bears / Detroit Free Press) —
+   down 11 midway through the fourth quarter, Williams'
+   two TD passes to Odunze in the final 7:20, the
+   6-yard winner with three seconds left giving Chicago
+   its first lead; Williams 345 passing yards (a Bears
+   Thanksgiving record), Chicago 9-2 atop the NFC North
+   with a sixth straight win, Gibbs 205 rushing yards
+   for Detroit. Philadelphia beat Dallas 39-38 at AT&T
+   Stadium (Philadelphia Eagles / NBC Sports) — down
+   31-10 in the third quarter, a 22-7 fourth quarter,
+   the largest Thanksgiving comeback in NFL history,
+   Milton 331 passing yards and four total TDs against
+   his former team, Smith a career-high 200 receiving
+   yards and two TDs on 11 catches, Robinson's blocked
+   punt returned for a TD and his fourth-down sack with
+   50 seconds left, Elliott's 59-yard winner with two
+   seconds left, Dallas 5-7. Buffalo beat Kansas City
+   13-10 at Highmark Stadium (USA Today / Chiefs) — a
+   cold, rainy night: Cook's 5-yard TD, Johnson's
+   1-yard TD for a 10-7 Chiefs lead, Bass's 54-yard
+   tying FG early in the fourth, Butker's miss from 46
+   with under six minutes left, and Bass's 57-yard
+   walk-off as time expired after a deflected punt;
+   Buffalo an NFL-best 10-1, Kansas City 8-3. Texas
+   Tech beat TCU 48-27 in Lubbock (AP via theScore) —
+   TCU led 10-0, Castellanos 20-of-25 for a career-high
+   374 yards and three TDs, three Tech TDs in 1:15 late
+   in the first half amid 41 consecutive points, Tech
+   11-1 (8-1 Big 12) clinching the Dec. 4 Big 12 title
+   game against No. 2 Utah, TCU 5-7 (3-6) under interim
+   coach Avalos. The band (same Nov 24-Nov 30 window)
+   now headlines the Eagles comeback, reports all five
+   Finals, and names Black Friday's Denver at
+   Pittsburgh and Friday's college slate as the next
+   slates. */
+ok(nflTickers.indexOf("KXNFLGAME-26NOV25GBLAR") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV26CHIDET") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV26PHIDAL") === -1 &&
+   nflTickers.indexOf("KXNFLGAME-26NOV26KCBUF") === -1 &&
+   nflTickers[0] === "KXNFLGAME-26NOV27DENPIT",
+   "kalshi-nfl.json settles Thanksgiving Eve and the Thanksgiving Day tripleheader (Green Bay at the Los Angeles Rams, Chicago at Detroit, Philadelphia at Dallas and Kansas City at Buffalo gone — the Rams won 26-13, Chicago won 39-35, Philadelphia won 39-38 and Buffalo won 13-10, all Finals) and heads the board with Black Friday (Denver at Pittsburgh)");
+ok(ncaafTickers.indexOf("KXNCAAFGAME-26NOV26TCUTTU") === -1 &&
+   ncaafTickers[0] === "KXNCAAFGAME-26NOV27BUFFAKR" &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28IDSTUND") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28WIUWEB") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28ILSTPEAY") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26NOV28LIUNAU") >= 0 &&
+   ncaafTickers.indexOf("KXNCAAFGAME-26DEC04UTAHTTU") >= 0,
+   "kalshi-ncaaf.json settles Thanksgiving night (TCU at Texas Tech gone — Texas Tech won 48-27, Final), heads the board with Friday's Buffalo vs Akron and adds five games (Idaho St. vs North Dakota, Western Illinois vs Weber St., Illinois St. vs Austin Peay, LIU vs Northern Arizona, and the Dec. 4 Big 12 Championship: Utah vs Texas Tech)");
+ok(band.indexOf("the Los Angeles Rams beat Green Bay 26\u201313 (Final) in the NFL's first Thanksgiving Eve game") >= 0 &&
+   band.indexOf("the Rams shut Green Bay out 13\u20130 after it, running 47 times for 241 yards as Blake Corum carried 32 times for a career-high 184 yards") >= 0 &&
+   band.indexOf("Jordan Love (17-of-29 for 198 yards and a touchdown) threw two second-half interceptions") >= 0 &&
+   band.indexOf("the Rams (7\u20134) won their fifth straight and moved ahead of Green Bay (6\u20135), losers of two straight, in the NFC wild-card race (NBC Sports / Packers)") >= 0,
+   "spotlight reports the Thanksgiving Eve Final: the Rams beat Green Bay 26-13 at SoFi, a 13-0 second-half shutout behind 47 rushes for 241 yards and Corum's career-high 184 yards on 32 carries, Love's two second-half interceptions, the 7-4 Rams' fifth straight win and 6-5 Green Bay's second straight loss (NBC Sports / Packers)");
+ok(band.indexOf("Chicago beat Detroit 39\u201335 (Final)") >= 0 &&
+   band.indexOf("Caleb Williams threw two touchdown passes to Rome Odunze in the final 7:20, the winner a 6-yarder with just three seconds left that gave Chicago its first lead of the game") >= 0 &&
+   band.indexOf("Williams threw for 345 yards, the most by a Bears quarterback in the franchise's 39 Thanksgiving games") >= 0 &&
+   band.indexOf("Chicago (9\u20132) won its sixth straight to take sole possession of first place in the NFC North and snap Detroit's six-game winning streak, Jahmyr Gibbs rushing for 205 yards in defeat (Chicago Bears / Detroit Free Press)") >= 0,
+   "spotlight reports the Thanksgiving opener: Chicago beat Detroit 39-35 at Ford Field, Williams' two TD passes to Odunze in the final 7:20 with the 6-yard winner with three seconds left giving Chicago its first lead, Williams' 345 yards a Bears Thanksgiving record, 9-2 Chicago's sixth straight win for sole possession of the NFC North, and Gibbs' 205 rushing yards in defeat (Chicago Bears / Detroit Free Press)");
+ok(band.indexOf("Philadelphia beat Dallas 39\u201338 (Final) at AT&T Stadium") >= 0 &&
+   band.indexOf("the Eagles outscored the Cowboys 22\u20137 in the fourth quarter to complete the largest Thanksgiving comeback in NFL history") >= 0 &&
+   band.indexOf("Joe Milton, facing his former team, threw for 331 yards and accounted for four touchdowns, DeVonta Smith set a career high with 200 receiving yards and two touchdowns on 11 catches") >= 0 &&
+   band.indexOf("Jake Elliott drilled a 59-yard field goal with two seconds remaining; Dallas fell to 5\u20137 (Philadelphia Eagles / NBC Sports)") >= 0,
+   "spotlight reports the Thanksgiving middle game: Philadelphia beat Dallas 39-38 at AT&T Stadium, a 22-7 fourth quarter completing the largest Thanksgiving comeback in NFL history from 31-10 down, Milton's 331 yards and four total TDs against his former team, Smith's career-high 200 receiving yards and two TDs, and Elliott's 59-yard winner with two seconds left as Dallas fell to 5-7 (Philadelphia Eagles / NBC Sports)");
+ok(band.indexOf("Buffalo beat Kansas City 13\u201310 (Final)") >= 0 &&
+   band.indexOf("Tyler Bass tied the game with a 54-yard field goal early in the fourth quarter, Harrison Butker missed from 46 yards with just under six minutes left, and Bass won it with a 57-yard field goal as time expired after a deflected punt set Buffalo up") >= 0 &&
+   band.indexOf("Buffalo improved to an NFL-best 10\u20131 atop the AFC, and Kansas City fell to 8\u20133 (USA Today / Chiefs)") >= 0,
+   "spotlight reports the Thanksgiving nightcap: Buffalo beat Kansas City 13-10 in the rain at Highmark Stadium, Bass's 54-yard tying field goal and 57-yard walk-off as time expired after a deflected punt, Butker's miss from 46 with under six minutes left, Buffalo an NFL-best 10-1 and Kansas City 8-3 (USA Today / Chiefs)");
+ok(band.indexOf("No. 9 Texas Tech beat TCU 48\u201327 (Final)") >= 0 &&
+   band.indexOf("Thomas Castellanos was 20-of-25 for a career-high 374 yards and three touchdown passes, two of them in a four-play span late in the first half as Texas Tech scored three touchdowns in 1:15") >= 0 &&
+   band.indexOf("Texas Tech (11\u20131, 8\u20131 in the Big 12) clinched its return to the Big 12 Championship Game, against No. 2 Utah on Dec. 4 at AT&T Stadium") >= 0 &&
+   band.indexOf("TCU (5\u20137, 3\u20136), led by interim coach Andy Avalos after Sonny Dykes was fired on Sunday, missed bowl eligibility despite Adam Schobel's three touchdown passes in his second career start (AP via theScore)") >= 0,
+   "spotlight reports Thanksgiving night's college Final: No. 9 Texas Tech beat TCU 48-27 in Lubbock, Castellanos 20-of-25 for a career-high 374 yards and three TDs with three Tech TDs in 1:15 amid 41 straight points, 11-1 (8-1) Texas Tech clinching the Dec. 4 Big 12 title game against No. 2 Utah, and 5-7 (3-6) TCU missing bowl eligibility under interim coach Avalos (AP via theScore)");
+ok(band.indexOf("Week 13 continues today, Black Friday, Nov 27, when Denver visits Pittsburgh \u2014 that game heads the Kalshi NFL board \u2014 and Friday's college slate, headed by Buffalo vs Akron, heads the Kalshi NCAAF board") >= 0 &&
+   band.indexOf("Miami (OH) stunned Western Michigan 28\u201324 on Tuesday night in Kalamazoo") === -1 &&
+   band.indexOf("Week 13 opens Wednesday night, Nov 25") === -1,
+   "spotlight names the next slates after Thanksgiving: Black Friday's Denver at Pittsburgh heads the Kalshi NFL board and Friday's college slate (Buffalo vs Akron) heads the NCAAF board — and the band no longer carries the Nov 25 Miami headline or the Week 13 fixture framing (the Miami result itself stays in the body, pinned in the Nov 25 block above)");
 ["UUoLrcjPV5PbUrUyXq5mjc_A", "UUiio0ydw439X13KyZgMIcHw", "UUvQrivswRDGK0lZ_AcUHp8g"].forEach(function(id){
   ok(band.indexOf("list=" + id) >= 0, "spotlight links the real playlist " + id);
 });
